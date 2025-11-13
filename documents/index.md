@@ -39,6 +39,7 @@ Hieronymusのマニュアルです。
 * [プロジェクト管理](./project.md)
 * [ユーザ管理](./user.md)
 * [役職員管理](./member.md)
+* [メニュー設定](./menu.md)
 
 ## 概要
 
