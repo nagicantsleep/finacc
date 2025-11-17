@@ -8,12 +8,14 @@
 
   let company = {};
   let useProjectAccounting = false;
+  let showIntercompanyAsSundries = false;
 
   onMount(async () => {
     try {
       const res = await axios.get('/api/company/info');
       company = res.data.company || {};
       useProjectAccounting = company.useProjectAccounting || false;
+      showIntercompanyAsSundries = company.showIntercompanyAsSundries || false;
     } catch (error) {
       console.error(error);
       toast('システム設定の読み込みに失敗しました。', 'danger');
@@ -22,7 +24,7 @@
 
   const handleChange = async () => {
     try {
-      const updatedCompany = { ...company, useProjectAccounting };
+      const updatedCompany = { ...company, useProjectAccounting, showIntercompanyAsSundries };
       await axios.put('/api/company/info', updatedCompany);
       company = updatedCompany;
       toast('設定を保存しました。', 'success');
@@ -31,6 +33,7 @@
       toast('設定の保存に失敗しました。', 'danger');
       // 変更を元に戻す
       useProjectAccounting = company.useProjectAccounting || false;
+      showIntercompanyAsSundries = company.showIntercompanyAsSundries || false;
     }
   };
 </script>
@@ -56,6 +59,10 @@
     <div class="form-check form-switch">
       <input class="form-check-input" type="checkbox" role="switch" id="useProjectAccountingSwitch" bind:checked={useProjectAccounting} on:change={handleChange}>
       <label class="form-check-label" for="useProjectAccountingSwitch">プロジェクト管理機能を有効にする</label>
+    </div>
+    <div class="form-check form-switch">
+      <input class="form-check-input" type="checkbox" role="switch" id="showIntercompanyAsSundriesSwitch" bind:checked={showIntercompanyAsSundries} on:change={handleChange}>
+      <label class="form-check-label" for="showIntercompanyAsSundriesSwitch">複合仕訳で相手勘定科目を「諸口」と表示する</label>
     </div>
   </div>
   {/if}

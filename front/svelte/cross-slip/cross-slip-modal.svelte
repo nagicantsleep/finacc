@@ -2,7 +2,7 @@
   <div class="modal-dialog modal-xl">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="modalLabel">振替伝票</h5>
+        <h5 class="modal-title" id="modalLabel">仕訳明細入力</h5>
         <button type="button" class="btn-close" id="close-button" area-label="Close"
           on:click={close_}></button>
       </div>
@@ -180,6 +180,12 @@ const save = (event) => {
       credit: 0
     };
     for	( let i = 0 ; i < slip.lines.length; i ++ )	{
+      if (slip.lines[i].debitAccount === 'sundries') {
+        slip.lines[i].debitAccount = null;
+      }
+      if (slip.lines[i].creditAccount === 'sundries') {
+        slip.lines[i].creditAccount = null;
+      }
       slip.lines[i].creditAmount = numeric(slip.lines[i].creditAmount);
       slip.lines[i].debitAmount = numeric(slip.lines[i].debitAmount);
       slip.lines[i].creditTax = numeric(slip.lines[i].creditTax);

@@ -52,6 +52,7 @@ import {onMount, beforeUpdate, afterUpdate, createEventDispatcher} from 'svelte'
 export	let	code;
 export	let	sub_code;
 export	let	accounts;
+export let showSundries = false;
 
 let account;
 let accountKey;
@@ -69,7 +70,7 @@ const onAccountInput = (event) => {
   isInitialInput = false;
   accountKey = inputAccount;
   list = searchAccountByKey(accountKey);
-  if  ( list.length > 0 ) {
+  if (list.length > 0 && accountKey !== '') {
     code = list[0].code;
   }
 }
@@ -140,17 +141,27 @@ const subAccountSelect = (event) => {
 }
 
 const setAccount = () => {
+console.log({showSundries});
   list = [];
   if ( code )	{
-    account = findAccount(code);
-    console.log('account', account);
-    if	( account )	{
-      inputAccount = account.name;
+    if (code === 'sundries') {
+      account = { name: '諸口', code: 'sundries' };
+      inputAccount = '諸口';
+    } else {
+      account = findAccount(code);
+      console.log('account', account);
+      if	( account )	{
+        inputAccount = account.name;
+      } else {
+        inputAccount = '';
+      }
+    }
+  } else {
+    if (showSundries) {
+      inputAccount = '諸口';
     } else {
       inputAccount = '';
     }
-  } else {
-    inputAccount = '';
   }
   subAccountKey = '';
 }
@@ -169,6 +180,9 @@ const searchAccountByKey = (key) => {
       }
     });
   } else {
+    if (showSundries) {
+      list.push({ name: '諸口', code: 'sundries' });
+    }
     accounts.forEach((account) => {
       list.push({
         name: account.name,
@@ -210,23 +224,26 @@ const setSubAccount = () => {
 }
 
 let initialized = false;
+let prevCode;
+let prevShowSundries;
+
 beforeUpdate(() => {
-  //console.log('beforeUpdate account', init, code, sub_code);
-  if	( !initialized )	{
-    console.log('init');
-    list = [];
-    //setAccounts(accounts);    これは不要かも知れないので、確実になったら消すこと
+  if (!initialized || prevCode !== code || prevShowSundries !== showSundries) {
     setAccount();
     setSubAccount();
     isInitialInput = true;
+    prevCode = code;
+    prevShowSundries = showSundries;
+  }
+  if (!initialized) {
     initialized = true;
   }
 });
 onMount(() => {
   list = [];
   setAccounts(accounts);
-  setAccount();
-  setSubAccount();
   isInitialInput = true;
+  prevCode = code;
+  prevShowSundries = showSundries;
 })
 </script>
