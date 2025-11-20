@@ -80,7 +80,7 @@
   <nav class="mt-2">
     <ul class="nav nav-pills nav-sidebar flex-column">
       {#each menu as entry}
-      {#if ( entry.title && ( !entry.authority || entry.authority(status.user, company) )) }
+      {#if ( entry.title && ( !entry.authority || entry.authority(status.user, status.company) )) }
 			<li class="nav-item">
 			  <a class={ status.pathname.match(entry.match) ? 'nav-link active': 'nav-link'}
           draggable="true"
@@ -150,7 +150,6 @@ import Icon from '@iconify/svelte';
 import eventBus from '../../javascripts/event-bus.js';
 import {currentMenu, getStore} from '../../javascripts/current-record.js'
 import {link} from '../../javascripts/router.js';
-import { getCompanyInfo } from '../../../libs/utils.js';
 
 export	let status;
 export let mainCount;
@@ -158,7 +157,6 @@ export let mainCount;
 let menuItems;
 let isMenuEditMode = false;
 let menuTemplates = [];
-let company;
 
 const newMenu = (template) => {
   currentMenu.set({
@@ -190,7 +188,6 @@ const menuEditDone = (event) => {
   });
 }
 onMount(async () => {
-  company = await getCompanyInfo();
   let result = await axios.get('/api/menu');
   menuEntries = result.data.menus;
   axios.get('/api/menu/templates').then((result) => {
