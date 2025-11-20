@@ -73,6 +73,7 @@ import OkModal from './common/ok-modal.svelte';
 
 import Router from './components/router.svelte';
 import {currentPage, getStore} from '../javascripts/router.js';
+import { getCompanyInfo } from '../../libs/utils.js';
 
 export let term;
 
@@ -157,6 +158,7 @@ let status = {
     startDate: new Date(),
     endDate: new Date()
   },
+  company: {},
   user: {},
   pathname: '',
   current: 'login'
@@ -170,13 +172,13 @@ const doReply = (event) => {
 }
 // currentPage.set('/home');
 
-onMount(() => {
+onMount(async () => {
   console.log('index onMount');
   status.pathname = location.pathname;
   // currentPage.set(location.pathname);
-  axios.get('/api/user').then((res) => {
-    status.user = res.data.user;
-  });
+  const res = await axios.get('/api/user');
+  status.user = res.data.user;
+  status.company = await getCompanyInfo();
   axios.get(`/api/term/${term}`).then((res) => {
     let fy = res.data;
     if  ( fy )  {

@@ -18,19 +18,20 @@
       showIntercompanyAsSundries = company.showIntercompanyAsSundries || false;
     } catch (error) {
       console.error(error);
-      toast('システム設定の読み込みに失敗しました。', 'danger');
+      toast.show('システム設定', '読み込みに失敗しました。');
     }
   });
 
   const handleChange = async () => {
+    console.log({company});
     try {
       const updatedCompany = { ...company, useProjectAccounting, showIntercompanyAsSundries };
       await axios.put('/api/company/info', updatedCompany);
       company = updatedCompany;
-      toast('設定を保存しました。', 'success');
+      toast.show('システム設定', '設定を保存しました。');
     } catch (error) {
       console.error(error);
-      toast('設定の保存に失敗しました。', 'danger');
+      toast.show('システム設定', '設定の保存に失敗しました。');
       // 変更を元に戻す
       useProjectAccounting = company.useProjectAccounting || false;
       showIntercompanyAsSundries = company.showIntercompanyAsSundries || false;
