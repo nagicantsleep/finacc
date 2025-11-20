@@ -59,7 +59,6 @@
       </thead>
       <tbody id="cross-slip">
         {#if slip}
-        {#key showIntercompanyAsSundries}
         {#each slip.lines as line, i}
         <tr
           on:drop|preventDefault={onDrop}
@@ -72,8 +71,7 @@
             <Account
               accounts={accounts}
               bind:code={line.debitAccount }
-              bind:sub_code={line.debitSubAccount}
-              showSundries={!line.debitAccount && !!line.creditAccount && showIntercompanyAsSundries}></Account>
+              bind:sub_code={line.debitSubAccount}></Account>
           </td>
           <td class="number input">
             <input type="text" class="number" autocomplete="off" size="12" maxlength="13"
@@ -168,8 +166,7 @@
             <Account
               accounts={accounts}
               bind:code={line.creditAccount}
-              bind:sub_code={line.creditSubAccount}
-              showSundries={!line.creditAccount && !!line.debitAccount && showIntercompanyAsSundries}></Account>
+              bind:sub_code={line.creditSubAccount}></Account>
           </td>
           <td class="number input">
             <input type="text" class="number" autocomplete="off" size="12" maxlength="13"
@@ -216,7 +213,6 @@
           </td>
         </tr>
         {/each}
-        {/key}
         {/if}
         <tr>
           <td>
@@ -263,24 +259,18 @@ export let taxRules;
 let sums;
 let projects = [];
 let showProject = false;
-let showIntercompanyAsSundries = false;
 
 $: slip.year = slip.month < ( fy.startDate.getMonth() + 1 ) ? fy.endDate.getFullYear() : fy.startDate.getFullYear();
 
 onMount(async () => {
   try {
     const companyInfo = await getCompanyInfo();
-    if (companyInfo) {
-      showProject = companyInfo.useProjectAccounting || false;
-      showIntercompanyAsSundries = companyInfo.showIntercompanyAsSundries || false;
-    } else {
-      showProject = false;
-      showIntercompanyAsSundries = false;
-    }
-console.log({showIntercompanyAsSundries});
-    if (showProject) {
+    if (companyInfo && companyInfo.useProjectAccounting) {
+      showProject = true;
       const result = await axios.get('/api/projects');
       projects = result.data;
+    } else {
+      showProject = false;
     }
   } catch (err) {
     console.error("部門会計情報の取得または部門リストの取得に失敗しました:", err);

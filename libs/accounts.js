@@ -13,6 +13,14 @@ export default class {
       ], 
     });
     let lines = [];
+    const company = await utils.getCompanyInfo();
+    if  ( company.showIntercompanyAsSundries )  {
+      lines.push({
+        key: '',
+        name: '諸口',
+        code: null
+      });
+    }
     for ( let i = 0; i < accounts.length; i ++ ) {
       let acc = accounts[i];
       if ( acc.subAccountCount > 0 ) {
@@ -36,7 +44,7 @@ export default class {
         }
         lines.push({
           key: acc.key,
-           name: acc.name,
+          name: acc.name,
           code: acc.accountCode,
           taxClass: acc.taxClass,
           subAccounts: sub_lines
