@@ -14,7 +14,7 @@
 		"start": "NODE_ENV='production' node ./bin/www"
 	},
 	"author": "ogochan@beesnest-inc.com",
-	"license": "AGPL",
+	"license": "AGPL-3.0-or-later",
 	"dependencies": {
 		"@codemirror/lang-javascript": "^6.2.4",
 		"@codemirror/lang-markdown": "^6.3.2",
