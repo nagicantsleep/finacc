@@ -31,7 +31,7 @@
   	<div>
     	<button type="button" class="btn btn-primary" id="open-cross-slip"
     		on:click={openSlip}>
-        伝票入力&nbsp;<i class="bi bi-pencil-square"></i>
+        仕訳明細入力&nbsp;<i class="bi bi-pencil-square"></i>
       </button>
   	</div>
 	</div>
