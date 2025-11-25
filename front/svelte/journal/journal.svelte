@@ -125,9 +125,11 @@ const ready = (slips) => {
         debitAmount: line.debitAmount !== null ? numeric(line.debitAmount).toLocaleString() : '',
         debitTax: line.debitTax != null ? numeric(line.debitTax).toLocaleString() : '',
         debitTaxRule: line.debitTaxRule ? line.debitTaxRule.label : '',
+        debitTaxRuleId: line.debitTaxRuleId,
         creditAmount: line.creditAmount !== null ? numeric(line.creditAmount).toLocaleString() : '',
         creditTax: line.creditTax != null ? numeric(line.creditTax).toLocaleString() : '',
         creditTaxRule: line.creditTaxRule ? line.creditTaxRule.label : '',
+        creditTaxTuleId: line.creditTaxTuleId,
            
         debitAccount: findAccount(line.debitAccount).name,
         debitSubAccount: findSubAccountByCode(line.debitAccount, line.debitSubAccount).name,

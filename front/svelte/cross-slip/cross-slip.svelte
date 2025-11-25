@@ -89,9 +89,9 @@
           </td>
           <td class="input">
             <div class="application d-flex">
+              {#if showProject}
               <input type="text" size="44" maxlength="51"
                 bind:value={line.application1}>
-              {#if showProject}
               <div class="project me-auto">
                 <select class="form-control" style="line-height:1;padding:0.375rem" bind:value={line.projectId}>
                   <option value={null}>-- プロジェクト --</option>
@@ -100,6 +100,9 @@
                   {/each}
                 </select>
               </div>
+              {:else}
+              <input type="text" size="60" maxlength="61"
+                bind:value={line.application1}>
               {/if}
             </div>
             {#if (!fy.taxIncluded)}
