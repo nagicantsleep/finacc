@@ -82,7 +82,7 @@
       {#each menu as entry}
       {#if ( entry.title && ( !entry.authority || entry.authority(status.user, status.company) )) }
 			<li class="nav-item">
-			  <a class={ status.pathname.match(entry.match) ? 'nav-link active': 'nav-link'}
+			  <a class={ $currentPage && $currentPage.match(entry.match) ? 'nav-link active': 'nav-link'}
           draggable="true"
           data-type={entry.name}
           on:dragstart={startDrag}
@@ -105,7 +105,7 @@
         <ul>
           {#each entry.submenu as subentry}
           <li class="nav-item">
-            <a class={ status.pathname.match(subentry.match) ? 'nav-link active': 'nav-link'}
+            <a class={ $currentPage && $currentPage.match(subentry.match) ? 'nav-link active': 'nav-link'}
               draggable="true"
               data-type={entry.name}
               on:dragstart={startDrag}
@@ -143,13 +143,13 @@
 </style>
 <script>
 import axios from 'axios';
-import {onMount, beforeUpdate, afterUpdate, createEventDispatcher, tick} from 'svelte';
+import {onMount, afterUpdate, createEventDispatcher, tick} from 'svelte';
 import menu from '../../../config/module-list.js';
 import Sortable from 'sortablejs';
 import Icon from '@iconify/svelte';
 import eventBus from '../../javascripts/event-bus.js';
 import {currentMenu, getStore} from '../../javascripts/current-record.js'
-import {link} from '../../javascripts/router.js';
+import { currentPage, link } from '../../javascripts/router.js';
 
 export	let status;
 export let mainCount;
@@ -230,13 +230,9 @@ onMount(async () => {
 let menuEntries = [];
 
 let args = [];
-beforeUpdate(() => {
-  //console.log('sidebar beforeUpdate', status);
-  status.pathname = location.pathname;
-  args = status.pathname.split('/');
-  status.current = args[1];
-
-});
+$: if ($currentPage) {
+  args = $currentPage.split('/');
+}
 
 const startDrag = (event) => {
   let name = event.target.dataset.type;
