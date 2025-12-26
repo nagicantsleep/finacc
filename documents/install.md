@@ -5,7 +5,7 @@ Hieronymusは2つのインストール方法を提供しています。
 * ソースコードからインストール
 * Dockerを使用したインストール
 
-## ソースコードからインストール
+## ソースコードからインストール{#from_source}
 
 HieronymusはDBにPostgresを使用します。あらかじめインストールしてからHieronymusのインストールを行ってください。
 
@@ -51,7 +51,7 @@ HieronymusはDBにPostgresを使用します。あらかじめインストール
    ```
    デフォルトでは `http://localhost:3010` で起動します。
 
-## Dockerを使用したインストール
+## Dockerを使用したインストール{#from_docker}
 
 ### 最新版をインストールする場合
 

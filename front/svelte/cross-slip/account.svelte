@@ -1,6 +1,6 @@
 <div class="search-container">
   <input type="text" size="12" maxlength="13" autocomplete="off"
-    placeholder="Search"
+    placeholder=""
     class="search-input"
     bind:value={inputAccount}
     on:input={onAccountInput}
@@ -16,7 +16,7 @@
     </select>
     {/if}
   <input type="text" size="12" maxlength="13" autocomplete="off"
-    placeholder="Search"
+    placeholder=""
     class="search-input"
     bind:value={inputSubAccount}
     on:input={onSubAccountInput}
@@ -46,7 +46,7 @@
 }
 </style>
 <script>
-import {setAccounts, findAccount, findSubAccount} from '../../javascripts/cross-slip';
+import {findAccount, findSubAccount} from '../../javascripts/cross-slip';
 import {onMount, beforeUpdate, afterUpdate, createEventDispatcher} from 'svelte';
 
 export	let	code;
@@ -97,7 +97,8 @@ const accountDecide = (selectCode) => {
   setAccount();
 }
 const accountSelect = (event) => {
-  code = event.target.value;
+  code = event.target.value || null;
+  //console.log(`accountSelect [${code}]`);
   accountDecide(code);
   list = [];
 }
@@ -141,14 +142,10 @@ const subAccountSelect = (event) => {
 
 const setAccount = () => {
   list = [];
-  if ( code )	{
-    account = findAccount(code);
-    console.log('account', account);
-    if	( account )	{
-      inputAccount = account.name;
-    } else {
-      inputAccount = '';
-    }
+  account = findAccount(code);
+  console.log('account', account);
+  if	( account )	{
+    inputAccount = account.name;
   } else {
     inputAccount = '';
   }
@@ -215,7 +212,6 @@ beforeUpdate(() => {
   if	( !initialized )	{
     console.log('init');
     list = [];
-    //setAccounts(accounts);    これは不要かも知れないので、確実になったら消すこと
     setAccount();
     setSubAccount();
     isInitialInput = true;
@@ -224,7 +220,6 @@ beforeUpdate(() => {
 });
 onMount(() => {
   list = [];
-  setAccounts(accounts);
   setAccount();
   setSubAccount();
   isInitialInput = true;

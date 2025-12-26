@@ -88,13 +88,10 @@
             {/if}
           </td>
           <td class="input">
-            <div class="application">
-              <input type="text" size="50" maxlength="51"
-                bind:value={line.application1}>
-            </div>
-            {#if (!fy.taxIncluded)}
             <div class="application d-flex">
               {#if showProject}
+              <input type="text" size="44" maxlength="51"
+                bind:value={line.application1}>
               <div class="project me-auto">
                 <select class="form-control" style="line-height:1;padding:0.375rem" bind:value={line.projectId}>
                   <option value={null}>-- プロジェクト --</option>
@@ -103,7 +100,13 @@
                   {/each}
                 </select>
               </div>
+              {:else}
+              <input type="text" size="60" maxlength="61"
+                bind:value={line.application1}>
               {/if}
+            </div>
+            {#if (!fy.taxIncluded)}
+            <div class="application d-flex">
               <div class="tax">
                 {#if (( line.creditAccount !== '3080000' ) &&
                       ( findTaxClass(line.debitAccount, line.debitSubAccount) > 0 ))}
@@ -116,14 +119,14 @@
                   }}>
                   <option value={null}> -- 未選択 --</option>
                   {#each taxRules as ent}
-                  {#if ent.taxClass === findTaxClass(line.debitAccount, line.debitSubAccount)}
                   <option value={ent.id}>{ent.label}</option>
+                  {#if ent.taxClass === findTaxClass(line.debitAccount, line.debitSubAccount)}
                   {/if}
                   {/each}
                 </select>
                 {/if}
               </div>
-              <input type="text" size="20" maxlength="51"
+              <input type="text" size="27" maxlength="51"
                 bind:value={line.application2}>
               <div class="tax ms-auto">
                 {#if (( !fy.taxIncluded ) &&
@@ -137,8 +140,8 @@
                   }}>
                   <option value={null}> -- 未選択 --</option>
                   {#each taxRules as ent}
-                  {#if ent.taxClass === findTaxClass(line.creditAccount, line.creditSubAccount)}
                   <option value={ent.id}>{ent.label}</option>
+                  {#if ent.taxClass === findTaxClass(line.creditAccount, line.creditSubAccount)}
                   {/if}
                   {/each}
                 </select>
@@ -147,16 +150,6 @@
             </div>
             {:else}
             <div class="application d-flex">
-              {#if showProject}
-              <div class="project me-auto">
-                <select class="form-control" style="line-height:1;padding:0.375rem" bind:value={line.projectId}>
-                  <option value={null}>-- プロジェクト --</option>
-                  {#each projects as project}
-                  <option value={project.id}>{project.name}</option>
-                  {/each}
-                </select>
-              </div>
-              {/if}
               <input type="text" size="40" maxlength="51"
                 bind:value={line.application2}>
             </div>
@@ -298,9 +291,6 @@ const computeSum = () => {
     credit_tax: credit_tax
   });
 }
-const updateAccount = (slip) => {
-}
-
 const computeTax = (index, dc) => {
   if	( dc == 'd' )	{
     if	( ( slip.lines[index].creditAccount ) &&
@@ -342,6 +332,8 @@ const computeTax = (index, dc) => {
 }
 const makeTaxLine = () => {
   if	( !fy.taxIncluded )	{
+    //  1140000 仮払消費税
+    //  3080000 仮受消費税
     for ( let i = 0; i < slip.lines.length ; i ++ ) {
       if	( ( ( slip.lines[i].creditAccount ) &&
             ( slip.lines[i].creditAccount.match(/^114|^308/) ) ) ||
@@ -383,7 +375,6 @@ const makeTaxLine = () => {
           slip.lines[gap].creditSubAccount = slip.lines[i].debitSubAccount;
           slip.lines[gap].creditAmount += numeric(slip.lines[i].debitTax);
         }
-        updateAccount(slip);
       }
       if	( slip.lines[i].creditTax > 0 )	{
         let credit = ( field(slip.lines[i].creditAccount) == '6' ) ? '3080000' : (
@@ -414,7 +405,6 @@ const makeTaxLine = () => {
           slip.lines[gap].debitSubAccount = slip.lines[i].creditSubAccount;
           slip.lines[gap].debitAmount += numeric(slip.lines[i].creditTax);
         }
-        updateAccount(slip);
       }
     }
   }
@@ -424,7 +414,6 @@ const computeSumAndNext = (index) => {
   computeSum();
   //console.log(index, slip.lines.length);
   slip.lines.splice(index + 1, 0, {});
-  updateAccount(slip);
   slip = slip;
 }
 
@@ -434,7 +423,6 @@ const computeSumAndDelete = (index) => {
   //console.log(index, slip.lines.length);
   slip.lines.splice(index, 1);
   computeSum();
-  updateAccount(slip);
   slip = slip;
 }
 
