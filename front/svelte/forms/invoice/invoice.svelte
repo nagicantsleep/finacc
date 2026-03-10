@@ -58,7 +58,7 @@
           {#if transaction.handleUser.member.tradingName}
           {transaction.handleUser.member.tradingName}
           {:else}
-          {transaction.handleUser.member.officialName}
+          {transaction.handleUser.member.legalName}
           {/if}
         </p>
         <p class="account">
