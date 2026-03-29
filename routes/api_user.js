@@ -2,6 +2,7 @@ import models from '../models/index.js';
 const Op = models.Sequelize.Op;
 import {passwd, passport, is_authenticated} from '../libs/user.js';
 import {bootstrapUserTenant} from '../libs/bootstrap.js';
+import {switchTenant} from '../libs/tenant.js';
 
 export default {
   members: (req, res, next) => {
@@ -216,7 +217,6 @@ export default {
   },
   login:  (req, res, next) => {
     passport.authenticate('local', async (error, user, info) => {
-      console.log('error', error);
       console.log('login user', user);
       console.log('info', info);
       if (error) {
@@ -264,5 +264,18 @@ export default {
         });
       }
     })(req, res, next);
+  },
+  switchTenant: async (req, res, next) => {
+    const tenantId = parseInt(req.body.tenantId);
+    if (!tenantId) {
+      return res.json({ result: 'NG', message: 'tenantId required' });
+    }
+    try {
+      const membership = await switchTenant(req.session.user.id, tenantId);
+      req.session.currentTenantId = membership.tenantId;
+      res.json({ result: 'OK', tenantId: membership.tenantId });
+    } catch (e) {
+      res.json({ result: 'NG', message: e.message });
+    }
   }
 }
