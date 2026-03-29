@@ -18,7 +18,9 @@ router.get('/closing/:term', is_authenticated,(req, res, next) => {
 
 const home =  async (req, res, next) => {
   //console.log('term', req.params.term, req.session.term);
-  const countFy = await models.FiscalYear.count();
+  const countFy = req.currentTenantId
+    ? await models.FiscalYear.count({ where: { tenantId: req.currentTenantId } })
+    : 0;
   if ( countFy === 0 ){
     res.redirect('/setup');
   }else{
@@ -44,7 +46,9 @@ const login =  async (req, res, next) => {
 };
 
 const setup  =  async (req, res, next) => {
-  const countFy = await models.FiscalYear.count();
+  const countFy = req.currentTenantId
+    ? await models.FiscalYear.count({ where: { tenantId: req.currentTenantId } })
+    : 0;
   if ( countFy === 0 ){
     res.render('setup.spy', {
       title: 'Setup'
