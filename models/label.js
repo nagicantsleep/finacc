@@ -18,10 +18,13 @@ export default (sequelize, DataTypes) => {
     }
   };
   Label.init({
+    tenantId: {
+      type: DataTypes.INTEGER,
+      allowNull: false
+    },
     name: {
       type: DataTypes.STRING,
-      allowNull: false,
-      unique: true
+      allowNull: false
     },
     description: {
       type: DataTypes.TEXT
@@ -29,6 +32,9 @@ export default (sequelize, DataTypes) => {
   }, {
     sequelize,
     modelName: 'Label',
+    indexes: [
+      { unique: true, fields: ['tenantId', 'name'] }
+    ]
   });
   return Label;
 };

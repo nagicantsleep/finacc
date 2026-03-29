@@ -3,18 +3,20 @@ import models from '../models/index.js';
 export default {
   get: async (req, res, next) => {
     const id = req.params.id;
+    const tenantId = req.currentTenantId;
     try {
       if (id) {
-        // Get single project
-        const project = await models.Project.findByPk(id);
+        const project = await models.Project.findOne({
+          where: { id, tenantId }
+        });
         if (project) {
           res.json(project);
         } else {
           res.status(404).send('Project not found');
         }
       } else {
-        // Get project list
         const projects = await models.Project.findAll({
+          where: { tenantId },
           order: [['code', 'ASC']]
         });
         res.json(projects);
@@ -26,7 +28,14 @@ export default {
 
   create: async (req, res, next) => {
     try {
-      const project = await models.Project.create(req.body);
+      const { name, code, startDate, endDate } = req.body;
+      const project = await models.Project.create({
+        name,
+        code,
+        startDate,
+        endDate,
+        tenantId: req.currentTenantId
+      });
       res.status(201).json(project);
     } catch (err) {
       next(err);
@@ -35,9 +44,12 @@ export default {
 
   update: async (req, res, next) => {
     try {
-      const project = await models.Project.findByPk(req.params.id);
+      const project = await models.Project.findOne({
+        where: { id: req.params.id, tenantId: req.currentTenantId }
+      });
       if (project) {
-        await project.update(req.body);
+        const { name, code, startDate, endDate } = req.body;
+        await project.update({ name, code, startDate, endDate });
         res.json(project);
       } else {
         res.status(404).send('Project not found');
@@ -49,7 +61,9 @@ export default {
 
   delete: async (req, res, next) => {
     try {
-      const project = await models.Project.findByPk(req.params.id);
+      const project = await models.Project.findOne({
+        where: { id: req.params.id, tenantId: req.currentTenantId }
+      });
       if (project) {
         await project.destroy();
         res.status(204).send();
@@ -63,12 +77,17 @@ export default {
 
   getLabels: async (req, res, next) => {
     try {
-      const project = await models.Project.findByPk(req.params.id);
+      const project = await models.Project.findOne({
+        where: { id: req.params.id, tenantId: req.currentTenantId }
+      });
       if (!project) {
         return res.status(404).send('Project not found');
       }
       const labels = await project.getLabels({
-        joinTableAttributes: ['displayOrder'],
+        through: {
+          where: { tenantId: req.currentTenantId },
+          attributes: ['displayOrder']
+        },
         order: [
           [models.sequelize.literal('"ProjectLabels"."displayOrder"'), 'ASC']
         ]
@@ -82,19 +101,19 @@ export default {
   updateLabels: async (req, res, next) => {
     try {
       const projectId = req.params.id;
-      const project = await models.Project.findByPk(projectId);
+      const project = await models.Project.findOne({
+        where: { id: projectId, tenantId: req.currentTenantId }
+      });
       if (!project) {
         return res.status(404).send('Project not found');
       }
-      
-      const labelsData = req.body.labels || []; // [{labelId: 1, displayOrder: 0}, ...]
 
-      // 既存の関連をすべて削除
+      const labelsData = req.body.labels || [];
+
       await models.ProjectLabel.destroy({
         where: { projectId: projectId, tenantId: req.currentTenantId }
       });
 
-      // 新しい関連をバルクインサート
       if (labelsData.length > 0) {
         const newAssociations = labelsData.map(item => ({
           projectId: projectId,
@@ -104,7 +123,7 @@ export default {
         }));
         await models.ProjectLabel.bulkCreate(newAssociations);
       }
-      
+
       res.status(200).send();
     } catch (err) {
       next(err);

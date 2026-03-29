@@ -4,8 +4,8 @@ const Op = models.Sequelize.Op;
 export default {
   get: async (req, res, next) => {
     res.set('Access-Control-Allow-Origin', '*');
-    let id =  req.params.id;
-    //console.log('/api/task/', id);
+    let id = req.params.id;
+    const tenantId = req.currentTenantId;
     let include = [
       {
         model: models.Company,
@@ -38,134 +38,115 @@ export default {
         as: 'document'
       }
     ];
-    
-    if	( !id )	{
-      let	order;
-      let where;
-      //console.log('query', req.query);
-      if	( req.query.order )	{
-        order = req.params.order;
+
+    try {
+      if (!id) {
+        let order;
+        let where = { tenantId };
+        if (req.query.order) {
+          order = req.params.order;
+        } else {
+          order = [
+            ["issueDate", "DESC"],
+            ["companyId", "ASC"]
+          ];
+        }
+        if (req.query.company) {
+          where = { [Op.and]: [where, { companyId: parseInt(req.query.company) }] };
+        }
+        let tasks = await models.Task.findAll({ where, order, include });
+        res.json({ code: 0, tasks });
       } else {
-        order = [
-          [ "issueDate", "DESC" ],
-          [ "companyId", "ASC"]
-        ]
-      }
-      if	( req.query.company )	{
-        where = {
-          companyId: parseInt(req.query.company)
-        };
-      }
-      //console.log({where});
-      //console.log({order});
-      //console.log({include});
-      models.Task.findAll({
-        where: where,
-        order: order,
-        include: include
-      }).then((tasks) => {
-        res.json({
-          code: 0,
-          tasks: tasks
-      	});
-      });
-    } else {
-      models.Task.findByPk(id, {
-        include: include,
-        order: [
-          [ "lines", "lineNo", "ASC"]
-        ]
-      }).then((task) => {
-        res.json({
-          code: 0,
-          task: task
+        let task = await models.Task.findOne({
+          where: { id, tenantId },
+          include,
+          order: [["lines", "lineNo", "ASC"]]
         });
-      });
+        res.json({ code: 0, task });
+      }
+    } catch (err) {
+      next(err);
     }
   },
   post: async (req, res, next) => {
     res.set('Access-Control-Allow-Origin', '*');
-    if  ( req.session.user.companyManagement )    {
-      let body = req.body;
-      body.createdBy = req.session.user.id;
-      body.updatedBy = req.session.user.id;
-      body.id = undefined;
-      //console.log('body', JSON.stringify(body, ' ', 2 ));
-      let document = await models.Document.create({
-        issueDate: body.issueDate,
-        title: body.subject,
-        descriptionType: body.document.descriptionType,
-        description: body.document.description,
-        handledBy: body.handledBy,
-        createdBy: body.createdBy,
-        updatedBy: body.updatedBy
-      });
-      body.documentId = document.id;
-      models.Task.create(body).then(async (task)=> {
+    if (req.session.user.companyManagement) {
+      try {
+        let body = req.body;
+        body.createdBy = req.session.user.id;
+        body.updatedBy = req.session.user.id;
+        body.id = undefined;
+        body.tenantId = req.currentTenantId;
+        let document = await models.Document.create({
+          issueDate: body.issueDate,
+          title: body.subject,
+          descriptionType: body.document.descriptionType,
+          description: body.document.description,
+          handledBy: body.handledBy,
+          createdBy: body.createdBy,
+          updatedBy: body.updatedBy,
+          tenantId: req.currentTenantId
+        });
+        body.documentId = document.id;
+        let task = await models.Task.create(body);
         let lines = [];
-        for ( let i = 0 ; i < body.lines.length ; i ++ )  {
+        for (let i = 0; i < body.lines.length; i++) {
           let line = body.lines[i];
-          if	(( typeof line.itemId === 'number ') ||
-        			 ( line.itemName !== '' ))	{
-          	line.taskId = task.id;
-          	line.lineNo = i;
-          	line.id = undefined;
-          	line.tenantId = req.currentTenantId;
-          	line = await models.TaskDetail.create(line);
-          	lines.push(line.dataValues);
+          if ((typeof line.itemId === 'number') || (line.itemName !== '')) {
+            line.taskId = task.id;
+            line.lineNo = i;
+            line.id = undefined;
+            line.tenantId = req.currentTenantId;
+            line = await models.TaskDetail.create(line);
+            lines.push(line.dataValues);
           }
         }
-        //console.log(lines);
         let _task = task.dataValues;
         _task.document = document.dataValues;
         _task.lines = lines;
-        //console.log('task', JSON.stringify(task, ' ', 2 ));
-        res.json({
-          task: _task
-        });
-      }).catch ((e) => {
+        res.json({ task: _task });
+      } catch (e) {
         console.log(e);
         res.json({ code: -1 });
-      });
+      }
     } else {
       res.json({ code: -2 });
     }
   },
-  update: (req, res, next) => {
+  update: async (req, res, next) => {
     res.set('Access-Control-Allow-Origin', '*');
-		let body = req.body;
-		body.updatedBy = req.session.user.id;
-		let id = req.params.id ? parseInt(req.params.id) : body.id;
-    if  ( req.session.user.companyManagement )    {
-      models.Task.findByPk(id, {
-        include: [
-          {
-            model: models.Document,
-            as: 'document'
-          }
-        ]
-      }).then(async (task) => {
-        task.set(body);
+    let body = req.body;
+    body.updatedBy = req.session.user.id;
+    let id = req.params.id ? parseInt(req.params.id) : body.id;
+    if (req.session.user.companyManagement) {
+      try {
+        let task = await models.Task.findOne({
+          where: { id, tenantId: req.currentTenantId },
+          include: [{ model: models.Document, as: 'document' }]
+        });
+        if (!task) {
+          return res.status(404).json({ code: -1 });
+        }
+        task.set({ ...body, tenantId: req.currentTenantId });
         await task.save();
         await models.TaskDetail.destroy({
           where: {
-            taskId: task.id
+            taskId: task.id,
+            tenantId: req.currentTenantId
           }
         });
         let lines = [];
-        for ( let i = 0 ; i < body.lines.length ; i ++ )  {
+        for (let i = 0; i < body.lines.length; i++) {
           let line = body.lines[i];
-          if	(( typeof line.itemId === 'number ') ||
-        			 ( line.itemName !== '' ))	{
-          	line.taskId = task.id;
-          	line.lineNo = i;
-          	line.id = undefined;
-          	line.tenantId = req.currentTenantId;
-          	let _line = await models.TaskDetail.create(line);
-          	lines.push(_line.dataValues);
+          if ((typeof line.itemId === 'number') || (line.itemName !== '')) {
+            line.taskId = task.id;
+            line.lineNo = i;
+            line.id = undefined;
+            line.tenantId = req.currentTenantId;
+            let _line = await models.TaskDetail.create(line);
+            lines.push(_line.dataValues);
           }
-        };
-        //console.log({lines});
+        }
         task.document.issueDate = body.issueDate;
         task.document.title = body.subject;
         task.document.descriptionType = body.document.descriptionType;
@@ -175,14 +156,11 @@ export default {
         task.document.updatedBy = body.updatedBy;
         await task.document.save();
         task.dataValues.lines = lines;
-        //console.log(JSON.stringify(task, ' ', 2 ));
-        res.json({
-          task: task
-        });
-      }).catch ((e) => {
+        res.json({ task });
+      } catch (e) {
         console.log(e);
         res.json({ code: -1 });
-      });
+      }
     } else {
       res.json({ code: -2 });
     }
@@ -190,15 +168,16 @@ export default {
   delete: async (req, res, next) => {
     res.set('Access-Control-Allow-Origin', '*');
     let id = parseInt(req.params.id);
-    if  ( req.session.user.companyManagement )   {
+    if (req.session.user.companyManagement) {
       await models.Task.destroy({
         where: {
-          id: id
+          id,
+          tenantId: req.currentTenantId
         }
       });
-      res.json({ code: 0});
+      res.json({ code: 0 });
     } else {
-      res.json({ code: -2});
+      res.json({ code: -2 });
     }
   }
-}
+};
