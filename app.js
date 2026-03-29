@@ -79,7 +79,7 @@ const screen = async (req, res, next) => {
     return	( req.params.current === ent.name );
   })
   if	( per )	{
-    const company = await getCompanyInfo();
+    const company = await getCompanyInfo(req.currentTenantId);
   	if ( !per.authority || per.authority(req.session.user, company) )	{
     	res.render('index.spy', {
       	title: per.title,

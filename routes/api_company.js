@@ -150,15 +150,14 @@ export default {
   },
   infoGet: async (req, res, next) => {
     res.set('Access-Control-Allow-Origin', '*');
-    let company = await getCompanyInfo();
-    console.log({company});
+    let company = await getCompanyInfo(req.currentTenantId);
     res.json({
       company: company
     });
   },
   infoPut: async (req, res, next) => {
     res.set('Access-Control-Allow-Origin', '*');
-    putCompanyInfo(req.body);
+    await putCompanyInfo(req.body, req.currentTenantId);
     res.json({
       code: 0
     });

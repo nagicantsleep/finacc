@@ -88,9 +88,9 @@ export const setup = async (req, res, next) => {
         year: req.body.year
       },{ transaction: t });
       await createInitialAccount(req.body.term, req.body.companyClass, t);
-      getCompanyInfo().then(async (company) => {
+      getCompanyInfo(req.currentTenantId).then(async (company) => {
         company.roundingMethod = req.body.roundingMethod;
-        await putCompanyInfo(company);
+        await putCompanyInfo(company, req.currentTenantId);
       })
       await t.commit();
       req.session.term = req.body.term;

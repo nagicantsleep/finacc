@@ -33,6 +33,11 @@ export default (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: false,
       defaultValue: 'active'
+    },
+    settings: {
+      type: DataTypes.JSONB,
+      allowNull: true,
+      defaultValue: null
     }
   }, {
     sequelize,

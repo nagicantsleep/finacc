@@ -11,8 +11,17 @@ export const isBrowser = () =>
   typeof window !== 'undefined' &&
   typeof document !== 'undefined';
 
-export const getCompanyInfo = async () => {
+export const getCompanyInfo = async (tenantId) => {
   if (isNode()) {
+    if (tenantId) {
+      const { default: models } = await import('../models/index.js');
+      const tenant = await models.Tenant.findByPk(tenantId);
+      if (tenant && tenant.settings) {
+        company = tenant.settings;
+        return company;
+      }
+    }
+    // Fallback: read from legacy file (single-tenant or no tenant context)
     const { readFile } = await import('node:fs/promises');
     try {
       company = JSON.parse(await readFile('./config/company.json', 'utf-8'));
@@ -22,17 +31,25 @@ export const getCompanyInfo = async () => {
     return company;
   } else if (isBrowser()) {
     const response = await axios.get('/api/company/info');
-    //console.log(response);
     company = response.data.company;
-    //console.log({company});
     return company;
   } else {
     throw new Error('Unsupported environment');
   }
 };
 
-export const putCompanyInfo = async(info) => {
+export const putCompanyInfo = async(info, tenantId) => {
   if (isNode()) {
+    if (tenantId) {
+      const { default: models } = await import('../models/index.js');
+      const tenant = await models.Tenant.findByPk(tenantId);
+      if (tenant) {
+        await tenant.update({ settings: info });
+        company = info;
+        return company;
+      }
+    }
+    // Fallback: write to legacy file
     const { writeFile } = await import('node:fs/promises');
     await writeFile('./config/company.json', JSON.stringify(info, ' ', 2));
     company = info;
