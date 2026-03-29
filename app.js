@@ -43,7 +43,7 @@ app.use(multipart());
 
 app.use(session({
   secret: env.expressSecret,
-  resave: true,
+  resave: false,
   saveUninitialized: false,
   name: env.appName,					    //	ここの名前は起動するnode.js毎にユニークにする
   store: new FileStore({
@@ -143,7 +143,11 @@ app.use((err, req, res, next) => {
         method: req.method,
         headers: req.headers
     });
-    
+
+    if (res.headersSent) {
+        return next(err);
+    }
+
     res.status(500).send(`
         <h1>500 - Internal Server Error</h1>
         <p>${err.message}</p>
