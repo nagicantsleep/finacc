@@ -239,15 +239,22 @@ export default {
           } else {
             req.session.user = user.user;
 
-            // Resolve default tenant and store currentTenantId in session.
+            // Resolve default tenant — silently bootstrap one if none exists.
             try {
-              const defaultMembership = await models.UserTenant.findOne({
-                where: {
-                  userId: user.user.id,
-                  isDefault: true,
-                  status: 'active'
-                }
+              let defaultMembership = await models.UserTenant.findOne({
+                where: { userId: user.user.id, isDefault: true, status: 'active' }
               });
+              if (!defaultMembership) {
+                const t = await models.sequelize.transaction();
+                try {
+                  const result = await bootstrapUserTenant(user.user, t);
+                  await t.commit();
+                  defaultMembership = result.membership;
+                } catch (be) {
+                  await t.rollback();
+                  console.log('tenant bootstrap error on login', be);
+                }
+              }
               if (defaultMembership) {
                 req.session.currentTenantId = defaultMembership.tenantId;
               }
