@@ -18,7 +18,17 @@ export default (sequelize, DataTypes) => {
         foreignKey: 'userId',
         sourceKey: 'id',
         as: 'member'
-      })
+      });
+      this.hasMany(models.UserTenant, {
+        foreignKey: 'userId',
+        as: 'memberships'
+      });
+      this.belongsToMany(models.Tenant, {
+        through: models.UserTenant,
+        foreignKey: 'userId',
+        otherKey: 'tenantId',
+        as: 'tenants'
+      });
     }
     set password(p) {
       this.hashPassword = bcrypt.hashSync(p, SALT_ROUNDS);

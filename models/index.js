@@ -30,7 +30,9 @@ import TaxRule from './tax-rule.js';
 import TransactionDocument from './transaction-document.js';
 import TransactionDetail from './transaction-detail.js';
 import TransactionKind from './transaction-kind.js';
+import Tenant from './tenant.js';
 import User from './user.js';
+import UserTenant from './usertenant.js';
 import Voucher from './voucher.js';
 import VoucherClass from './voucherclass.js';
 import VoucherFile from './voucherfile.js';
@@ -78,10 +80,12 @@ const models = {
   Task: Task(sequelize, DataTypes),
   TaskDetail: TaskDetail(sequelize, DataTypes),
   TaxRule: TaxRule(sequelize, DataTypes),
+  Tenant: Tenant(sequelize, DataTypes),
   TransactionDocument: TransactionDocument(sequelize, DataTypes),
   TransactionDetail: TransactionDetail(sequelize, DataTypes),
   TransactionKind: TransactionKind(sequelize, DataTypes),
   User: User(sequelize, DataTypes),
+  UserTenant: UserTenant(sequelize, DataTypes),
   Voucher: Voucher(sequelize, DataTypes),
   VoucherClass: VoucherClass(sequelize, DataTypes),
   VoucherFile: VoucherFile(sequelize, DataTypes)
