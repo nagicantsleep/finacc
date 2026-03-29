@@ -19,6 +19,7 @@ import cookieParser from 'cookie-parser';
 import homeRouter from './routes/home.js';
 import formsRouter from './routes/forms.js';
 import {is_authenticated} from './libs/user.js';
+import {requireTenant} from './libs/tenant.js';
 import models from './models/index.js';
 import { getCompanyInfo } from './libs/utils.js';
 
@@ -111,15 +112,15 @@ const voucherFile = (req, res, next) => {
 
 app.use('/', homeRouter);
 
-app.get('/voucher/file/:id', is_authenticated, voucherFile);
+app.get('/voucher/file/:id', is_authenticated, requireTenant, voucherFile);
 app.use('/forms', formsRouter);
 app.use('/api', apiRouter);
 
-app.use('/:current/:command/:arg1/:arg2/:arg3', is_authenticated, screen);
-app.use('/:current/:command/:arg1/:arg2', is_authenticated, screen);
-app.use('/:current/:command/:arg1', is_authenticated, screen);
-app.use('/:current/:id', is_authenticated, screen);
-app.use('/:current', is_authenticated, screen);
+app.use('/:current/:command/:arg1/:arg2/:arg3', is_authenticated, requireTenant, screen);
+app.use('/:current/:command/:arg1/:arg2', is_authenticated, requireTenant, screen);
+app.use('/:current/:command/:arg1', is_authenticated, requireTenant, screen);
+app.use('/:current/:id', is_authenticated, requireTenant, screen);
+app.use('/:current', is_authenticated, requireTenant, screen);
 
 const spaFallback = (req, res, next) => {
   // API, フォーム、ファイルへのリクエストは除外
@@ -132,7 +133,7 @@ const spaFallback = (req, res, next) => {
     term: req.session.term,
   });
 }
-app.use(is_authenticated, spaFallback);
+app.use(is_authenticated, requireTenant, spaFallback);
 
 app.use((err, req, res, next) => {
     console.error(`[${new Date().toISOString()}] 500エラー:`, {
