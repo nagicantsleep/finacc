@@ -92,13 +92,13 @@ const	get_details = async (fy, account, sub_account) => {
 
 export default {
   get: (req, res, next) => {
+    const tenantId = req.currentTenantId;
     let term =  parseInt(req.params.term);
     let account = req.params.account;
     let sub_account = parseInt(req.params.sub_account);
-    //console.log('/api/ledger/', term, account, sub_account);
-    //console.log(term);
     models.FiscalYear.findOne({
       where: {
+        tenantId,
         term: term
       }
     }).then((fy) => {

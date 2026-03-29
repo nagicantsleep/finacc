@@ -16,7 +16,8 @@ export default (sequelize, DataTypes) => {
 		term: DataTypes.INTEGER,
 		debit: DataTypes.DECIMAL(12),
 		credit: DataTypes.DECIMAL(12),
-		balance: DataTypes.DECIMAL(12)
+		balance: DataTypes.DECIMAL(12),
+		tenantId: DataTypes.INTEGER
 	}, {
 		sequelize,
 		modelName: 'SubAccountRemaining',

@@ -6,14 +6,15 @@ import * as utils from './utils.js';
 export default class {
   static accounts;
 
-  static async  all () {
+  static async  all (tenantId) {
     let accounts = await models.Account.findAll({
+      where: { tenantId },
       order: [
         ['accountCode']
       ], 
     });
     let lines = [];
-    const company = await utils.getCompanyInfo();
+    const company = await utils.getCompanyInfo(tenantId);
     if  ( company.showIntercompanyAsSundries )  {
       lines.push({
         key: '',
@@ -27,6 +28,7 @@ export default class {
         let sub_lines = [];
         let subs = await models.SubAccount.findAll({
           where: {
+            tenantId,
             accountId: acc.id
           },
           order: [
@@ -61,8 +63,9 @@ export default class {
     this.accounts = lines;
     return (lines);
   }
-  static async all2 (term) {
+  static async all2 (tenantId, term) {
     let accounts = await models.Account.findAll({
+      where: { tenantId },
       order: [
         ['accountCode']
       ],
@@ -75,7 +78,6 @@ export default class {
         as: 'accountClass'
       }]
     });
-    //console.log(JSON.stringify(accounts,null,2));
     let lines = [];
     for ( let i = 0; i < accounts.length; i ++ ) {
       let acc = accounts[i];
@@ -86,6 +88,7 @@ export default class {
           let rem = await models.SubAccountRemaining.findOne({
             where: {
               [Op.and]: {
+                tenantId,
                 term: term,
                 subAccountId: suba.id
               }
@@ -105,6 +108,7 @@ export default class {
         let rem = await models.AccountRemaining.findOne({
           where: {
             [Op.and]: {
+              tenantId,
               term: term,
               accountId: acc.id
             }
@@ -128,12 +132,12 @@ export default class {
         let rem = await models.AccountRemaining.findOne({
           where: {
             [Op.and]: {
+              tenantId,
               term: term,
               accountId: acc.id
             }
           }
         });
-        //console.log('remaining', rem);
         lines.push({
           id: acc.id,
           major_name: acc.accountClass.major,
@@ -149,16 +153,16 @@ export default class {
         });
       }
     }
-    //console.log(JSON.stringify(lines, null, 2))
     this.accounts = lines;
     return (lines);
   }
-  static async all3(term) {
+  static async all3(tenantId, term) {
     // 1. 残高取得関数
     const getRemaining = async (model, key, field) => {
       const rem = await model.findOne({
         where: {
           [Op.and]: {
+            tenantId,
             term,
             [field]: key
           }
@@ -173,6 +177,7 @@ export default class {
     
     // 2. データ取得
     const accountClasses = await models.AccountClass.findAll({
+      where: { tenantId },
       order: [
         ['field', 'ASC'],
         ['adding', 'ASC'],
@@ -262,117 +267,119 @@ export default class {
     return lines;
   }
     
-  static async all4(term)	{   //  科目管理画面で使っている
-		let accountClasses = await models.AccountClass.findAll({
-			include: [
+  static async all4(tenantId, term)	{   //  科目管理画面で使っている
+  let accountClasses = await models.AccountClass.findAll({
+  where: { tenantId },
+  include: [
         {
-				  model: models.Account,
-				  as: 'accounts',
-				  include: [
+  model: models.Account,
+  as: 'accounts',
+  include: [
             {
-						  model: models.SubAccount,
-						  as: 'subAccounts'
-					  }
-				  ]
-			  }
+  model: models.SubAccount,
+  as: 'subAccounts'
+  }
+  ]
+  }
       ],
-			order: [
-				['field', 'ASC'],
-				['adding', 'ASC'],
+  order: [
+  ['field', 'ASC'],
+  ['adding', 'ASC'],
         ['accounts', 'accountCode', 'ASC'],
         ['accounts', 'subAccounts', 'subAccountCode', 'ASC']
-			],
-		});
-		let	lines = [];
-		for	( let i = 0; i < accountClasses.length ; i ++ )	{
-			let acl = accountClasses[i];
-			if	( acl.accounts.length === 0 )	{
-				lines.push({
-					major_name: acl.major,
-					middle_name: acl.middle,
-					minor_name: acl.minor,
-					acl_id: acl.id,
-					acl_code: make_klass(acl.field, acl.adding)
-				});
-			} else
-			for	( let j = 0; j < acl.accounts.length; j ++ )	{
-				let acc = acl.accounts[j];
-				if ( acc.subAccounts.length > 0 ) {
-					let sub_lines = [];
-					for ( let j = 0; j < acc.subAccounts.length; j ++ ) {
-						let suba = acc.subAccounts[j];
-						let rem = await models.SubAccountRemaining.findOne({
-							where: {
-								[Op.and]: {
-									term: term,
-									subAccountId: suba.id
-								}
-							}
-						})
-						sub_lines.push({
-							id: suba.id,
-							key: suba.key,
-							name: suba.name,
-							code: suba.subAccountCode,
-							taxClass: suba.taxClass,
-							debit: rem ? rem.debit : 0,
-							credit: rem ? rem.credit : 0,
-							balance: rem ? rem.balance :0
-						});
-					}
-					let rem = await models.AccountRemaining.findOne({
-						where: {
-							[Op.and]: {
-								term: term,
-								accountId: acc.id
-							}
-						}
-					});
-					lines.push({
-						id: acc.id,
-						major_name: acl.major,
-						middle_name: acl.middle,
-						minor_name: acl.minor,
-						acl_id: acl.id,
-						acl_code: make_klass(acl.field, acl.adding),
-						key: acc.key,
-						name: acc.name,
-						code: acc.accountCode,
-						taxClass: acc.taxClass,
-						subAccounts: sub_lines,
-						debit: rem ? rem.debit : 0,
-						credit: rem ? rem.credit : 0,
-						balance: rem ? rem.balance :0
-					});
-				} else {
-					let rem = await models.AccountRemaining.findOne({
-						where: {
-							[Op.and]: {
-								term: term,
-								accountId: acc.id
-							}
-						}
-					});
-					//console.log('remaining', rem);
-					lines.push({
-						id: acc.id,
-						major_name: acl.major,
-						middle_name: acl.middle,
-						minor_name: acl.minor,
-						acl_id: acl.id,
-						acl_code: make_klass(acl.field, acl.adding),
-						key: acc.key,
-						name: acc.name,
-						code: acc.accountCode,
-						taxClass: acc.taxClass,
-						debit: rem ? rem.debit : 0,
-						credit: rem ? rem.credit : 0,
-						balance: rem ? rem.balance :0
-					});
-				}
-			}
-		}
-		//console.log(lines);
+  ],
+  });
+  let	lines = [];
+  for	( let i = 0; i < accountClasses.length ; i ++ )	{
+  let acl = accountClasses[i];
+  if	( acl.accounts.length === 0 )	{
+  lines.push({
+  major_name: acl.major,
+  middle_name: acl.middle,
+  minor_name: acl.minor,
+  acl_id: acl.id,
+  acl_code: make_klass(acl.field, acl.adding)
+  });
+  } else
+  for	( let j = 0; j < acl.accounts.length; j ++ )	{
+  let acc = acl.accounts[j];
+  if ( acc.subAccounts.length > 0 ) {
+  let sub_lines = [];
+  for ( let j = 0; j < acc.subAccounts.length; j ++ ) {
+  let suba = acc.subAccounts[j];
+  let rem = await models.SubAccountRemaining.findOne({
+  where: {
+  [Op.and]: {
+  tenantId,
+  term: term,
+  subAccountId: suba.id
+  }
+  }
+  })
+  sub_lines.push({
+  id: suba.id,
+  key: suba.key,
+  name: suba.name,
+  code: suba.subAccountCode,
+  taxClass: suba.taxClass,
+  debit: rem ? rem.debit : 0,
+  credit: rem ? rem.credit : 0,
+  balance: rem ? rem.balance :0
+  });
+  }
+  let rem = await models.AccountRemaining.findOne({
+  where: {
+  [Op.and]: {
+  tenantId,
+  term: term,
+  accountId: acc.id
+  }
+  }
+  });
+  lines.push({
+  id: acc.id,
+  major_name: acl.major,
+  middle_name: acl.middle,
+  minor_name: acl.minor,
+  acl_id: acl.id,
+  acl_code: make_klass(acl.field, acl.adding),
+  key: acc.key,
+  name: acc.name,
+  code: acc.accountCode,
+  taxClass: acc.taxClass,
+  subAccounts: sub_lines,
+  debit: rem ? rem.debit : 0,
+  credit: rem ? rem.credit : 0,
+  balance: rem ? rem.balance :0
+  });
+  } else {
+  let rem = await models.AccountRemaining.findOne({
+  where: {
+  [Op.and]: {
+  tenantId,
+  term: term,
+  accountId: acc.id
+  }
+  }
+  });
+  lines.push({
+  id: acc.id,
+  major_name: acl.major,
+  middle_name: acl.middle,
+  minor_name: acl.minor,
+  acl_id: acl.id,
+  acl_code: make_klass(acl.field, acl.adding),
+  key: acc.key,
+  name: acc.name,
+  code: acc.accountCode,
+  taxClass: acc.taxClass,
+  debit: rem ? rem.debit : 0,
+  credit: rem ? rem.credit : 0,
+  balance: rem ? rem.balance :0
+  });
+  }
+  }
+  }
     this.accounts = lines;
 		return	(lines);
 	}

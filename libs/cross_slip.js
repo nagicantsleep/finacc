@@ -23,9 +23,10 @@ const createDetail = (line, slipId, lineNo) => {
   });
 }
 
-export const create = async (body, user) => {
+export const create = async (body, user, tenantId) => {
   let fy = await models.FiscalYear.findOne({
     where: {
+      tenantId,
       startDate: {
         [Op.lte]: new Date(body.year, body.month - 1, 2)
       },
@@ -34,23 +35,23 @@ export const create = async (body, user) => {
       }
     }
   });
-  //console.log('fy', fy);
   if  ( !fy ) return;
   let ml = await models.MonthlyLog.findOne({
     where: {
+      tenantId,
       term: fy.term,
       month: body.month
     }
   });
   if	( !ml )	{
     ml = await models.MonthlyLog.create({
+      tenantId,
       term: fy.term,
           month: body.month,
           slipCount: 0,
           voucharCount: 0
     })
   }
-  //console.log('ml', ml);
   ml.slipCount += 1;
   
   let approvedAt;
@@ -60,6 +61,7 @@ export const create = async (body, user) => {
     approvedBy = user.id;
   }
   let slip = await models.CrossSlip.create({
+    tenantId,
     year: body.year,
     month: body.month,
     day: body.day,

@@ -36,7 +36,8 @@ export default (sequelize, DataTypes) => {
     accountCode: DataTypes.STRING,
     taxClass: DataTypes.INTEGER,
     subAccountCount: DataTypes.INTEGER,
-    expiredAt: DataTypes.DATE
+    expiredAt: DataTypes.DATE,
+    tenantId: DataTypes.INTEGER
   }, {
     sequelize,
     modelName: 'Account',

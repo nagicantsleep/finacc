@@ -4,12 +4,14 @@ import {create as createCrossSlip, update as updateCrossSlip} from '../libs/cros
 
 export default {
   list: async(req, res, next) => {
+    const tenantId = req.currentTenantId;
     res.set('Access-Control-Allow-Origin', '*');
     switch  ( req.params.type)  {
       case  'not_approved':
         let where;
         if  ( req.session.user.approvable ) {
           where = {
+            tenantId,
             approvedAt: {
               [Op.eq]: null
             },
@@ -17,6 +19,7 @@ export default {
           }
         } else {
           where = {
+            tenantId,
             approvedAt: {
               [Op.eq]: null
             },
@@ -56,6 +59,7 @@ export default {
     }
   },
   get: async(req, res, next) => {
+    const tenantId = req.currentTenantId;
     res.set('Access-Control-Allow-Origin', '*');
     let year = req.params.year;
     let month = req.params.month;
@@ -64,6 +68,7 @@ export default {
     let cross_slip = await models.CrossSlip.findOne({
       where: {
         [Op.and]: {
+          tenantId,
           year: year,
           month: month,
           no: no
@@ -114,15 +119,14 @@ export default {
         ['lines', 'lineNo', 'ASC']
       ]
     });
-    //console.log(cross_slip);
     res.json(cross_slip);
   },
   post: async(req, res, next) => {
+    const tenantId = req.currentTenantId;
     res.set('Access-Control-Allow-Origin', '*');
     if	( req.session.user.accounting )  {
       let body = req.body;
-      //console.log('body:', body);
-      let slip = await createCrossSlip(body, req.session.user);
+      let slip = await createCrossSlip(body, req.session.user, tenantId);
       if  ( slip )  {
         res.json(slip);
       } else {
@@ -139,9 +143,11 @@ export default {
     }
   },
   update: async(req, res, next) => {
+    const tenantId = req.currentTenantId;
     let body = req.body;
     let slip = await models.CrossSlip.findOne({
         where: {
+          tenantId,
           year: body.year,
           month: body.month,
           no: body.no
@@ -171,12 +177,13 @@ export default {
     }
   },
   delete: async(req, res, next) => {
+    const tenantId = req.currentTenantId;
     res.set('Access-Control-Allow-Origin', '*');
     if	( req.session.user.approvable )	{
       let body = req.body;
-      //console.log('body:', body);
       let slip = await models.CrossSlip.findOne({
         where: {
+          tenantId,
           year: body.year,
           month: body.month,
           day: body.day,
@@ -202,12 +209,13 @@ export default {
     }
   },
   approve: (req, res, next) => {
+    const tenantId = req.currentTenantId;
     res.set('Access-Control-Allow-Origin', '*');
     if	( req.session.user.approvable )	{
       let body = req.body;
-      //console.log('update body:', body);
       models.CrossSlip.findOne({
         where: {
+          tenantId,
           year: body.year,
           month: body.month,
           no: body.no

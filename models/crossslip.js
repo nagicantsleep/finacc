@@ -45,7 +45,8 @@ export default (sequelize, DataTypes) => {
 		approvedAt: DataTypes.DATE,
 		approvedBy: DataTypes.INTEGER,
 		createdBy: DataTypes.INTEGER,
-		updatedBy: DataTypes.INTEGER
+		updatedBy: DataTypes.INTEGER,
+		tenantId: DataTypes.INTEGER
 	}, {
 		sequelize,
 		modelName: 'CrossSlip',

@@ -4,10 +4,12 @@ import Acc from '../libs/parse_account_code.js';
 
 export default {
 	get: async (req, res, next) => {
+		const tenantId = req.currentTenantId;
 		let account_code = req.params.code;
 
 		let account = await models.Account.findOne({
 			where: {
+				tenantId,
 				accountCode: account_code
 			},
 			include: [{
@@ -16,13 +18,14 @@ export default {
 				as: 'subAccounts'
 			}],
 		});
-		//console.log(account);
 		res.json(account);
 	},
 	post: async(req, res, next) => {
+		const tenantId = req.currentTenantId;
 		let klass = Acc.klass(req.body.code);
 		let account = await models.Account.findOne({
 			where: {
+				tenantId,
 				accountCode: req.body.code
 			}
 		});
@@ -34,14 +37,16 @@ export default {
 			key: req.body.key,
 			accountId: account.id,
 			subAccountCode: code,
-			taxClass: req.body.tax_class
+			taxClass: req.body.tax_class,
+			tenantId
 		});
 		await models.SubAccountRemaining.create({
 			term: req.params.term,
 			subAccountId: new_sub_account.id,
 			debit: req.body.debit,
 			credit: req.body.credit,
-			balance: req.body.balance
+			balance: req.body.balance,
+			tenantId
 		});
 		res.json({
 			accountCode: account.accountCode,
@@ -49,16 +54,19 @@ export default {
 		})
 	},
 	update: async(req, res, next) => {
+		const tenantId = req.currentTenantId;
 		console.log(req.body);
 		let sub_code = req.body.sub_code;
 		let term = parseInt(req.params.term);
 		let account = await models.Account.findOne({
 			where: {
+				tenantId,
 				accountCode: req.body.code
 			}
 		});
 		let sub = await models.SubAccount.findOne({
 			where: {
+				tenantId,
 				accountId: account.id,
 				subAccountCode: sub_code
 			}
@@ -72,6 +80,7 @@ export default {
 			let rem = await models.SubAccountRemaining.findOne({
 				where: {
 					[Op.and]: {
+						tenantId,
 						term: term,
 						subAccountId: sub.id
 					}
@@ -79,6 +88,7 @@ export default {
 			});
 			if ( !rem ) {
 				rem = new models.SubAccountRemaining({
+					tenantId,
 					term: term,
 					subAccountId: sub.id
 				});

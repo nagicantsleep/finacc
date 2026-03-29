@@ -15,8 +15,10 @@ export default {
     });
   },
   all: (req, res, next) => {
+    const tenantId = req.currentTenantId;
     models.FiscalYear.findOne({
       where: {
+        tenantId,
         term: req.params.term
       }
     }).then((fy) => {

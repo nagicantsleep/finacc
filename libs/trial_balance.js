@@ -3,17 +3,18 @@ const Op = models.Sequelize.Op;
 import Accounts from './accounts.js';
 import {numeric, dc} from './parse_account_code.js';
 
-export default async (term, endDate, options) => {
+export default async (tenantId, term, endDate, options) => {
   let lines = [];
   let index = [];
 
   let fy = await models.FiscalYear.findOne({
     where: {
+      tenantId,
       term: term
     }
   });
 
-  let accounts = await Accounts.all3(term);
+  let accounts = await Accounts.all3(tenantId, term);
   for ( let i = 0; i < accounts.length; i += 1)   {
     let acc = accounts[i];
     let balance = numeric(acc.balance);     //  don't forget!!!
@@ -51,6 +52,7 @@ export default async (term, endDate, options) => {
     let cross_slips = await models.CrossSlip.findAll({
       where: {
         [Op.and]: {
+          tenantId,
           year: mon.getFullYear(),
           month: mon.getMonth() + 1
         }

@@ -3,15 +3,16 @@ const Op = models.Sequelize.Op;
 
 export default {
   get: async (req, res, next) => {
+    const tenantId = req.currentTenantId;
     let year =  parseInt(req.params.year);
     let month =  parseInt(req.params.month);
-    //console.log('/api/journal/', year, month);
     
     let cross_slips = [];
 
     let slips = await models.CrossSlip.findAll({
       where: {
         [Op.and]: {
+          tenantId,
           year: year,
           month: month
         }

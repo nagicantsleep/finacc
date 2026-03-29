@@ -2,7 +2,7 @@ import models from '../models/index.js';
 import parseAccounts from '../libs/parse_accounts.js';
 import {getCompanyInfo, putCompanyInfo} from '../libs/utils.js';
 
-const createInitialAccount = async (term, companyClass, t) => {
+const createInitialAccount = async (tenantId, term, companyClass, t) => {
   const now = new Date();
   let accountClasses = [];
   const values = parseAccounts(term, companyClass);
@@ -13,16 +13,18 @@ const createInitialAccount = async (term, companyClass, t) => {
       minor: account_class.minor,
       field: account_class.field,
       adding: account_class.adding,
+      tenantId,
       createdAt: now,
       updatedAt: now
     });
   });
   await models.AccountClass.bulkCreate(accountClasses,{ transaction: t });
-  accountClasses = await models.AccountClass.findAll({transaction: t });
+  accountClasses = await models.AccountClass.findAll({ where: { tenantId }, transaction: t });
   for ( let i = 0; i < values.accounts.length; i ++ ) {
     let account = values.accounts[i];
     let account_class = await models.AccountClass.findOne({
       where: {
+        tenantId,
         field: account.field,
         adding: account.adding
       },
@@ -35,6 +37,7 @@ const createInitialAccount = async (term, companyClass, t) => {
       accountCode: account.account_code,
       taxClass: account.tax_class,
       subAccountCount: account.sub_account_count,
+      tenantId,
       createdAt: now,
       updatedAt: now
     },{ transaction: t });
@@ -47,7 +50,8 @@ const createInitialAccount = async (term, companyClass, t) => {
       term: account.term,
       debit: 0,
       credit: 0,
-      balance: 0
+      balance: 0,
+      tenantId
     },{ transaction: t });
   }
   if	( values.subAccounts )	{
@@ -55,6 +59,7 @@ const createInitialAccount = async (term, companyClass, t) => {
       let sub_account = values.subAccounts[i];
       let account = await models.Account.findOne({
         where: {
+          tenantId,
           accountCode: sub_account.account_code,
         },
         transaction: t });
@@ -63,21 +68,24 @@ const createInitialAccount = async (term, companyClass, t) => {
         key: sub_account.key,
         accountId: account.id,
         subAccountCode: sub_account.sub_account_code,
-        taxClass: sub_account.tax_class
+        taxClass: sub_account.tax_class,
+        tenantId
       },{ transaction: t });
       await models.SubAccountRemaining.create({
         subAccountId: sub_account_rec.id,
         term: sub_account.term,
         debit: 0,
         credit: 0,
-        balance: 0
+        balance: 0,
+        tenantId
       },{ transaction: t });
     }
   }
 }
 
 export const setup = async (req, res, next) => {
-	const countFy = await models.FiscalYear.count();
+  const tenantId = req.currentTenantId;
+	const countFy = await models.FiscalYear.count({ where: { tenantId } });
   if ( countFy === 0 ){
     const t = await models.sequelize.transaction();
     try {
@@ -85,9 +93,10 @@ export const setup = async (req, res, next) => {
         startDate: new Date(req.body.startDate),
         endDate: new Date(req.body.endDate),
         term: req.body.term,
-        year: req.body.year
+        year: req.body.year,
+        tenantId
       },{ transaction: t });
-      await createInitialAccount(req.body.term, req.body.companyClass, t);
+      await createInitialAccount(tenantId, req.body.term, req.body.companyClass, t);
       getCompanyInfo(req.currentTenantId).then(async (company) => {
         company.roundingMethod = req.body.roundingMethod;
         await putCompanyInfo(company, req.currentTenantId);
