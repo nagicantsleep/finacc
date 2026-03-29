@@ -10,6 +10,7 @@ export default (sequelize, DataTypes) => {
     }
   }
   Sticky.init({
+    tenantId: DataTypes.INTEGER,
     authorId: DataTypes.INTEGER,
     message: DataTypes.TEXT
   }, {

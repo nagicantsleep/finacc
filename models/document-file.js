@@ -15,6 +15,7 @@ export default (sequelize, DataTypes) => {
     }
   }
   DocumentFile.init({
+    tenantId: DataTypes.INTEGER,
     documentId: DataTypes.INTEGER,
     name: DataTypes.STRING,
     mimeType: DataTypes.STRING,

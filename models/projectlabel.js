@@ -7,6 +7,9 @@ export default (sequelize, DataTypes) => {
     }
   };
   ProjectLabel.init({
+    tenantId: {
+      type: DataTypes.INTEGER,
+    },
     projectId: {
       type: DataTypes.INTEGER,
       primaryKey: true,

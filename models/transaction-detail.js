@@ -26,6 +26,7 @@ export default (sequelize, DataTypes) => {
     }
   }
   TransactionDetail.init({
+    tenantId: DataTypes.INTEGER,
     transactionDocumentId: DataTypes.INTEGER,
     lineNo: DataTypes.INTEGER,
     itemId: DataTypes.INTEGER,
