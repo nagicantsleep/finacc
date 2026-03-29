@@ -73,17 +73,24 @@ export const requireTenant = async (req, res, next) => {
       }
       req.currentTenantId = membership.tenantId;
       req.membership = membership;
-    } else {
-      // Stale or missing — clear session tenant
-      req.session.currentTenantId = null;
-      req.currentTenantId = null;
-      req.membership = null;
+      return next();
     }
+
+    // No resolvable tenant — destroy session and force re-login so the
+    // bootstrap path (signup) or login handler can set currentTenantId.
+    req.logout((err) => {
+      req.session.destroy(() => {
+        if (req.path.startsWith('/api/')) {
+          res.status(401).json({ result: 'NG', message: 'No active tenant. Please log in again.' });
+        } else {
+          res.redirect('/login');
+        }
+      });
+    });
   } catch (e) {
     console.log('requireTenant error', e);
+    return next();
   }
-
-  return next();
 };
 
 /**
