@@ -8,7 +8,7 @@ export default (sequelize, DataTypes) => {
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-			this.belongsTo(models.Item, {
+			this.belongsTo(models.Document, {
 				foreignKey: 'documentId',
 				onDelete: 'CASCADE'
 			});
