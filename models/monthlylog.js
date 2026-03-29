@@ -16,7 +16,7 @@ export default (sequelize, DataTypes) => {
     month: DataTypes.INTEGER,
     slipCount: DataTypes.INTEGER,
     voucherCount: DataTypes.INTEGER,
-    tenantId: DataTypes.INTEGER
+    tenantId: { type: DataTypes.INTEGER, allowNull: false }
   }, {
     sequelize,
     modelName: 'MonthlyLog',

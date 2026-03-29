@@ -42,7 +42,7 @@ export default (sequelize, DataTypes) => {
 		}
 	};
 	CrossSlipDetail.init({
-		tenantId: DataTypes.INTEGER,
+		tenantId: { type: DataTypes.INTEGER, allowNull: false },
 		crossSlipId: DataTypes.INTEGER,
 		lineNo: DataTypes.INTEGER,
 		debitAccount: DataTypes.STRING,

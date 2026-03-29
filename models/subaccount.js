@@ -20,7 +20,7 @@ export default (sequelize, DataTypes) => {
 		accountId: DataTypes.INTEGER,
 		subAccountCode: DataTypes.INTEGER,
 		taxClass: DataTypes.INTEGER,
-		tenantId: DataTypes.INTEGER
+		tenantId: { type: DataTypes.INTEGER, allowNull: false }
 	}, {
 		sequelize,
 		modelName: 'SubAccount',

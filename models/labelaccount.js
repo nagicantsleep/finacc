@@ -9,6 +9,7 @@ export default (sequelize, DataTypes) => {
   LabelAccount.init({
     tenantId: {
       type: DataTypes.INTEGER,
+      allowNull: false,
     },
     labelId: {
       type: DataTypes.INTEGER,

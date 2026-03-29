@@ -18,7 +18,7 @@ export default (sequelize, DataTypes) => {
 		year: DataTypes.INTEGER,
 		taxIncluded: DataTypes.BOOLEAN,
 		transactionCount: DataTypes.INTEGER,
-		tenantId: DataTypes.INTEGER
+		tenantId: { type: DataTypes.INTEGER, allowNull: false }
 	}, {
 		sequelize,
 		modelName: 'FiscalYear',

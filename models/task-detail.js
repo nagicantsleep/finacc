@@ -26,7 +26,7 @@ export default (sequelize, DataTypes) => {
     }
   }
   TaskDetail.init({
-    tenantId: DataTypes.INTEGER,
+    tenantId: { type: DataTypes.INTEGER, allowNull: false },
     taskId: DataTypes.INTEGER,
     lineNo: DataTypes.INTEGER,
     itemId: DataTypes.INTEGER,

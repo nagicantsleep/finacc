@@ -26,7 +26,7 @@ export default (sequelize, DataTypes) => {
   }
   Member.init({
     userId: DataTypes.INTEGER,
-    tenantId: DataTypes.INTEGER,
+    tenantId: { type: DataTypes.INTEGER, allowNull: false },
     memberClassId: DataTypes.INTEGER,
     operation: DataTypes.TEXT,
 
