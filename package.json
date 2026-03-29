@@ -10,8 +10,8 @@
 		"watch": "vite build -w",
 		"watch-ssr": "vite build -w --config vite.config.ssr.js",
 		"prepublishOnly": "npm test",
-		"start-dev": "APP_NAME='hieronymus-dev' node ./bin/www",
-		"start": "NODE_ENV='production' node ./bin/www"
+		"start-dev": "cross-env APP_NAME=hieronymus-dev node ./bin/www",
+		"start": "cross-env NODE_ENV=production node ./bin/www"
 	},
 	"author": "ogochan@beesnest-inc.com",
 	"license": "AGPL-3.0-or-later",
@@ -87,6 +87,7 @@
 	},
 	"devDependencies": {
 		"chai": "^4.2.0",
+		"cross-env": "^10.1.0",
 		"css-loader": "^5.2.4",
 		"esbuild": "^0.23.1",
 		"esm": "^3.2.25",
