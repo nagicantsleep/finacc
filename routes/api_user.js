@@ -1,6 +1,7 @@
 import models from '../models/index.js';
 const Op = models.Sequelize.Op;
 import {passwd, passport, is_authenticated} from '../libs/user.js';
+import {bootstrapUserTenant} from '../libs/bootstrap.js';
 
 export default {
   members: (req, res, next) => {
@@ -152,23 +153,23 @@ export default {
       });
     })
   },
-  signup: (req, res, next) => {
+  signup: async (req, res, next) => {
     let user_name = req.body.user_name;
     let password = req.body.password;
-    //console.log('signup', user_name, password);
-    models.User.check(user_name, password).then((_user) => {
+    models.User.check(user_name, password).then(async (_user) => {
       if  ( _user) {
         res.json({
           result: 'NG',
           message: `ユーザー名 ${user_name} は既に登録されています。`
         });
       } else {
-        let user = new models.User({
-          name: user_name
-        });
-        user.password = password;
-        models.User.count().then((count) => {
-          //console.log('count', count);
+        const transaction = await models.sequelize.transaction();
+        try {
+          let user = new models.User({
+            name: user_name
+          });
+          user.password = password;
+          const count = await models.User.count({ transaction });
           if	( count === 0 )	{
             user.administrable = true;
             user.accounting = true;
@@ -186,16 +187,24 @@ export default {
             user.inventoryManagement = false;
             user.personnelManagement = false;
           }
-          console.log('user--', user);
-          user.save().then((ret) => {
-            console.log('ret', ret);
-            res.json({
-              result: 'OK'
-            })
-          }).catch((err) => {
-            console.log('save error', err);
-          })
-        });
+          user = await user.save({ transaction });
+
+          if (count === 0) {
+            await bootstrapUserTenant(user, transaction);
+          }
+
+          await transaction.commit();
+          res.json({
+            result: 'OK'
+          });
+        } catch (err) {
+          await transaction.rollback();
+          console.log('signup error', err);
+          res.json({
+            result: 'NG',
+            message: err.message || err
+          });
+        }
       }
     }).catch((err) => {
       console.log(err);
@@ -206,7 +215,7 @@ export default {
     });
   },
   login:  (req, res, next) => {
-    passport.authenticate('local', (error, user, info) => {
+    passport.authenticate('local', async (error, user, info) => {
       console.log('error', error);
       console.log('login user', user);
       console.log('info', info);
@@ -216,23 +225,38 @@ export default {
       if (( !user ) ||
           (( user.user.deauthorizedAt !== null ) &&
            ( user.user.deauthorizedAt < new Date() )) ) {
-        //console.log('user not found');
         res.json({
           result: 'NG',
           message: `user ${user.user_name} not found`
         });
       } else {
-        req.login(user, (error, next) => {
+        req.login(user, async (error) => {
           console.log('/login user', user);
           console.log("error", error);
           if (error) {
-            //console.log("error");
             res.json({
               result: 'NG',
               message: `user ${user.user_name} not found`
             });
           } else {
             req.session.user = user.user;
+
+            // Resolve default tenant and store currentTenantId in session.
+            try {
+              const defaultMembership = await models.UserTenant.findOne({
+                where: {
+                  userId: user.user.id,
+                  isDefault: true,
+                  status: 'active'
+                }
+              });
+              if (defaultMembership) {
+                req.session.currentTenantId = defaultMembership.tenantId;
+              }
+            } catch (e) {
+              console.log('tenant resolution error', e);
+            }
+
             res.json({
               result: 'OK'
             });
