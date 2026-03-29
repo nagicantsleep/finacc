@@ -4,6 +4,7 @@ import axios from 'axios';
 
 import session from 'express-session';
 import pgSession from 'connect-pg-simple';
+import { readFileSync } from 'fs';
 import passport from 'passport';
 import multipart from 'connect-multiparty';
 
@@ -27,6 +28,8 @@ import env from './config/env.js';
 global.env = env;
 
 const __dirname = import.meta.dirname;
+const nodeEnv = process.env.NODE_ENV || 'development';
+const dbConfig = JSON.parse(readFileSync(path.join(__dirname, './config/config.json'), 'utf-8'))[nodeEnv];
 
 // SSRのためにローカルにaxiosを向けるため
 axios.defaults.baseURL = `http://localhost:${global.env.port}`;
@@ -46,7 +49,13 @@ app.use(session({
   saveUninitialized: false,
   name: env.appName,					    //	ここの名前は起動するnode.js毎にユニークにする
   store: new (pgSession(session))({
-    conString: `postgresql://sa:NeoX12345%40localhost:5432/hieronymus`,
+    conObject: {
+      host: dbConfig.host,
+      port: dbConfig.port,
+      database: dbConfig.database,
+      user: dbConfig.username,
+      password: dbConfig.password
+    },
     tableName: 'session',
     ttl: global.env.session_ttl
   }),
