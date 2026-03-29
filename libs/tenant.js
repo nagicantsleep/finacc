@@ -73,6 +73,19 @@ export const requireTenant = async (req, res, next) => {
       }
       req.currentTenantId = membership.tenantId;
       req.membership = membership;
+
+      // Overlay tenant-scoped permissions onto req.session.user so the
+      // frontend sees the correct permission flags for the active tenant.
+      const PERM_FIELDS = [
+        'accounting', 'fiscalBrowsing', 'approvable', 'administrable',
+        'companyManagement', 'inventoryManagement', 'personnelManagement'
+      ];
+      for (const field of PERM_FIELDS) {
+        if (membership[field] !== undefined) {
+          req.session.user[field] = membership[field];
+        }
+      }
+
       return next();
     }
 
