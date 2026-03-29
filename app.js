@@ -114,7 +114,7 @@ app.use('/', homeRouter);
 
 app.get('/voucher/file/:id', is_authenticated, requireTenant, voucherFile);
 app.use('/forms', formsRouter);
-app.use('/api', apiRouter);
+app.use('/api', requireTenant, apiRouter);
 
 app.use('/:current/:command/:arg1/:arg2/:arg3', is_authenticated, requireTenant, screen);
 app.use('/:current/:command/:arg1/:arg2', is_authenticated, requireTenant, screen);

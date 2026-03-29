@@ -190,9 +190,7 @@ export default {
           }
           user = await user.save({ transaction });
 
-          if (count === 0) {
-            await bootstrapUserTenant(user, transaction);
-          }
+          await bootstrapUserTenant(user, transaction);
 
           await transaction.commit();
           res.json({
