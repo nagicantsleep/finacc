@@ -3,8 +3,7 @@ const app = express();
 import axios from 'axios';
 
 import session from 'express-session';
-import fileStore from 'session-file-store';
-const FileStore = fileStore(session);
+import pgSession from 'connect-pg-simple';
 import passport from 'passport';
 import multipart from 'connect-multiparty';
 
@@ -46,10 +45,10 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   name: env.appName,					    //	ここの名前は起動するnode.js毎にユニークにする
-  store: new FileStore({
-    ttl: global.env.session_ttl,	//	default 3600(s)
-    reapInterval: global.env.session_ttl,
-    path: global.env.session_path	//	default path
+  store: new (pgSession(session))({
+    conString: `postgresql://sa:NeoX12345%40localhost:5432/hieronymus`,
+    tableName: 'session',
+    ttl: global.env.session_ttl
   }),
 
   cookie: {
