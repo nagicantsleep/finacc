@@ -37,9 +37,19 @@ export default {
     })
   },
   list: (req, res, next) => {
-    if  ( req.query && req.query.nomember ) {
+    const tenantId = req.currentTenantId;
+    const baseInclude = [
+      {
+        model: models.UserTenant,
+        as: 'memberships',
+        where: { tenantId, status: 'active' },
+        attributes: []
+      }
+    ];
+    if (req.query && req.query.nomember) {
       models.User.findAll({
         include: [
+          ...baseInclude,
           {
             model: models.Member,
             as: 'member'
@@ -51,23 +61,20 @@ export default {
       }).then((_users) => {
         let users = [];
         _users.forEach((user) => {
-          if  ( !user.member )  {
+          if (!user.member) {
             users.push(user);
           }
-        })
-        res.json({
-          users: users
         });
+        res.json({ users });
       });
     } else {
       models.User.findAll({
+        include: baseInclude,
         order: [
           ["name", "ASC"]
         ]
       }).then((users) => {
-        res.json({
-          users: users
-        });
+        res.json({ users });
       });
     }
   },
