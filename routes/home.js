@@ -1,6 +1,7 @@
 import express from 'express';
 const router = express.Router();
 import {is_authenticated, passport} from '../libs/user.js';
+import {requireTenant} from '../libs/tenant.js';
 import models from '../models/index.js';
 const Op = models.Sequelize.Op;
 import closing from '../forms/closing.js';
@@ -58,9 +59,9 @@ const setup  =  async (req, res, next) => {
   }
 };
 
-router.get('/setup', is_authenticated, setup);
-router.get('/home/:term', is_authenticated, home);
-router.get('/home', is_authenticated, home);
+router.get('/setup', is_authenticated, requireTenant, setup);
+router.get('/home/:term', is_authenticated, requireTenant, home);
+router.get('/home', is_authenticated, requireTenant, home);
 router.get('/login', login);
 router.get('/logout', (req, res, next) => {
   //console.log('logout', req.user);
@@ -77,6 +78,6 @@ router.get('/signup', (req, res, next) => {
     message: ''
   });
 });
-router.get('/', is_authenticated, home);
+router.get('/', is_authenticated, requireTenant, home);
 
 export default router;
