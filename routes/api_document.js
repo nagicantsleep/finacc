@@ -101,6 +101,7 @@ export default {
     models.DocumentFile.create({
       name: name,
       documentId: document_id,
+      tenantId: req.currentTenantId,
       mimeType: mime_type,
       body: body
     }).then	((ret) => {

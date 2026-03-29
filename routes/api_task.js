@@ -110,6 +110,7 @@ export default {
           	line.taskId = task.id;
           	line.lineNo = i;
           	line.id = undefined;
+          	line.tenantId = req.currentTenantId;
           	line = await models.TaskDetail.create(line);
           	lines.push(line.dataValues);
           }
@@ -159,6 +160,7 @@ export default {
           	line.taskId = task.id;
           	line.lineNo = i;
           	line.id = undefined;
+          	line.tenantId = req.currentTenantId;
           	let _line = await models.TaskDetail.create(line);
           	lines.push(_line.dataValues);
           }

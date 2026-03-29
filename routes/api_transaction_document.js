@@ -260,6 +260,7 @@ export default {
             line.transactionDocumentId = transaction.id;
             line.lineNo = i;
             line.id = undefined;
+            line.tenantId = req.currentTenantId;
             line = await models.TransactionDetail.create(line);
             //console.log({line});
           }
@@ -313,6 +314,7 @@ export default {
          		line.transactionDocumentId = transaction.id;
           	line.lineNo = i;
           	line.id = undefined;
+          	line.tenantId = req.currentTenantId;
           	let _line = await models.TransactionDetail.create(line);
           	lines.push(_line.dataValues);
           }
@@ -458,6 +460,7 @@ export default {
             models.VoucherFile.create({
               voucherId: voucher.id,
               name: name,
+              tenantId: req.currentTenantId,
               mimeType: 'application/pdf',
               body: pdf
             });
@@ -495,6 +498,7 @@ export default {
           await models.VoucherFile.create({
             voucherId: voucher.id,
             name: name,
+            tenantId: req.currentTenantId,
             mimeType: 'application/pdf',
             body: pdf
           });

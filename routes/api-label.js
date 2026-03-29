@@ -55,7 +55,7 @@ export default {
 
       // 既存の関連をすべて削除
       await models.LabelAccount.destroy({
-        where: { labelId: labelId }
+        where: { labelId: labelId, tenantId: req.currentTenantId }
       });
 
       // 新しい関連をバルクインサート
@@ -63,6 +63,7 @@ export default {
         const newAssociations = accounts.map(acc => ({
           labelId: labelId,
           accountId: acc.id,
+          tenantId: req.currentTenantId,
           summaryType: acc.summaryType // summaryTypeも追加
         }));
         await models.LabelAccount.bulkCreate(newAssociations);

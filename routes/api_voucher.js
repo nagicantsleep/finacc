@@ -337,6 +337,7 @@ export default {
     models.VoucherFile.create({
       name: name,
       voucherId: voucher_id,
+      tenantId: req.currentTenantId,
       mimeType: mime_type,
       body: body
     }).then	((ret) => {

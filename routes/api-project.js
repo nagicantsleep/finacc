@@ -91,7 +91,7 @@ export default {
 
       // 既存の関連をすべて削除
       await models.ProjectLabel.destroy({
-        where: { projectId: projectId }
+        where: { projectId: projectId, tenantId: req.currentTenantId }
       });
 
       // 新しい関連をバルクインサート
@@ -99,7 +99,8 @@ export default {
         const newAssociations = labelsData.map(item => ({
           projectId: projectId,
           labelId: item.labelId,
-          displayOrder: item.displayOrder
+          displayOrder: item.displayOrder,
+          tenantId: req.currentTenantId
         }));
         await models.ProjectLabel.bulkCreate(newAssociations);
       }

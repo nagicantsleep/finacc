@@ -27,7 +27,7 @@ const getSummary = async (project, startDate, endDate) => {
   }) : [];
   const summaryTypeMap = new Map();
   for (const link of labelAccountLinks) {
-    summaryTypeMap.set(`${link.labelId}-${link.accountCode}`, link.summaryType);
+    summaryTypeMap.set(`${link.labelId}-${link.accountId}`, link.summaryType);
   }
 
   // 4. 取得したラベルを、プロジェクトに設定された順序に並び替える
@@ -37,7 +37,7 @@ const getSummary = async (project, startDate, endDate) => {
   const codeToLabelMap = new Map();
   for (const label of labels) {
     for (const account of label.accounts) {
-      const key = `${label.id}-${account.accountCode}`;
+      const key = `${label.id}-${account.id}`;
       codeToLabelMap.set(account.accountCode, {
         name: label.name,
         summaryType: summaryTypeMap.get(key)
