@@ -20,13 +20,16 @@ export default (sequelize, DataTypes) => {
     }
   };
   Project.init({
+    tenantId: {
+      type: DataTypes.INTEGER,
+      allowNull: true
+    },
     name: {
       type: DataTypes.STRING,
       allowNull: false
     },
     code: {
-      type: DataTypes.STRING,
-      unique: true
+      type: DataTypes.STRING
     },
     startDate: {
       type: DataTypes.DATEONLY,

@@ -19,10 +19,13 @@ export default (sequelize, DataTypes) => {
     }
   };
   Label.init({
+    tenantId: {
+      type: DataTypes.INTEGER,
+      allowNull: true
+    },
     name: {
       type: DataTypes.STRING,
-      allowNull: false,
-      unique: true
+      allowNull: false
     },
     description: {
       type: DataTypes.TEXT

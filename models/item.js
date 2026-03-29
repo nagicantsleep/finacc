@@ -42,6 +42,7 @@ export default (sequelize, DataTypes) => {
     }
   }
   Item.init({
+    tenantId: DataTypes.INTEGER,
     itemClassId: DataTypes.INTEGER,
     key: DataTypes.STRING,
     globalCode: DataTypes.STRING,         //  JAN, ASIN, ISBN...

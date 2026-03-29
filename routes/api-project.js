@@ -2,11 +2,14 @@ import models from '../models/index.js';
 
 export default {
   get: async (req, res, next) => {
+    const tenantId = req.currentTenantId;
     const id = req.params.id;
     try {
       if (id) {
         // Get single project
-        const project = await models.Project.findByPk(id);
+        const project = await models.Project.findOne({
+          where: { tenantId, id }
+        });
         if (project) {
           res.json(project);
         } else {
@@ -15,6 +18,7 @@ export default {
       } else {
         // Get project list
         const projects = await models.Project.findAll({
+          where: { tenantId },
           order: [['code', 'ASC']]
         });
         res.json(projects);
@@ -25,8 +29,9 @@ export default {
   },
 
   create: async (req, res, next) => {
+    const tenantId = req.currentTenantId;
     try {
-      const project = await models.Project.create(req.body);
+      const project = await models.Project.create({ ...req.body, tenantId });
       res.status(201).json(project);
     } catch (err) {
       next(err);
@@ -34,8 +39,11 @@ export default {
   },
 
   update: async (req, res, next) => {
+    const tenantId = req.currentTenantId;
     try {
-      const project = await models.Project.findByPk(req.params.id);
+      const project = await models.Project.findOne({
+        where: { tenantId, id: req.params.id }
+      });
       if (project) {
         await project.update(req.body);
         res.json(project);
@@ -48,8 +56,11 @@ export default {
   },
 
   delete: async (req, res, next) => {
+    const tenantId = req.currentTenantId;
     try {
-      const project = await models.Project.findByPk(req.params.id);
+      const project = await models.Project.findOne({
+        where: { tenantId, id: req.params.id }
+      });
       if (project) {
         await project.destroy();
         res.status(204).send();
@@ -62,8 +73,11 @@ export default {
   },
 
   getLabels: async (req, res, next) => {
+    const tenantId = req.currentTenantId;
     try {
-      const project = await models.Project.findByPk(req.params.id);
+      const project = await models.Project.findOne({
+        where: { tenantId, id: req.params.id }
+      });
       if (!project) {
         return res.status(404).send('Project not found');
       }
@@ -80,9 +94,12 @@ export default {
   },
 
   updateLabels: async (req, res, next) => {
+    const tenantId = req.currentTenantId;
     try {
       const projectId = req.params.id;
-      const project = await models.Project.findByPk(projectId);
+      const project = await models.Project.findOne({
+        where: { tenantId, id: projectId }
+      });
       if (!project) {
         return res.status(404).send('Project not found');
       }

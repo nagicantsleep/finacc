@@ -33,33 +33,41 @@ const getFiles = async (id) => {
 export default {
   get: async (req, res, next) => {
     res.set('Access-Control-Allow-Origin', '*');
+    const tenantId = req.currentTenantId;
     let id =  req.params.id;
     //console.log('/api/document/', id);
     if	( !id )	{
       let query = {
+        where: { tenantId },
         order: [
           ['issueDate', 'DESC']
+        ],
+        include: [
+          {
+            model: models.DocumentFile,
+            as: 'files',
+            attributes: [ 'id', 'mimeType']
+          }
         ]
       };
       console.log('query', req.query);
-      query.include.push({
-        model: models.DocumentFile,
-        as: 'files',
-        attributes: [ 'id', 'mimeType']
-      });
       console.log(JSON.stringify(query, ' ', 2));
       models.Document.findAll(query).then((documents) => {
         res.json(documents);
       });
     } else {
-      models.Document.findByPk(id).then((document) => {
+      models.Document.findOne({
+        where: { tenantId, id }
+      }).then((document) => {
         res.json(document);
       });
     }
   },
   post: (req, res, next) => {
     res.set('Access-Control-Allow-Origin', '*');
+    const tenantId = req.currentTenantId;
     let body = req.body;
+    body.tenantId = tenantId;
     models.Document.create(body).then((document) => {
       //console.log(document);
       res.json(document);
@@ -67,10 +75,13 @@ export default {
   },
   update: async(req, res, next) => {
     res.set('Access-Control-Allow-Origin', '*');
+    const tenantId = req.currentTenantId;
     let body = req.body;
     let id = req.params.id ? req.params.id : body.id;
 
-    let document = await models.Document.findByPk(id)
+    let document = await models.Document.findOne({
+      where: { tenantId, id }
+    })
     if	( document )	{
       document.set(body);
       document.save().then(() => {
@@ -80,10 +91,13 @@ export default {
   },
   delete: async(req, res, next) => {
     res.set('Access-Control-Allow-Origin', '*');
+    const tenantId = req.currentTenantId;
     let body = req.body;
     let id = req.params.id ? req.params.id : body.id;
 
-    let document = await models.Document.findByPk(id);
+    let document = await models.Document.findOne({
+      where: { tenantId, id }
+    });
     if	( document )	{
       document.destroy().then(() => {
         res.json({

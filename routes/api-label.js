@@ -2,15 +2,18 @@ import models from '../models/index.js';
 
 export default {
   get: async (req, res, next) => {
+    const tenantId = req.currentTenantId;
     try {
       const labels = await models.Label.findAll({
-              include: [{
-                model: models.Account,
-                as: 'accounts',
-                through: {
-                  attributes: ['summaryType'] // 中間テーブルからsummaryTypeを取得
-                }
-              }, {          model: models.Project,
+        where: { tenantId },
+        include: [{
+          model: models.Account,
+          as: 'accounts',
+          through: {
+            attributes: ['summaryType'] // 中間テーブルからsummaryTypeを取得
+          }
+        }, {
+          model: models.Project,
           as: 'projects'
         }],
         order: [['name', 'ASC']]
@@ -23,8 +26,9 @@ export default {
   },
 
   create: async (req, res, next) => {
+    const tenantId = req.currentTenantId;
     try {
-      const newLabel = await models.Label.create(req.body);
+      const newLabel = await models.Label.create({ ...req.body, tenantId });
       res.status(201).json(newLabel);
     } catch (err) {
       next(err);
@@ -32,8 +36,11 @@ export default {
   },
 
   getAccounts: async (req, res, next) => {
+    const tenantId = req.currentTenantId;
     try {
-      const label = await models.Label.findByPk(req.params.id);
+      const label = await models.Label.findOne({
+        where: { tenantId, id: req.params.id }
+      });
       if (!label) {
         return res.status(404).send('Label not found');
       }
@@ -45,8 +52,11 @@ export default {
   },
 
   updateAccounts: async (req, res, next) => {
+    const tenantId = req.currentTenantId;
     try {
-      const label = await models.Label.findByPk(req.params.id);
+      const label = await models.Label.findOne({
+        where: { tenantId, id: req.params.id }
+      });
       if (!label) {
         return res.status(404).send('Label not found');
       }
@@ -74,8 +84,11 @@ export default {
   },
 
   delete: async (req, res, next) => {
+    const tenantId = req.currentTenantId;
     try {
-      const label = await models.Label.findByPk(req.params.id);
+      const label = await models.Label.findOne({
+        where: { tenantId, id: req.params.id }
+      });
       if (!label) {
         return res.status(404).send('Label not found');
       }
@@ -87,8 +100,11 @@ export default {
   },
 
   update: async (req, res, next) => {
+    const tenantId = req.currentTenantId;
     try {
-      const label = await models.Label.findByPk(req.params.id);
+      const label = await models.Label.findOne({
+        where: { tenantId, id: req.params.id }
+      });
       if (!label) {
         return res.status(404).send('Label not found');
       }

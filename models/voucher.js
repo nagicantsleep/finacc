@@ -42,6 +42,7 @@ export default (sequelize, DataTypes) => {
     }
   }
   Voucher.init({
+    tenantId: DataTypes.INTEGER,
     voucherClassId: DataTypes.INTEGER,
     issueDate: DataTypes.DATEONLY,
     paymentDate: DataTypes.DATEONLY,

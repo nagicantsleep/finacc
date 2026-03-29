@@ -44,6 +44,7 @@ export default (sequelize, DataTypes) => {
     }
   }
   Task.init({
+    tenantId: DataTypes.INTEGER,
     issueDate: DataTypes.DATEONLY,
     deliveryLimit: DataTypes.DATEONLY,
     endedAt: DataTypes.DATEONLY,

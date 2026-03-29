@@ -32,6 +32,7 @@ const getFiles = async (id) => {
 
 export default {
   get: async (req, res, next) => {
+    const tenantId = req.currentTenantId;
     let id =  req.params.id;
     //console.log('/api/voucher/', id);
     let include = [
@@ -117,6 +118,7 @@ export default {
       } else {
         let fy = await models.FiscalYear.findOne({
           where: {
+            tenantId,
             term: req.session.term
           }
         });
@@ -202,7 +204,7 @@ export default {
 
       }
       models.Voucher.findAll({
-        where: where,
+        where: where ? { ...where, tenantId } : { tenantId },
         order: order,
         include: include,
         distinct: true
@@ -242,6 +244,7 @@ export default {
     } else {
       models.Voucher.findOne({
         where: {
+          tenantId,
           id: id
         },
         include: include
@@ -273,7 +276,9 @@ export default {
     }
   },
   post: async(req, res, next) => {
+    const tenantId = req.currentTenantId;
     let body = req.body;
+    body.tenantId = tenantId;
     body.createdBy = req.session.user.id;
     body.updatedBy = req.session.user.id;
     //console.log('body:', body);
@@ -291,11 +296,14 @@ export default {
     
   },
   update: async(req, res, next) => {
+    const tenantId = req.currentTenantId;
     let body = req.body;
     body.updatedBy = req.session.user.id;
     let id = req.params.id ? req.params.id : body.id;
 
-    let voucher = await models.Voucher.findByPk(id)
+    let voucher = await models.Voucher.findOne({
+      where: { tenantId, id }
+    })
     if	( voucher )	{
       voucher.set(body);
       voucher.save().then(() => {
@@ -310,10 +318,13 @@ export default {
     }
   },
   delete: async(req, res, next) => {
+    const tenantId = req.currentTenantId;
     let body = req.body;
     let id = req.params.id ? req.params.id : body.id;
 
-    models.Voucher.findByPk(id).then((voucher) => {
+    models.Voucher.findOne({
+      where: { tenantId, id }
+    }).then((voucher) => {
       voucher.destroy().then(() => {
         res.json({
           code: 0});
@@ -396,7 +407,9 @@ export default {
   },
   classesGet: (req, res, next) => {
     res.set('Access-Control-Allow-Origin', '*');
+    const tenantId = req.currentTenantId;
     models.VoucherClass.findAll({
+      where: { tenantId },
       order: [
         [ 'displayOrder', 'asc']
       ]
@@ -408,10 +421,13 @@ export default {
   },
   classesPut: async (req, res, next) => {
     res.set('Access-Control-Allow-Origin', '*');
+    const tenantId = req.currentTenantId;
     let kinds = req.body.values;
     for ( const kind of kinds ) {
       if  ( kind.id ) {
-        let result = await models.VoucherClass.findByPk(kind.id);
+        let result = await models.VoucherClass.findOne({
+          where: { tenantId, id: kind.id }
+        });
         if  ( !kind.name )  {
           await result.destroy();
         } else {
@@ -419,10 +435,11 @@ export default {
           await result.save();
         }
       } else {
-        await models.VoucherClass.create(kind);
+        await models.VoucherClass.create({ ...kind, tenantId });
       }
     }
     models.VoucherClass.findAll({
+      where: { tenantId },
       order: [
         [ 'displayOrder', 'asc']
       ]

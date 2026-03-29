@@ -6,6 +6,7 @@ import Mime from 'mime';
 export default {
   get: async (req, res, next) => {
     res.set('Access-Control-Allow-Origin', '*');
+    const tenantId = req.currentTenantId;
     let id =  req.params.id;
     let include = [
       {
@@ -23,6 +24,7 @@ export default {
   //console.log('/api/item/', id);
     if	( !id )	{
       let query = {
+        where: { tenantId },
         order: [
           ['name', 'ASC']
         ],
@@ -45,6 +47,7 @@ export default {
       }
       if	( req.query.key )	{
         query.where = {
+          tenantId,
           key: {
             [Op.like]: `%${req.query.key}%`
           }
@@ -55,6 +58,7 @@ export default {
           query.where.itemClassId = parseInt(req.query.itemClassId);
         } else {
           query.where = {
+            tenantId,
             itemClassId: parseInt(req.query.itemClassId)
           }
         }
@@ -70,7 +74,8 @@ export default {
         model: models.ItemClass,
         as: 'itemClass'
       });
-      models.Item.findByPk(id, {
+      models.Item.findOne({
+        where: { tenantId, id },
         include: include
       }).then((item) => {
         res.json({
@@ -81,14 +86,17 @@ export default {
   },
   post: async (req, res, next) => {
     res.set('Access-Control-Allow-Origin', '*');
+    const tenantId = req.currentTenantId;
     let body = req.body;
     body.createdBy = req.session.user.id;
     body.updatedBy = req.session.user.id;
+    body.tenantId = tenantId;
     body.id = undefined;
     console.log(JSON.stringify(body, ' ', 2 ));
     if  ( body.itemClassId > 0 )  {
       if	( body.document.descriptionType )	{
         let document = await models.Document.create({
+          tenantId,
           issueDate: new Date(),
           title: body.name,
           descriptionType: body.document.descriptionType,
@@ -111,9 +119,11 @@ export default {
   },
   update: (req, res, next) => {
     res.set('Access-Control-Allow-Origin', '*');
+    const tenantId = req.currentTenantId;
     let body = req.body;
     let id = req.params.id ? req.params.id : body.id;
-    models.Item.findByPk(id, {
+    models.Item.findOne({
+      where: { tenantId, id },
       include: [
         {
           model: models.Document,
@@ -148,6 +158,7 @@ export default {
           await _item.document.save();
         } else {
           let document = await models.Document.create({
+            tenantId,
             issueDate: new Date(),
             title: body.subject,
             descriptionType: body.document.descriptionType,
@@ -168,10 +179,11 @@ export default {
   },
   delete: async(req, res, next) => {
     res.set('Access-Control-Allow-Origin', '*');
+    const tenantId = req.currentTenantId;
     let body = req.body;
     let id = req.params.id ? req.params.id : body.id;
 
-    let item = await models.Item.findByPk(id);
+    let item = await models.Item.findOne({ where: { tenantId, id } });
     if	( item )	{
       item.destroy().then(() => {
         res.json({
@@ -181,7 +193,9 @@ export default {
   },
   classesGet: (req, res, next) => {
     res.set('Access-Control-Allow-Origin', '*');
+    const tenantId = req.currentTenantId;
     models.ItemClass.findAll({
+      where: { tenantId },
       order: [
         [ 'displayOrder', 'asc']
       ]
@@ -198,10 +212,11 @@ export default {
   },
   classesPut: async (req, res, next) => {
     res.set('Access-Control-Allow-Origin', '*');
+    const tenantId = req.currentTenantId;
     let kinds = req.body.values;
     for ( const kind of kinds ) {
       if  ( kind.id ) {
-        let result = await models.ItemClass.findByPk(kind.id);
+        let result = await models.ItemClass.findOne({ where: { tenantId, id: kind.id } });
         if  ( !kind.name )  {
           await result.destroy();
         } else {
@@ -209,10 +224,11 @@ export default {
           await result.save();
         }
       } else {
-        await models.ItemClass.create(kind);
+        await models.ItemClass.create({ ...kind, tenantId });
       }
     }
     models.ItemClass.findAll({
+      where: { tenantId },
       order: [
         [ 'displayOrder', 'asc']
       ]

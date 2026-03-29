@@ -6,6 +6,7 @@ import {DateString} from '../libs/utils.js';
 export default {
   get: async (req, res, next) => {
     res.set('Access-Control-Allow-Origin', '*');
+    const tenantId = req.currentTenantId;
     let id =  req.params.id;
     let include = [
       {
@@ -157,7 +158,7 @@ export default {
       //console.log({order});
       //console.log({include});
       models.TransactionDocument.findAll({
-        where: where,
+        where: where ? { ...where, tenantId } : { tenantId },
         order: order,
         include: include
       }).then((transactions) => {
@@ -167,7 +168,8 @@ export default {
       	});
       });
     } else {
-      models.TransactionDocument.findByPk(id, {
+      models.TransactionDocument.findOne({
+        where: { tenantId, id },
         include: include
       }).then((transaction) => {
         //console.log({transaction});
@@ -224,13 +226,16 @@ export default {
   },
   post: async (req, res, next) => {
     res.set('Access-Control-Allow-Origin', '*');
+    const tenantId = req.currentTenantId;
     if  ( req.session.user.companyManagement )    {
       let body = req.body;
       body.createdBy = req.session.user.id;
       body.updatedBy = req.session.user.id;
+      body.tenantId = tenantId;
       if  ( !body.no )  {
         let fy = await models.FiscalYear.findOne({
           where: {
+            tenantId,
             term: req.session.term
           }
         });
@@ -241,6 +246,7 @@ export default {
       body.id = undefined;
       //console.log(JSON.stringify(body, ' ', 2 ));
       let document = await models.Document.create({
+        tenantId,
         issueDate: body.issueDate,
         title: body.subject,
         descriptionType: body.document.descriptionType,
@@ -278,11 +284,13 @@ export default {
   },
   update: (req, res, next) => {
     res.set('Access-Control-Allow-Origin', '*');
+    const tenantId = req.currentTenantId;
 		let body = req.body;
 		body.updatedBy = req.session.user.id;
 		let id = req.params.id ? parseInt(req.params.id) : body.id;
     if  ( req.session.user.companyManagement )    {
-      models.TransactionDocument.findByPk(id, {
+      models.TransactionDocument.findOne({
+        where: { tenantId, id },
         include: [
           {
             model: models.Document,
@@ -330,6 +338,7 @@ export default {
             await _transaction.document.save();
           } else {
             let document = await models.Document.create({
+              tenantId,
 	            issueDate: body.issueDate,
   	          title: body.subject,
     	        descriptionType: body.document.descriptionType,
@@ -359,9 +368,12 @@ export default {
   },
   delete: (req, res, next) => {
     res.set('Access-Control-Allow-Origin', '*');
+    const tenantId = req.currentTenantId;
     let id = parseInt(req.params.id);
     if  ( req.session.user.companyManagement )   {
-      models.TransactionDocument.findByPk(id).then((transaction) => {
+      models.TransactionDocument.findOne({
+        where: { tenantId, id }
+      }).then((transaction) => {
         transaction.destroy().then(() => {
           res.json({ code: 0});
         }).catch (()=> {
@@ -376,7 +388,9 @@ export default {
 
   },
   book: async (req, res, next) => {
-    const transaction = await models.TransactionDocument.findByPk(req.params.id, {
+    const tenantId = req.currentTenantId;
+    const transaction = await models.TransactionDocument.findOne({
+      where: { tenantId, id: req.params.id },
       include: [
         {
           model: models.Task,
@@ -424,6 +438,7 @@ export default {
 		  if	( transaction.kind.book && transaction.kind.book.form )	{
         const company = await models.Company.findOne({
           where: {
+            tenantId,
             companyClassId: 1
           }
         });
@@ -434,7 +449,8 @@ export default {
         let name = `${transaction.companyName}-${transaction.kind.book.form}-${DateString(new Date())} .pdf`;
         if	( transaction.voucherId )	{
           //console.log('update');
-          const voucher = await models.Voucher.findByPk(transaction.voucherId, {
+          const voucher = await models.Voucher.findOne({
+            where: { tenantId, id: transaction.voucherId },
             include: [
               {
                 model: models.VoucherFile,
@@ -470,6 +486,7 @@ export default {
               if  ( rule.id !== line.taxRule.id ) {
                 rule = await models.TaxRule.findOne({
                   where: {
+                    tenantId,
                     taxClass: 9
                   }
                 });
@@ -479,6 +496,7 @@ export default {
             }
           })
           const voucher = await models.Voucher.create({
+            tenantId,
             voucherClassId: transaction.kind.bookId,
             issueDate: transaction.issueDate,
             companyId: transaction.companyId,
@@ -506,7 +524,9 @@ export default {
   },
   kindsGet: (req, res, next) => {
     res.set('Access-Control-Allow-Origin', '*');
+    const tenantId = req.currentTenantId;
     models.TransactionKind.findAll({
+      where: { tenantId },
       order: [
         [ 'displayOrder', 'asc']
       ]
@@ -518,10 +538,13 @@ export default {
   },
   kindsPut: async (req, res, next) => {
     res.set('Access-Control-Allow-Origin', '*');
+    const tenantId = req.currentTenantId;
     let kinds = req.body.values;
     for ( const kind of kinds ) {
       if  ( kind.id ) {
-        let result = await models.TransactionKind.findByPk(kind.id);
+        let result = await models.TransactionKind.findOne({
+          where: { tenantId, id: kind.id }
+        });
         if  ( !kind.label )  {
           await result.destroy();
         } else {
@@ -529,10 +552,11 @@ export default {
             await result.save();
         }
       } else {
-        await models.TransactionKind.create(kind);
+        await models.TransactionKind.create({ ...kind, tenantId });
       }
     }
     models.TransactionKind.findAll({
+      where: { tenantId },
       order: [
         [ 'displayOrder', 'asc']
       ]

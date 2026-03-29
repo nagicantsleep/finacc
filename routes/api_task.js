@@ -4,6 +4,7 @@ const Op = models.Sequelize.Op;
 export default {
   get: async (req, res, next) => {
     res.set('Access-Control-Allow-Origin', '*');
+    const tenantId = req.currentTenantId;
     let id =  req.params.id;
     //console.log('/api/task/', id);
     let include = [
@@ -60,7 +61,7 @@ export default {
       //console.log({order});
       //console.log({include});
       models.Task.findAll({
-        where: where,
+        where: where ? { ...where, tenantId } : { tenantId },
         order: order,
         include: include
       }).then((tasks) => {
@@ -70,7 +71,8 @@ export default {
       	});
       });
     } else {
-      models.Task.findByPk(id, {
+      models.Task.findOne({
+        where: { tenantId, id },
         include: include,
         order: [
           [ "lines", "lineNo", "ASC"]
@@ -85,13 +87,16 @@ export default {
   },
   post: async (req, res, next) => {
     res.set('Access-Control-Allow-Origin', '*');
+    const tenantId = req.currentTenantId;
     if  ( req.session.user.companyManagement )    {
       let body = req.body;
+      body.tenantId = tenantId;
       body.createdBy = req.session.user.id;
       body.updatedBy = req.session.user.id;
       body.id = undefined;
       //console.log('body', JSON.stringify(body, ' ', 2 ));
       let document = await models.Document.create({
+        tenantId,
         issueDate: body.issueDate,
         title: body.subject,
         descriptionType: body.document.descriptionType,
@@ -132,11 +137,13 @@ export default {
   },
   update: (req, res, next) => {
     res.set('Access-Control-Allow-Origin', '*');
+    const tenantId = req.currentTenantId;
 		let body = req.body;
 		body.updatedBy = req.session.user.id;
 		let id = req.params.id ? parseInt(req.params.id) : body.id;
     if  ( req.session.user.companyManagement )    {
-      models.Task.findByPk(id, {
+      models.Task.findOne({
+        where: { tenantId, id },
         include: [
           {
             model: models.Document,
@@ -187,10 +194,12 @@ export default {
   },
   delete: async (req, res, next) => {
     res.set('Access-Control-Allow-Origin', '*');
+    const tenantId = req.currentTenantId;
     let id = parseInt(req.params.id);
     if  ( req.session.user.companyManagement )   {
       await models.Task.destroy({
         where: {
+          tenantId,
           id: id
         }
       });
