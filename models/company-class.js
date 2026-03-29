@@ -12,6 +12,7 @@ export default (sequelize, DataTypes) => {
     }
   }
   CompanyClass.init({
+    tenantId: DataTypes.INTEGER,
     name: DataTypes.STRING,
     displayOrder: DataTypes.INTEGER,
     isClient: DataTypes.BOOLEAN

@@ -150,7 +150,7 @@ export default {
         body.tenantId = req.currentTenantId;
         if (!body.no) {
           let fy = await models.FiscalYear.findOne({
-            where: { term: req.session.term }
+            where: { tenantId: req.currentTenantId, term: req.session.term }
           });
           fy.transactionCount += 1;
           fy.save();
@@ -315,7 +315,7 @@ export default {
     });
     if (transaction && transaction.kind.forBook) {
       if (transaction.kind.book && transaction.kind.book.form) {
-        const company = await models.Company.findOne({ where: { companyClassId: 1 } });
+        const company = await models.Company.findOne({ where: { tenantId, companyClassId: 1 } });
         const pdf = await print(transaction.kind.book.form, { transaction, company });
         let name = `${transaction.companyName}-${transaction.kind.book.form}-${DateString(new Date())} .pdf`;
         if (transaction.voucherId) {
@@ -349,7 +349,7 @@ export default {
           transaction.lines.forEach(async (line) => {
             if (rule) {
               if (rule.id !== line.taxRule.id) {
-                rule = await models.TaxRule.findOne({ where: { taxClass: 9 } });
+                rule = await models.TaxRule.findOne({ where: { tenantId, taxClass: 9 } });
               }
             } else {
               rule = line.taxRule;
@@ -385,7 +385,9 @@ export default {
   },
   kindsGet: (req, res, next) => {
     res.set('Access-Control-Allow-Origin', '*');
+    const tenantId = req.currentTenantId;
     models.TransactionKind.findAll({
+      where: { tenantId },
       order: [['displayOrder', 'asc']]
     }).then((kinds) => {
       res.json({ values: kinds });
@@ -393,10 +395,13 @@ export default {
   },
   kindsPut: async (req, res, next) => {
     res.set('Access-Control-Allow-Origin', '*');
+    const tenantId = req.currentTenantId;
     let kinds = req.body.values;
     for (const kind of kinds) {
       if (kind.id) {
-        let result = await models.TransactionKind.findByPk(kind.id);
+        let result = await models.TransactionKind.findOne({
+          where: { tenantId, id: kind.id }
+        });
         if (!kind.label) {
           await result.destroy();
         } else {
@@ -404,10 +409,11 @@ export default {
           await result.save();
         }
       } else {
-        await models.TransactionKind.create(kind);
+        await models.TransactionKind.create({ ...kind, tenantId });
       }
     }
     models.TransactionKind.findAll({
+      where: { tenantId },
       order: [['displayOrder', 'asc']]
     }).then((kinds) => {
       res.json({ values: kinds });

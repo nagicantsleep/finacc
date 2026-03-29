@@ -3,6 +3,7 @@ const Op = models.Sequelize.Op;
 
 export default {
   get: async (req, res, next) => {
+    const tenantId = req.currentTenantId;
     let id =  req.params.id;
     //console.log('/api/member/', id);
     let include = [
@@ -17,6 +18,7 @@ export default {
     ];
     if	( !id )	{
       let query = {
+        where: { tenantId },
         order: [
           ['legalName', 'ASC']
         ],
@@ -24,13 +26,7 @@ export default {
       };
       console.log('query', req.query);
       if  ( req.query.memberClassId ) {
-        if  ( query.where ) {
-          query.where.memberClassId = parseInt(req.query.memberClassId);
-        } else {
-          query.where = {
-            memberClassId: parseInt(req.query.memberClassId)
-          }
-        }
+        query.where.memberClassId = parseInt(req.query.memberClassId);
       }
       //console.log(JSON.stringify(query, ' ', 2));
       models.Member.findAll(query).then( async(members) => {
@@ -39,7 +35,8 @@ export default {
         });
       });
     } else {
-      models.Member.findByPk(id, {
+      models.Member.findOne({
+        where: { tenantId, id },
         include: include
       }).then((member) => {
         res.json({
@@ -49,7 +46,9 @@ export default {
     }
   },
   post: (req, res, next) => {
+    const tenantId = req.currentTenantId;
     let body = req.body;
+    body.tenantId = tenantId;
     models.Member.create(body).then((member) => {
       //console.log(member);
       res.json({
@@ -65,10 +64,11 @@ export default {
     });
   },
   update: async(req, res, next) => {
+    const tenantId = req.currentTenantId;
     let body = req.body;
     let id = req.params.id ? req.params.id : body.id;
 
-    let member = await models.Member.findByPk(id)
+    let member = await models.Member.findOne({ where: { tenantId, id } });
     if	( member )	{
       member.set(body);
       member.save().then(() => {
@@ -85,10 +85,11 @@ export default {
     }
   },
   delete: async(req, res, next) => {
+    const tenantId = req.currentTenantId;
     let body = req.body;
     let id = req.params.id ? req.params.id : body.id;
 
-    let member = await models.Member.findByPk(id);
+    let member = await models.Member.findOne({ where: { tenantId, id } });
     if	( member )	{
       member.destroy().then(() => {
         res.json({

@@ -15,6 +15,7 @@ export default (sequelize, DataTypes) => {
     }
   }
   Company.init({
+    tenantId: DataTypes.INTEGER,
     companyClassId: DataTypes.INTEGER,
     name: DataTypes.STRING,
     chargeName: DataTypes.STRING,

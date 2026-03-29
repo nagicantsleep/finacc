@@ -9,6 +9,7 @@ export default (sequelize, DataTypes) => {
      */
   }
   TaxRule.init({
+    tenantId: DataTypes.INTEGER,
     label: DataTypes.STRING,
     displayOrder: DataTypes.INTEGER,
     taxClass: DataTypes.INTEGER,

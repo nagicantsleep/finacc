@@ -5,6 +5,7 @@ import {getCompanyInfo, putCompanyInfo} from '../libs/utils.js';
 
 export default {
   get: async (req, res, next) => {
+    const tenantId = req.currentTenantId;
     let id =  req.params.id;
     console.log('/api/company/', id);
 		let include = [
@@ -14,14 +15,12 @@ export default {
       }
     ];
     if	( !id )	{
-      let where;
+      let where = { tenantId };
       if	( req.query )	{
         if	( req.query.kind )	{
           let kind = parseInt(req.query.kind);
           if	( kind > 0 )	{
-            where = {
-              companyClassId: kind
-            }
+            where.companyClassId = kind;
           }
         }
         if  ( req.query.clientOnly )  {
@@ -44,7 +43,8 @@ export default {
         	order: [
           	['name', 'ASC']
         	],
-        	include: include
+        	include: include,
+          where: { tenantId }
         });
       }
       pr.then((companies) => {
@@ -56,6 +56,7 @@ export default {
     } else {
       models.Company.findOne({
         where: {
+          tenantId,
           id: id
         },
         include: include
@@ -68,22 +69,24 @@ export default {
     }
   },
   post: async(req, res, next) => {
+    const tenantId = req.currentTenantId;
     let body = req.body;
-    //console.log('body:', body);
+    body.tenantId = tenantId;
 
     let company = await models.Company.create(body)
-    //console.log(company);
     
     res.json({
       id: company.id
     });
   },
   update: async(req, res, next) => {
+    const tenantId = req.currentTenantId;
     let body = req.body;
     let id = req.params.id ? req.params.id : body.id;
 
     let company = await models.Company.findOne({
       where: {
+        tenantId,
         id: id
       }
     });
@@ -95,11 +98,13 @@ export default {
     }
   },
   delete: async(req, res, next) => {
+    const tenantId = req.currentTenantId;
     let body = req.body;
     let id = req.params.id ? req.params.id : body.id;
 
     let company = await models.Company.findOne({
       where: {
+        tenantId,
         id: id
       }
     });
@@ -111,8 +116,10 @@ export default {
     }
   },
   kindsGet: (req, res, next) => {
+    const tenantId = req.currentTenantId;
     res.set('Access-Control-Allow-Origin', '*');
     models.CompanyClass.findAll({
+      where: { tenantId },
       order: [
         [ 'displayOrder', 'asc']
       ]
@@ -123,11 +130,12 @@ export default {
     })
   },
   kindsPut: async (req, res, next) => {
+    const tenantId = req.currentTenantId;
     res.set('Access-Control-Allow-Origin', '*');
     let kinds = req.body.values;
     for ( const kind of kinds ) {
       if  ( kind.id ) {
-        let result = await models.CompanyClass.findByPk(kind.id);
+        let result = await models.CompanyClass.findOne({ where: { tenantId, id: kind.id } });
         if  ( !kind.name )  {
           await result.destroy();
         } else {
@@ -135,10 +143,11 @@ export default {
           await result.save();
         }
       } else {
-        await models.CompanyClass.create(kind);
+        await models.CompanyClass.create({ ...kind, tenantId });
       }
     }
     models.CompanyClass.findAll({
+      where: { tenantId },
       order: [
         [ 'displayOrder', 'asc']
       ]

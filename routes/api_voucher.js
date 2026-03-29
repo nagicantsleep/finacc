@@ -98,6 +98,7 @@ export default {
         } else {
           let fy = await models.FiscalYear.findOne({
             where: {
+              tenantId,
               term: req.session.term
             }
           });
@@ -287,7 +288,9 @@ export default {
   },
   classesGet: (req, res, next) => {
     res.set('Access-Control-Allow-Origin', '*');
+    const tenantId = req.currentTenantId;
     models.VoucherClass.findAll({
+      where: { tenantId },
       order: [['displayOrder', 'asc']]
     }).then((classes) => {
       res.json({ values: classes });
@@ -295,10 +298,13 @@ export default {
   },
   classesPut: async (req, res, next) => {
     res.set('Access-Control-Allow-Origin', '*');
+    const tenantId = req.currentTenantId;
     let kinds = req.body.values;
     for (const kind of kinds) {
       if (kind.id) {
-        let result = await models.VoucherClass.findByPk(kind.id);
+        let result = await models.VoucherClass.findOne({
+          where: { tenantId, id: kind.id }
+        });
         if (!kind.name) {
           await result.destroy();
         } else {
@@ -306,10 +312,11 @@ export default {
           await result.save();
         }
       } else {
-        await models.VoucherClass.create(kind);
+        await models.VoucherClass.create({ ...kind, tenantId });
       }
     }
     models.VoucherClass.findAll({
+      where: { tenantId },
       order: [['displayOrder', 'asc']]
     }).then((kinds) => {
       res.json({ values: kinds });
