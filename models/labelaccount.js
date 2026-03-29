@@ -14,8 +14,8 @@ export default (sequelize, DataTypes) => {
       type: DataTypes.INTEGER,
       primaryKey: true,
     },
-    accountCode: {
-      type: DataTypes.STRING,
+    accountId: {
+      type: DataTypes.INTEGER,
       primaryKey: true,
     },
     summaryType: {

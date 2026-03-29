@@ -62,7 +62,7 @@ export default {
       if (accounts.length > 0) {
         const newAssociations = accounts.map(acc => ({
           labelId: labelId,
-          accountCode: acc.code,
+          accountId: acc.id,
           summaryType: acc.summaryType // summaryTypeも追加
         }));
         await models.LabelAccount.bulkCreate(newAssociations);

@@ -12,8 +12,7 @@ export default (sequelize, DataTypes) => {
       this.belongsToMany(models.Account, {
         through: 'LabelAccounts',
         foreignKey: 'labelId',
-        otherKey: 'accountCode',
-        targetKey: 'accountCode',
+        otherKey: 'accountId',
         as: 'accounts'
       });
     }
