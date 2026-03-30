@@ -2,7 +2,7 @@ import models from '../models/index.js';
 const Op = models.Sequelize.Op;
 import {dc, numeric} from '../libs/parse_account_code.js';
 
-const	getDetails = async (fy, account, sub_account) => {
+const	getDetails = async (fy, account, sub_account, tenantId) => {
   //console.log({account});
   //console.log({sub_account});
   let changes = [];
@@ -13,12 +13,14 @@ const	getDetails = async (fy, account, sub_account) => {
     endDate = new Date(fy.endDate);
   } else {
     let d = await models.FiscalYear.findOne({
+      where: { tenantId },
       order: [
         ['term', 'ASC']
       ]
     });
     startDate = new Date(d.startDate);
     d = await models.FiscalYear.findOne({
+      where: { tenantId },
       order: [
         ['term', 'DESC']
       ]
@@ -63,7 +65,7 @@ const	getDetails = async (fy, account, sub_account) => {
     //console.log('where', where);
 
     let details = await models.CrossSlipDetail.findAll({
-      where: where,
+      where: { ...where, tenantId },
       include: [
         {
           model: models.CrossSlip,
@@ -117,21 +119,23 @@ export default {
     let term =  parseInt(req.params.term);
     let account = req.params.account;
     let sub_account = req.params.sub_account;
+    const tenantId = req.currentTenantId;
     
     //console.log('/api/changes/', term, account, sub_account);
     //console.log(term);
     if	( term > 0 )	{
       models.FiscalYear.findOne({
         where: {
-          term: term
+          term: term,
+          tenantId: tenantId
         }
       }).then((fy) => {
-        getDetails(fy, account, sub_account).then((changes)=> {
+        getDetails(fy, account, sub_account, tenantId).then((changes)=> {
           res.json(changes);
         })
       });
     } else {
-      getDetails(undefined, account, sub_account).then((changes)=> {
+      getDetails(undefined, account, sub_account, tenantId).then((changes)=> {
         res.json(changes);
       })
     }
