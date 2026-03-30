@@ -9,15 +9,21 @@ export default {
     let include = [
       {
         model: models.Company,
-        as: 'company'
+        as: 'company',
+        where: { tenantId },
+        required: false
       },
       {
         model: models.TaskDetail,
         as: 'lines',
+        where: { tenantId },
+        required: false,
         include: [
           {
             model: models.TaxRule,
-            as: 'taxRule'
+            as: 'taxRule',
+            where: { tenantId },
+            required: false
           }
         ]
       },
@@ -29,13 +35,17 @@ export default {
           {
             model: models.Member,
             as: 'member',
+            where: { tenantId },
+            required: false,
             attributes: ['legalName', 'tradingName']
           }
         ]
       },
       {
         model: models.Document,
-        as: 'document'
+        as: 'document',
+        where: { tenantId },
+        required: false
       }
     ];
 

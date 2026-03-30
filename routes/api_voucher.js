@@ -39,16 +39,22 @@ export default {
     let include = [
       {
         model: models.Company,
-        as: 'company'
+        as: 'company',
+        where: { tenantId },
+        required: false
       }, {
         model: models.User,
         as: 'updateUser'
       }, {
         model: models.VoucherClass,
-        as: 'voucherClass'
+        as: 'voucherClass',
+        where: { tenantId },
+        required: false
       }, {
         model: models.TaxRule,
-        as: 'taxRule'
+        as: 'taxRule',
+        where: { tenantId },
+        required: false
       }
     ];
 

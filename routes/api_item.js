@@ -12,10 +12,14 @@ export default {
       {
         model: models.Document,
       	as: 'document',
+        where: { tenantId },
+        required: false,
       	include: [
         	{
 	          model: models.DocumentFile,
   	        as: 'files',
+            where: { tenantId },
+            required: false,
     	      attributes: [ 'id', 'mimeType']
       	  }
       	]
@@ -34,13 +38,16 @@ export default {
       if  ( !req.query.product ) {
         query.include.push({
           model: models.ItemClass,
-          as: 'itemClass'
+          as: 'itemClass',
+          where: { tenantId },
+          required: false
         });
       } else {
         query.include.push({
           model: models.ItemClass,
           as: 'itemClass',
           where: {
+            tenantId,
             product: ( req.query.product === 'true' ) ? true : false
           }
         });
@@ -72,7 +79,9 @@ export default {
     } else {
       include.push({
         model: models.ItemClass,
-        as: 'itemClass'
+        as: 'itemClass',
+        where: { tenantId },
+        required: false
       });
       models.Item.findOne({
         where: { tenantId, id },
