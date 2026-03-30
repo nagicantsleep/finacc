@@ -2,7 +2,7 @@ import models from '../models/index.js';
 const Op = models.Sequelize.Op;
 import Accounts from '../libs/accounts.js';
 
-const	get_details = async (fy, account, sub_account) => {
+const	get_details = async (fy, account, sub_account, tenantId) => {
   //console.log({account});
   //console.log({sub_account});
   let ledger = [];
@@ -43,7 +43,7 @@ const	get_details = async (fy, account, sub_account) => {
     //console.log('where', where);
 
     let details = await models.CrossSlipDetail.findAll({
-      where: where,
+      where: { ...where, tenantId },
       include: [
         {
           model: models.CrossSlip,
@@ -102,7 +102,7 @@ export default {
         term: term
       }
     }).then((fy) => {
-      get_details(fy, account, sub_account).then((ledger)=> {
+      get_details(fy, account, sub_account, tenantId).then((ledger)=> {
         res.json(ledger);
       })
     });

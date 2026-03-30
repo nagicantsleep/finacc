@@ -38,7 +38,8 @@ export default {
       let slip = slips[i];
       let details = await models.CrossSlipDetail.findAll({
         where: {
-          crossSlipId: slip.id
+          crossSlipId: slip.id,
+          tenantId: tenantId
         },
         include: [
           {
