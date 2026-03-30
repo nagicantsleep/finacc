@@ -23,7 +23,7 @@ router.get('/explanatory_journal/:term', is_authenticated, async (req, res, next
 	if (( req.session.user.accounting ) ||
     	( req.session.user.fiscalBrowsing )) {
     if  ( req.query.format === 'pdf' )  {
-      const company = await myCompany();
+      const company = await myCompany(req.currentTenantId);
       const {fy, dates} = await initializeExplanatoryJournal(req.params.term);
       print('explanatory-journal', {
         fy: fy,
@@ -49,7 +49,7 @@ router.get('/general_ledger/:term', is_authenticated, async (req, res, next) => 
 	if (( req.session.user.accounting ) ||
         ( req.session.user.fiscalBrowsing )) {
     if  ( req.query.format === 'pdf' )  {
-      const company = await myCompany();
+      const company = await myCompany(req.currentTenantId);
       const {fy, accountPages, ledgerPages} = await initializeGeneralLedger(req.params.term);
       print('general-ledger', {
         fy: fy,
@@ -76,7 +76,7 @@ router.get('/subsidiary_ledger/:term', is_authenticated, async (req, res, next) 
 	if (( req.session.user.accounting ) ||
         ( req.session.user.fiscalBrowsing )) {
     if  ( req.query.format === 'pdf' )  {
-      const company = await myCompany();
+      const company = await myCompany(req.currentTenantId);
       const {fy, ledgerPages} = await initializeSubsidiaryLedger(req.params.term);
       print('subsidiary-ledger', {
         fy: fy,
@@ -102,7 +102,7 @@ router.get('/trial_balance/:term', is_authenticated, async (req, res, next) => {
 	if (( req.session.user.accounting ) ||
       ( req.session.user.fiscalBrowsing )) {
     if  ( req.query.format === 'pdf' )  {
-      const company = await myCompany();
+      const company = await myCompany(req.currentTenantId);
       const {fy, assetPages, liabilitiesAndCapitalPages, incomeStatementPages} = await initializeTrialBalance(req.params.term);
       print('trial-balance', {
         fy: fy,
@@ -140,7 +140,7 @@ router.get('/financial_statement/:term', is_authenticated, async (req, res, next
 	if (( req.session.user.accounting ) ||
       ( req.session.user.fiscalBrowsing )) {
     if  ( req.query.format === 'pdf' )  {
-      const company = await myCompany();
+      const company = await myCompany(req.currentTenantId);
       const {fy, bsLines, plOut, sgaPage, asset, liabilities, networth, sgaSum} = await initializeFinancialStatement(req.params.term);
       print('financial-statement', {
         fy: fy,
@@ -177,7 +177,7 @@ router.get('/transaction/:form/:id', is_authenticated, async (req, res) => {
     res.sendFile(path.join(__dirname, '../views/form.html'));
   } else
   if  ( req.query.format === 'pdf' )  {
-    const company = await myCompany();
+    const company = await myCompany(req.currentTenantId);
     const transaction = await models.TransactionDocument.findOne({
       where: { id: req.params.id, tenantId: req.currentTenantId },
       include: [

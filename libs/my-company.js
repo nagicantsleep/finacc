@@ -1,7 +1,7 @@
 import axios from 'axios';
 import {isNode, isBrowser} from './utils.js';
 
-export default async () => {
+export default async (tenantId) => {
   let company;
   if  ( isBrowser ) {
     const result = await axios.get('/api/company?kind=1');
@@ -13,6 +13,7 @@ export default async () => {
     const models = await import('../models/index.js');
     const company = await  models.Company.findOne({
       where: {
+        tenantId,
         companyClassId: 1
       },
       include: [
