@@ -16,7 +16,7 @@ export default (sequelize, DataTypes) => {
   }
   Menu.init(
     {
-      tenantId: DataTypes.INTEGER,
+      tenantId: { type: DataTypes.INTEGER, allowNull: false },
       userId: DataTypes.INTEGER,
       title: DataTypes.STRING,
       displayOrder: DataTypes.INTEGER,

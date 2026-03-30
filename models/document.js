@@ -15,7 +15,7 @@ export default (sequelize, DataTypes) => {
     }
   }
   Document.init({
-    tenantId: DataTypes.INTEGER,
+    tenantId: { type: DataTypes.INTEGER, allowNull: false },
     issueDate: DataTypes.DATEONLY,
     title: DataTypes.STRING,
     descriptionType: DataTypes.STRING,

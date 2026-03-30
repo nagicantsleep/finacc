@@ -19,7 +19,7 @@ export default (sequelize, DataTypes) => {
     }
   };
   TransactionKind.init({
-    tenantId: DataTypes.INTEGER,
+    tenantId: { type: DataTypes.INTEGER, allowNull: false },
     label: DataTypes.STRING,
     displayOrder: DataTypes.INTEGER,
     hasDetails: DataTypes.BOOLEAN,

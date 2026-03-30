@@ -18,7 +18,7 @@ export default (sequelize, DataTypes) => {
     }
   };
   ItemClass.init({
-    tenantId: DataTypes.INTEGER,
+    tenantId: { type: DataTypes.INTEGER, allowNull: false },
     name: DataTypes.STRING,
     product: DataTypes.BOOLEAN,
     inventoryManagement: DataTypes.BOOLEAN

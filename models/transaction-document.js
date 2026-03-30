@@ -52,7 +52,7 @@ export default (sequelize, DataTypes) => {
     }
   }
   TransactionDocument.init({
-    tenantId: DataTypes.INTEGER,
+    tenantId: { type: DataTypes.INTEGER, allowNull: false },
     no: DataTypes.STRING,
     kindId: DataTypes.INTEGER,
     issueDate: DataTypes.DATEONLY,

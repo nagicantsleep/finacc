@@ -42,7 +42,7 @@ export default (sequelize, DataTypes) => {
     }
   }
   Item.init({
-    tenantId: DataTypes.INTEGER,
+    tenantId: { type: DataTypes.INTEGER, allowNull: false },
     itemClassId: DataTypes.INTEGER,
     key: DataTypes.STRING,
     globalCode: DataTypes.STRING,         //  JAN, ASIN, ISBN...
