@@ -6,8 +6,10 @@ import {switchTenant} from '../libs/tenant.js';
 
 export default {
   members: (req, res, next) => {
+    const tenantId = req.currentTenantId;
     models.Member.findAll({
       where: {
+        tenantId,
         userId: {
           [Op.ne]: null
         }
@@ -78,9 +80,13 @@ export default {
       });
     }
   },
-  get: (req, res, next) => {
+  get: async (req, res, next) => {
     let id = req.params.id;
     if  ( id )  {
+      const membership = await models.UserTenant.findOne({
+        where: { userId: id, tenantId: req.currentTenantId, status: 'active' }
+      });
+      if (!membership) return res.status(404).json({ code: -1 });
       models.User.findByPk(id).then((user) => {
         res.json({
           user: user
@@ -93,10 +99,14 @@ export default {
       });
     }
   },
-  update: (req, res, next) => {
+  update: async (req, res, next) => {
     let id = parseInt(req.params.id);
     if  (( req.session.user.id == id) ||
          ( req.session.user.administrable ))    {
+      const membership = await models.UserTenant.findOne({
+        where: { userId: id, tenantId: req.currentTenantId, status: 'active' }
+      });
+      if (!membership) return res.status(404).json({ code: -1 });
       models.User.findByPk(id).then((user) => {
         if  ( req.body.administrable !== undefined )    {
           if  ( user.id != 1 )    {
@@ -134,10 +144,14 @@ export default {
       res.json({ status: 'NG'});
     }
   },
-  delete: (req, res, next) => {
+  delete: async (req, res, next) => {
     let id = parseInt(req.params.id);
     if  (( id != 1 ) &&
          ( req.session.user.administrable ))   {
+      const membership = await models.UserTenant.findOne({
+        where: { userId: id, tenantId: req.currentTenantId, status: 'active' }
+      });
+      if (!membership) return res.status(404).json({ code: -1 });
       models.User.findByPk(id).then((user) => {
         user.destroy().then(() => {
           res.json({ code: 0});
