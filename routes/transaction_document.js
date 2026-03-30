@@ -19,8 +19,10 @@ const screen = (req, res, next) => {
 
 const form_out = async (req, res, form) => {
   let id = req.params.id;
+  const tenantId = req.currentTenantId;
   const company = await myCompany();
-  let transaction = await models.TransactionDocument.findByPk(id, {
+  let transaction = await models.TransactionDocument.findOne({
+    where: { id, tenantId },
     include: [{
         model: models.Company,
         as: 'company'

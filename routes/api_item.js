@@ -139,7 +139,8 @@ export default {
            ( item.documentId ) )	{
         await models.Document.destroy({
           where: {
-            id: item.documentId
+            id: item.documentId,
+            tenantId
           }
         })
         item.documentDocumentId = null;

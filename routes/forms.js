@@ -178,7 +178,8 @@ router.get('/transaction/:form/:id', is_authenticated, async (req, res) => {
   } else
   if  ( req.query.format === 'pdf' )  {
     const company = await myCompany();
-    const transaction = await models.TransactionDocument.findByPk(req.params.id, {
+    const transaction = await models.TransactionDocument.findOne({
+      where: { id: req.params.id, tenantId: req.currentTenantId },
       include: [
         {
           model: models.Task,

@@ -125,8 +125,10 @@ export default {
     }
   },
   getTemplates: async (req, res, next) => {
+    const tenantId = req.currentTenantId;
     models.Menu.findAll({
       where: {
+        tenantId,
         userId: null,
         displayOrder: {
           [Op.gt]: 0

@@ -108,7 +108,7 @@ export default {
         }
         if (req.query.print) {
           if (!transaction.voucherId) {
-            let companies = await models.Company.findAll({ where: { companyClassId: 1 } });
+            let companies = await models.Company.findAll({ where: { companyClassId: 1, tenantId } });
             const company = companies[0];
             const pdf = await print(req.query.print, { transaction, company });
             res.setHeader('Content-Type', 'application/pdf');
