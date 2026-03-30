@@ -1,8 +1,9 @@
 import models from '../models/index.js';
 const Op = models.Sequelize.Op;
 
-const createDetail = (line, slipId, lineNo) => {
+const createDetail = (line, slipId, lineNo, tenantId) => {
   return models.CrossSlipDetail.create({
+    tenantId,
     crossSlipId: slipId,
     lineNo: lineNo,
     debitAccount: line.debitAccount,
@@ -77,7 +78,7 @@ export const create = async (body, user, tenantId) => {
   let lines = [];
   for ( let i = 0; i < body.lines.length ; i ++ ) {
     let line = body.lines[i];
-    await createDetail(line, slip.id, i);
+    await createDetail(line, slip.id, i, tenantId);
     lines.push(line);
   }
   return  ({
@@ -89,7 +90,7 @@ export const create = async (body, user, tenantId) => {
   })
 }
 
-export const update = async (slip, body, user) => {
+export const update = async (slip, body, user, tenantId) => {
   slip.lineCount = body.lines.length;
   slip.day = body.day;
   slip.updatedBy = user.id;
@@ -100,11 +101,12 @@ export const update = async (slip, body, user) => {
   slip.save();
   await models.CrossSlipDetail.destroy({
     where: {
-      crossSlipId: slip.id
+      crossSlipId: slip.id,
+      tenantId
     }
   });
   for ( let i = 0; i < body.lines.length ; i ++ ) {
     let line = body.lines[i];
-    await createDetail(line, slip.id, i);
+    await createDetail(line, slip.id, i, tenantId);
   }
 }

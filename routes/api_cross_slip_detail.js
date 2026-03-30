@@ -24,13 +24,13 @@ export default {
       }
     }).then((fy) => {
   		if	( req.params.sub )	{
-      	CrossSlipDetails.all(fy, req.params.acc, paseInt(req.params.sum)).then((result) => {
+      	CrossSlipDetails.all(fy, req.params.acc, paseInt(req.params.sum), tenantId).then((result) => {
         	res.json({
           	details: result
         	})
       	});
     	} else {
-      	CrossSlipDetails.all(fy. req.params.acc).then((result) => {
+      	CrossSlipDetails.all(fy, req.params.acc, undefined, tenantId).then((result) => {
           res.json({
             details: result
           })

@@ -157,7 +157,7 @@ export default {
       if	( !slip.approvedAt )	{
         if	(( req.session.user.accounting ) ||
            ( req.session.user.id == slip.createdBy )) {
-            await updateCrossSlip(slip, body, req.session.user);
+            await updateCrossSlip(slip, body, req.session.user, tenantId);
             res.json({
               code: 0
             });
