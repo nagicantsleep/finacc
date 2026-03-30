@@ -15,7 +15,9 @@ export default {
       include: [{
         model: models.SubAccount,
         order: ['subAccountId', 'ASC'],
-        as: 'subAccounts'
+        as: 'subAccounts',
+        where: { tenantId },
+        required: false
       }],
     });
     res.json(account);

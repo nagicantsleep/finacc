@@ -70,6 +70,8 @@ const	getDetails = async (fy, account, sub_account, tenantId) => {
         {
           model: models.CrossSlip,
           as: 'crossSlip',
+          where: { tenantId },
+          required: false
         }
       ],
       order: [

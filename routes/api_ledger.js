@@ -48,33 +48,47 @@ const	get_details = async (fy, account, sub_account, tenantId) => {
         {
           model: models.CrossSlip,
           as: 'crossSlip',
+          where: { tenantId },
+          required: false
         },
         {
           model: models.Voucher,
           required: false,
           as: 'debitVoucher',
+          where: { tenantId },
           include: [{
             model: models.VoucherFile,
-            as: 'files'
+            as: 'files',
+            where: { tenantId },
+            required: false
           }]
         },
         {
           model: models.Voucher,
           required: false,
           as: 'creditVoucher',
+          where: { tenantId },
           include: [{
             model: models.VoucherFile,
-            as: 'files'
+            as: 'files',
+            where: { tenantId },
+            required: false
           }]
         }, {
           model: models.TaxRule,
-          as: 'debitTaxRule'
+          as: 'debitTaxRule',
+          where: { tenantId },
+          required: false
         }, {
           model: models.TaxRule,
-          as: 'creditTaxRule'
+          as: 'creditTaxRule',
+          where: { tenantId },
+          required: false
         }, {
           model: models.Project,
-          as: 'projectData'
+          as: 'projectData',
+          where: { tenantId },
+          required: false
         }
       ],
       order: [
