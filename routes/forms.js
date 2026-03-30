@@ -37,7 +37,7 @@ router.get('/explanatory_journal/:term', is_authenticated, async (req, res, next
     if	( req.query.format === 'html' )	{
       res.sendFile(path.join(__dirname, '../views/form.html'));
     } else {
-      explanatory_journal(parseInt(req.params.term)).then((buff) => {
+      explanatory_journal(parseInt(req.params.term), req.currentTenantId).then((buff) => {
         res.send(buff);
       });
     }

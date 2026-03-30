@@ -4,10 +4,12 @@ const Op = models.Sequelize.Op;
 import Account from '../libs/accounts.js';
 
 class ExplanatoryJournal {
-    constructor(term) {
+    constructor(term, tenantId) {
+        this.tenantId = tenantId;
         this.book = new ExcelJS.Workbook();
         this.fy = models.FiscalYear.findOne({
             where: {
+                tenantId,
                 term: term
             }
         });
@@ -49,9 +51,11 @@ class ExplanatoryJournal {
         };
     }
     async make_journal(sheet, date) {
+        const tenantId = this.tenantId;
         let slips = await models.CrossSlip.findAll({
             where: {
                 [Op.and]: {
+                    tenantId,
                     year: date.year,
                     month: date.month
                 }
@@ -74,6 +78,7 @@ class ExplanatoryJournal {
             let slip = slips[i];
             let details = await models.CrossSlipDetail.findAll({
                 where: {
+                    tenantId,
                     crossSlipId: slip.id
                 },
                 order: [
@@ -387,8 +392,8 @@ sheet.run().then (() => {
 });
 */
 
-export default async (term) => {
-    let sheet = new ExplanatoryJournal(term);
+export default async (term, tenantId) => {
+    let sheet = new ExplanatoryJournal(term, tenantId);
     await sheet.run();
     return  sheet.book.xlsx.writeBuffer();
 }
