@@ -11,15 +11,21 @@ export default {
     let include = [
       {
         model: models.Task,
-        as: 'task'
+        as: 'task',
+        where: { tenantId },
+        required: false
       },
       {
         model: models.TransactionDetail,
         as: 'lines',
+        where: { tenantId },
+        required: false,
         include: [
           {
             model: models.TaxRule,
-            as: 'taxRule'
+            as: 'taxRule',
+            where: { tenantId },
+            required: false
           }
         ]
       },
@@ -31,21 +37,29 @@ export default {
           {
             model: models.Member,
             as: 'member',
+            where: { tenantId },
+            required: false,
             attributes: ['legalName', 'tradingName']
           }
         ]
       },
       {
         model: models.Document,
-        as: 'document'
+        as: 'document',
+        where: { tenantId },
+        required: false
       },
       {
         model: models.TransactionKind,
         as: 'kind',
+        where: { tenantId },
+        required: false,
         include: [
           {
             model: models.VoucherClass,
-            as: 'book'
+            as: 'book',
+            where: { tenantId },
+            required: false
           }
         ]
       }
