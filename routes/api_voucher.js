@@ -258,19 +258,25 @@ export default {
       res.json(files);
     }
   },
-  bind: (req, res, next) => {
+  bind: async (req, res, next) => {
     let body = req.body;
-    models.VoucherFile.findOne({
-      where: { id: body.id, tenantId: req.currentTenantId }
-    }).then((file) => {
-      file.voucherId = body.voucherId;
-      file.save().then(() => {
-        res.json({ code: 0 });
-      }).catch((e) => {
-        console.log('error', e);
-        res.json({ code: -1 });
+    const tenantId = req.currentTenantId;
+    try {
+      const file = await models.VoucherFile.findOne({
+        where: { id: body.id, tenantId }
       });
-    });
+      if (!file) return res.status(404).json({ code: -1 });
+      const voucher = await models.Voucher.findOne({
+        where: { id: body.voucherId, tenantId }
+      });
+      if (!voucher) return res.status(403).json({ code: -3 });
+      file.voucherId = body.voucherId;
+      await file.save();
+      res.json({ code: 0 });
+    } catch (e) {
+      console.log('error', e);
+      res.json({ code: -1 });
+    }
   },
   deleteFile: (req, res, next) => {
     let id = parseInt(req.body.id);

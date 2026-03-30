@@ -182,27 +182,26 @@ export default {
       res.redirect('/home');
     }
   },
-  bind: (req, res, next) => {
+  bind: async (req, res, next) => {
     res.set('Access-Control-Allow-Origin', '*');
     let body = req.body;
-    models.DocumentFile.findOne({
-      where: {
-        id: body.id,
-        tenantId: req.currentTenantId
-      }
-    }).then((file) => {
-      file.documentId = body.documentId;
-      file.save().then(() => {
-        res.json({
-          code: 0
-        });
-      }).catch((e) => {
-        console.log('error', e);
-        res.json({
-          code: -1
-        });
+    const tenantId = req.currentTenantId;
+    try {
+      const file = await models.DocumentFile.findOne({
+        where: { id: body.id, tenantId }
       });
-    });
+      if (!file) return res.status(404).json({ code: -1 });
+      const document = await models.Document.findOne({
+        where: { id: body.documentId, tenantId }
+      });
+      if (!document) return res.status(403).json({ code: -3 });
+      file.documentId = body.documentId;
+      await file.save();
+      res.json({ code: 0 });
+    } catch (e) {
+      console.log('error', e);
+      res.json({ code: -1 });
+    }
   },
   deleteFile: (req, res, next) => {
     res.set('Access-Control-Allow-Origin', '*');
