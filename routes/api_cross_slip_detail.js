@@ -8,7 +8,8 @@ export default {
 
     models.CrossSlipDetail.findOne({
       where: {
-        id: id
+        id: id,
+        tenantId: req.currentTenantId
       }
     }).then((detail) => {
       res.json(detail);
@@ -42,7 +43,8 @@ export default {
     console.log('update', detail);
     models.CrossSlipDetail.findOne({
       where: {
-        id: detail.id
+        id: detail.id,
+        tenantId: req.currentTenantId
       }
     }).then((result) => {
       if ( result ) {
