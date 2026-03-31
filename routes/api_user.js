@@ -84,16 +84,12 @@ export default {
     let id = req.params.id;
     if  ( id )  {
       const membership = await models.UserTenant.findOne({
-        where: { userId: id, tenantId: req.currentTenantId, status: 'active' }
+        where: { userId: id, tenantId: req.currentTenantId, status: 'active' },
+        include: [{ model: models.User, as: 'user', attributes: ['id', 'name', 'deauthorizedAt'] }]
       });
       if (!membership) return res.status(404).json({ code: -1 });
-      models.User.findByPk(id).then((user) => {
-        res.json({
-          user: user
-        });
-      });
+      res.json({ user: membership.user, membership });
     } else {
-      //console.log(req.session.user);
       res.json({
         user: req.session.user
       });
@@ -107,39 +103,21 @@ export default {
         where: { userId: id, tenantId: req.currentTenantId, status: 'active' }
       });
       if (!membership) return res.status(404).json({ code: -1 });
-      models.User.findByPk(id).then((user) => {
-        if  ( req.body.administrable !== undefined )    {
-          if  ( user.id != 1 )    {
-            user.administrable = req.body.administrable;
-          }
+      const PERMISSION_FIELDS = [
+        'administrable', 'accounting', 'fiscalBrowsing', 'approvable',
+        'inventoryManagement', 'companyManagement', 'personnelManagement',
+        'deauthorizedAt', 'role'
+      ];
+      for (const field of PERMISSION_FIELDS) {
+        if (req.body[field] !== undefined) {
+          membership[field] = req.body[field];
         }
-        if  ( req.body.accounting !== undefined )   {
-          user.accounting = req.body.accounting;
-        }
-        if  ( req.body.fiscalBrowsing !== undefined )   {
-          user.fiscalBrowsing = req.body.fiscalBrowsing;
-        }
-        if  ( req.body.approvable !== undefined )   {
-          user.approvable = req.body.approvable;
-        }
-        if  ( req.body.inventoryManagement !== undefined )    {
-          user.inventoryManagement = req.body.inventoryManagement;
-        }
-        if  ( req.body.companyManagement !== undefined )    {
-          user.companyManagement = req.body.companyManagement;
-        }
-        if  ( req.body.personnelManagement !== undefined )    {
-          user.personnelManagement = req.body.personnelManagement;
-        }
-        if  ( req.body.deauthorizedAt !== undefined )    {
-          user.deauthorizedAt = req.body.deauthorizedAt;
-        }
-        user.save().then(()=> {
-          res.json({ code: 0 });
-        }).catch (() => {
-          res.json({ code: -1 });
-        });
-      })
+      }
+      membership.save().then(() => {
+        res.json({ code: 0 });
+      }).catch(() => {
+        res.json({ code: -1 });
+      });
     } else {
       res.json({ status: 'NG'});
     }
@@ -152,13 +130,12 @@ export default {
         where: { userId: id, tenantId: req.currentTenantId, status: 'active' }
       });
       if (!membership) return res.status(404).json({ code: -1 });
-      models.User.findByPk(id).then((user) => {
-        user.destroy().then(() => {
-          res.json({ code: 0});
-        }).catch (()=> {
-          res.json({ code: -1});
-        })
-      })
+      membership.status = 'inactive';
+      membership.save().then(() => {
+        res.json({ code: 0 });
+      }).catch(() => {
+        res.json({ code: -1 });
+      });
     } else {
       res.json({ code: -2});
     }
