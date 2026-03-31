@@ -102,6 +102,20 @@ export default [
 勘定科目を追加変更ができます。<br/>
 なお「削除」はできません。`
   }, {
+    name: 'home',
+    title: '会社設定',
+    match: /^\/home/,
+    authority: (user) => {
+      return  (user.administrable);
+    },
+    href: (status) => {
+      return	('/home');
+    },
+    icon: { name: 'bi:gear-fill' },
+    description: `
+テナント情報とシステム設定を管理します。<br/>
+自社情報、種別マスタ、税区分、システム設定などが含まれます。`
+  }, {
     name: 'company',
     title: '取引先管理',
     match: /^\/company/,
