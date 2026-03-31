@@ -17,7 +17,6 @@
             <p class="text-{msg_type} text-center">{message}</p>
           {/if}
           
-          <!-- Section 1: Login Credentials (Required) -->
           <fieldset class="mb-3">
             <legend class="fieldset-legend">ログイン情報 <span class="text-danger">*</span></legend>
             
@@ -75,7 +74,6 @@
             </div>
           </fieldset>
           
-          <!-- Section 2: Basic Identity (Required) -->
           <fieldset class="mb-3">
             <legend class="fieldset-legend">基本情報 <span class="text-danger">*</span></legend>
             
@@ -97,6 +95,19 @@
             </div>
             
             <div class="mb-3">
+              <label for="legalRuby">氏名（フリガナ）</label>
+              <input 
+                type="text" 
+                id="legalRuby"
+                bind:value={legalRuby}
+                class="form-control"
+                placeholder="ヤマダ タロウ"
+                autocomplete="off"
+                disabled={isSubmitting}
+              >
+            </div>
+            
+            <div class="mb-3">
               <label for="email">メールアドレス <span class="text-danger">*</span></label>
               <input 
                 type="email" 
@@ -112,120 +123,87 @@
                 <div class="invalid-feedback">{errors.email}</div>
               {/if}
             </div>
-          </fieldset>
-          
-          <!-- Section 3: Optional Details (Collapsible) -->
-          <fieldset class="mb-3">
-            <legend 
-              class="fieldset-legend collapsible-legend"
-              on:click={toggleOptionalSection}
-              on:keydown={(e) => e.key === 'Enter' && toggleOptionalSection()}
-              tabindex="0"
-              role="button"
-              aria-expanded={showOptional}
-              aria-controls="optional-fields"
-            >
-              追加情報（任意）
-              <i class="bi {showOptional ? 'bi-chevron-up' : 'bi-chevron-down'} ms-2"></i>
-            </legend>
             
-            {#if showOptional}
-              <div id="optional-fields" class="optional-fields">
-                <div class="mb-3">
-                  <label for="legalRuby">氏名（フリガナ）</label>
-                  <input 
-                    type="text" 
-                    id="legalRuby"
-                    bind:value={legalRuby}
-                    class="form-control"
-                    placeholder="ヤマダ タロウ"
-                    autocomplete="off"
-                    disabled={isSubmitting}
-                  >
-                </div>
-                
-                <div class="row mb-3">
-                  <div class="col-6">
-                    <label for="birthDate">生年月日</label>
-                    <input 
-                      type="date" 
-                      id="birthDate"
-                      bind:value={birthDate}
-                      class="form-control"
-                      autocomplete="bday"
-                      disabled={isSubmitting}
-                    >
-                  </div>
-                  <div class="col-6">
-                    <label for="legalSex">性別</label>
-                    <select 
-                      id="legalSex"
-                      bind:value={legalSex}
-                      class="form-select"
-                      autocomplete="sex"
-                      disabled={isSubmitting}
-                    >
-                      <option value="">選択してください</option>
-                      <option value="1">男性</option>
-                      <option value="2">女性</option>
-                      <option value="9">その他</option>
-                    </select>
-                  </div>
-                </div>
-                
-                <div class="mb-3">
-                  <label for="telNo">電話番号</label>
-                  <input 
-                    type="tel" 
-                    id="telNo"
-                    bind:value={telNo}
-                    class="form-control"
-                    placeholder="090-1234-5678"
-                    autocomplete="tel"
-                    disabled={isSubmitting}
-                  >
-                </div>
-                
-                <div class="mb-3">
-                  <label for="zip">郵便番号</label>
-                  <input 
-                    type="text" 
-                    id="zip"
-                    bind:value={zip}
-                    class="form-control"
-                    placeholder="123-4567"
-                    autocomplete="postal-code"
-                    disabled={isSubmitting}
-                  >
-                </div>
-                
-                <div class="mb-3">
-                  <label for="address1">住所1</label>
-                  <input 
-                    type="text" 
-                    id="address1"
-                    bind:value={address1}
-                    class="form-control"
-                    placeholder="東京都渋谷区..."
-                    autocomplete="address-line1"
-                    disabled={isSubmitting}
-                  >
-                </div>
-                
-                <div class="mb-3">
-                  <label for="address2">住所2（建物名等）</label>
-                  <input 
-                    type="text" 
-                    id="address2"
-                    bind:value={address2}
-                    class="form-control"
-                    placeholder="○○ビル 101号室"
-                    autocomplete="address-line2"
-                    disabled={isSubmitting}
-                  >
-                </div>
+            <div class="row mb-3">
+              <div class="col-6">
+                <label for="birthDate">生年月日</label>
+                <input 
+                  type="date" 
+                  id="birthDate"
+                  bind:value={birthDate}
+                  class="form-control"
+                  autocomplete="bday"
+                  disabled={isSubmitting}
+                >
               </div>
-            {/if}
+              <div class="col-6">
+                <label for="legalSex">性別</label>
+                <select 
+                  id="legalSex"
+                  bind:value={legalSex}
+                  class="form-select"
+                  autocomplete="sex"
+                  disabled={isSubmitting}
+                >
+                  <option value="">選択してください</option>
+                  <option value="1">男性</option>
+                  <option value="2">女性</option>
+                  <option value="9">その他</option>
+                </select>
+              </div>
+            </div>
+            
+            <div class="mb-3">
+              <label for="telNo">電話番号</label>
+              <input 
+                type="tel" 
+                id="telNo"
+                bind:value={telNo}
+                class="form-control"
+                placeholder="090-1234-5678"
+                autocomplete="tel"
+                disabled={isSubmitting}
+              >
+            </div>
+            
+            <div class="mb-3">
+              <label for="zip">郵便番号</label>
+              <input 
+                type="text" 
+                id="zip"
+                bind:value={zip}
+                class="form-control"
+                placeholder="123-4567"
+                autocomplete="postal-code"
+                disabled={isSubmitting}
+              >
+            </div>
+            
+            <div class="mb-3">
+              <label for="address1">住所1</label>
+              <input 
+                type="text" 
+                id="address1"
+                bind:value={address1}
+                class="form-control"
+                placeholder="東京都渋谷区..."
+                autocomplete="address-line1"
+                disabled={isSubmitting}
+              >
+            </div>
+            
+            <div class="mb-3">
+              <label for="address2">住所2（建物名等）</label>
+              <input 
+                type="text" 
+                id="address2"
+                bind:value={address2}
+                class="form-control"
+                placeholder="○○ビル 101号室"
+                autocomplete="address-line2"
+                disabled={isSubmitting}
+              >
+            </div>
           </fieldset>
           
           <div class="row d-flex justify-content-center">
@@ -255,17 +233,17 @@ import axios from 'axios';
 import {onMount} from 'svelte';
 import { link } from '../../javascripts/router.js';
 
-// Required fields - Section 1: Login Credentials
+// Login credentials
 let user_name = '';
 let password = '';
 let confirmPassword = '';
 
-// Required fields - Section 2: Basic Identity
+// Identity
 let legalName = '';
+let legalRuby = '';
 let email = '';
 
-// Optional fields - Section 3
-let legalRuby = '';
+// Optional
 let birthDate = '';
 let legalSex = '';
 let telNo = '';
@@ -278,11 +256,9 @@ let message = '';
 let msg_type = '';
 let successMessage = '';
 let isSubmitting = false;
-let showOptional = false;
 let errors = {};
 
 onMount(() => {
-  // Reset all fields on mount
   resetForm();
 });
 
@@ -291,8 +267,8 @@ function resetForm() {
   password = '';
   confirmPassword = '';
   legalName = '';
-  email = '';
   legalRuby = '';
+  email = '';
   birthDate = '';
   legalSex = '';
   telNo = '';
@@ -304,15 +280,10 @@ function resetForm() {
   errors = {};
 }
 
-function toggleOptionalSection() {
-  showOptional = !showOptional;
-}
-
 function validateForm() {
   errors = {};
   let isValid = true;
   
-  // Username validation
   if (!user_name || user_name.trim().length === 0) {
     errors.user_name = 'ユーザー名を入力してください。';
     isValid = false;
@@ -324,7 +295,6 @@ function validateForm() {
     isValid = false;
   }
   
-  // Password validation
   if (!password || password.length === 0) {
     errors.password = 'パスワードを入力してください。';
     isValid = false;
@@ -333,19 +303,16 @@ function validateForm() {
     isValid = false;
   }
   
-  // Confirm password validation
   if (password !== confirmPassword) {
     errors.confirmPassword = 'パスワードが一致していません。';
     isValid = false;
   }
   
-  // Legal name validation
   if (!legalName || legalName.trim().length === 0) {
     errors.legalName = '氏名を入力してください。';
     isValid = false;
   }
   
-  // Email validation
   if (!email || email.trim().length === 0) {
     errors.email = 'メールアドレスを入力してください。';
     isValid = false;
@@ -362,11 +329,9 @@ const change = () => {
 }
 
 const SignUp = async () => {
-  // Clear previous messages
   message = '';
   successMessage = '';
   
-  // Validate form
   if (!validateForm()) {
     msg_type = 'danger';
     message = '入力内容を確認してください。';
@@ -383,7 +348,6 @@ const SignUp = async () => {
       email: email.trim()
     };
     
-    // Add optional fields only if they have values
     if (legalRuby && legalRuby.trim()) {
       payload.legalRuby = legalRuby.trim();
     }
@@ -409,10 +373,7 @@ const SignUp = async () => {
     const response = await axios.post('/api/user/signup', payload);
     
     if (response.data.result === 'OK') {
-      // Show success message
       successMessage = '登録が完了しました。ログインページへ移動します...';
-      
-      // Wait 2 seconds then redirect
       setTimeout(() => {
         link('/login');
       }, 2000);
@@ -456,38 +417,6 @@ const SignUp = async () => {
     border-bottom: 1px solid #dee2e6;
     padding-bottom: 0.5rem;
     margin-bottom: 1rem;
-  }
-  
-  .collapsible-legend {
-    cursor: pointer;
-    user-select: none;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-  
-  .collapsible-legend:hover {
-    color: #0d6efd;
-  }
-  
-  .collapsible-legend:focus {
-    outline: 2px solid #0d6efd;
-    outline-offset: 2px;
-  }
-  
-  .optional-fields {
-    animation: slideDown 0.2s ease-out;
-  }
-  
-  @keyframes slideDown {
-    from {
-      opacity: 0;
-      transform: translateY(-10px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
   }
   
   fieldset {
