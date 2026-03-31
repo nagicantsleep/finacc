@@ -1,14 +1,4 @@
-{#if ( status.state === 'list' )}
-<MemberList
-  bind:members={members}
-  classes={classes}
-  bind:status={status}
-  on:open={openEntry}
-  ></MemberList>
-{:else if ( status.state === 'home')}
-<MemberHome
-  bind:status={status}></MemberHome>
-{:else if ( (status.state === 'entry' && member && member.id) || (status.state === 'new' && member) )}
+{#if ( (status.state === 'entry' && member && member.id) || (status.state === 'new' && member) )}
   <MemberEntry
     classes={classes}
     users={users}
@@ -16,13 +6,19 @@
     bind:member={member}
     on:close={closeEntry}>
   </MemberEntry>
+{:else}
+<MemberList
+  bind:members={members}
+  classes={classes}
+  bind:status={status}
+  on:open={openEntry}
+  ></MemberList>
 {/if}
 <script>
 import axios from 'axios';
 import {onMount, afterUpdate} from 'svelte';
 import MemberEntry from './member-entry.svelte';
 import MemberList from './member-list.svelte';
-import MemberHome from './member-home.svelte';
 import {currentMember, getStore} from '../../javascripts/current-record.js';
 import { currentPage, link } from '../../javascripts/router.js';
 
@@ -55,9 +51,6 @@ const checkPage = (page) => {
 
   status.state = action;
   switch  (action)  {
-  case  'home':
-    member = null;
-    break;
   case  'entry':
     const entryId = args[3];
     member = null;

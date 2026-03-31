@@ -252,21 +252,6 @@ export default [
     icon: { name: 'bi:person-square' },
     description: `
 人事情報を入力します。<br/>
-現在は担当者名の情報源として使っているだけですが、将来的には人事給与システムが付加されます。`,
-    submenu: [
-      {
-        title: '役職員管理',
-        href: (status) => {
-          return	(`/member/`);
-        },
-        match: /^\/member\/($|entry|new)/,
-      }, {
-        title: '設定',
-        match: /^\/member\/home/,
-        href: (status) => {
-          return	(`/member/home`);
-        }
-      }
-    ]
+現在は担当者名の情報源として使っているだけですが、将来的には人事給与システムが付加されます。`
   }
 ];
