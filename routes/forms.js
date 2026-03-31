@@ -1,6 +1,5 @@
 import express from 'express';
 const router = express.Router();
-import {is_authenticated} from '../libs/user.js';
 import explanatory_journal from '../forms/explanatory_journal.js';
 import general_ledger from '../forms/general_ledger.js';
 import subsidiary_ledger from '../forms/subsidiary_ledger.js';
@@ -19,7 +18,7 @@ import myCompany from '../libs/my-company.js';
 
 const __dirname = import.meta.dirname;
 
-router.get('/explanatory_journal/:term', is_authenticated, async (req, res, next) => {
+router.get('/explanatory_journal/:term', async (req, res, next) => {
 	if (( req.session.user.accounting ) ||
     	( req.session.user.fiscalBrowsing )) {
     if  ( req.query.format === 'pdf' )  {
@@ -45,7 +44,7 @@ router.get('/explanatory_journal/:term', is_authenticated, async (req, res, next
 		res.redirect('/home');
 	}
 });
-router.get('/general_ledger/:term', is_authenticated, async (req, res, next) => {
+router.get('/general_ledger/:term', async (req, res, next) => {
 	if (( req.session.user.accounting ) ||
         ( req.session.user.fiscalBrowsing )) {
     if  ( req.query.format === 'pdf' )  {
@@ -72,7 +71,7 @@ router.get('/general_ledger/:term', is_authenticated, async (req, res, next) => 
 		res.redirect('/home');
 	}
 });
-router.get('/subsidiary_ledger/:term', is_authenticated, async (req, res, next) => {
+router.get('/subsidiary_ledger/:term', async (req, res, next) => {
 	if (( req.session.user.accounting ) ||
         ( req.session.user.fiscalBrowsing )) {
     if  ( req.query.format === 'pdf' )  {
@@ -98,7 +97,7 @@ router.get('/subsidiary_ledger/:term', is_authenticated, async (req, res, next) 
 		res.redirect('/home');
 	}
 });
-router.get('/trial_balance/:term', is_authenticated, async (req, res, next) => {
+router.get('/trial_balance/:term', async (req, res, next) => {
 	if (( req.session.user.accounting ) ||
       ( req.session.user.fiscalBrowsing )) {
     if  ( req.query.format === 'pdf' )  {
@@ -126,7 +125,7 @@ router.get('/trial_balance/:term', is_authenticated, async (req, res, next) => {
 		res.redirect('/home');
 	}
 });
-router.get('/trial_balance/:term/:month', is_authenticated, (req, res, next) => {
+router.get('/trial_balance/:term/:month', (req, res, next) => {
 	if (( req.session.user.accounting ) ||
       ( req.session.user.fiscalBrowsing )) {
     trial_balance(parseInt(req.params.term), req.params.month).then((buff) => {
@@ -136,7 +135,7 @@ router.get('/trial_balance/:term/:month', is_authenticated, (req, res, next) => 
 		res.redirect('/home');
 	}
 });
-router.get('/financial_statement/:term', is_authenticated, async (req, res, next) => {
+router.get('/financial_statement/:term', async (req, res, next) => {
 	if (( req.session.user.accounting ) ||
       ( req.session.user.fiscalBrowsing )) {
     if  ( req.query.format === 'pdf' )  {
@@ -169,7 +168,7 @@ router.get('/financial_statement/:term', is_authenticated, async (req, res, next
 	}
 });
 
-router.get('/transaction/:form/:id', is_authenticated, async (req, res) => {
+router.get('/transaction/:form/:id', async (req, res) => {
   console.log(req.query);
   if  (( !req.query ) ||
        ( !req.query.format ) ||
