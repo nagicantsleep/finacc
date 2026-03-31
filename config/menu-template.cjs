@@ -345,25 +345,10 @@ module.exports = [
         "minimize": false,
         "component": "MenuLink",
         "options": {
-          "title": "ユーザ管理",
-          "name": "users",
-          "href": "/users/",
-          "description": "\n本システムの利用者アカウントの管理です。<br/>\n操作権限の設定も可能です。"
-        }
-      },
-      {
-        "id": "2",
-        "x": 0,
-        "y": 19,
-        "w": 3,
-        "h": 18,
-        "minimize": false,
-        "component": "MenuLink",
-        "options": {
           "title": "役職員管理",
           "name": "member",
           "href": "/member/",
-          "description": "\n人事情報を入力します。<br/>\n現在は担当者名の情報源として使っているだけですが、将来的には人事給与システムが付加されます。"
+          "description": "\n役職員情報と利用者アカウントの権限を管理します。"
         }
       }
     ]

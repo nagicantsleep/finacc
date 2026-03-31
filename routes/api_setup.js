@@ -1,22 +1,19 @@
 import models from '../models/index.js';
 import parseAccounts from '../libs/parse_accounts.js';
 import {getCompanyInfo, putCompanyInfo} from '../libs/utils.js';
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+const menuTemplates = require('../config/menu-template.cjs');
 
 const createInitialMenuTemplates = async (tenantId, t) => {
-  const accountingBody = JSON.stringify([
-    { id: 'w1', x: 0, y: 0, w: 3, h: 23, minimize: false, component: 'MenuLink', options: { name: 'journal',       title: '仕訳日記帳', description: '伝票入力等の基本画面です。' } },
-    { id: 'w2', x: 3, y: 0, w: 3, h: 23, minimize: false, component: 'MenuLink', options: { name: 'ledger',        title: '元帳',       description: '総勘定元帳と補助元帳が複合した画面です。' } },
-    { id: 'w3', x: 6, y: 0, w: 3, h: 23, minimize: false, component: 'MenuLink', options: { name: 'trial-balance', title: '残高試算表', description: '残高試算表が確認できます。' } },
-    { id: 'w4', x: 9, y: 0, w: 3, h: 23, minimize: false, component: 'MenuLink', options: { name: 'changes',       title: '推移表',     description: '科目毎の月次集計の推移をグラフ表示します。' } },
-  ]);
-  const homeBody = JSON.stringify([
-    { id: 'w5', x: 0, y: 0, w: 6, h: 29, minimize: false, component: 'SelectTerm', options: { title: '期の選択' } },
-    { id: 'w6', x: 6, y: 0, w: 4, h: 29, minimize: false, component: 'Password',   options: { title: 'パスワード変更' } },
-  ]);
-  await models.Menu.bulkCreate([
-    { tenantId, userId: null, title: '会計メニュー', displayOrder: 1, body: accountingBody },
-    { tenantId, userId: null, title: 'ホームメニュー', displayOrder: 2, body: homeBody },
-  ], { transaction: t });
+  const records = menuTemplates.map((template, i) => ({
+    tenantId,
+    userId: null,
+    title: template.title,
+    displayOrder: i + 1,
+    body: JSON.stringify(template.menu)
+  }));
+  await models.Menu.bulkCreate(records, { transaction: t });
 };
 
 const createInitialAccount = async (tenantId, term, companyClass, t) => {
