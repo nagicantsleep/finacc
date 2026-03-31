@@ -17,6 +17,9 @@
           <th scope="col" style="width: 150px;">
             名前
           </th>
+          <th scope="col" style="width: 80px;">
+            権限
+          </th>
           <th scope="col" style="width: 100px;">
             入社年度
           </th>
@@ -36,6 +39,7 @@
               {/each}
             </select>
           </th>
+          <th></th>
           <th></th>
           <th></th>
           <th></th>
