@@ -55,10 +55,10 @@
         {/if}
         <p class="handler">
           担当: &nbsp;
-          {#if transaction.handleUser.member.tradingName}
-          {transaction.handleUser.member.tradingName}
+          {#if transaction.handleUser.memberships?.[0]?.tradingName}
+          {transaction.handleUser.memberships[0].tradingName}
           {:else}
-          {transaction.handleUser.member.officialName}
+          {transaction.handleUser.legalName}
           {/if}
         </p>
         <p class="account">

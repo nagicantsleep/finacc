@@ -3,19 +3,17 @@ import {Model} from 'sequelize';
 export default (sequelize, DataTypes) => {
   class Tenant extends Model {
     static associate(models) {
-      this.hasMany(models.UserTenant, {
+      // Has many tenant members
+      this.hasMany(models.TenantMember, {
         foreignKey: 'tenantId',
-        as: 'memberships'
+        as: 'members'
       });
+      // Belongs to many users through TenantMember
       this.belongsToMany(models.User, {
-        through: models.UserTenant,
+        through: models.TenantMember,
         foreignKey: 'tenantId',
         otherKey: 'userId',
         as: 'users'
-      });
-      this.hasMany(models.Member, {
-        foreignKey: 'tenantId',
-        as: 'members'
       });
     }
   }

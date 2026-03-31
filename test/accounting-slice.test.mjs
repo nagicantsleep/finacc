@@ -57,8 +57,8 @@ describe('Accounting slice — multi-tenant isolation (Issue #9)', function () {
     // Resolve tenant IDs from DB for direct checks
     const userC = await models.User.findOne({ where: { name: USER_C.name } });
     const userD = await models.User.findOne({ where: { name: USER_D.name } });
-    const utC = await models.UserTenant.findOne({ where: { userId: userC.id, isDefault: true } });
-    const utD = await models.UserTenant.findOne({ where: { userId: userD.id, isDefault: true } });
+    const utC = await models.TenantMember.findOne({ where: { userId: userC.id, isDefault: true } });
+    const utD = await models.TenantMember.findOne({ where: { userId: userD.id, isDefault: true } });
     tenantCId = utC.tenantId;
     tenantDId = utD.tenantId;
   });

@@ -211,12 +211,12 @@ router.get('/transaction/:form/:id', async (req, res) => {
         {
           model: models.User,
           as: 'handleUser',
-          attributes: ['name'],
+          attributes: ['name', 'legalName'],
           include: [
             {
-              model: models.Member,
-              as: 'member',
-              attributes: ['legalName', 'tradingName']
+              model: models.TenantMember,
+              as: 'memberships',
+              attributes: ['tradingName']
             }
           ]
         },

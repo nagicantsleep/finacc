@@ -278,7 +278,7 @@
               </a>
             </td>
             <td>
-              { line.handleUser ? line.handleUser.member.tradingName: '__'}
+              { line.handleUser ? (line.handleUser.memberships?.[0]?.tradingName || line.handleUser.legalName || ''): '__'}
             </td>
             <td class="number">
               {numeric(line.amount).toLocaleString()}

@@ -1,21 +1,21 @@
 import models from '../models/index.js';
 const Op = models.Sequelize.Op;
 import {passwd, passport, is_authenticated} from '../libs/user.js';
-import {bootstrapUserTenant} from '../libs/bootstrap.js';
+import {bootstrapTenantMember} from '../libs/bootstrap.js';
 import {switchTenant} from '../libs/tenant.js';
 
 export default {
   members: (req, res, next) => {
     const tenantId = req.currentTenantId;
-    models.Member.findAll({
+    models.TenantMember.findAll({
       where: {
         tenantId,
         userId: {
           [Op.ne]: null
         }
       },
-      oeder: [
-        ["officialName", "ASC"]
+      order: [
+        ["tradingName", "ASC"]
       ],
       include: [
         {
@@ -29,7 +29,7 @@ export default {
         if  ( member.userId ) {
           users.push({
             id: member.userId,
-            name: member.tradingName ? member.tradingName : member.legalName
+            name: member.tradingName ? member.tradingName : (member.user ? member.user.legalName : null)
           })
         }
       }
@@ -42,50 +42,27 @@ export default {
     const tenantId = req.currentTenantId;
     const baseInclude = [
       {
-        model: models.UserTenant,
+        model: models.TenantMember,
         as: 'memberships',
         where: { tenantId, status: 'active' },
         attributes: []
       }
     ];
-    if (req.query && req.query.nomember) {
-      models.User.findAll({
-        include: [
-          ...baseInclude,
-          {
-            model: models.Member,
-            as: 'member'
-          }
-        ],
-        order: [
-          ["name", "ASC"]
-        ]
-      }).then((_users) => {
-        let users = [];
-        _users.forEach((user) => {
-          if (!user.member) {
-            users.push(user);
-          }
-        });
-        res.json({ users });
-      });
-    } else {
-      models.User.findAll({
-        include: baseInclude,
-        order: [
-          ["name", "ASC"]
-        ]
-      }).then((users) => {
-        res.json({ users });
-      });
-    }
+    models.User.findAll({
+      include: baseInclude,
+      order: [
+        ["name", "ASC"]
+      ]
+    }).then((users) => {
+      res.json({ users });
+    });
   },
   get: async (req, res, next) => {
     let id = req.params.id;
     if  ( id )  {
-      const membership = await models.UserTenant.findOne({
+      const membership = await models.TenantMember.findOne({
         where: { userId: id, tenantId: req.currentTenantId, status: 'active' },
-        include: [{ model: models.User, as: 'user', attributes: ['id', 'name', 'deauthorizedAt'] }]
+        include: [{ model: models.User, as: 'user', attributes: ['id', 'name', 'legalName', 'email', 'deauthorizedAt'] }]
       });
       if (!membership) return res.status(404).json({ code: -1 });
       res.json({ user: membership.user, membership });
@@ -99,14 +76,14 @@ export default {
     let id = parseInt(req.params.id);
     if  (( req.session.user.id == id) ||
          ( req.session.user.administrable ))    {
-      const membership = await models.UserTenant.findOne({
+      const membership = await models.TenantMember.findOne({
         where: { userId: id, tenantId: req.currentTenantId, status: 'active' }
       });
       if (!membership) return res.status(404).json({ code: -1 });
       const PERMISSION_FIELDS = [
         'administrable', 'accounting', 'fiscalBrowsing', 'approvable',
         'inventoryManagement', 'companyManagement', 'personnelManagement',
-        'deauthorizedAt', 'role'
+        'deauthorizedAt', 'isOwner'
       ];
       for (const field of PERMISSION_FIELDS) {
         if (req.body[field] !== undefined) {
@@ -126,7 +103,7 @@ export default {
     let id = parseInt(req.params.id);
     if  (( id != 1 ) &&
          ( req.session.user.administrable ))   {
-      const membership = await models.UserTenant.findOne({
+      const membership = await models.TenantMember.findOne({
         where: { userId: id, tenantId: req.currentTenantId, status: 'active' }
       });
       if (!membership) return res.status(404).json({ code: -1 });
@@ -155,6 +132,9 @@ export default {
   signup: async (req, res, next) => {
     let user_name = req.body.user_name;
     let password = req.body.password;
+    let legalName = req.body.legalName || user_name;
+    let email = req.body.email || `${user_name}@localhost`;
+    
     models.User.check(user_name, password).then(async (_user) => {
       if  ( _user) {
         res.json({
@@ -165,30 +145,21 @@ export default {
         const transaction = await models.sequelize.transaction();
         try {
           let user = new models.User({
-            name: user_name
+            name: user_name,
+            legalName: legalName,
+            email: email,
+            legalRuby: req.body.legalRuby || null,
+            legalSex: req.body.legalSex || null,
+            birthDate: req.body.birthDate || null,
+            telNo: req.body.telNo || null,
+            zip: req.body.zip || null,
+            address1: req.body.address1 || null,
+            address2: req.body.address2 || null
           });
           user.password = password;
-          const count = await models.User.count({ transaction });
-          if	( count === 0 )	{
-            user.administrable = true;
-            user.accounting = true;
-            user.fiscalBrowsing = true;
-            user.approvable = true;
-            user.companyManagement = true;
-            user.inventoryManagement = true;
-            user.personnelManagement = true;
-          } else {
-            user.administrable = false;
-            user.accounting = false;
-            user.fiscalBrowsing = false;
-            user.approvable = false;
-            user.companyManagement = false;
-            user.inventoryManagement = false;
-            user.personnelManagement = false;
-          }
           user = await user.save({ transaction });
 
-          await bootstrapUserTenant(user, transaction);
+          await bootstrapTenantMember(user, transaction);
 
           await transaction.commit();
           res.json({
@@ -239,13 +210,13 @@ export default {
 
             // Resolve default tenant — silently bootstrap one if none exists.
             try {
-              let defaultMembership = await models.UserTenant.findOne({
+              let defaultMembership = await models.TenantMember.findOne({
                 where: { userId: user.user.id, isDefault: true, status: 'active' }
               });
               if (!defaultMembership) {
                 const t = await models.sequelize.transaction();
                 try {
-                  const result = await bootstrapUserTenant(user.user, t);
+                  const result = await bootstrapTenantMember(user.user, t);
                   await t.commit();
                   defaultMembership = result.membership;
                 } catch (be) {

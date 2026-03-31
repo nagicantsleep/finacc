@@ -7,12 +7,12 @@ import models from '../models/index.js';
  *  3. if exactly one active membership, use it
  *  4. otherwise return null (requires explicit selection)
  *
- * Returns the resolved UserTenant membership, or null.
+ * Returns the resolved TenantMember membership, or null.
  */
 export async function resolveTenant(userId, sessionTenantId) {
   // Step 1 — validate session tenant
   if (sessionTenantId) {
-    const membership = await models.UserTenant.findOne({
+    const membership = await models.TenantMember.findOne({
       where: { userId, tenantId: sessionTenantId, status: 'active' },
       include: [{ model: models.Tenant, as: 'tenant' }]
     });
@@ -22,7 +22,7 @@ export async function resolveTenant(userId, sessionTenantId) {
   }
 
   // Step 2 — default membership
-  const defaultMembership = await models.UserTenant.findOne({
+  const defaultMembership = await models.TenantMember.findOne({
     where: { userId, isDefault: true, status: 'active' },
     include: [{ model: models.Tenant, as: 'tenant' }]
   });
@@ -31,7 +31,7 @@ export async function resolveTenant(userId, sessionTenantId) {
   }
 
   // Step 3 — exactly one active membership
-  const activeMemberships = await models.UserTenant.findAll({
+  const activeMemberships = await models.TenantMember.findAll({
     where: { userId, status: 'active' },
     include: [{ model: models.Tenant, as: 'tenant' }]
   });
@@ -112,7 +112,7 @@ export const requireTenant = async (req, res, next) => {
  * Returns the membership on success, throws on failure.
  */
 export async function switchTenant(userId, tenantId) {
-  const membership = await models.UserTenant.findOne({
+  const membership = await models.TenantMember.findOne({
     where: { userId, tenantId, status: 'active' },
     include: [{ model: models.Tenant, as: 'tenant' }]
   });

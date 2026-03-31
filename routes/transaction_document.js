@@ -34,10 +34,12 @@ const form_out = async (req, res, form) => {
       {
         model: models.User,
         as: 'handleUser',
+        attributes: ['name', 'legalName'],
         include: [
           {
-            model: models.Member,
-            as: 'member'
+            model: models.TenantMember,
+            as: 'memberships',
+            attributes: ['tradingName']
           }
         ]
       }

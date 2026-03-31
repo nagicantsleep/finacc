@@ -32,14 +32,14 @@ export default {
       {
         model: models.User,
         as: 'handleUser',
-        attributes: ['name'],
+        attributes: ['name', 'legalName'],
         include: [
           {
-            model: models.Member,
-            as: 'member',
+            model: models.TenantMember,
+            as: 'memberships',
             where: { tenantId },
             required: false,
-            attributes: ['legalName', 'tradingName']
+            attributes: ['tradingName']
           }
         ]
       },
@@ -322,8 +322,8 @@ export default {
         {
           model: models.User,
           as: 'handleUser',
-          attributes: ['name'],
-          include: [{ model: models.Member, as: 'member', attributes: ['legalName', 'tradingName'] }]
+          attributes: ['name', 'legalName'],
+          include: [{ model: models.TenantMember, as: 'memberships', attributes: ['tradingName'] }]
         }
       ]
     });

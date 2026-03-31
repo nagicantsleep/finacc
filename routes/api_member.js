@@ -20,7 +20,7 @@ export default {
       let query = {
         where: { tenantId },
         order: [
-          ['legalName', 'ASC']
+          ['tradingName', 'ASC']
         ],
         include: include
       };
@@ -29,13 +29,13 @@ export default {
         query.where.memberClassId = parseInt(req.query.memberClassId);
       }
       //console.log(JSON.stringify(query, ' ', 2));
-      models.Member.findAll(query).then( async(members) => {
+      models.TenantMember.findAll(query).then( async(members) => {
         res.json({
           members: members
         });
       });
     } else {
-      models.Member.findOne({
+      models.TenantMember.findOne({
         where: { tenantId, id },
         include: include
       }).then((member) => {
@@ -49,7 +49,7 @@ export default {
     const tenantId = req.currentTenantId;
     let body = req.body;
     body.tenantId = tenantId;
-    models.Member.create(body).then((member) => {
+    models.TenantMember.create(body).then((member) => {
       //console.log(member);
       res.json({
         member: member
@@ -59,7 +59,7 @@ export default {
       res.status(500);
       res.json({
         code: -1,
-        message: 'DB error at post'
+        message: e.message || 'DB error at post'
       })
     });
   },
@@ -68,7 +68,7 @@ export default {
     let body = req.body;
     let id = req.params.id ? req.params.id : body.id;
 
-    let member = await models.Member.findOne({ where: { tenantId, id } });
+    let member = await models.TenantMember.findOne({ where: { tenantId, id } });
     if	( member )	{
       member.set(body);
       member.tenantId = tenantId;
@@ -90,7 +90,7 @@ export default {
     let body = req.body;
     let id = req.params.id ? req.params.id : body.id;
 
-    let member = await models.Member.findOne({ where: { tenantId, id } });
+    let member = await models.TenantMember.findOne({ where: { tenantId, id } });
     if	( member )	{
       member.destroy().then(() => {
         res.json({

@@ -19,14 +19,14 @@ function slugFromName(name) {
  * Bootstrap a personal owned default tenant for a newly self-registered user.
  *
  * Must be called inside an existing Sequelize transaction (t).
- * Idempotent: if a default UserTenant already exists for this user, returns it
+ * Idempotent: if a default TenantMember already exists for this user, returns it
  * without creating duplicates.
  *
  * Returns { tenant, membership }.
  */
-export async function bootstrapUserTenant(user, t) {
+export async function bootstrapTenantMember(user, t) {
   // Idempotency guard: if the user already has a default membership, skip.
-  const existing = await models.UserTenant.findOne({
+  const existing = await models.TenantMember.findOne({
     where: { userId: user.id, isDefault: true },
     transaction: t
   });
@@ -46,12 +46,12 @@ export async function bootstrapUserTenant(user, t) {
     { transaction: t }
   );
 
-  // Create the owner membership, copying legacy permission booleans and marking default.
-  const membership = await models.UserTenant.create(
+  // Create the owner membership with all permissions and marking default.
+  const membership = await models.TenantMember.create(
     {
       userId: user.id,
       tenantId: tenant.id,
-      role: 'owner',
+      isOwner: true,
       status: 'active',
       isDefault: true,
       accounting: true,
@@ -68,4 +68,7 @@ export async function bootstrapUserTenant(user, t) {
   return { tenant, membership };
 }
 
-export default { bootstrapUserTenant };
+// Keep old function name as alias for backward compatibility during transition
+export const bootstrapUserTenant = bootstrapTenantMember;
+
+export default { bootstrapTenantMember, bootstrapUserTenant };
