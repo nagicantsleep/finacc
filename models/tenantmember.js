@@ -62,6 +62,12 @@ export default (sequelize, DataTypes) => {
   }
   
   TenantMember.init({
+    // Primary key
+    id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true
+    },
     // Foreign keys
     userId: {
       type: DataTypes.INTEGER,
