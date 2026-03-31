@@ -64,7 +64,6 @@ import Accounts from './accounts/accounts.svelte';
 import Company from './company/company.svelte';
 import Project from './project/project.svelte';
 
-import Users from './users/users.svelte';
 import Transaction from './transaction/transaction.svelte';
 import Item from './item/item.svelte';
 import Member from './member/member.svelte';
@@ -133,10 +132,6 @@ const routes = [
   {
     match: /^\/item/,
     component: Item
-  },
-  {
-    match: /^\/users/,
-    component: Users
   },
   {
     match: /^\/member/,

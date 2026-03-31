@@ -148,6 +148,61 @@
       <input type="text" class="form-control" id="email" bind:value={member.email}>
     </div>
   </div>
+  {#if ( member.userId && member.userId > 0 && member.user )}
+  <hr>
+  <div class="row mb-3">
+    <div class="col-12">
+      <h6>権限設定</h6>
+      <p class="text-muted small">リンク済みユーザー「{member.user.name}」の権限を設定します。</p>
+    </div>
+  </div>
+  <div class="row mb-3">
+    <div class="col-3">
+      <label class="form-check-label">
+        <input type="checkbox" class="form-check-input" bind:checked={member.administrable}>
+        管理者
+      </label>
+    </div>
+    <div class="col-3">
+      <label class="form-check-label">
+        <input type="checkbox" class="form-check-input" bind:checked={member.accounting}>
+        会計
+      </label>
+    </div>
+    <div class="col-3">
+      <label class="form-check-label">
+        <input type="checkbox" class="form-check-input" bind:checked={member.fiscalBrowsing}>
+        会計(閲覧)
+      </label>
+    </div>
+    <div class="col-3">
+      <label class="form-check-label">
+        <input type="checkbox" class="form-check-input" bind:checked={member.approvable}>
+        承認可能
+      </label>
+    </div>
+  </div>
+  <div class="row mb-3">
+    <div class="col-3">
+      <label class="form-check-label">
+        <input type="checkbox" class="form-check-input" bind:checked={member.companyManagement}>
+        顧客管理
+      </label>
+    </div>
+    <div class="col-3">
+      <label class="form-check-label">
+        <input type="checkbox" class="form-check-input" bind:checked={member.inventoryManagement}>
+        在庫管理
+      </label>
+    </div>
+    <div class="col-3">
+      <label class="form-check-label">
+        <input type="checkbox" class="form-check-input" bind:checked={member.personnelManagement}>
+        人事管理
+      </label>
+    </div>
+  </div>
+  {/if}
 </div>
 <style>
 </style>

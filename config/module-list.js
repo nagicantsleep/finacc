@@ -240,20 +240,6 @@ export default [
       }
     ]
   }, {
-    name: 'users',
-    title: 'ユーザ管理',
-    authority: (user) => {
-      return  (user.administrable || user.personnelManagement);
-    },
-    href: (status) => {
-      return	('/users/');
-    },
-    match: /^\/users/,
-    icon: { name: 'bi:people' },
-    description: `
-本システムの利用者アカウントの管理です。<br/>
-操作権限の設定も可能です。`
-  }, {
     name: 'member',
     title: '役職員管理',
     authority: (user) => {
