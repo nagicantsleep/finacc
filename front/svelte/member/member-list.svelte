@@ -11,29 +11,21 @@
     <table class="table table-bordered">
       <thead class="table-light">
         <tr>
-          <th scope="col" style="width: 150px;">
-            クラス
-          </th>
-          <th scope="col" style="width: 150px;">
-            名前
-          </th>
-          <th scope="col" style="width: 80px;">
-            権限
-          </th>
-          <th scope="col" style="width: 100px;">
-            入社年度
-          </th>
-          <th scope="col" style="width: 140px;">
-            誕生日(年齢)
-          </th>
-          <th scope="col"></th>
+          <th scope="col" style="width: 130px;">クラス</th>
+          <th scope="col">名前</th>
+          <th scope="col" style="width: 80px;">状態</th>
+          <th scope="col" style="width: 50px;" title="ユーザー連携">連携</th>
+          <th scope="col" style="width: 50px;" title="管理者">管</th>
+          <th scope="col" style="width: 50px;" title="会計">会</th>
+          <th scope="col" style="width: 50px;" title="承認">承</th>
+          <th scope="col" style="width: 100px;">入社日</th>
         </tr>
         <tr>
           <th style="padding:5px;">
-            <select class="form-select" id="memberClass"
+            <select class="form-select form-select-sm" id="memberClass"
               on:input={handleFilterChange}
               bind:value={memberClassId}>
-              <option value={-1}>未設定</option>
+              <option value={-1}>全て</option>
               {#each classes as line}
               <option value={line.id}>{line.title}</option>
               {/each}
@@ -44,34 +36,40 @@
           <th></th>
           <th></th>
           <th></th>
+          <th></th>
+          <th></th>
         </tr>
       </thead>
       <tbody>
         {#each members as line}
         <tr>
+          <td>{line.memberClass ? line.memberClass.title : ''}</td>
           <td>
-            {line.memberClass.title}
-          </td>
-          <td>
-            <button type="button" class="btn btn-link"
-              on:click={() => {
-                openMember(line.id);
-              }}>
+            <button type="button" class="btn btn-link p-0"
+              on:click={() => { openMember(line.id); }}>
               {line.tradingName ? line.tradingName : line.legalName}
             </button>
           </td>
           <td>
-            {#if line.joiningDate}
-            {line.joiningDate.replaceAll('-', '/')}
-            {/if}
+            <span class="badge {line.status === 'active' ? 'bg-success' : 'bg-secondary'}">
+              {line.status === 'active' ? '在職' : '退職'}
+            </span>
+          </td>
+          <td class="text-center">
+            {#if line.userId}●{/if}
+          </td>
+          <td class="text-center">
+            {#if line.administrable}✓{/if}
+          </td>
+          <td class="text-center">
+            {#if line.accounting}✓{/if}
+          </td>
+          <td class="text-center">
+            {#if line.approvable}✓{/if}
           </td>
           <td>
-            {#if line.birthDate}
-            {line.birthDate.replaceAll('-', '/')}
-            ({age(line.birthDate)})
-            {/if}
+            {#if line.joiningDate}{line.joiningDate.replaceAll('-', '/')}{/if}
           </td>
-          <td></td>
         </tr>
         {/each}
       </tbody>
@@ -85,7 +83,6 @@
 <script>
 import {onMount, createEventDispatcher} from 'svelte';
 const dispatch = createEventDispatcher();
-import {age} from '../../../libs/utils';
 import {parseParams} from '../../javascripts/params.js';
 import { link } from '../../javascripts/router.js';
 

@@ -15,7 +15,7 @@
     </div>
     <label for="user" class="col-1 col-form-label">ユーザー</label>
     <div class="col-3">
-      <select class="form-select" id="user" bind:value={member.userId}>
+      <select class="form-select" id="user" bind:value={member.userId} disabled={!member.id}>
         {#if users}
         <option value={0}>未設定</option>
         {#each users as line}
@@ -23,6 +23,9 @@
         {/each}
         {/if}
       </select>
+      {#if !member.id}
+      <div class="form-text text-muted">保存後に連携可能</div>
+      {/if}
     </div>
   </div>
   <div class="row mb-3">
