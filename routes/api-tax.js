@@ -55,6 +55,7 @@ export default {
           await result.destroy();
         } else {
           result.set(taxRule);
+          result.tenantId = tenantId;
           await result.save();
         }
       } else {

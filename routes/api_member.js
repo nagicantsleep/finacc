@@ -71,6 +71,7 @@ export default {
     let member = await models.Member.findOne({ where: { tenantId, id } });
     if	( member )	{
       member.set(body);
+      member.tenantId = tenantId;
       member.save().then(() => {
         res.json({
           member: member

@@ -321,6 +321,7 @@ export default {
           await result.destroy();
         } else {
           result.set(kind);
+          result.tenantId = tenantId;
           await result.save();
         }
       } else {

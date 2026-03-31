@@ -92,6 +92,7 @@ export default {
     });
     if	( company )	{
       company.set(body);
+      company.tenantId = tenantId;
       company.save().then(() => {
         res.json(company);
       });
@@ -140,6 +141,7 @@ export default {
           await result.destroy();
         } else {
           result.set(kind);
+          result.tenantId = tenantId;
           await result.save();
         }
       } else {

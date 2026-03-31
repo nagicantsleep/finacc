@@ -65,6 +65,7 @@ export default {
             where: { tenantId, id: menu.id }
           });
           result.set(menu);
+          result.tenantId = tenantId;
           await result.save();
         } else {
           await models.Menu.create({ ...menu, tenantId });
@@ -101,6 +102,7 @@ export default {
       })
     	if	( menu )	{
       	menu.set(body);
+        menu.tenantId = tenantId;
       	menu.save().then(() => {
         	res.json({
           	menu: menu

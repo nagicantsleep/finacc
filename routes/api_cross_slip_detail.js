@@ -49,6 +49,7 @@ export default {
     }).then((result) => {
       if ( result ) {
         result.set(detail);
+        result.tenantId = req.currentTenantId;
         result.save().then(() => {
           res.json(result);
         });

@@ -144,6 +144,7 @@ export default {
       let documentId = item.documentId;
       let _item = item.dataValues;
       item.set(body);
+      item.tenantId = tenantId;
       if	(( !body.document.descriptionType ) &&
            ( item.documentId ) )	{
         await models.Document.destroy({
@@ -231,6 +232,7 @@ export default {
           await result.destroy();
         } else {
           result.set(kind);
+          result.tenantId = tenantId;
           await result.save();
         }
       } else {
