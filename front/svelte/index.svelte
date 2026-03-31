@@ -53,6 +53,7 @@ import Alert from './components/alert.svelte';
 import Login from './login/login.svelte';
 import SignUp from './login/signup.svelte';
 import Home from './home/home.svelte';
+import Tenant from './home/home.svelte';
 import Menu from './menu/menu.svelte';
 import Journal from './journal/journal.svelte';
 import Ledger from './ledger/ledger.svelte';
@@ -84,6 +85,10 @@ const routes = [
   {
     match: /^\/home/,
     component: Home
+  },
+  {
+    match: /^\/tenant/,
+    component: Tenant
   },
   {
     match: /^\/journal/,

@@ -102,14 +102,14 @@ export default [
 勘定科目を追加変更ができます。<br/>
 なお「削除」はできません。`
   }, {
-    name: 'home',
+    name: 'tenant',
     title: '会社設定',
-    match: /^\/home/,
+    match: /^\/tenant/,
     authority: (user) => {
       return  (user.administrable);
     },
     href: (status) => {
-      return	('/home');
+      return	('/tenant');
     },
     icon: { name: 'bi:gear-fill' },
     description: `
