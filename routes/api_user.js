@@ -27,9 +27,10 @@ export default {
       let users = [];
       for ( let member of members ) {
         if  ( member.userId ) {
+          const displayName = member.tradingName || (member.user ? member.user.legalName : null);
           users.push({
             id: member.userId,
-            name: member.tradingName ? member.tradingName : (member.user ? member.user.legalName : null)
+            name: displayName
           })
         }
       }

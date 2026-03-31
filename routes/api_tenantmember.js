@@ -1,11 +1,20 @@
 import models from '../models/index.js';
 const Op = models.Sequelize.Op;
 
+/**
+ * Display name helper: returns tradingName || user.legalName || '(未設定)'
+ * Used in all routes displaying member names.
+ */
+function getDisplayName(member) {
+  if (member.tradingName) return member.tradingName;
+  if (member.user && member.user.legalName) return member.user.legalName;
+  return '(未設定)';
+}
+
 export default {
   get: async (req, res, next) => {
     const tenantId = req.currentTenantId;
     let id =  req.params.id;
-    //console.log('/api/member/', id);
     let include = [
       {
         model: models.MemberClass,
@@ -24,15 +33,11 @@ export default {
         ],
         include: include
       };
-      console.log('query', req.query);
       if  ( req.query.memberClassId ) {
         query.where.memberClassId = parseInt(req.query.memberClassId);
       }
-      //console.log(JSON.stringify(query, ' ', 2));
-      models.TenantMember.findAll(query).then( async(members) => {
-        res.json({
-          members: members
-        });
+      models.TenantMember.findAll(query).then(async (members) => {
+        res.json({ members });
       });
     } else {
       models.TenantMember.findOne({
@@ -40,28 +45,35 @@ export default {
         include: include
       }).then((member) => {
         res.json({
-          member: member
+          member,
+          displayName: getDisplayName(member)
         });
       });
     }
   },
-  post: (req, res, next) => {
+  post: async (req, res, next) => {
     const tenantId = req.currentTenantId;
     let body = req.body;
     body.tenantId = tenantId;
-    models.TenantMember.create(body).then((member) => {
-      //console.log(member);
-      res.json({
-        member: member
+
+    // Validation: tradingName required when userId = NULL
+    if (!body.userId && (!body.tradingName || body.tradingName.trim() === '')) {
+      return res.status(400).json({
+        code: -1,
+        message: 'ログインしないメンバーには名前（tradingName）が必要です。'
       });
-    }).catch ((e) => {
+    }
+
+    try {
+      const member = await models.TenantMember.create(body);
+      res.json({ member });
+    } catch (e) {
       console.log(e);
-      res.status(500);
-      res.json({
+      res.status(500).json({
         code: -1,
         message: e.message || 'DB error at post'
-      })
-    });
+      });
+    }
   },
   update: async(req, res, next) => {
     const tenantId = req.currentTenantId;
@@ -70,19 +82,24 @@ export default {
 
     let member = await models.TenantMember.findOne({ where: { tenantId, id } });
     if	( member )	{
+      // Validation: tradingName required when userId = NULL
+      if (!member.userId) {
+        const newName = body.tradingName !== undefined ? body.tradingName : member.tradingName;
+        if (!newName || newName.trim() === '') {
+          return res.status(400).json({
+            code: -1,
+            message: 'ログインしないメンバーには名前（tradingName）が必要です。'
+          });
+        }
+      }
       member.set(body);
       member.tenantId = tenantId;
       member.save().then(() => {
-        res.json({
-          member: member
-        });
+        res.json({ member });
       }).catch((e) => {
         console.log(e);
-        res.status(500);
-        res.json({
-          code: -1
-        });
-      })
+        res.status(500).json({ code: -1 });
+      });
     }
   },
   delete: async(req, res, next) => {
@@ -93,20 +110,16 @@ export default {
     let member = await models.TenantMember.findOne({ where: { tenantId, id } });
     if	( member )	{
       member.destroy().then(() => {
-        res.json({
-          code: 0});
+        res.json({ code: 0 });
       });
     }
   },
   classes: (req, res, next) => {
     models.MemberClass.findAll().then((result) => {
-      res.json({
-        values: result
-      });
-    }).catch((e) => {
-      res.json({
-        code: -1
-      });
-    })
-  }
+      res.json({ values: result });
+    }).catch(() => {
+      res.json({ code: -1 });
+    });
+  },
+  getDisplayName
 };
