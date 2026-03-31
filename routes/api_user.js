@@ -130,57 +130,115 @@ export default {
     })
   },
   signup: async (req, res, next) => {
-    let user_name = req.body.user_name;
-    let password = req.body.password;
-    let legalName = req.body.legalName || user_name;
-    let email = req.body.email || `${user_name}@localhost`;
+    const user_name = req.body.user_name;
+    const password = req.body.password;
+    const legalName = req.body.legalName;
+    const email = req.body.email;
     
-    models.User.check(user_name, password).then(async (_user) => {
-      if  ( _user) {
+    // Validate required fields
+    if (!user_name || !user_name.trim()) {
+      return res.json({
+        result: 'NG',
+        message: 'ユーザー名を入力してください。'
+      });
+    }
+    
+    if (!password || password.length < 8) {
+      return res.json({
+        result: 'NG',
+        message: 'パスワードは8文字以上で入力してください。'
+      });
+    }
+    
+    if (!legalName || !legalName.trim()) {
+      return res.json({
+        result: 'NG',
+        message: '氏名を入力してください。'
+      });
+    }
+    
+    if (!email || !email.trim()) {
+      return res.json({
+        result: 'NG',
+        message: 'メールアドレスを入力してください。'
+      });
+    }
+    
+    // Validate username format (alphanumeric + underscore, 4-20 chars)
+    if (!/^[a-zA-Z0-9_]{4,20}$/.test(user_name)) {
+      return res.json({
+        result: 'NG',
+        message: 'ユーザー名は半角英数字とアンダースコア、4〜20文字で入力してください。'
+      });
+    }
+    
+    // Validate email format
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return res.json({
+        result: 'NG',
+        message: '有効なメールアドレスを入力してください。'
+      });
+    }
+    
+    try {
+      // Check for reserved usernames
+      const existingUser = await models.User.check(user_name, password);
+      if (existingUser) {
+        return res.json({
+          result: 'NG',
+          message: `ユーザー名「${user_name}」は既に使用されています。`
+        });
+      }
+      
+      // Check for email uniqueness
+      const existingEmail = await models.User.findOne({
+        where: { email: email.trim().toLowerCase() }
+      });
+      if (existingEmail) {
+        return res.json({
+          result: 'NG',
+          message: 'このメールアドレスは既に登録されています。'
+        });
+      }
+      
+      const transaction = await models.sequelize.transaction();
+      try {
+        let user = new models.User({
+          name: user_name.trim(),
+          legalName: legalName.trim(),
+          email: email.trim().toLowerCase(),
+          legalRuby: req.body.legalRuby?.trim() || null,
+          legalSex: req.body.legalSex != null ? parseInt(req.body.legalSex, 10) : null,
+          birthDate: req.body.birthDate || null,
+          telNo: req.body.telNo?.trim() || null,
+          zip: req.body.zip?.trim() || null,
+          address1: req.body.address1?.trim() || null,
+          address2: req.body.address2?.trim() || null
+        });
+        user.password = password;
+        user = await user.save({ transaction });
+
+        await bootstrapTenantMember(user, transaction);
+
+        await transaction.commit();
+        res.json({
+          result: 'OK'
+        });
+      } catch (err) {
+        await transaction.rollback();
+        console.log('signup error', err);
         res.json({
           result: 'NG',
-          message: `ユーザー名 ${user_name} は既に登録されています。`
+          message: err.message || '登録に失敗しました。'
         });
-      } else {
-        const transaction = await models.sequelize.transaction();
-        try {
-          let user = new models.User({
-            name: user_name,
-            legalName: legalName,
-            email: email,
-            legalRuby: req.body.legalRuby || null,
-            legalSex: req.body.legalSex || null,
-            birthDate: req.body.birthDate || null,
-            telNo: req.body.telNo || null,
-            zip: req.body.zip || null,
-            address1: req.body.address1 || null,
-            address2: req.body.address2 || null
-          });
-          user.password = password;
-          user = await user.save({ transaction });
-
-          await bootstrapTenantMember(user, transaction);
-
-          await transaction.commit();
-          res.json({
-            result: 'OK'
-          });
-        } catch (err) {
-          await transaction.rollback();
-          console.log('signup error', err);
-          res.json({
-            result: 'NG',
-            message: err.message || err
-          });
-        }
       }
-    }).catch((err) => {
-      console.log(err);
+    } catch (err) {
+      console.log('signup validation error', err);
       res.json({
         result: 'NG',
-        message: err
+        message: typeof err === 'string' ? err : '登録に失敗しました。'
       });
-    });
+    }
   },
   login:  (req, res, next) => {
     passport.authenticate('local', async (error, user, info) => {
