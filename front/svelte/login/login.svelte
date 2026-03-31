@@ -18,7 +18,11 @@
         <div class="row d-flex justify-content-center">
           <div class="col-lg-8 col-4 d-grid">
             <button type="button" class="btn btn-primary mb-3"
-              on:click={Login}>
+              on:click={Login}
+              disabled={isSubmitting}>
+              {#if isSubmitting}
+                <span class="spinner-border spinner-border-sm me-2"></span>
+              {/if}
               ログイン
             </button>
             <a on:click|preventDefault={change} href="#" class="text-center">アカウント登録はこちら</a>
@@ -33,10 +37,11 @@ import {onMount, beforeUpdate, afterUpdate, createEventDispatcher} from 'svelte'
 import axios from 'axios';
 export let current;
 
-let user_name;
-let password;
-let message;
-let msg_type;
+let user_name = '';
+let password = '';
+let message = '';
+let msg_type = '';
+let isSubmitting = false;
 
 const change = (event) => {
   current = 'signup';
@@ -49,30 +54,42 @@ onMount(() => {
   message = '';
 })
 
-const Login = () => {
-  if ( user_name.length === 0 || password.length === 0 ){
+const Login = async () => {
+  if (!user_name || !password) {
     msg_type = 'danger';
-    message = `ユーザー名またはパスワードが入力されていません。`;
-  }else{
-    try {
-      axios.post('/api/user/login', {
-        user_name: user_name,
-        password: password
-      }).then((_env) => {
-        console.log('result', _env.data);
-        if  ( _env.data.result === 'OK') {
-          window.location = '/home';
-        } else {
-          msg_type = 'danger';
-          message = `ユーザー名またはパスワードが違います。`;
-        }
-      }).catch((msg) => {
-        message = `エラーが発生しました。`;
-        msg_type = 'danger';
-      });
-    } catch(e) {
-      console.log('login fail', e);
+    message = 'ユーザー名またはパスワードが入力されていません。';
+    return;
+  }
+  
+  isSubmitting = true;
+  
+  try {
+    const response = await axios.post('/api/user/login', {
+      user_name,
+      password
+    });
+    
+    console.log('result', response.data);
+    
+    if (response.data.result === 'OK') {
+      // Check if tenant selection is needed
+      if (response.data.requiresTenantSelection) {
+        current = 'tenant-select';
+        window.history.pushState(null, "", `/login/select-tenant`);
+      } else {
+        // Direct login successful
+        window.location = '/home';
+      }
+    } else {
+      msg_type = 'danger';
+      message = response.data.message || 'ユーザー名またはパスワードが違います。';
+      isSubmitting = false;
     }
+  } catch (err) {
+    console.error('login error', err);
+    message = 'エラーが発生しました。';
+    msg_type = 'danger';
+    isSubmitting = false;
   }
 }
 

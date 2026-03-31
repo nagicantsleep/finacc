@@ -40,7 +40,7 @@ export async function bootstrapTenantMember(user, t) {
   const tenant = await models.Tenant.create(
     {
       slug,
-      name: user.name,
+      name: `${user.legalName}さんの組織`,
       status: 'active'
     },
     { transaction: t }

@@ -46,6 +46,8 @@ router.get('/user/:id', user.get);
 router.put('/user/password', user.password);
 router.post('/user/login', user.login);
 router.post('/user/signup', user.signup);
+router.get('/user/tenants', user.tenants);
+router.post('/user/select-tenant', user.selectTenant);
 router.put('/user/tenant', user.switchTenant);
 router.put('/user/:id', user.update);
 router.delete('/user/:id', user.delete);

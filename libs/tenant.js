@@ -122,4 +122,24 @@ export async function switchTenant(userId, tenantId) {
   return membership;
 }
 
-export default { resolveTenant, requireTenant, switchTenant };
+/**
+ * Overlay TenantMember permissions onto session user object for backward
+ * compatibility with frontend permission checks.
+ */
+export function overlayMembershipPermissions(sessionUser, membership) {
+  const PERM_FIELDS = [
+    'accounting', 'fiscalBrowsing', 'approvable', 'administrable',
+    'companyManagement', 'inventoryManagement', 'personnelManagement'
+  ];
+
+  for (const field of PERM_FIELDS) {
+    if (membership[field] !== undefined) {
+      sessionUser[field] = membership[field];
+    }
+  }
+
+  sessionUser.isOwner = membership.isOwner;
+  sessionUser.tenantId = membership.tenantId;
+}
+
+export default { resolveTenant, requireTenant, switchTenant, overlayMembershipPermissions };

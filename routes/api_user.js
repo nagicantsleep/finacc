@@ -2,7 +2,7 @@ import models from '../models/index.js';
 const Op = models.Sequelize.Op;
 import {passwd, passport, is_authenticated} from '../libs/user.js';
 import {bootstrapTenantMember} from '../libs/bootstrap.js';
-import {switchTenant} from '../libs/tenant.js';
+import {switchTenant, overlayMembershipPermissions} from '../libs/tenant.js';
 
 export default {
   members: (req, res, next) => {
@@ -208,32 +208,71 @@ export default {
           } else {
             req.session.user = user.user;
 
-            // Resolve default tenant — silently bootstrap one if none exists.
             try {
-              let defaultMembership = await models.TenantMember.findOne({
-                where: { userId: user.user.id, isDefault: true, status: 'active' }
+              // Fetch all active tenant memberships
+              const memberships = await models.TenantMember.findAll({
+                where: { 
+                  userId: user.user.id, 
+                  status: 'active' 
+                },
+                include: [{ 
+                  model: models.Tenant, 
+                  as: 'tenant',
+                  where: { status: 'active' }
+                }]
               });
-              if (!defaultMembership) {
+
+              if (memberships.length === 0) {
+                // No memberships — bootstrap personal tenant
                 const t = await models.sequelize.transaction();
                 try {
                   const result = await bootstrapTenantMember(user.user, t);
                   await t.commit();
-                  defaultMembership = result.membership;
+                  
+                  // Set session tenant
+                  req.session.currentTenantId = result.membership.tenantId;
+                  overlayMembershipPermissions(req.session.user, result.membership);
+                  
+                  return res.json({ result: 'OK' });
                 } catch (be) {
                   await t.rollback();
                   console.log('tenant bootstrap error on login', be);
+                  return res.json({
+                    result: 'NG',
+                    message: 'テナントの作成に失敗しました。'
+                  });
                 }
-              }
-              if (defaultMembership) {
-                req.session.currentTenantId = defaultMembership.tenantId;
+              } else if (memberships.length === 1) {
+                // Single tenant — auto-login
+                const membership = memberships[0];
+                req.session.currentTenantId = membership.tenantId;
+                overlayMembershipPermissions(req.session.user, membership);
+                
+                return res.json({ result: 'OK' });
+              } else {
+                // Multiple tenants — check for default
+                const defaultMembership = memberships.find(m => m.isDefault);
+                
+                if (defaultMembership) {
+                  // Auto-login to default tenant
+                  req.session.currentTenantId = defaultMembership.tenantId;
+                  overlayMembershipPermissions(req.session.user, defaultMembership);
+                  return res.json({ result: 'OK' });
+                } else {
+                  // No default — require tenant selection
+                  return res.json({ 
+                    result: 'OK',
+                    requiresTenantSelection: true
+                  });
+                }
               }
             } catch (e) {
               console.log('tenant resolution error', e);
+              return res.json({
+                result: 'NG',
+                message: 'テナントの取得に失敗しました。'
+              });
             }
-
-            res.json({
-              result: 'OK'
-            });
           }
         });
       }
@@ -247,9 +286,111 @@ export default {
     try {
       const membership = await switchTenant(req.session.user.id, tenantId);
       req.session.currentTenantId = membership.tenantId;
+      overlayMembershipPermissions(req.session.user, membership);
       res.json({ result: 'OK', tenantId: membership.tenantId });
     } catch (e) {
       res.json({ result: 'NG', message: e.message });
+    }
+  },
+  tenants: async (req, res, next) => {
+    if (!req.session || !req.session.user) {
+      return res.status(401).json({
+        result: 'NG',
+        message: '認証されていません。'
+      });
+    }
+    
+    try {
+      const memberships = await models.TenantMember.findAll({
+        where: { 
+          userId: req.session.user.id, 
+          status: 'active' 
+        },
+        include: [{ 
+          model: models.Tenant, 
+          as: 'tenant',
+          where: { status: 'active' }
+        }],
+        order: [
+          ['isDefault', 'DESC'],
+          ['createdAt', 'ASC']
+        ]
+      });
+      
+      const tenants = memberships.map(m => ({
+        tenantId: m.tenantId,
+        tenantName: m.tenant.name,
+        tenantSlug: m.tenant.slug,
+        isOwner: m.isOwner,
+        isDefault: m.isDefault
+      }));
+      
+      res.json({
+        result: 'OK',
+        userName: req.session.user.legalName || req.session.user.name,
+        tenants
+      });
+    } catch (err) {
+      console.error('tenants fetch error', err);
+      res.status(500).json({
+        result: 'NG',
+        message: 'テナントの取得に失敗しました。'
+      });
+    }
+  },
+  selectTenant: async (req, res, next) => {
+    if (!req.session || !req.session.user) {
+      return res.status(401).json({
+        result: 'NG',
+        message: '認証されていません。'
+      });
+    }
+    
+    const { tenantId } = req.body;
+    
+    if (!tenantId) {
+      return res.json({
+        result: 'NG',
+        message: 'テナントIDが指定されていません。'
+      });
+    }
+    
+    try {
+      const membership = await models.TenantMember.findOne({
+        where: { 
+          userId: req.session.user.id, 
+          tenantId,
+          status: 'active' 
+        },
+        include: [{ 
+          model: models.Tenant, 
+          as: 'tenant',
+          where: { status: 'active' }
+        }]
+      });
+      
+      if (!membership) {
+        return res.json({
+          result: 'NG',
+          message: 'そのテナントへのアクセス権限がありません。'
+        });
+      }
+      
+      // Set session tenant
+      req.session.currentTenantId = membership.tenantId;
+      overlayMembershipPermissions(req.session.user, membership);
+      
+      res.json({ 
+        result: 'OK',
+        tenantId: membership.tenantId,
+        tenantName: membership.tenant.name
+      });
+    } catch (err) {
+      console.error('tenant selection error', err);
+      res.status(500).json({
+        result: 'NG',
+        message: 'テナントの選択に失敗しました。'
+      });
     }
   }
 }
