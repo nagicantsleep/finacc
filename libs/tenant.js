@@ -89,7 +89,16 @@ export const requireTenant = async (req, res, next) => {
       return next();
     }
 
-    // No resolvable tenant — destroy session and force re-login so the
+    // No resolvable tenant — allow tenant-management routes through so users
+    // can see/list/select tenants even without a default selected yet.
+    const rawPath = req.originalUrl || req.url;
+    if (rawPath.includes('/user/tenants') ||
+        rawPath.includes('/user/select-tenant') ||
+        rawPath.includes('/user/tenant')) {
+      return next();
+    }
+
+    // For all other routes, destroy session and force re-login so the
     // bootstrap path (signup) or login handler can set currentTenantId.
     req.logout((err) => {
       req.session.destroy(() => {
