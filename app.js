@@ -106,7 +106,8 @@ const voucherFile = (req, res, next) => {
   if ( req.session.user.accounting )	{
     models.VoucherFile.findOne({
       where: {
-        id: req.params.id
+        id: req.params.id,
+        tenantId: req.currentTenantId
       }
     }).then((content) => {
       res.set('Content-Type', content.mimeType);
