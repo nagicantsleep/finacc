@@ -22,7 +22,7 @@ function slugFromName(name) {
  * Idempotent: if a default TenantMember already exists for this user, returns it
  * without creating duplicates.
  *
- * Returns { tenant, membership, companyClass, company }.
+ * Returns { tenant, membership, companyClasses, company }.
  */
 export async function bootstrapTenantMember(user, t) {
   // Idempotency guard: if the user already has a default membership, skip.
@@ -66,28 +66,34 @@ export async function bootstrapTenantMember(user, t) {
     { transaction: t }
   );
 
-  // Create the default company class (own company) for the tenant.
-  const companyClass = await models.CompanyClass.create(
-    {
-      tenantId: tenant.id,
-      name: '自社',
-      displayOrder: 8,
-      isClient: false
-    },
-    { transaction: t }
+  // Seed all default company classes for the tenant.
+  const defaultClasses = [
+    { name: '国内購買先', displayOrder: 1, isClient: false },
+    { name: '海外購買先', displayOrder: 2, isClient: false },
+    { name: '国内外注',   displayOrder: 3, isClient: false },
+    { name: '海外外注',   displayOrder: 4, isClient: false },
+    { name: '国内顧客',   displayOrder: 5, isClient: true  },
+    { name: '海外顧客',   displayOrder: 6, isClient: true  },
+    { name: '税金公共料金等', displayOrder: 7, isClient: false },
+    { name: '自社',       displayOrder: 8, isClient: false },
+  ];
+  const companyClasses = await models.CompanyClass.bulkCreate(
+    defaultClasses.map(c => ({ ...c, tenantId: tenant.id })),
+    { transaction: t, returning: true }
   );
+  const ownClass = companyClasses.find(c => c.name === '自社');
 
   // Create a default company for the tenant linked to the own-company class.
   const company = await models.Company.create(
     {
       tenantId: tenant.id,
       name: '本社',
-      companyClassId: companyClass.id
+      companyClassId: ownClass.id
     },
     { transaction: t }
   );
 
-  return { tenant, membership, companyClass, company };
+  return { tenant, membership, companyClasses, company };
 }
 
 // Keep old function name as alias for backward compatibility during transition
