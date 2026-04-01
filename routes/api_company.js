@@ -6,6 +6,7 @@ import {getCompanyInfo, putCompanyInfo} from '../libs/utils.js';
 export default {
   get: async (req, res, next) => {
     const tenantId = req.currentTenantId;
+    if (!tenantId) return res.status(401).json({ code: -1, message: 'Unauthorized' });
     let id =  req.params.id;
     console.log('/api/company/', id);
 		let include = [

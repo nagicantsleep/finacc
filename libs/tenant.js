@@ -57,6 +57,14 @@ export async function resolveTenant(userId, sessionTenantId) {
  */
 export const requireTenant = async (req, res, next) => {
   if (!req.session || !req.session.user) {
+    const rawPath = req.originalUrl || req.url;
+    const publicPaths = ['/api/user/login', '/api/user/signup'];
+    if (publicPaths.some(p => rawPath.startsWith(p))) {
+      return next();
+    }
+    if (rawPath.startsWith('/api/')) {
+      return res.status(401).json({ result: 'NG', message: 'Not authenticated.' });
+    }
     return next();
   }
 
