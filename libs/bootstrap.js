@@ -60,7 +60,8 @@ export async function bootstrapTenantMember(user, t) {
       administrable: true,
       companyManagement: true,
       inventoryManagement: true,
-      personnelManagement: true
+      personnelManagement: true,
+      tenantSettings: true
     },
     { transaction: t }
   );

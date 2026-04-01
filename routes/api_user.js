@@ -84,7 +84,7 @@ export default {
       const PERMISSION_FIELDS = [
         'administrable', 'accounting', 'fiscalBrowsing', 'approvable',
         'inventoryManagement', 'companyManagement', 'personnelManagement',
-        'deauthorizedAt', 'isOwner'
+        'tenantSettings', 'deauthorizedAt', 'isOwner'
       ];
       for (const field of PERMISSION_FIELDS) {
         if (req.body[field] !== undefined) {

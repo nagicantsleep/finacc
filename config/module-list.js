@@ -106,7 +106,7 @@ export default [
     title: '会社設定',
     match: /^\/tenant/,
     authority: (user) => {
-      return  (user.administrable);
+      return  (user.tenantSettings);
     },
     href: (status) => {
       return	('/tenant');

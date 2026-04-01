@@ -156,6 +156,11 @@ export default (sequelize, DataTypes) => {
       allowNull: false,
       defaultValue: false
     },
+    tenantSettings: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false
+    },
 
     // Tenant-internal identity & display
     tradingName: {
@@ -253,6 +258,7 @@ export default (sequelize, DataTypes) => {
           tenantMember.companyManagement = false;
           tenantMember.inventoryManagement = false;
           tenantMember.personnelManagement = false;
+          tenantMember.tenantSettings = false;
         }
       }
     }
