@@ -2,7 +2,7 @@ import models from '../models/index.js';
 const Op = models.Sequelize.Op;
 import Accounts from '../libs/accounts.js';
 
-const	get_details = async (fy, account, sub_account, tenantId) => {
+export const	get_details = async (fy, account, sub_account, tenantId) => {
   //console.log({account});
   //console.log({sub_account});
   let ledger = [];
