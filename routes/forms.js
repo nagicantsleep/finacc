@@ -23,6 +23,9 @@ router.get('/explanatory_journal/:term', async (req, res, next) => {
     	( req.session.user.fiscalBrowsing )) {
     if  ( req.query.format === 'pdf' )  {
       const company = await myCompany(req.currentTenantId);
+      if (!company) {
+        return res.status(404).json({ error: 'Company not found. Please create a company with companyClassId: 1' });
+      }
       const {fy, dates} = await initializeExplanatoryJournal(req.params.term, req.currentTenantId);
       print('explanatory-journal', {
         fy: fy,
