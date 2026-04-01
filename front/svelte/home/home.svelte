@@ -40,17 +40,13 @@
   </div>
   {/if}
 </div>
+{#if ( status.user.administrable) }
 <div class="row">
   <div class="col-6" style="padding:10px;">
-    <Password
-      bind:toast={toast}></Password>
+    <Backup bind:toast={toast} bind:status={status}/>
   </div>
-  {#if ( status.user.administrable) }
-    <div class="col-6" style="padding:10px;">
-      <Backup bind:toast={toast} bind:status={status}/>
-    </div>
-  {/if}
 </div>
+{/if}
 <div class="row">
   {#if ( status.user.administrable) }
   <div class="col-4" style="padding:10px;">
@@ -166,7 +162,6 @@ import { onMount, beforeUpdate } from "svelte";
 
 import  FormPrint from './form-print.svelte';
 import  SelectTerm from './term.svelte';
-import Password from './password.svelte';
 import Backup from './backup.svelte';
 import Approve from './approve.svelte';
 import SystemSettings from './system-settings.svelte';
