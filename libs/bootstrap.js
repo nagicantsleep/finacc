@@ -22,7 +22,7 @@ function slugFromName(name) {
  * Idempotent: if a default TenantMember already exists for this user, returns it
  * without creating duplicates.
  *
- * Returns { tenant, membership, company }.
+ * Returns { tenant, membership, companyClass, company }.
  */
 export async function bootstrapTenantMember(user, t) {
   // Idempotency guard: if the user already has a default membership, skip.
@@ -66,16 +66,28 @@ export async function bootstrapTenantMember(user, t) {
     { transaction: t }
   );
 
-  // Create a default company for the tenant.
-  const company = await models.Company.create(
+  // Create the default company class (own company) for the tenant.
+  const companyClass = await models.CompanyClass.create(
     {
       tenantId: tenant.id,
-      name: '本社'
+      name: '自社',
+      displayOrder: 8,
+      isClient: false
     },
     { transaction: t }
   );
 
-  return { tenant, membership, company };
+  // Create a default company for the tenant linked to the own-company class.
+  const company = await models.Company.create(
+    {
+      tenantId: tenant.id,
+      name: '本社',
+      companyClassId: companyClass.id
+    },
+    { transaction: t }
+  );
+
+  return { tenant, membership, companyClass, company };
 }
 
 // Keep old function name as alias for backward compatibility during transition
