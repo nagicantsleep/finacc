@@ -14,14 +14,14 @@
           <th scope="col" style="width: 120px;">クラス</th>
           <th scope="col" style="width: 200px;">名前</th>
           <th scope="col" style="width: 70px;">状態</th>
-          <th scope="col" style="width: 40px;" title="ユーザー連携">連携</th>
-          <th scope="col" style="width: 40px;" title="管理者">管</th>
-          <th scope="col" style="width: 40px;" title="会計">会</th>
-          <th scope="col" style="width: 40px;" title="会計(閲覧)">閲</th>
-          <th scope="col" style="width: 40px;" title="承認可能">承</th>
-          <th scope="col" style="width: 40px;" title="顧客管理">顧</th>
-          <th scope="col" style="width: 40px;" title="在庫管理">在</th>
-          <th scope="col" style="width: 40px;" title="人事管理">人</th>
+          <th scope="col" class="th-rotate"><span>連携</span></th>
+          <th scope="col" class="th-rotate"><span>管理者</span></th>
+          <th scope="col" class="th-rotate"><span>会計</span></th>
+          <th scope="col" class="th-rotate"><span>会計(閲覧)</span></th>
+          <th scope="col" class="th-rotate"><span>承認可能</span></th>
+          <th scope="col" class="th-rotate"><span>顧客管理</span></th>
+          <th scope="col" class="th-rotate"><span>在庫管理</span></th>
+          <th scope="col" class="th-rotate"><span>人事管理</span></th>
           <th scope="col" style="width: 100px;">入社日</th>
         </tr>
         <tr>
@@ -80,6 +80,19 @@
 </div>
 
 <style>
+  .th-rotate {
+    width: 40px;
+    white-space: nowrap;
+    vertical-align: bottom;
+    padding: 4px 2px;
+  }
+  .th-rotate span {
+    display: inline-block;
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    font-size: 11px;
+    line-height: 1;
+  }
 </style>
 
 <script>
