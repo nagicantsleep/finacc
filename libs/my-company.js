@@ -10,8 +10,8 @@ export default async (tenantId) => {
     }
   } else
   if  ( isNode() )  {
-    const models = await import('../models/index.js');
-    const company = await  models.Company.findOne({
+    const { default: models } = await import('../models/index.js');
+    company = await models.Company.findOne({
       where: {
         tenantId,
         companyClassId: 1
