@@ -112,10 +112,9 @@ export const setup = async (req, res, next) => {
       },{ transaction: t });
       await createInitialAccount(tenantId, req.body.term, req.body.companyClass, t);
       await createInitialMenuTemplates(tenantId, t);
-      getCompanyInfo(req.currentTenantId).then(async (company) => {
-        company.roundingMethod = req.body.roundingMethod;
-        await putCompanyInfo(company, req.currentTenantId);
-      })
+      const company = await getCompanyInfo(req.currentTenantId);
+      company.roundingMethod = req.body.roundingMethod;
+      await putCompanyInfo(company, req.currentTenantId);
       await t.commit();
       req.session.term = req.body.term;
       req.session.save();

@@ -1,5 +1,16 @@
 import models from '../models/index.js';
 
+const DEFAULT_COMPANY_CLASSES = [
+  { name: '国内購買先', displayOrder: 1, isClient: false },
+  { name: '海外購買先', displayOrder: 2, isClient: false },
+  { name: '国内外注', displayOrder: 3, isClient: false },
+  { name: '海外外注', displayOrder: 4, isClient: false },
+  { name: '国内顧客', displayOrder: 5, isClient: true },
+  { name: '海外顧客', displayOrder: 6, isClient: true },
+  { name: '税金公共料金等', displayOrder: 7, isClient: false },
+  { name: '自社', displayOrder: 8, isClient: false },
+];
+
 /**
  * Generate a unique tenant slug from a username.
  * Strips characters not safe for a slug and appends a short timestamp suffix
@@ -22,7 +33,7 @@ function slugFromName(name) {
  * Idempotent: if a default TenantMember already exists for this user, returns it
  * without creating duplicates.
  *
- * Returns { tenant, membership }.
+ * Returns { tenant, membership, companyClasses, company }.
  */
 export async function bootstrapTenantMember(user, t) {
   // Idempotency guard: if the user already has a default membership, skip.
@@ -66,7 +77,27 @@ export async function bootstrapTenantMember(user, t) {
     { transaction: t }
   );
 
-  return { tenant, membership };
+  // Seed default company classes for the tenant.
+  const companyClasses = await models.CompanyClass.bulkCreate(
+    DEFAULT_COMPANY_CLASSES.map((companyClass) => ({
+      ...companyClass,
+      tenantId: tenant.id
+    })),
+    { transaction: t, returning: true }
+  );
+  const ownCompanyClass = companyClasses.find((companyClass) => companyClass.name === '自社');
+
+  // Create the default company for the tenant.
+  const company = await models.Company.create(
+    {
+      tenantId: tenant.id,
+      companyClassId: ownCompanyClass.id,
+      name: '本社'
+    },
+    { transaction: t }
+  );
+
+  return { tenant, membership, companyClasses, company };
 }
 
 // Keep old function name as alias for backward compatibility during transition
