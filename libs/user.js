@@ -26,7 +26,7 @@ _passport.use(new Local({
       }).catch((e) => {
         console.log('login error', e);
         return done(null, false, {
-          message: 'fail'
+          message: e?.message || 'fail'
         });
       });
     });
@@ -70,11 +70,11 @@ export	const	auth_user = (name, password) => {
           done(user);
         } else {
           //console.log("auth fail");
-          fail(user);
+          fail(new Error('パスワードが違います。'));
         }
       } else {
         //console.log("user none");
-        fail(null);
+        fail(new Error('ユーザーが存在しません。'));
       }
     });
   });

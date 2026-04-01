@@ -248,10 +248,15 @@ export default {
       if (error) {
         return next(error);
       }
-      if (( !user ) ||
-          (( user.user.deauthorizedAt !== null ) &&
-           ( user.user.deauthorizedAt < new Date() )) ) {
-        res.json({
+      if (!user) {
+        return res.json({
+          result: 'NG',
+          message: info?.message || 'ユーザー名またはパスワードが違います。'
+        });
+      }
+      if (( user.user.deauthorizedAt !== null ) &&
+          ( user.user.deauthorizedAt < new Date() )) {
+        return res.json({
           result: 'NG',
           message: `user ${user.user_name} not found`
         });
