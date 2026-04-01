@@ -11,13 +11,17 @@
     <table class="table table-bordered">
       <thead class="table-light">
         <tr>
-          <th scope="col" style="width: 130px;">クラス</th>
-          <th scope="col">名前</th>
-          <th scope="col" style="width: 80px;">状態</th>
-          <th scope="col" style="width: 50px;" title="ユーザー連携">連携</th>
-          <th scope="col" style="width: 50px;" title="管理者">管</th>
-          <th scope="col" style="width: 50px;" title="会計">会</th>
-          <th scope="col" style="width: 50px;" title="承認">承</th>
+          <th scope="col" style="width: 120px;">クラス</th>
+          <th scope="col" style="width: 200px;">名前</th>
+          <th scope="col" style="width: 70px;">状態</th>
+          <th scope="col" style="width: 40px;" title="ユーザー連携">連携</th>
+          <th scope="col" style="width: 40px;" title="管理者">管</th>
+          <th scope="col" style="width: 40px;" title="会計">会</th>
+          <th scope="col" style="width: 40px;" title="会計(閲覧)">閲</th>
+          <th scope="col" style="width: 40px;" title="承認可能">承</th>
+          <th scope="col" style="width: 40px;" title="顧客管理">顧</th>
+          <th scope="col" style="width: 40px;" title="在庫管理">在</th>
+          <th scope="col" style="width: 40px;" title="人事管理">人</th>
           <th scope="col" style="width: 100px;">入社日</th>
         </tr>
         <tr>
@@ -31,6 +35,10 @@
               {/each}
             </select>
           </th>
+          <th></th>
+          <th></th>
+          <th></th>
+          <th></th>
           <th></th>
           <th></th>
           <th></th>
@@ -55,21 +63,15 @@
               {line.status === 'active' ? '在職' : '退職'}
             </span>
           </td>
-          <td class="text-center">
-            {#if line.userId}●{/if}
-          </td>
-          <td class="text-center">
-            {#if line.administrable}✓{/if}
-          </td>
-          <td class="text-center">
-            {#if line.accounting}✓{/if}
-          </td>
-          <td class="text-center">
-            {#if line.approvable}✓{/if}
-          </td>
-          <td>
-            {#if line.joiningDate}{line.joiningDate.replaceAll('-', '/')}{/if}
-          </td>
+          <td class="text-center">{#if line.userId}●{/if}</td>
+          <td class="text-center">{#if line.administrable}✓{/if}</td>
+          <td class="text-center">{#if line.accounting}✓{/if}</td>
+          <td class="text-center">{#if line.fiscalBrowsing}✓{/if}</td>
+          <td class="text-center">{#if line.approvable}✓{/if}</td>
+          <td class="text-center">{#if line.companyManagement}✓{/if}</td>
+          <td class="text-center">{#if line.inventoryManagement}✓{/if}</td>
+          <td class="text-center">{#if line.personnelManagement}✓{/if}</td>
+          <td>{#if line.joiningDate}{line.joiningDate.replaceAll('-', '/')}{/if}</td>
         </tr>
         {/each}
       </tbody>
