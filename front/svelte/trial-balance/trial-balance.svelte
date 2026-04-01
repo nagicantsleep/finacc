@@ -2,7 +2,7 @@
 <div class="list">
   <div class="page-title d-flex justify-content-between">
   	<h1>残高試算表</h1>
-  	<a href="/forms/trial_balance?format=pdf"
+  	<a href="/forms/trial_balance/{status.fy.term}?format=pdf"
       download="残高試算表.pdf" class="btn btn-primary">
     	残高試算表をダウンロード&nbsp;<i class="bi bi-download"></i>
   	</a>
