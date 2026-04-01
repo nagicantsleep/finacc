@@ -112,7 +112,10 @@ export const requireTenant = async (req, res, next) => {
     });
   } catch (e) {
     console.log('requireTenant error', e);
-    return next();
+    if (req.path.startsWith('/api/')) {
+      return res.status(500).json({ result: 'NG', message: 'Internal server error resolving tenant.' });
+    }
+    return res.redirect('/login');
   }
 };
 
