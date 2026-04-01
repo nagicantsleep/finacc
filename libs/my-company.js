@@ -8,8 +8,7 @@ export default async (tenantId) => {
     if	( result.data.companies.length > 0 )	{
       company = result.data.companies[0];
     }
-  } else
-  if  ( isNode() )  {
+  } else if  ( isNode() )  {
     const { default: models } = await import('../models/index.js');
     company = await models.Company.findOne({
       where: {
@@ -24,6 +23,6 @@ export default async (tenantId) => {
       ]
     });
   }
-  return  (company)
+  return company;
 }
 

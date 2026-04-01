@@ -466,11 +466,16 @@ const SGA = () => {
 }
 
 
-export default async(term) => {
-  let result = await axios.get(`/api/term/${term}`);
-  let fy = result.data;
-  let res = await axios.get(`/api/trial-balance/${term}`);
-  trialBalanceLines = res.data;
+export default async(term, tenantId) => {
+  const { default: models } = await import('../models/index.js');
+  
+  let fy = await models.FiscalYear.findOne({
+    where: { tenantId, term }
+  });
+  
+  const lastDate = new Date(fy.endDate);
+  const ret = await trial_balance(tenantId, term, lastDate);
+  trialBalanceLines = ret.lines;
   trialBalanceLines.forEach((line) => {
     if  ( parseInt(line.acl_code) < 400 ) {
       //console.log(line);

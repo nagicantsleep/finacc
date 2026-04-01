@@ -23,7 +23,10 @@ router.get('/explanatory_journal/:term', async (req, res, next) => {
     	( req.session.user.fiscalBrowsing )) {
     if  ( req.query.format === 'pdf' )  {
       const company = await myCompany(req.currentTenantId);
-      const {fy, dates} = await initializeExplanatoryJournal(req.params.term);
+      if (!company) {
+        return res.status(404).json({ error: 'Company not found. Please create a company with companyClassId: 1' });
+      }
+      const {fy, dates} = await initializeExplanatoryJournal(req.params.term, req.currentTenantId);
       print('explanatory-journal', {
         fy: fy,
         dates: dates,
@@ -49,7 +52,7 @@ router.get('/general_ledger/:term', async (req, res, next) => {
         ( req.session.user.fiscalBrowsing )) {
     if  ( req.query.format === 'pdf' )  {
       const company = await myCompany(req.currentTenantId);
-      const {fy, accountPages, ledgerPages} = await initializeGeneralLedger(req.params.term);
+      const {fy, accountPages, ledgerPages} = await initializeGeneralLedger(req.params.term, req.currentTenantId);
       print('general-ledger', {
         fy: fy,
         company: company,
@@ -76,7 +79,7 @@ router.get('/subsidiary_ledger/:term', async (req, res, next) => {
         ( req.session.user.fiscalBrowsing )) {
     if  ( req.query.format === 'pdf' )  {
       const company = await myCompany(req.currentTenantId);
-      const {fy, ledgerPages} = await initializeSubsidiaryLedger(req.params.term);
+      const {fy, ledgerPages} = await initializeSubsidiaryLedger(req.params.term, req.currentTenantId);
       print('subsidiary-ledger', {
         fy: fy,
         company: company,
@@ -102,7 +105,7 @@ router.get('/trial_balance/:term', async (req, res, next) => {
       ( req.session.user.fiscalBrowsing )) {
     if  ( req.query.format === 'pdf' )  {
       const company = await myCompany(req.currentTenantId);
-      const {fy, assetPages, liabilitiesAndCapitalPages, incomeStatementPages} = await initializeTrialBalance(req.params.term);
+      const {fy, assetPages, liabilitiesAndCapitalPages, incomeStatementPages} = await initializeTrialBalance(req.params.term, req.currentTenantId);
       print('trial-balance', {
         fy: fy,
         company: company,
@@ -140,7 +143,7 @@ router.get('/financial_statement/:term', async (req, res, next) => {
       ( req.session.user.fiscalBrowsing )) {
     if  ( req.query.format === 'pdf' )  {
       const company = await myCompany(req.currentTenantId);
-      const {fy, bsLines, plOut, sgaPage, asset, liabilities, networth, sgaSum} = await initializeFinancialStatement(req.params.term);
+      const {fy, bsLines, plOut, sgaPage, asset, liabilities, networth, sgaSum} = await initializeFinancialStatement(req.params.term, req.currentTenantId);
       print('financial-statement', {
         fy: fy,
         company: company,

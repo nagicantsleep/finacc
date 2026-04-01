@@ -1,17 +1,20 @@
-import axios from 'axios';
 import {burstPage} from './utils.js';
 import {ledgerLines} from './ledger.js';
+import Accounts from './accounts.js';
+import {get_details} from '../routes/api_ledger.js';
 
-const ledgerPages = async (term, account) => {
+const ledgerPages = async (term, account, tenantId) => {
+  const { default: models } = await import('../models/index.js');
+  
+  const fy = await models.FiscalYear.findOne({
+    where: { term, tenantId }
+  });
+  
   const LINES = 17;
 
   let pages = [];
-  let remaining;
-  let details;
-  let ledger;
-  let result = await axios.get(`/api/ledger/${term}/${account.code}`);
-  details = result.data;
-  ledger = ledgerLines(account.code, null, account, details);
+  let details = await get_details(fy, account.code, null, tenantId);
+  let ledger = ledgerLines(account.code, null, account, details);
   let {lines, pickup, sums} = ledger;
   let page = [];
   let balance = pickup.balance;
@@ -40,16 +43,18 @@ const ledgerPages = async (term, account) => {
   });
 }
 
-export default async (term) => {
-  let result = await axios.get(`/api/term/${term}`);
-  let fy = result.data;
+export default async (term, tenantId) => {
+  const { default: models } = await import('../models/index.js');
+  
+  let fy = await models.FiscalYear.findOne({
+    where: { tenantId, term }
+  });
 
-  let res = await axios.get(`/api/accounts2/${term}`);
-  let accounts = res.data;
+  let accounts = await Accounts.all2(tenantId, term);
   let accountLines = [];
   let ledgerLines = [];
   for ( let account of accounts ) {
-    let ledger = await ledgerPages(term, account);
+    let ledger = await ledgerPages(term, account, tenantId);
     //console.log({ledger});
     if  (( ledger.sums.debit ) ||
          ( ledger.sums.credit ) ||
