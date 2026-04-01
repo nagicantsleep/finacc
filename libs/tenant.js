@@ -78,7 +78,8 @@ export const requireTenant = async (req, res, next) => {
       // frontend sees the correct permission flags for the active tenant.
       const PERM_FIELDS = [
         'accounting', 'fiscalBrowsing', 'approvable', 'administrable',
-        'companyManagement', 'inventoryManagement', 'personnelManagement'
+        'companyManagement', 'inventoryManagement', 'personnelManagement',
+        'tenantSettings'
       ];
       for (const field of PERM_FIELDS) {
         if (membership[field] !== undefined) {
@@ -138,7 +139,8 @@ export async function switchTenant(userId, tenantId) {
 export function overlayMembershipPermissions(sessionUser, membership) {
   const PERM_FIELDS = [
     'accounting', 'fiscalBrowsing', 'approvable', 'administrable',
-    'companyManagement', 'inventoryManagement', 'personnelManagement'
+    'companyManagement', 'inventoryManagement', 'personnelManagement',
+    'tenantSettings'
   ];
 
   for (const field of PERM_FIELDS) {
