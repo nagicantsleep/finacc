@@ -102,20 +102,6 @@ export default [
 勘定科目を追加変更ができます。<br/>
 なお「削除」はできません。`
   }, {
-    name: 'home',
-    title: '会社設定',
-    match: /^\/tenant/,
-    authority: (user) => {
-      return  (user.tenantSettings);
-    },
-    href: (status) => {
-      return	('/tenant');
-    },
-    icon: { name: 'bi:gear-fill' },
-    description: `
-テナント情報とシステム設定を管理します。<br/>
-自社情報、種別マスタ、税区分、システム設定などが含まれます。`
-  }, {
     name: 'company',
     title: '取引先管理',
     match: /^\/company/,
@@ -253,5 +239,19 @@ export default [
     description: `
 人事情報を入力します。<br/>
 現在は担当者名の情報源として使っているだけですが、将来的には人事給与システムが付加されます。`
+  }, {
+    name: 'home',
+    title: '会社設定',
+    match: /^\/tenant/,
+    authority: (user) => {
+      return  (user.tenantSettings);
+    },
+    href: (status) => {
+      return	('/tenant');
+    },
+    icon: { name: 'bi:gear-fill' },
+    description: `
+テナント情報とシステム設定を管理します。<br/>
+自社情報、種別マスタ、税区分、システム設定などが含まれます。`
   }
 ];
