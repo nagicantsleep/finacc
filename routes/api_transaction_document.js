@@ -2,6 +2,7 @@ import models from '../models/index.js';
 const Op = models.Sequelize.Op;
 import {print} from '../libs/print.js';
 import {DateString} from '../libs/utils.js';
+import myCompany from '../libs/my-company.js';
 
 export default {
   get: async (req, res, next) => {
@@ -122,8 +123,7 @@ export default {
         }
         if (req.query.print) {
           if (!transaction.voucherId) {
-            let companies = await models.Company.findAll({ where: { companyClassId: 1, tenantId } });
-            const company = companies[0];
+            const company = await myCompany(tenantId);
             const pdf = await print(req.query.print, { transaction, company });
             res.setHeader('Content-Type', 'application/pdf');
             res.send(pdf);
@@ -329,7 +329,7 @@ export default {
     });
     if (transaction && transaction.kind.forBook) {
       if (transaction.kind.book && transaction.kind.book.form) {
-        const company = await models.Company.findOne({ where: { tenantId, companyClassId: 1 } });
+        const company = await myCompany(tenantId);
         const pdf = await print(transaction.kind.book.form, { transaction, company });
         let name = `${transaction.companyName}-${transaction.kind.book.form}-${DateString(new Date())} .pdf`;
         if (transaction.voucherId) {

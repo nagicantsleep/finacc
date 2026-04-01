@@ -10,10 +10,19 @@ export default async (tenantId) => {
     }
   } else if  ( isNode() )  {
     const { default: models } = await import('../models/index.js');
+    const ownCompanyClass = await models.CompanyClass.findOne({
+      where: {
+        tenantId,
+        name: '自社'
+      }
+    });
+    if (!ownCompanyClass) {
+      return null;
+    }
     company = await models.Company.findOne({
       where: {
         tenantId,
-        companyClassId: 1
+        companyClassId: ownCompanyClass.id
       },
       include: [
         {
