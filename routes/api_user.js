@@ -397,6 +397,69 @@ export default {
       });
     }
   },
+  profile: async (req, res, next) => {
+    if (!req.session || !req.session.user) {
+      return res.status(401).json({ result: 'NG', message: '認証されていません。' });
+    }
+    const userId = req.session.user.id;
+    const { legalName, legalRuby, email, telNo } = req.body;
+
+    if (!legalName || !legalName.trim()) {
+      return res.json({ result: 'NG', message: '氏名を入力してください。' });
+    }
+    if (!email || !email.trim()) {
+      return res.json({ result: 'NG', message: 'メールアドレスを入力してください。' });
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return res.json({ result: 'NG', message: '有効なメールアドレスを入力してください。' });
+    }
+
+    try {
+      const user = await models.User.findByPk(userId);
+      if (!user) return res.status(404).json({ result: 'NG', message: 'ユーザーが見つかりません。' });
+
+      user.legalName = legalName.trim();
+      user.legalRuby = legalRuby?.trim() || null;
+      user.email = email.trim().toLowerCase();
+      user.telNo = telNo?.trim() || null;
+      await user.save();
+
+      req.session.user.legalName = user.legalName;
+      req.session.user.email = user.email;
+
+      res.json({ result: 'OK' });
+    } catch (err) {
+      console.error('profile update error', err);
+      res.json({ result: 'NG', message: 'プロフィールの更新に失敗しました。' });
+    }
+  },
+  logoff: async (req, res, next) => {
+    if (!req.session || !req.session.user) {
+      return res.status(401).json({ result: 'NG', message: '認証されていません。' });
+    }
+    try {
+      const memberships = await models.TenantMember.findAll({
+        where: { userId: req.session.user.id, status: 'active' },
+        include: [{ model: models.Tenant, as: 'tenant', where: { status: 'active' } }]
+      });
+
+      if (memberships.length <= 1) {
+        // Only one tenant — full logout
+        req.logout((err) => {
+          req.session.destroy(() => {
+            res.json({ result: 'OK', action: 'logout' });
+          });
+        });
+      } else {
+        // Multiple tenants — clear current tenant, go to selection
+        delete req.session.currentTenantId;
+        res.json({ result: 'OK', action: 'select' });
+      }
+    } catch (err) {
+      console.error('logoff error', err);
+      res.json({ result: 'NG', message: 'ログオフに失敗しました。' });
+    }
+  },
   selectTenant: async (req, res, next) => {
     if (!req.session || !req.session.user) {
       return res.status(401).json({

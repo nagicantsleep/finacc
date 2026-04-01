@@ -44,6 +44,8 @@ router.delete('/admin/backup/:date', admin.delete);
 router.get('/user', user.get);
 router.get('/user/:id', user.get);
 router.put('/user/password', user.password);
+router.put('/user/profile', user.profile);
+router.post('/user/logoff', user.logoff);
 router.post('/user/login', user.login);
 router.post('/user/signup', user.signup);
 router.get('/user/tenants', user.tenants);

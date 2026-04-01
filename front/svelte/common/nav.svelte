@@ -23,20 +23,60 @@
           role="button" aria-expanded="false">
         <span class="d-none d-md-inline">{status.user.name}</span>
       </a>
-      <ul class="dropdown-menu"
+      <ul class="dropdown-menu dropdown-menu-end"
           aria-labelledby="user_menu">
         <li>
-          <a href="/logout" class="dropdown-item">Sign out</a>
+          <a href="#" class="dropdown-item" on:click|preventDefault={openProfile}>
+            <i class="bi bi-person-circle me-1"></i>プロフィール
+          </a>
+        </li>
+        <li>
+          <a href="#" class="dropdown-item" on:click|preventDefault={logoff}>
+            <i class="bi bi-box-arrow-left me-1"></i>テナント切替
+          </a>
+        </li>
+        <li><hr class="dropdown-divider"></li>
+        <li>
+          <a href="/logout" class="dropdown-item">
+            <i class="bi bi-power me-1"></i>Sign out
+          </a>
         </li>
       </ul>
     </li>
   </ul>
 </div>
 
+<ProfileModal bind:this={profileModal} user={status.user} on:updated={onProfileUpdated} />
+
 <script>
-import {onMount, beforeUpdate, afterUpdate, createEventDispatcher} from 'svelte';
+import {onMount, createEventDispatcher} from 'svelte';
+import axios from 'axios';
 import {wareki} from '../../../libs/utils';
+import ProfileModal from './profile-modal.svelte';
 
 export let status;
+
+let profileModal;
+
+const openProfile = () => profileModal?.show();
+
+const onProfileUpdated = (event) => {
+  status.user = { ...status.user, ...event.detail };
+};
+
+const logoff = async () => {
+  try {
+    const res = await axios.post('/api/user/logoff');
+    if (res.data.result === 'OK') {
+      if (res.data.action === 'logout') {
+        window.location = '/login';
+      } else {
+        window.location = '/login/select-tenant';
+      }
+    }
+  } catch (err) {
+    console.error('logoff error', err);
+  }
+};
 
 </script>
