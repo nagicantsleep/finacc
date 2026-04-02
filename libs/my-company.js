@@ -4,7 +4,7 @@ import {isNode, isBrowser} from './utils.js';
 export default async (tenantId) => {
   let company;
   if  ( isBrowser() ) {
-    const result = await axios.get('/api/company?kind=1');
+    const result = await axios.get('/api/company?ownClass=true');
     if	( result.data.companies.length > 0 )	{
       company = result.data.companies[0];
     }

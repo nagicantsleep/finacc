@@ -24,7 +24,7 @@ router.get('/explanatory_journal/:term', async (req, res, next) => {
     if  ( req.query.format === 'pdf' )  {
       const company = await myCompany(req.currentTenantId);
       if (!company) {
-        return res.status(404).json({ error: 'Company not found. Please create a company with companyClassId: 1' });
+        return res.status(404).json({ error: 'Company not found. Please register a company with class 自社.' });
       }
       const {fy, dates} = await initializeExplanatoryJournal(req.params.term, req.currentTenantId);
       print('explanatory-journal', {
@@ -66,7 +66,7 @@ router.get('/general_ledger/:term', async (req, res, next) => {
     if	( req.query.format === 'html')	{
       res.sendFile(path.join(__dirname, '../views/form.html'));
     } else {
-      general_ledger(parseInt(req.params.term)).then((buff) => {
+      general_ledger(parseInt(req.params.term), req.currentTenantId).then((buff) => {
         res.send(buff);
       })
     }
@@ -92,7 +92,7 @@ router.get('/subsidiary_ledger/:term', async (req, res, next) => {
     if	( req.query.format === 'html')	{
       res.sendFile(path.join(__dirname, '../views/form.html'));
     } else {
-      subsidiary_ledger(parseInt(req.params.term)).then((buff) => {
+      subsidiary_ledger(parseInt(req.params.term), req.currentTenantId).then((buff) => {
         res.send(buff);
       })
     }
@@ -120,7 +120,7 @@ router.get('/trial_balance/:term', async (req, res, next) => {
     if	( req.query.format === 'html')	{
       res.sendFile(path.join(__dirname, '../views/form.html'));
     } else {
-      trial_balance(parseInt(req.params.term)).then((buff) => {
+      trial_balance(parseInt(req.params.term), null, req.currentTenantId).then((buff) => {
         res.send(buff);
       })
     }
@@ -131,7 +131,7 @@ router.get('/trial_balance/:term', async (req, res, next) => {
 router.get('/trial_balance/:term/:month', (req, res, next) => {
 	if (( req.session.user.accounting ) ||
       ( req.session.user.fiscalBrowsing )) {
-    trial_balance(parseInt(req.params.term), req.params.month).then((buff) => {
+    trial_balance(parseInt(req.params.term), req.params.month, req.currentTenantId).then((buff) => {
       res.send(buff);
     })
 	} else {
@@ -162,7 +162,7 @@ router.get('/financial_statement/:term', async (req, res, next) => {
     if	( req.query.format === 'html')	{
       res.sendFile(path.join(__dirname, '../views/form.html'));
     } else {
-      financial_statement(parseInt(req.params.term)).then((buff) => {
+      financial_statement(parseInt(req.params.term), req.currentTenantId).then((buff) => {
         res.send(buff);
       })
     }

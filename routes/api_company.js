@@ -24,6 +24,14 @@ export default {
             where.companyClassId = kind;
           }
         }
+        if  ( req.query.ownClass )  {
+          const ownCompanyClass = await models.CompanyClass.findOne({
+            where: { tenantId, name: '自社' }
+          });
+          if (ownCompanyClass) {
+            where.companyClassId = ownCompanyClass.id;
+          }
+        }
         if  ( req.query.clientOnly )  {
           include[0].where = {
             isClient: true

@@ -99,11 +99,12 @@ const createInitialAccount = async (tenantId, term, companyClass, t) => {
 
 export const setup = async (req, res, next) => {
   const tenantId = req.currentTenantId;
-	const countFy = await models.FiscalYear.count({ where: { tenantId } });
-  if ( countFy === 0 ){
-    const t = await models.sequelize.transaction();
-    try {
-      const fy =  await models.FiscalYear.create({
+  const t = await models.sequelize.transaction();
+  try {
+    // Check inside the transaction to prevent concurrent double-setup.
+    const countFy = await models.FiscalYear.count({ where: { tenantId }, transaction: t });
+    if ( countFy === 0 ){
+      const fy = await models.FiscalYear.create({
         startDate: new Date(req.body.startDate),
         endDate: new Date(req.body.endDate),
         term: req.body.term,
@@ -119,14 +120,14 @@ export const setup = async (req, res, next) => {
       req.session.term = req.body.term;
       req.session.save();
       res.json({code: 0});
-    }catch(e){
-      console.log(e)
+    } else {
       await t.rollback();
-      res.json({code: -99});
+      res.json({code: -1});
     }
-  }else{
-    // exists FiscalYear
-    res.json({code: -1});
+  } catch(e) {
+    console.log(e);
+    await t.rollback();
+    res.json({code: -99});
   }
 }
 

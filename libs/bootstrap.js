@@ -36,9 +36,11 @@ function slugFromName(name) {
  * Returns { tenant, membership, companyClasses, company }.
  */
 export async function bootstrapTenantMember(user, t) {
-  // Idempotency guard: if the user already has a default membership, skip.
+  // Idempotency guard inside the transaction with a row-level lock to prevent
+  // concurrent signups from racing past this check and creating duplicate tenants.
   const existing = await models.TenantMember.findOne({
     where: { userId: user.id, isDefault: true },
+    lock: t.LOCK.UPDATE,
     transaction: t
   });
   if (existing) {
