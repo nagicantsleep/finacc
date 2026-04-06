@@ -386,12 +386,14 @@ export default {
         tenantName: m.tenant.name,
         tenantSlug: m.tenant.slug,
         isOwner: m.isOwner,
-        isDefault: m.isDefault
+        isDefault: m.isDefault,
+        status: m.status
       }));
       
       res.json({
         result: 'OK',
         userName: req.session.user.legalName || req.session.user.name,
+        activeTenantId: req.session.currentTenantId || null,
         tenants
       });
     } catch (err) {
@@ -399,6 +401,48 @@ export default {
       res.status(500).json({
         result: 'NG',
         message: 'テナントの取得に失敗しました。'
+      });
+    }
+  },
+  sessionStatus: async (req, res, next) => {
+    if (!req.session || !req.session.user) {
+      return res.status(401).json({
+        result: 'NG',
+        authenticated: false,
+        message: '認証されていません。'
+      });
+    }
+
+    try {
+      const memberships = await models.TenantMember.findAll({
+        where: {
+          userId: req.session.user.id,
+          status: 'active'
+        },
+        include: [{
+          model: models.Tenant,
+          as: 'tenant',
+          where: { status: 'active' }
+        }]
+      });
+
+      res.json({
+        result: 'OK',
+        authenticated: true,
+        activeTenantId: req.session.currentTenantId || null,
+        needsTenantSelection: !req.session.currentTenantId,
+        membershipCount: memberships.length,
+        user: {
+          id: req.session.user.id,
+          name: req.session.user.name,
+          legalName: req.session.user.legalName
+        }
+      });
+    } catch (err) {
+      console.error('session status error', err);
+      res.status(500).json({
+        result: 'NG',
+        message: 'セッション状態の取得に失敗しました。'
       });
     }
   },

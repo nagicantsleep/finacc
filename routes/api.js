@@ -49,6 +49,7 @@ router.post('/user/logoff', user.logoff);
 router.post('/user/login', user.login);
 router.post('/user/signup', user.signup);
 router.get('/user/tenants', user.tenants);
+router.get('/user/session-status', user.sessionStatus);
 router.post('/user/select-tenant', user.selectTenant);
 router.put('/user/tenant', user.switchTenant);
 router.put('/user/:id', user.update);
