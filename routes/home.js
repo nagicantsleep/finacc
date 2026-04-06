@@ -46,6 +46,12 @@ const login =  async (req, res, next) => {
   });
 };
 
+const logon = async (req, res, next) => {
+  res.render('logon.spy', {
+    title: 'Logon'
+  });
+};
+
 const setup  =  async (req, res, next) => {
   const countFy = req.currentTenantId
     ? await models.FiscalYear.count({ where: { tenantId: req.currentTenantId } })
@@ -63,6 +69,7 @@ router.get('/setup', is_authenticated, requireTenant, setup);
 router.get('/home/:term', is_authenticated, requireTenant, home);
 router.get('/home', is_authenticated, requireTenant, home);
 router.get('/login', login);
+router.get('/logon', is_authenticated, logon);
 router.get('/logout', (req, res, next) => {
   //console.log('logout', req.user);
   req.logout((err) => {
