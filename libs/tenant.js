@@ -98,26 +98,27 @@ export const requireTenant = async (req, res, next) => {
       return next();
     }
 
-    // No resolvable tenant — allow tenant-management routes through so users
-    // can see/list/select tenants even without a default selected yet.
     const rawPath = req.originalUrl || req.url;
+    if (req.session.currentTenantId) {
+      req.session.currentTenantId = null;
+    }
+
     if (rawPath.includes('/user/tenants') ||
         rawPath.includes('/user/select-tenant') ||
         rawPath.includes('/user/tenant')) {
       return next();
     }
 
-    // For all other routes, destroy session and force re-login so the
-    // bootstrap path (signup) or login handler can set currentTenantId.
-    req.logout((err) => {
-      req.session.destroy(() => {
-        if (req.path.startsWith('/api/')) {
-          res.status(401).json({ result: 'NG', message: 'No active tenant. Please log in again.' });
-        } else {
-          res.redirect('/login');
-        }
+    if (rawPath.startsWith('/api/')) {
+      return res.status(403).json({
+        result: 'NG',
+        code: 'TENANT_SELECTION_REQUIRED',
+        message: 'No active tenant selected.',
+        redirectTo: '/logon'
       });
-    });
+    }
+
+    return res.redirect('/logon');
   } catch (e) {
     console.log('requireTenant error', e);
     if (req.path.startsWith('/api/')) {
