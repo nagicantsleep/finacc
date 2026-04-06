@@ -31,8 +31,8 @@
           </a>
         </li>
         <li>
-          <a href="#" class="dropdown-item" on:click|preventDefault={logoff}>
-            <i class="bi bi-box-arrow-left me-1"></i>テナント切替
+          <a href="#" class="dropdown-item" on:click|preventDefault={switchTenantFromApp}>
+            <i class="bi bi-arrow-left-right me-1"></i>テナント切替
           </a>
         </li>
         <li><hr class="dropdown-divider"></li>
@@ -49,7 +49,6 @@
 <ProfileModal bind:this={profileModal} user={status.user} on:updated={onProfileUpdated} />
 
 <script>
-import {onMount, createEventDispatcher} from 'svelte';
 import axios from 'axios';
 import {wareki} from '../../../libs/utils';
 import ProfileModal from './profile-modal.svelte';
@@ -64,18 +63,13 @@ const onProfileUpdated = (event) => {
   status.user = { ...status.user, ...event.detail };
 };
 
-const logoff = async () => {
+const switchTenantFromApp = async () => {
   try {
     const res = await axios.post('/api/user/logoff');
-    if (res.data.result === 'OK') {
-      if (res.data.action === 'logout') {
-        window.location = '/login';
-      } else {
-        window.location = '/login/select-tenant';
-      }
-    }
+    if (res.data.result !== 'OK') return;
+    window.location = res.data.action === 'logout' ? '/login' : '/logon';
   } catch (err) {
-    console.error('logoff error', err);
+    console.error('tenant switch error', err);
   }
 };
 
