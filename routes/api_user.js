@@ -4,6 +4,40 @@ import {passwd, passport, is_authenticated} from '../libs/user.js';
 import {bootstrapTenantMember} from '../libs/bootstrap.js';
 import {switchTenant, overlayMembershipPermissions} from '../libs/tenant.js';
 
+async function createOwnedTenant(user, name, transaction) {
+  const baseSlug = (name || user.legalName || user.name || 'tenant')
+    .toLowerCase()
+    .replace(/[^a-z0-9-]/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '')
+    .slice(0, 40) || 'tenant';
+  const slug = `${baseSlug}-${Date.now().toString(36)}`;
+
+  const tenant = await models.Tenant.create({
+    slug,
+    name,
+    status: 'active'
+  }, { transaction });
+
+  await models.TenantMember.create({
+    userId: user.id,
+    tenantId: tenant.id,
+    isOwner: true,
+    status: 'active',
+    isDefault: false,
+    accounting: true,
+    fiscalBrowsing: true,
+    approvable: true,
+    administrable: true,
+    companyManagement: true,
+    inventoryManagement: true,
+    personnelManagement: true,
+    tenantSettings: true
+  }, { transaction });
+
+  return tenant;
+}
+
 export default {
   members: (req, res, next) => {
     const tenantId = req.currentTenantId;
@@ -444,6 +478,129 @@ export default {
         result: 'NG',
         message: 'セッション状態の取得に失敗しました。'
       });
+    }
+  },
+  createTenant: async (req, res, next) => {
+    if (!req.session || !req.session.user) {
+      return res.status(401).json({ result: 'NG', message: '認証されていません。' });
+    }
+
+    const name = req.body.name?.trim();
+    if (!name) {
+      return res.status(400).json({ result: 'NG', message: 'テナント名を入力してください。' });
+    }
+
+    const transaction = await models.sequelize.transaction();
+    try {
+      const tenant = await createOwnedTenant(req.session.user, name, transaction);
+      await transaction.commit();
+      res.json({ result: 'OK', tenant: { id: tenant.id, name: tenant.name, slug: tenant.slug } });
+    } catch (err) {
+      await transaction.rollback();
+      console.error('tenant create error', err);
+      res.status(500).json({ result: 'NG', message: 'テナントの作成に失敗しました。' });
+    }
+  },
+  updateTenant: async (req, res, next) => {
+    if (!req.session || !req.session.user) {
+      return res.status(401).json({ result: 'NG', message: '認証されていません。' });
+    }
+
+    const tenantId = parseInt(req.params.id, 10);
+    const name = req.body.name?.trim();
+    if (!tenantId || !name) {
+      return res.status(400).json({ result: 'NG', message: '更新内容が不正です。' });
+    }
+
+    try {
+      const membership = await models.TenantMember.findOne({
+        where: {
+          userId: req.session.user.id,
+          tenantId,
+          isOwner: true,
+          status: 'active'
+        },
+        include: [{ model: models.Tenant, as: 'tenant', where: { status: 'active' } }]
+      });
+
+      if (!membership || !membership.tenant) {
+        return res.status(403).json({ result: 'NG', message: 'そのテナントを管理できません。' });
+      }
+
+      membership.tenant.name = name;
+      await membership.tenant.save();
+      res.json({ result: 'OK', tenant: { id: membership.tenant.id, name: membership.tenant.name, slug: membership.tenant.slug } });
+    } catch (err) {
+      console.error('tenant update error', err);
+      res.status(500).json({ result: 'NG', message: 'テナントの更新に失敗しました。' });
+    }
+  },
+  deleteTenant: async (req, res, next) => {
+    if (!req.session || !req.session.user) {
+      return res.status(401).json({ result: 'NG', message: '認証されていません。' });
+    }
+
+    const tenantId = parseInt(req.params.id, 10);
+    if (!tenantId) {
+      return res.status(400).json({ result: 'NG', message: 'テナントIDが不正です。' });
+    }
+
+    const transaction = await models.sequelize.transaction();
+    try {
+      const membership = await models.TenantMember.findOne({
+        where: {
+          userId: req.session.user.id,
+          tenantId,
+          isOwner: true,
+          status: 'active'
+        },
+        include: [{ model: models.Tenant, as: 'tenant', where: { status: 'active' } }],
+        transaction,
+        lock: transaction.LOCK.UPDATE
+      });
+
+      if (!membership || !membership.tenant) {
+        await transaction.rollback();
+        return res.status(403).json({ result: 'NG', message: 'そのテナントを管理できません。' });
+      }
+
+      const activeOwners = await models.TenantMember.count({
+        where: {
+          tenantId,
+          isOwner: true,
+          status: 'active'
+        },
+        transaction
+      });
+
+      if (activeOwners <= 1) {
+        await transaction.rollback();
+        return res.status(400).json({ result: 'NG', message: '最後の有効なオーナーのテナントは削除できません。' });
+      }
+
+      membership.status = 'inactive';
+      membership.isDefault = false;
+      await membership.save({ transaction });
+
+      const remainingActiveMembers = await models.TenantMember.count({
+        where: { tenantId, status: 'active' },
+        transaction
+      });
+      if (remainingActiveMembers === 0) {
+        membership.tenant.status = 'inactive';
+        await membership.tenant.save({ transaction });
+      }
+
+      if (req.session.currentTenantId === tenantId) {
+        delete req.session.currentTenantId;
+      }
+
+      await transaction.commit();
+      res.json({ result: 'OK' });
+    } catch (err) {
+      await transaction.rollback();
+      console.error('tenant delete error', err);
+      res.status(500).json({ result: 'NG', message: 'テナントの削除に失敗しました。' });
     }
   },
   profile: async (req, res, next) => {
