@@ -72,12 +72,9 @@ const Login = async () => {
     console.log('result', response.data);
     
     if (response.data.result === 'OK') {
-      // Check if tenant selection is needed
       if (response.data.requiresTenantSelection) {
-        current = 'tenant-select';
-        window.history.pushState(null, "", `/login/select-tenant`);
+        window.location = '/logon';
       } else {
-        // Direct login successful
         window.location = '/home';
       }
     } else {

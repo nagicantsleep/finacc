@@ -97,8 +97,7 @@ function selectTenant(tenant) {
   axios.post('/api/user/select-tenant', { tenantId: tenant.tenantId })
     .then((response) => {
       if (response.data.result === 'OK') {
-        // Success — redirect to home
-        window.location = '/home';
+        window.location = response.data.redirectTo || '/home';
       } else {
         message = response.data.message || 'テナントの選択に失敗しました。';
         msg_type = 'danger';
