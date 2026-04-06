@@ -517,50 +517,31 @@ export default {
       });
     }
     
-    const { tenantId } = req.body;
+    const tenantId = parseInt(req.body.tenantId, 10);
     
     if (!tenantId) {
-      return res.json({
+      return res.status(400).json({
         result: 'NG',
         message: 'テナントIDが指定されていません。'
       });
     }
     
     try {
-      const membership = await models.TenantMember.findOne({
-        where: { 
-          userId: req.session.user.id, 
-          tenantId,
-          status: 'active' 
-        },
-        include: [{ 
-          model: models.Tenant, 
-          as: 'tenant',
-          where: { status: 'active' }
-        }]
-      });
-      
-      if (!membership) {
-        return res.json({
-          result: 'NG',
-          message: 'そのテナントへのアクセス権限がありません。'
-        });
-      }
-      
-      // Set session tenant
+      const membership = await switchTenant(req.session.user.id, tenantId);
       req.session.currentTenantId = membership.tenantId;
       overlayMembershipPermissions(req.session.user, membership);
       
       res.json({ 
         result: 'OK',
         tenantId: membership.tenantId,
-        tenantName: membership.tenant.name
+        tenantName: membership.tenant.name,
+        redirectTo: '/home'
       });
     } catch (err) {
       console.error('tenant selection error', err);
-      res.status(500).json({
+      res.status(403).json({
         result: 'NG',
-        message: 'テナントの選択に失敗しました。'
+        message: 'そのテナントへのアクセス権限がありません。'
       });
     }
   }
