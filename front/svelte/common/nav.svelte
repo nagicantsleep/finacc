@@ -33,6 +33,9 @@
         <li>
           <a href="#" class="dropdown-item" on:click|preventDefault={switchTenantFromApp}>
             <i class="bi bi-arrow-left-right me-1"></i>テナント切替
+            {#if switchingTenant}
+              <span class="spinner-border spinner-border-sm ms-2" role="status" aria-hidden="true"></span>
+            {/if}
           </a>
         </li>
         <li><hr class="dropdown-divider"></li>
@@ -56,6 +59,7 @@ import ProfileModal from './profile-modal.svelte';
 export let status;
 
 let profileModal;
+let switchingTenant = false;
 
 const openProfile = () => profileModal?.show();
 
@@ -64,12 +68,21 @@ const onProfileUpdated = (event) => {
 };
 
 const switchTenantFromApp = async () => {
+  if (switchingTenant) {
+    return;
+  }
+
+  switchingTenant = true;
   try {
     const res = await axios.post('/api/user/logoff');
-    if (res.data.result !== 'OK') return;
+    if (res.data.result !== 'OK') {
+      switchingTenant = false;
+      return;
+    }
     window.location = res.data.action === 'logout' ? '/login' : '/logon';
   } catch (err) {
     console.error('tenant switch error', err);
+    switchingTenant = false;
   }
 };
 

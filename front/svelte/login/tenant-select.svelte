@@ -23,6 +23,9 @@
               <div 
                 class="tenant-card {selectedTenantId === tenant.tenantId ? 'selected' : ''}"
                 on:click={() => selectTenant(tenant)}
+                on:keydown={(event) => onTenantCardKeydown(event, tenant)}
+                role="button"
+                tabindex="0"
               >
                 <div class="tenant-info">
                   <div class="tenant-name">{tenant.tenantName}</div>
@@ -110,6 +113,13 @@ function selectTenant(tenant) {
       msg_type = 'danger';
       isSubmitting = false;
     });
+}
+
+function onTenantCardKeydown(event, tenant) {
+  if (event.key === 'Enter' || event.key === ' ') {
+    event.preventDefault();
+    selectTenant(tenant);
+  }
 }
 
 function logout() {
