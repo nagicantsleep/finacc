@@ -1,5 +1,11 @@
 import models from '../models/index.js';
 
+const SESSION_PERMISSION_FIELDS = [
+  'accounting', 'fiscalBrowsing', 'approvable', 'administrable',
+  'companyManagement', 'inventoryManagement', 'personnelManagement',
+  'tenantSettings'
+];
+
 /**
  * Resolve the current tenantId for a user following the epic-1 fallback chain:
  *  1. valid session.currentTenantId (active membership must exist)
@@ -81,31 +87,27 @@ export const requireTenant = async (req, res, next) => {
       }
       req.currentTenantId = membership.tenantId;
       req.membership = membership;
-
-      // Overlay tenant-scoped permissions onto req.session.user so the
-      // frontend sees the correct permission flags for the active tenant.
-      const PERM_FIELDS = [
-        'accounting', 'fiscalBrowsing', 'approvable', 'administrable',
-        'companyManagement', 'inventoryManagement', 'personnelManagement',
-        'tenantSettings'
-      ];
-      for (const field of PERM_FIELDS) {
-        if (membership[field] !== undefined) {
-          req.session.user[field] = membership[field];
-        }
-      }
+      overlayMembershipPermissions(req.session.user, membership);
 
       return next();
     }
 
     const rawPath = req.originalUrl || req.url;
+    clearMembershipPermissions(req.session.user);
     if (req.session.currentTenantId) {
       req.session.currentTenantId = null;
     }
 
-    if (rawPath.includes('/user/tenants') ||
-        rawPath.includes('/user/select-tenant') ||
-        rawPath.includes('/user/tenant')) {
+    const tenantlessApiPaths = [
+      '/api/user',
+      '/api/user/password',
+      '/api/user/profile',
+      '/api/user/tenants',
+      '/api/user/session-status',
+      '/api/user/select-tenant',
+      '/api/user/logoff'
+    ];
+    if (tenantlessApiPaths.includes(rawPath) || rawPath.startsWith('/api/user/tenant')) {
       return next();
     }
 
@@ -144,18 +146,21 @@ export async function switchTenant(userId, tenantId) {
   return membership;
 }
 
+export function clearMembershipPermissions(sessionUser) {
+  for (const field of SESSION_PERMISSION_FIELDS) {
+    delete sessionUser[field];
+  }
+
+  delete sessionUser.isOwner;
+  delete sessionUser.tenantId;
+}
+
 /**
  * Overlay TenantMember permissions onto session user object for backward
  * compatibility with frontend permission checks.
  */
 export function overlayMembershipPermissions(sessionUser, membership) {
-  const PERM_FIELDS = [
-    'accounting', 'fiscalBrowsing', 'approvable', 'administrable',
-    'companyManagement', 'inventoryManagement', 'personnelManagement',
-    'tenantSettings'
-  ];
-
-  for (const field of PERM_FIELDS) {
+  for (const field of SESSION_PERMISSION_FIELDS) {
     if (membership[field] !== undefined) {
       sessionUser[field] = membership[field];
     }
@@ -165,4 +170,4 @@ export function overlayMembershipPermissions(sessionUser, membership) {
   sessionUser.tenantId = membership.tenantId;
 }
 
-export default { resolveTenant, requireTenant, switchTenant, overlayMembershipPermissions };
+export default { resolveTenant, requireTenant, switchTenant, overlayMembershipPermissions, clearMembershipPermissions };

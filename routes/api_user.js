@@ -1,8 +1,26 @@
 import models from '../models/index.js';
 const Op = models.Sequelize.Op;
-import {passwd, passport, is_authenticated} from '../libs/user.js';
+import {passwd, passport, is_authenticated, buildSessionUser} from '../libs/user.js';
 import {bootstrapTenantMember} from '../libs/bootstrap.js';
-import {switchTenant, overlayMembershipPermissions} from '../libs/tenant.js';
+import {switchTenant, overlayMembershipPermissions, clearMembershipPermissions} from '../libs/tenant.js';
+
+const MEMBERSHIP_PERMISSION_FIELDS = [
+  'administrable', 'accounting', 'fiscalBrowsing', 'approvable',
+  'inventoryManagement', 'companyManagement', 'personnelManagement',
+  'tenantSettings'
+];
+
+const SESSION_USER_FIELDS = ['id', 'name', 'legalName', 'legalRuby', 'email', 'telNo', 'deauthorizedAt'];
+
+const sessionUserResponse = (sessionUser = {}) => {
+  const user = {};
+  for (const field of SESSION_USER_FIELDS) {
+    if (sessionUser[field] !== undefined) {
+      user[field] = sessionUser[field];
+    }
+  }
+  return user;
+};
 
 async function createOwnedTenant(user, name, transaction) {
   const baseSlug = (name || user.legalName || user.name || 'tenant')
