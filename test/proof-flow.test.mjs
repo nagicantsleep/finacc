@@ -18,8 +18,8 @@ import app from '../app.js';
 
 // Unique user names per test run to avoid collisions with existing data
 const RUN = Date.now().toString(36);
-const USER_A = { name: `test-a-${RUN}`, password: 'password-a' };
-const USER_B = { name: `test-b-${RUN}`, password: 'password-b' };
+const USER_A = { name: `testa_${RUN}`, password: 'password-a' };
+const USER_B = { name: `testb_${RUN}`, password: 'password-b' };
 
 /**
  * Sign up a user, returning a supertest agent that carries the session cookie.
@@ -32,7 +32,7 @@ async function signupAndLogin(user) {
   // we only need what the current bootstrap logic provides)
   const signupRes = await agent
     .post('/api/user/signup')
-    .send({ user_name: user.name, password: user.password })
+    .send({ user_name: user.name, password: user.password, legalName: user.name, email: `${user.name}@example.com` })
     .expect('Content-Type', /json/);
 
   assert.ok(

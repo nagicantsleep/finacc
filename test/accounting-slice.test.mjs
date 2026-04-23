@@ -14,14 +14,14 @@ import app from '../app.js';
 import models from '../models/index.js';
 
 const RUN = Date.now().toString(36);
-const USER_C = { name: `test-c-${RUN}`, password: 'password-c' };
-const USER_D = { name: `test-d-${RUN}`, password: 'password-d' };
+const USER_C = { name: `testc_${RUN}`, password: 'password-c' };
+const USER_D = { name: `testd_${RUN}`, password: 'password-d' };
 
 async function signupAndLogin(user) {
   const agent = request.agent(app);
   const signupRes = await agent
     .post('/api/user/signup')
-    .send({ user_name: user.name, password: user.password })
+    .send({ user_name: user.name, password: user.password, legalName: user.name, email: `${user.name}@example.com` })
     .expect('Content-Type', /json/);
   assert.ok(
     signupRes.body.result === 'OK' || signupRes.body.message?.includes('既に登録'),

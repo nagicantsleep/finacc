@@ -42,19 +42,19 @@ router.get('/admin/backup/:date', is_authenticated, requireTenant, admin.downloa
 router.post('/admin/upload', is_authenticated, requireTenant, admin.upload);
 router.delete('/admin/backup/:date', is_authenticated, requireTenant, admin.delete);
 
-router.get('/user', is_authenticated, requireTenant, user.get);
-router.get('/user/:id', is_authenticated, requireTenant, user.get);
-router.put('/user/password', is_authenticated, user.password);
-router.put('/user/profile', is_authenticated, user.profile);
-router.post('/user/logoff', is_authenticated, user.logoff);
-router.post('/user/login', user.login);
-router.post('/user/signup', user.signup);
+router.get('/user', is_authenticated, user.get);
 router.get('/user/tenants', is_authenticated, user.tenants);
 router.get('/user/session-status', is_authenticated, user.sessionStatus);
 router.post('/user/select-tenant', is_authenticated, user.selectTenant);
 router.post('/user/tenant', is_authenticated, user.createTenant);
 router.put('/user/tenant/:id', is_authenticated, user.updateTenant);
 router.delete('/user/tenant/:id', is_authenticated, user.deleteTenant);
+router.get('/user/:id', is_authenticated, requireTenant, user.get);
+router.put('/user/password', is_authenticated, user.password);
+router.put('/user/profile', is_authenticated, user.profile);
+router.post('/user/logoff', is_authenticated, user.logoff);
+router.post('/user/login', user.login);
+router.post('/user/signup', user.signup);
 router.put('/user/:id', is_authenticated, requireTenant, user.update);
 router.delete('/user/:id', is_authenticated, requireTenant, user.delete);
 router.get('/users/member', is_authenticated, requireTenant, user.members);
