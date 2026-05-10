@@ -1,6 +1,7 @@
 import express from 'express';
 const router = express.Router();
 import {is_authenticated, passport} from '../libs/user.js';
+import {requireTenant} from '../libs/tenant.js';
 import models from '../models/index.js';
 const Op = models.Sequelize.Op;
 import closing from '../forms/closing.js';
@@ -18,7 +19,9 @@ router.get('/closing/:term', is_authenticated,(req, res, next) => {
 
 const home =  async (req, res, next) => {
   //console.log('term', req.params.term, req.session.term);
-  const countFy = await models.FiscalYear.count();
+  const countFy = req.currentTenantId
+    ? await models.FiscalYear.count({ where: { tenantId: req.currentTenantId } })
+    : 0;
   if ( countFy === 0 ){
     res.redirect('/setup');
   }else{
@@ -43,8 +46,16 @@ const login =  async (req, res, next) => {
   });
 };
 
+const logon = async (req, res, next) => {
+  res.render('logon.spy', {
+    title: 'Logon'
+  });
+};
+
 const setup  =  async (req, res, next) => {
-  const countFy = await models.FiscalYear.count();
+  const countFy = req.currentTenantId
+    ? await models.FiscalYear.count({ where: { tenantId: req.currentTenantId } })
+    : 0;
   if ( countFy === 0 ){
     res.render('setup.spy', {
       title: 'Setup'
@@ -54,10 +65,11 @@ const setup  =  async (req, res, next) => {
   }
 };
 
-router.get('/setup', is_authenticated, setup);
-router.get('/home/:term', is_authenticated, home);
-router.get('/home', is_authenticated, home);
+router.get('/setup', is_authenticated, requireTenant, setup);
+router.get('/home/:term', is_authenticated, requireTenant, home);
+router.get('/home', is_authenticated, requireTenant, home);
 router.get('/login', login);
+router.get('/logon', is_authenticated, logon);
 router.get('/logout', (req, res, next) => {
   //console.log('logout', req.user);
   req.logout((err) => {
@@ -73,6 +85,6 @@ router.get('/signup', (req, res, next) => {
     message: ''
   });
 });
-router.get('/', is_authenticated, home);
+router.get('/', is_authenticated, requireTenant, home);
 
 export default router;

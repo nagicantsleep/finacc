@@ -19,7 +19,8 @@ export default (sequelize, DataTypes) => {
 		key: DataTypes.STRING,
 		accountId: DataTypes.INTEGER,
 		subAccountCode: DataTypes.INTEGER,
-		taxClass: DataTypes.INTEGER
+		taxClass: DataTypes.INTEGER,
+		tenantId: { type: DataTypes.INTEGER, allowNull: false }
 	}, {
 		sequelize,
 		modelName: 'SubAccount',

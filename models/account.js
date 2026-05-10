@@ -22,9 +22,8 @@ export default (sequelize, DataTypes) => {
       });
       this.belongsToMany(models.Label, {
         through: 'LabelAccounts',
-        foreignKey: 'accountCode',
+        foreignKey: 'accountId',
         otherKey: 'labelId',
-        sourceKey: 'accountCode',
         as: 'labels'
       });
     }
@@ -36,7 +35,8 @@ export default (sequelize, DataTypes) => {
     accountCode: DataTypes.STRING,
     taxClass: DataTypes.INTEGER,
     subAccountCount: DataTypes.INTEGER,
-    expiredAt: DataTypes.DATE
+    expiredAt: DataTypes.DATE,
+    tenantId: { type: DataTypes.INTEGER, allowNull: false }
   }, {
     sequelize,
     modelName: 'Account',

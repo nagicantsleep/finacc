@@ -1,19 +1,28 @@
 import axios from 'axios';
 import {isNode, isBrowser} from './utils.js';
 
-export default async () => {
+export default async (tenantId) => {
   let company;
-  if  ( isBrowser ) {
-    const result = await axios.get('/api/company?kind=1');
+  if  ( isBrowser() ) {
+    const result = await axios.get('/api/company?ownClass=true');
     if	( result.data.companies.length > 0 )	{
       company = result.data.companies[0];
     }
-  } else
-  if  ( isNode )  {
-    const models = await import('../models/index.js');
-    const company = await  models.Company.findOne({
+  } else if  ( isNode() )  {
+    const { default: models } = await import('../models/index.js');
+    const ownCompanyClass = await models.CompanyClass.findOne({
       where: {
-        companyClassId: 1
+        tenantId,
+        name: '自社'
+      }
+    });
+    if (!ownCompanyClass) {
+      return null;
+    }
+    company = await models.Company.findOne({
+      where: {
+        tenantId,
+        companyClassId: ownCompanyClass.id
       },
       include: [
         {
@@ -23,6 +32,6 @@ export default async () => {
       ]
     });
   }
-  return  (company)
+  return company;
 }
 

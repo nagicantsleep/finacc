@@ -6,19 +6,22 @@ import {ledgerLines} from '../libs/ledger.js';
 import TrialBalance from '../libs/trial_balance.js';
 import {printPL} from '../libs/init-financial-statement.js';
 
-const   fiscalYear = async (term) => {
+const   fiscalYear = async (term, tenantId) => {
     let fy = await models.FiscalYear.findOne({
         where: {
+            tenantId,
             term: term
         }
     });
     let nfy = await models.FiscalYear.findOne({
         where: {
+            tenantId,
             term: fy.term + 1
         }
     });
     if  ( !nfy )    {
         nfy = await models.FiscalYear.create({
+                tenantId,
                 startDate: new Date(fy.startDate.getFullYear() + 1,
                                     fy.startDate.getMonth(),
                                     fy.startDate.getDate()),
@@ -32,7 +35,7 @@ const   fiscalYear = async (term) => {
     return  ([fy, nfy]);
 }
 
-const   Closing = async (arg, carry) => {
+const   Closing = async (arg, carry, tenantId) => {
     let fy = arg[0];
     let nfy = arg[1];
     //console.log(fy);
@@ -45,12 +48,14 @@ const   Closing = async (arg, carry) => {
                 let sub = subs[j];
                 let rem = await models.SubAccountRemaining.findOne({
                                 where: {
+                                    tenantId,
                                     subAccountId: sub.id,
                                     term: nfy.term
                                 }
                             });
                 if ( !rem ) {
                     rem = await models.SubAccountRemaining.create({
+                            tenantId,
                             subAccountId: sub.id,
                             term: nfy.term,
                             debit: 0,
@@ -69,7 +74,7 @@ const   Closing = async (arg, carry) => {
                         credit: numeric(sub.credit),
                         balance: numeric(sub.balance)
                     };
-                    let details = await CrossSlipDetails.all(fy, acc.code, sub.code);
+                    let details = await CrossSlipDetails.all(fy, acc.code, sub.code, tenantId);
                     let lines = ledgerLines(acc.code, sub.code, pickup, details);
                     rem.debit = lines.sums.debitAmount;
                     rem.credit = lines.sums.creditAmount;
@@ -84,12 +89,14 @@ const   Closing = async (arg, carry) => {
             //console.log(acc);
             let rem = await models.AccountRemaining.findOne({
                     where: {
+                        tenantId,
                         accountId: acc.id,
                         term: nfy.term
                     }
                 });
             if ( !rem ) {
                 rem = await models.AccountRemaining.create({
+                            tenantId,
                             accountId: acc.id,
                             term: nfy.term,
                             debit: 0,
@@ -113,7 +120,7 @@ const   Closing = async (arg, carry) => {
                     credit: numeric(acc.credit),
                     balance: numeric(acc.balance)
                 };
-                let details = await CrossSlipDetails.all(fy, acc.code);
+                let details = await CrossSlipDetails.all(fy, acc.code, undefined, tenantId);
                 let lines = ledgerLines(acc.code, null, pickup, details);
                 rem.debit = lines.sums.debitAmount;
                 rem.credit = lines.sums.creditAmount ;
@@ -145,9 +152,9 @@ const	net_income = (lines) => {
     return  (line);
 }
 
-export default async (term) => {
-    let fy = await fiscalYear(term);
+export default async (term, tenantId) => {
+    let fy = await fiscalYear(term, tenantId);
     let {lines} = await TrialBalance(term);
     let carry = net_income(lines);
-    await Closing(fy, carry);
+    await Closing(fy, carry, tenantId);
 }

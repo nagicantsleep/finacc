@@ -2,7 +2,7 @@ import models from '../models/index.js';
 const Op = models.Sequelize.Op;
 
 export default class {
-    static  async   all(fy, accountCode, subAccountCode) {
+    static  async   all(fy, accountCode, subAccountCode, tenantId) {
         //console.log(fy);
         let details = []
         for ( let mon = new Date(fy.startDate); mon < new Date(fy.endDate); ) {
@@ -10,6 +10,7 @@ export default class {
             if  ( subAccountCode )  {
                 details = details.concat( await models.CrossSlipDetail.findAll({
                     where: {
+                        tenantId,
                         [Op.and]: {
                             [Op.or]: [
                                 {
@@ -36,6 +37,7 @@ export default class {
             } else {
                 details = details.concat( await models.CrossSlipDetail.findAll({
                     where: {
+                        tenantId,
                         [Op.and]: {
                             '$crossSlip.year$': mon.getFullYear(),
                             '$crossSlip.month$': mon.getMonth() + 1,

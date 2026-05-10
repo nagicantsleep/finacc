@@ -1,4 +1,4 @@
-import {Model} from 'sequelize';
+import { Model } from "sequelize";
 
 export default (sequelize, DataTypes) => {
   class Menu extends Model {
@@ -8,20 +8,24 @@ export default (sequelize, DataTypes) => {
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-			this.belongsTo(models.User, {
-				sourceKey: 'userId',
-        as: 'user'
-			});
+      this.belongsTo(models.User, {
+        sourceKey: "userId",
+        as: "user",
+      });
     }
   }
-  Menu.init({
-    userId: DataTypes.INTEGER,
-    title: DataTypes.STRING,
-    displayOrder: DataTypes.INTEGER,
-    body: DataTypes.TEXT
-  }, {
-    sequelize,
-    modelName: 'Menu',
-  });
+  Menu.init(
+    {
+      tenantId: { type: DataTypes.INTEGER, allowNull: false },
+      userId: DataTypes.INTEGER,
+      title: DataTypes.STRING,
+      displayOrder: DataTypes.INTEGER,
+      body: DataTypes.TEXT,
+    },
+    {
+      sequelize,
+      modelName: "Menu",
+    },
+  );
   return Menu;
 };

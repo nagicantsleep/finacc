@@ -137,7 +137,7 @@ const deleteTransaction = (event) => {
 			<td>件名</td><td>${transaction.subject || ''}</td>
 		</tr>
     <tr>
-			<td>担当</td><td>${transaction.handleUser.member.tradingName || ''}</td>
+			<td>担当</td><td>${transaction.handleUser?.memberships?.[0]?.tradingName || transaction.handleUser?.legalName || ''}</td>
     </tr>
   </tbody>
 </table>

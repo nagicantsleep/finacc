@@ -14,6 +14,7 @@ export default (sequelize, DataTypes) => {
     }
   }
   StickyStatus.init({
+    tenantId: { type: DataTypes.INTEGER, allowNull: false },
     stickyId: DataTypes.INTEGER,
     receiverId: DataTypes.INTEGER,
     showHide: DataTypes.BOOLEAN,

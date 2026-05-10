@@ -15,6 +15,7 @@ export default (sequelize, DataTypes) => {
     }
   }
   VoucherFile.init({
+    tenantId: { type: DataTypes.INTEGER, allowNull: false },
     voucherId: DataTypes.INTEGER,
     name: DataTypes.STRING,
     mimeType: DataTypes.STRING,

@@ -15,7 +15,7 @@
     </div>
     <label for="user" class="col-1 col-form-label">ユーザー</label>
     <div class="col-3">
-      <select class="form-select" id="user" bind:value={member.userId}>
+      <select class="form-select" id="user" bind:value={member.userId} disabled={!member.id}>
         {#if users}
         <option value={0}>未設定</option>
         {#each users as line}
@@ -23,58 +23,25 @@
         {/each}
         {/if}
       </select>
+      {#if !member.id}
+      <div class="form-text text-muted">保存後に連携可能</div>
+      {/if}
     </div>
-  </div>
-  <div class="row mb-3">
-    <label class="col-1 col-form-label">名前</label>
-    <div class="col-11">
-      <div class="row">
-        <div class="col-6">
-          <div class="row">
-            <label for="legalName" class="col-3 col-form-label">戸籍名</label>
-            <div class="col-9">
-              <input type="text" class="form-control" id="legalName"
-                bind:value={member.legalName}>
-            </div>
-          </div>
-          <div class="row">
-            <label for="legalRuby" class="col-3 col-form-label">戸籍名(読み)</label>
-            <div class="col-9">
-              <input type="text" class="form-control" id="legalRuby"
-                bind:value={member.legalRuby}>
-            </div>
-          </div>
-        </div>
-        <label for="tradingName" class="col-1 col-form-label">通称</label>
-        <div class="col-5">
-          <input type="text" class="form-control" id="tradingName"
-            bind:value={member.tradingName}>
-        </div>
-      </div>
-    </div>
-  </div>
-  <div class="row mb-3">
-    <label for="birthDate" class="col-1 col-form-label">誕生日</label>
+    <label for="status" class="col-1 col-form-label">状態</label>
     <div class="col-2">
-      <input type="date" class="form-control" id="birthDate"
-        bind:value={member.birthDate}>
-    </div>
-    <label for="legalSex" class="col-1 col-form-label">戸籍性別</label>
-    <div class="col-2">
-      <select class="form-select" id="legalSex" bind:value={member.legalSex}>
-        {#each LEGAL_SEX as sex}
-        <option value={sex[0]}>{sex[1]}</option>
-        {/each}
+      <select class="form-select" id="status" bind:value={member.status}>
+        <option value="active">在職</option>
+        <option value="inactive">退職</option>
       </select>
     </div>
   </div>
   <div class="row mb-3">
-    <label for="dependent" class="col-1 col-form-label">扶養家族</label>
-    <div class="col-1">
-      <input type="text" class="form-control number" id="dependent"
-        bind:value={member.dependent}>
+    <label for="tradingName" class="col-1 col-form-label">表示名</label>
+    <div class="col-5">
+      <input type="text" class="form-control" id="tradingName"
+        bind:value={member.tradingName}>
+      <div class="form-text text-muted">テナント内での表示名。未設定の場合はユーザー名を使用。</div>
     </div>
-    <label class="col-1 col-form-label">人</label>
   </div>
   <div class="row mb-3">
     <label for="joiningDate" class="col-1 col-form-label">入社日</label>
@@ -89,7 +56,7 @@
     </div>
     <label for="resignReason" class="col-1 col-form-label">退職事由</label>
     <div class="col-2">
-      <select class="form-select" id="legalSex" bind:value={member.resignReason}>
+      <select class="form-select" id="resignReason" bind:value={member.resignReason}>
         {#each RESIGN_REASON as reason}
         <option value={reason[0]}>{reason[1]}</option>
         {/each}
@@ -97,16 +64,16 @@
     </div>
   </div>
   <div class="row mb-3">
-    <label for="zip" class="col-1 col-form-label">郵便番号</label>
-    <div class="col-2">
-      <input type="text" class="form-control" id="zip" bind:value={member.zip}>
+    <label for="dependent" class="col-1 col-form-label">扶養家族</label>
+    <div class="col-1">
+      <input type="text" class="form-control number" id="dependent"
+        bind:value={member.dependent}>
     </div>
-  </div>
-  <div class="row mb-3">
-    <label for="address1" class="col-1 col-form-label">住所</label>
-    <div class="col-11">
-      <input type="text" class="form-control" id="address1" bind:value={member.address1}>
-      <input type="text" class="form-control" id="address2" bind:value={member.address2}>
+    <label class="col-1 col-form-label">人</label>
+    <label for="socialInsuranceNumber" class="col-1 col-form-label">社会保険番号</label>
+    <div class="col-3">
+      <input type="text" class="form-control" id="socialInsuranceNumber"
+        bind:value={member.socialInsuranceNumber}>
     </div>
   </div>
   <div class="row mb-3">
@@ -114,7 +81,7 @@
     <div class="col-11">
       <div class="row">
         <label for="bankName" class="col-3 col-form-label">金融機関名</label>
-        <label for="banBranchkName" class="col-3 col-form-label">支店名</label>
+        <label for="bankBranchName" class="col-3 col-form-label">支店名</label>
         <label for="accountType" class="col-2 col-form-label">口座種別</label>
         <label for="accountNo" class="col-3 col-form-label">口座番号</label>
       </div>
@@ -139,23 +106,74 @@
     </div>
   </div>
   <div class="row mb-3">
-    <label for="telNo" class="col-1 col-form-label">電話</label>
-    <div class="col-3">
-      <input type="text" class="form-control" id="telNo" bind:value={member.telNo}>
-    </div>
-    <label for="email" class="col-1 col-form-label">E-Mail</label>
-    <div class="col-4">
-      <input type="text" class="form-control" id="email" bind:value={member.email}>
+    <label for="operation" class="col-1 col-form-label">備考</label>
+    <div class="col-11">
+      <textarea class="form-control" id="operation" rows="2"
+        bind:value={member.operation}></textarea>
     </div>
   </div>
+  {#if ( member.userId && member.userId > 0 && member.user )}
+  <hr>
+  <div class="row mb-3">
+    <div class="col-12">
+      <h6>権限設定</h6>
+      <p class="text-muted small">リンク済みユーザー「{member.user.name}」の権限を設定します。</p>
+    </div>
+  </div>
+  <div class="row mb-3">
+    <div class="col-3">
+      <label class="form-check-label">
+        <input type="checkbox" class="form-check-input" bind:checked={member.administrable}>
+        管理者
+      </label>
+    </div>
+    <div class="col-3">
+      <label class="form-check-label">
+        <input type="checkbox" class="form-check-input" bind:checked={member.accounting}>
+        会計
+      </label>
+    </div>
+    <div class="col-3">
+      <label class="form-check-label">
+        <input type="checkbox" class="form-check-input" bind:checked={member.fiscalBrowsing}>
+        会計(閲覧)
+      </label>
+    </div>
+    <div class="col-3">
+      <label class="form-check-label">
+        <input type="checkbox" class="form-check-input" bind:checked={member.approvable}>
+        承認可能
+      </label>
+    </div>
+  </div>
+  <div class="row mb-3">
+    <div class="col-3">
+      <label class="form-check-label">
+        <input type="checkbox" class="form-check-input" bind:checked={member.companyManagement}>
+        顧客管理
+      </label>
+    </div>
+    <div class="col-3">
+      <label class="form-check-label">
+        <input type="checkbox" class="form-check-input" bind:checked={member.inventoryManagement}>
+        在庫管理
+      </label>
+    </div>
+    <div class="col-3">
+      <label class="form-check-label">
+        <input type="checkbox" class="form-check-input" bind:checked={member.personnelManagement}>
+        人事管理
+      </label>
+    </div>
+  </div>
+  {/if}
 </div>
 <style>
 </style>
 
 <script>
-import axios from 'axios';
-import {onMount, beforeUpdate, afterUpdate, createEventDispatcher} from 'svelte';
-import {LEGAL_SEX, RESIGN_REASON} from '../../../libs/member';
+import {onMount, beforeUpdate, createEventDispatcher} from 'svelte';
+import {RESIGN_REASON} from '../../../libs/member';
 import {BANK_ACCOUNT_TYPE} from '../../../libs/utils';
 
 export	let	member;
@@ -166,5 +184,4 @@ beforeUpdate(() => {
 onMount(() => {
   console.log('member-info onMount', member);
 })
-
 </script>

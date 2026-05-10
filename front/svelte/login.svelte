@@ -7,7 +7,7 @@
 {/if}
 
 <script>
-import {onMount, beforeUpdate, afterUpdate, createEventDispatcher} from 'svelte';
+import {onMount, beforeUpdate} from 'svelte';
 import axios from 'axios';
 
 import Login from './login/login.svelte';
@@ -22,6 +22,10 @@ let reply;
 onMount(() => {
   console.log('index onMount');
   status.pathname = location.pathname;
+  if (location.pathname === '/login/select-tenant') {
+    window.location.replace('/logon');
+    return;
+  }
   axios.get('/api/user').then((res) => {
     status.user = res.data.user;
   });
@@ -30,7 +34,11 @@ onMount(() => {
 beforeUpdate(() => {
   let args = location.pathname.split('/');
   console.log('index beforeUpdate', args);
-  status.current = args[1];
+  if (location.pathname === '/login/select-tenant') {
+    window.location.replace('/logon');
+    return;
+  }
+  status.current = args[1] || 'login';
   status = status;
 })
 

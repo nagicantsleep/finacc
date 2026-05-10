@@ -8,26 +8,29 @@ export default {
 
     models.CrossSlipDetail.findOne({
       where: {
-        id: id
+        id: id,
+        tenantId: req.currentTenantId
       }
     }).then((detail) => {
       res.json(detail);
     });
   },
   all: (req, res, next) => {
+    const tenantId = req.currentTenantId;
     models.FiscalYear.findOne({
       where: {
+        tenantId,
         term: req.params.term
       }
     }).then((fy) => {
   		if	( req.params.sub )	{
-      	CrossSlipDetails.all(fy, req.params.acc, paseInt(req.params.sum)).then((result) => {
+      	CrossSlipDetails.all(fy, req.params.acc, paseInt(req.params.sum), tenantId).then((result) => {
         	res.json({
           	details: result
         	})
       	});
     	} else {
-      	CrossSlipDetails.all(fy. req.params.acc).then((result) => {
+      	CrossSlipDetails.all(fy, req.params.acc, undefined, tenantId).then((result) => {
           res.json({
             details: result
           })
@@ -40,11 +43,13 @@ export default {
     console.log('update', detail);
     models.CrossSlipDetail.findOne({
       where: {
-        id: detail.id
+        id: detail.id,
+        tenantId: req.currentTenantId
       }
     }).then((result) => {
       if ( result ) {
         result.set(detail);
+        result.tenantId = req.currentTenantId;
         result.save().then(() => {
           res.json(result);
         });

@@ -226,20 +226,6 @@ export default [
       }
     ]
   }, {
-    name: 'users',
-    title: 'ユーザ管理',
-    authority: (user) => {
-      return  (user.administrable || user.personnelManagement);
-    },
-    href: (status) => {
-      return	('/users/');
-    },
-    match: /^\/users/,
-    icon: { name: 'bi:people' },
-    description: `
-本システムの利用者アカウントの管理です。<br/>
-操作権限の設定も可能です。`
-  }, {
     name: 'member',
     title: '役職員管理',
     authority: (user) => {
@@ -252,21 +238,20 @@ export default [
     icon: { name: 'bi:person-square' },
     description: `
 人事情報を入力します。<br/>
-現在は担当者名の情報源として使っているだけですが、将来的には人事給与システムが付加されます。`,
-    submenu: [
-      {
-        title: '役職員管理',
-        href: (status) => {
-          return	(`/member/`);
-        },
-        match: /^\/member\/($|entry|new)/,
-      }, {
-        title: '設定',
-        match: /^\/member\/home/,
-        href: (status) => {
-          return	(`/member/home`);
-        }
-      }
-    ]
+現在は担当者名の情報源として使っているだけですが、将来的には人事給与システムが付加されます。`
+  }, {
+    name: 'home',
+    title: '会社設定',
+    match: /^\/tenant/,
+    authority: (user) => {
+      return  (user.tenantSettings);
+    },
+    href: (status) => {
+      return	('/tenant');
+    },
+    icon: { name: 'bi:gear-fill' },
+    description: `
+テナント情報とシステム設定を管理します。<br/>
+自社情報、種別マスタ、税区分、システム設定などが含まれます。`
   }
 ];

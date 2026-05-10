@@ -7,12 +7,16 @@ export default (sequelize, DataTypes) => {
     }
   };
   LabelAccount.init({
+    tenantId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
     labelId: {
       type: DataTypes.INTEGER,
       primaryKey: true,
     },
-    accountCode: {
-      type: DataTypes.STRING,
+    accountId: {
+      type: DataTypes.INTEGER,
       primaryKey: true,
     },
     summaryType: {

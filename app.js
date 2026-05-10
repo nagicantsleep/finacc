@@ -3,8 +3,8 @@ const app = express();
 import axios from 'axios';
 
 import session from 'express-session';
-import fileStore from 'session-file-store';
-const FileStore = fileStore(session);
+import pgSession from 'connect-pg-simple';
+import { readFileSync } from 'fs';
 import passport from 'passport';
 import multipart from 'connect-multiparty';
 
@@ -19,6 +19,7 @@ import cookieParser from 'cookie-parser';
 import homeRouter from './routes/home.js';
 import formsRouter from './routes/forms.js';
 import {is_authenticated} from './libs/user.js';
+import {requireTenant} from './libs/tenant.js';
 import models from './models/index.js';
 import { getCompanyInfo } from './libs/utils.js';
 
@@ -27,6 +28,8 @@ import env from './config/env.js';
 global.env = env;
 
 const __dirname = import.meta.dirname;
+const nodeEnv = process.env.NODE_ENV || 'development';
+const dbConfig = JSON.parse(readFileSync(path.join(__dirname, './config/config.json'), 'utf-8'))[nodeEnv];
 
 // SSRのためにローカルにaxiosを向けるため
 axios.defaults.baseURL = `http://localhost:${global.env.port}`;
@@ -42,13 +45,19 @@ app.use(multipart());
 
 app.use(session({
   secret: env.expressSecret,
-  resave: true,
+  resave: false,
   saveUninitialized: false,
   name: env.appName,					    //	ここの名前は起動するnode.js毎にユニークにする
-  store: new FileStore({
-    ttl: global.env.session_ttl,	//	default 3600(s)
-    reapInterval: global.env.session_ttl,
-    path: global.env.session_path	//	default path
+  store: new (pgSession(session))({
+    conObject: {
+      host: dbConfig.host,
+      port: dbConfig.port,
+      database: dbConfig.database,
+      user: dbConfig.username,
+      password: dbConfig.password
+    },
+    tableName: 'session',
+    ttl: global.env.session_ttl
   }),
 
   cookie: {
@@ -78,7 +87,7 @@ const screen = async (req, res, next) => {
     return	( req.params.current === ent.name );
   })
   if	( per )	{
-    const company = await getCompanyInfo();
+    const company = await getCompanyInfo(req.currentTenantId);
   	if ( !per.authority || per.authority(req.session.user, company) )	{
     	res.render('index.spy', {
       	title: per.title,
@@ -97,7 +106,8 @@ const voucherFile = (req, res, next) => {
   if ( req.session.user.accounting )	{
     models.VoucherFile.findOne({
       where: {
-        id: req.params.id
+        id: req.params.id,
+        tenantId: req.currentTenantId
       }
     }).then((content) => {
       res.set('Content-Type', content.mimeType);
@@ -111,15 +121,15 @@ const voucherFile = (req, res, next) => {
 
 app.use('/', homeRouter);
 
-app.get('/voucher/file/:id', is_authenticated, voucherFile);
-app.use('/forms', formsRouter);
+app.get('/voucher/file/:id', is_authenticated, requireTenant, voucherFile);
+app.use('/forms', is_authenticated, requireTenant, formsRouter);
 app.use('/api', apiRouter);
 
-app.use('/:current/:command/:arg1/:arg2/:arg3', is_authenticated, screen);
-app.use('/:current/:command/:arg1/:arg2', is_authenticated, screen);
-app.use('/:current/:command/:arg1', is_authenticated, screen);
-app.use('/:current/:id', is_authenticated, screen);
-app.use('/:current', is_authenticated, screen);
+app.use('/:current/:command/:arg1/:arg2/:arg3', is_authenticated, requireTenant, screen);
+app.use('/:current/:command/:arg1/:arg2', is_authenticated, requireTenant, screen);
+app.use('/:current/:command/:arg1', is_authenticated, requireTenant, screen);
+app.use('/:current/:id', is_authenticated, requireTenant, screen);
+app.use('/:current', is_authenticated, requireTenant, screen);
 
 const spaFallback = (req, res, next) => {
   // API, フォーム、ファイルへのリクエストは除外
@@ -132,7 +142,7 @@ const spaFallback = (req, res, next) => {
     term: req.session.term,
   });
 }
-app.use(is_authenticated, spaFallback);
+app.use(is_authenticated, requireTenant, spaFallback);
 
 app.use((err, req, res, next) => {
     console.error(`[${new Date().toISOString()}] 500エラー:`, {
@@ -142,7 +152,11 @@ app.use((err, req, res, next) => {
         method: req.method,
         headers: req.headers
     });
-    
+
+    if (res.headersSent) {
+        return next(err);
+    }
+
     res.status(500).send(`
         <h1>500 - Internal Server Error</h1>
         <p>${err.message}</p>

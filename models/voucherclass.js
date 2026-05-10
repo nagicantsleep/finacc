@@ -15,6 +15,7 @@ export default (sequelize, DataTypes) => {
     }
   }
   VoucherClass.init({
+    tenantId: { type: DataTypes.INTEGER, allowNull: false },
     name: DataTypes.STRING,
     displayOrder: DataTypes.INTEGER,
     send: DataTypes.BOOLEAN,

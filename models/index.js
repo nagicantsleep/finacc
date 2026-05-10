@@ -13,7 +13,6 @@ import MonthlyLog from './monthlylog.js';
 import Item from './item.js';
 import ItemClass from './itemclass.js';
 import ItemFile from './itemfile.js';
-import Member from './member.js';
 import MemberClass from './memberclass.js';
 import Menu from './menu.js';
 import Project from './project.js';
@@ -30,6 +29,8 @@ import TaxRule from './tax-rule.js';
 import TransactionDocument from './transaction-document.js';
 import TransactionDetail from './transaction-detail.js';
 import TransactionKind from './transaction-kind.js';
+import Tenant from './tenant.js';
+import TenantMember from './tenantmember.js';
 import User from './user.js';
 import Voucher from './voucher.js';
 import VoucherClass from './voucherclass.js';
@@ -63,7 +64,6 @@ const models = {
   Item: Item(sequelize, DataTypes),
   ItemClass: ItemClass(sequelize, DataTypes),
   ItemFile: ItemFile(sequelize, DataTypes),
-  Member: Member(sequelize, DataTypes),
   MemberClass: MemberClass(sequelize, DataTypes),
   Menu: Menu(sequelize, DataTypes),
   MonthlyLog: MonthlyLog(sequelize, DataTypes),
@@ -78,6 +78,8 @@ const models = {
   Task: Task(sequelize, DataTypes),
   TaskDetail: TaskDetail(sequelize, DataTypes),
   TaxRule: TaxRule(sequelize, DataTypes),
+  Tenant: Tenant(sequelize, DataTypes),
+  TenantMember: TenantMember(sequelize, DataTypes),
   TransactionDocument: TransactionDocument(sequelize, DataTypes),
   TransactionDetail: TransactionDetail(sequelize, DataTypes),
   TransactionKind: TransactionKind(sequelize, DataTypes),

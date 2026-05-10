@@ -3,13 +3,19 @@ const Op = models.Sequelize.Op;
 import axios from 'axios';
 import { JSDOM } from 'jsdom';
 
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+const menuTemplatesDef = require('../config/menu-template.cjs');
+
 export default {
   get: async (req, res, next) => {
+    const tenantId = req.currentTenantId;
     let id =  req.params.id;
     //console.log('/api/menu/', id);
     if	( !id )	{
       models.Menu.findAll({
         where: {
+          tenantId,
           userId: req.session.user.id,
           displayOrder: {
             [Op.gt]: 0
@@ -30,7 +36,8 @@ export default {
         });
       });
     } else {
-      models.Menu.findByPk(id, {
+      models.Menu.findOne({
+        where: { tenantId, id }
       }).then((menu) => {
         res.json({
           menu: menu
@@ -39,7 +46,9 @@ export default {
     }
   },
   post: (req, res, next) => {
+    const tenantId = req.currentTenantId;
     let body = req.body;
+    body.tenantId = tenantId;
     body.userId = req.session.user.id;
     models.Menu.create(body).then((menu) => {
       //console.log(menu);
@@ -49,21 +58,26 @@ export default {
     });
   },
   update: async(req, res, next) => {
+    const tenantId = req.currentTenantId;
     let body = req.body;
 
     if	( body.menus )	{
 			let menus = req.body.menus;
       for ( const menu of menus ) {
         if  ( menu.id ) {
-          let result = await models.Menu.findByPk(menu.id);
+          let result = await models.Menu.findOne({
+            where: { tenantId, id: menu.id }
+          });
           result.set(menu);
+          result.tenantId = tenantId;
           await result.save();
         } else {
-          await models.Menu.create(menu);
+          await models.Menu.create({ ...menu, tenantId });
         }
       }
       models.Menu.findAll({
         where: {
+          tenantId,
           userId: req.session.user.id,
           displayOrder: {
             [Op.gt]: 0
@@ -87,9 +101,12 @@ export default {
       })
     } else {
       let id = req.params.id ? req.params.id : body.id;
-    	let menu = await models.Menu.findByPk(id)
+    	let menu = await models.Menu.findOne({
+        where: { tenantId, id }
+      })
     	if	( menu )	{
       	menu.set(body);
+        menu.tenantId = tenantId;
       	menu.save().then(() => {
         	res.json({
           	menu: menu
@@ -99,10 +116,13 @@ export default {
     }
   },
   delete: async(req, res, next) => {
+    const tenantId = req.currentTenantId;
     let body = req.body;
     let id = req.params.id ? req.params.id : body.id;
 
-    let menu = await models.Menu.findByPk(id);
+    let menu = await models.Menu.findOne({
+      where: { tenantId, id }
+    });
     if	( menu )	{
       menu.destroy().then(() => {
         res.json({
@@ -111,21 +131,26 @@ export default {
     }
   },
   getTemplates: async (req, res, next) => {
-    models.Menu.findAll({
+    const tenantId = req.currentTenantId;
+    let templates = await models.Menu.findAll({
       where: {
+        tenantId,
         userId: null,
-        displayOrder: {
-          [Op.gt]: 0
-        }
+        displayOrder: { [Op.gt]: 0 }
       },
-      order: [
-        ['displayOrder', 'ASC']
-      ],
-    }).then( async(templates) => {
-      res.json({
-        templates: templates
-      });
+      order: [['displayOrder', 'ASC']],
     });
+    if (templates.length === 0) {
+      const records = menuTemplatesDef.map((template, i) => ({
+        tenantId,
+        userId: null,
+        title: template.title,
+        displayOrder: i + 1,
+        body: JSON.stringify(template.menu)
+      }));
+      templates = await models.Menu.bulkCreate(records);
+    }
+    res.json({ templates });
   },
   preview: async (req, res, next) => {
     const targetUrl = req.query.url;

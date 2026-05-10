@@ -1,12 +1,11 @@
 const INPUT_FILE = './accounts.csv'
 
-import child_process from 'child_process';
+import fs from 'fs';
+import iconv from 'iconv-lite';
 
 export const exec = (term, companyClass) => {
-  //let file = fs.readFileSync(INPUT_FILE, "utf-8");		// csv uft-8 encoded
-  let file = child_process.execSync(`/usr/bin/iconv -f shift_jis -t utf-8 < ${INPUT_FILE}`, {	//	csv by Excel
-    encoding: "utf-8"
-  });
+  const buf = fs.readFileSync(INPUT_FILE);
+  let file = iconv.decode(buf, 'shift_jis');
   let lines = file.split("\r\n");		// Excel csv line separator
 
   // skip title 2lines

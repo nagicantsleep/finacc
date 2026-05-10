@@ -1,7 +1,7 @@
-import axios from 'axios';
 import {numeric, burstPage} from './utils.js';
 import SumTable from '../forms/sum-table.js';
 import {field} from './parse_account_code.js';
+import trial_balance from './trial_balance.js';
 
 let fy;
 let assetPages;
@@ -278,11 +278,20 @@ const printIncomeStatementPage = () => {
 }
 
 
-export default async (term) => {
-  let res = await axios.get(`/api/trial-balance/${term}`);
-  lines = res.data;
-  let result = await axios.get(`/api/term/${term}`);
-  fy = result.data;
+export default async (term, tenantId) => {
+  const { default: models } = await import('../models/index.js');
+  
+  fy = await models.FiscalYear.findOne({
+    where: { tenantId, term }
+  });
+  
+  if (!fy) {
+    throw new Error(`Fiscal year for term ${term} not found.`);
+  }
+  
+  const lastDate = new Date(fy.endDate);
+  const ret = await trial_balance(tenantId, term, lastDate);
+  lines = ret.lines;
 
   printAssetPage();
   printIncomeStatementPage();

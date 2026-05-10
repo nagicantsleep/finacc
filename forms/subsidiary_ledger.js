@@ -20,9 +20,9 @@ Account.all2(TERM).then((accounts) => {
 });
 
 */
-export default async (term) => {
+export default async (term, tenantId) => {
     let book = new Book(term);
-    let accounts = await Account.all2(term);
+    let accounts = await Account.all2(tenantId, term);
     let account_page = new AccountPage(book, accounts);
     await account_page.run();
     let ledger = new Ledger(book, accounts);

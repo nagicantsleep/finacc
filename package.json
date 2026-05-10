@@ -9,9 +9,11 @@
 		"build-ssr": "vite build --config vite.config.ssr.js",
 		"watch": "vite build -w",
 		"watch-ssr": "vite build -w --config vite.config.ssr.js",
+		"test": "cross-env APP_NAME=hieronymus-test mocha --timeout 15000 test/**/*.test.mjs",
 		"prepublishOnly": "npm test",
-		"start-dev": "APP_NAME='hieronymus-dev' node ./bin/www",
-		"start": "NODE_ENV='production' node ./bin/www"
+		"dev": "cross-env APP_NAME=hieronymus-dev node --watch ./bin/www",
+		"start-dev": "cross-env APP_NAME=hieronymus-dev node ./bin/www",
+		"start": "cross-env NODE_ENV=production node ./bin/www"
 	},
 	"author": "ogochan@beesnest-inc.com",
 	"license": "AGPL-3.0-or-later",
@@ -32,6 +34,7 @@
 		"chart.js": "^4.4.4",
 		"codemirror": "^6.0.1",
 		"connect-multiparty": "^2.2.0",
+		"connect-pg-simple": "^10.0.0",
 		"cookie-parser": "^1.4.5",
 		"cors": "^2.8.5",
 		"dotenv": "^16.5.0",
@@ -87,6 +90,7 @@
 	},
 	"devDependencies": {
 		"chai": "^4.2.0",
+		"cross-env": "^10.1.0",
 		"css-loader": "^5.2.4",
 		"esbuild": "^0.23.1",
 		"esm": "^3.2.25",
@@ -98,6 +102,7 @@
 		"sass": "^1.77.8",
 		"sequelize-auto": "^0.8.3",
 		"style-loader": "^2.0.0",
+		"supertest": "^7.2.2",
 		"vite": "^5.4.3",
 		"vite-plugin-static-copy": "^2.2.0",
 		"webpack": "^5.90.3",

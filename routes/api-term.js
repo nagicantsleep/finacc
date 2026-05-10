@@ -3,11 +3,13 @@ import models from '../models/index.js';
 const Op = models.Sequelize.Op;
 
 export const get = (req, res, next) => {
+  const tenantId = req.currentTenantId;
   if	( req.params.term )	{
     let term = parseInt(req.params.term);
     models.FiscalYear.findOne({
       where: {
-        term: term
+        term: term,
+        tenantId
       }
     }).then((fy) => {
       res.json(fy);
@@ -19,6 +21,7 @@ export const get = (req, res, next) => {
     let month = req.params.month;
     models.FiscalYear.findOne({
       where: {
+        tenantId,
         [Op.and]: {
           startDate: {
             [Op.lte]: new Date(year, month - 1, 2)
@@ -34,6 +37,9 @@ export const get = (req, res, next) => {
     });
   } else {
     models.FiscalYear.findAll({
+      where: {
+        tenantId
+      },
       order: [
         ['term', 'ASC']
       ]
@@ -46,7 +52,12 @@ export const get = (req, res, next) => {
 export const update = (req, res, next) => {
   let id = parseInt(req.params.id);
   //console.log({id});
-  models.FiscalYear.findByPk(id).then((fy) => {
+  models.FiscalYear.findOne({
+    where: {
+      id,
+      tenantId: req.currentTenantId
+    }
+  }).then((fy) => {
     fy.taxIncluded = req.body.taxIncluded;
     fy.save().then(() => {
       res.json({

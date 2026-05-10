@@ -1,21 +1,143 @@
-import axios from 'axios';
 import {numeric, burstPage } from './utils.js';
 import {setAccounts, findAccount, findSubAccountByCode} from '../front/javascripts/cross-slip.js';
+import Accounts from './accounts.js';
 
 let fy = {};
 let dates;
 
 const LINES = 24;
 
-const setupDates = async (term) => {
-  let result = await axios.get(`/api/term/${term}`);
+const setupDates = async (term, tenantId) => {
+  const { default: models } = await import('../models/index.js');
+  const Op = models.Sequelize.Op;
+  
+  fy = await models.FiscalYear.findOne({
+    where: { term, tenantId }
+  });
+  
   dates = [];
-  fy = result.data;
   for ( let mon = new Date(fy.startDate); mon < new Date(fy.endDate); ) {
     let year = mon.getFullYear();
     let month = mon.getMonth() + 1;
-    let result = await axios.get(`/api/journal/${year}/${month}`)
-    const ret = ready(result.data.journal);
+    
+    let slips = await models.CrossSlip.findAll({
+      where: {
+        tenantId,
+        year: year,
+        month: month
+      },
+      include: [{
+        model: models.User,
+        as: 'creater'
+      }, {
+        model: models.User,
+        as: 'approver'
+      }],
+      order: [
+        ['year', 'ASC'],
+        ['month', 'ASC'],
+        ['day', 'ASC'],
+        ['no', 'ASC']
+      ]
+    });
+
+    let cross_slips = [];
+    for ( let i = 0; i < slips.length; i ++ ) {
+      let slip = slips[i];
+      let details = await models.CrossSlipDetail.findAll({
+        where: {
+          crossSlipId: slip.id,
+          tenantId: tenantId
+        },
+        include: [
+          {
+            model: models.Voucher,
+            required: false,
+            as: 'debitVoucher',
+            where: { tenantId },
+            include: [{
+              model: models.VoucherFile,
+              as: 'files',
+              where: { tenantId },
+              required: false
+            }]
+          }, {
+            model: models.Voucher,
+            required: false,
+            as: 'creditVoucher',
+            where: { tenantId },
+            include: [{
+              model: models.VoucherFile,
+              as: 'files',
+              where: { tenantId },
+              required: false
+            }]
+          }, {
+            model: models.TaxRule,
+            as: 'debitTaxRule',
+            where: { tenantId },
+            required: false
+          }, {
+            model: models.TaxRule,
+            as: 'creditTaxRule',
+            where: { tenantId },
+            required: false
+          }, {
+            model: models.Project,
+            as: 'projectData',
+            where: { tenantId },
+            required: false
+          }
+        ],
+        order: [
+          ['lineNo', 'ASC']
+        ]
+      });
+      
+      let lines = [];
+      for ( let j = 0; j < details.length; j ++ ) {
+        let detail = details[j];
+        lines.push({
+          id: detail.id,
+          lineNo: detail.lineNo,
+          debitAmount: detail.debitAmount,
+          debitTax: detail.debitTax,
+          debitTaxRule: detail.debitTaxRule,
+          debitTaxRuleId: detail.debitTaxRuleId,
+          debitAccount: detail.debitAccount,
+          debitSubAccount: detail.debitSubAccount,
+          debitVoucherId: detail.debitVoucherId,
+          debitVoucher: detail.debitVoucher,
+          application1: detail.application1,
+          application2: detail.application2,
+          creditAmount: detail.creditAmount,
+          creditTax: detail.creditTax,
+          creditTaxRule: detail.creditTaxRule,
+          creditTaxRuleId: detail.creditTaxRuleId,
+          creditVoucherId: detail.creditVoucherId,
+          creditVoucher: detail.creditVoucher,
+          projectId: detail.projectId,
+          projectData: detail.projectData,
+          creditAccount: detail.creditAccount,
+          creditSubAccount: detail.creditSubAccount
+        });
+      }
+      
+      cross_slips.push({
+        id: slip.id,
+        year: slip.year,
+        month: slip.month,
+        day: slip.day,
+        no: slip.no,
+        term: slip.term,
+        createrName: slip.creater ? slip.creater.name : '',
+        approverName: slip.approver ? slip.approver.name : '',
+        approvedAt: slip.approvedAt,
+        lines: lines
+      });
+    }
+    
+    const ret = ready(cross_slips);
 
     let pages = burstPage(ret.lines, LINES);
     dates.push({
@@ -25,14 +147,12 @@ const setupDates = async (term) => {
       sums: ret.sums
     });
     mon.setMonth(mon.getMonth() + 1);
-    //mon = new Date(fy.endDate);
   }
 }
-const setupAccount = () => {
-  axios.get(`/api/accounts`).then((res) => {
-    let accounts = res.data;
-    setAccounts(accounts);
-  });
+
+const setupAccount = async (tenantId) => {
+  let accounts = await Accounts.all(tenantId);
+  setAccounts(accounts);
 }
 const ready = (slips) => {
   let _lines = [];
@@ -93,9 +213,9 @@ const ready = (slips) => {
   });
 }
 
-export default async (term) => {
-  setupAccount();  
-  await setupDates(term);
+export default async (term, tenantId) => {
+  await setupAccount(tenantId);  
+  await setupDates(term, tenantId);
   return  ({
     fy: fy,
     dates: dates

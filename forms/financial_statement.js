@@ -54,9 +54,9 @@ const	net_income = (lines) => {
 	line.balance = line.pickup - line.debit + line.credit;
 }
 
-export default async (term) => {
+export default async (term, tenantId) => {
 	let book = new Book(term);
-	let {lines, accounts} = await TrialBalance(term);
+	let {lines, accounts} = await TrialBalance(tenantId, term);
 	net_income(lines);
 
 	let income_statement_page = new IncomeStatementPage(book, lines, accounts);

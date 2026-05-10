@@ -20,13 +20,16 @@ export default (sequelize, DataTypes) => {
     }
   };
   Project.init({
+    tenantId: {
+      type: DataTypes.INTEGER,
+      allowNull: false
+    },
     name: {
       type: DataTypes.STRING,
       allowNull: false
     },
     code: {
-      type: DataTypes.STRING,
-      unique: true
+      type: DataTypes.STRING
     },
     startDate: {
       type: DataTypes.DATEONLY,
@@ -39,6 +42,9 @@ export default (sequelize, DataTypes) => {
   }, {
     sequelize,
     modelName: 'Project',
+    indexes: [
+      { unique: true, fields: ['tenantId', 'code'] }
+    ]
   });
   return Project;
 };

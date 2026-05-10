@@ -2,7 +2,7 @@ import models from '../models/index.js';
 const Op = models.Sequelize.Op;
 import Accounts from '../libs/accounts.js';
 
-const	get_details = async (fy, account, sub_account) => {
+export const	get_details = async (fy, account, sub_account, tenantId) => {
   //console.log({account});
   //console.log({sub_account});
   let ledger = [];
@@ -43,38 +43,52 @@ const	get_details = async (fy, account, sub_account) => {
     //console.log('where', where);
 
     let details = await models.CrossSlipDetail.findAll({
-      where: where,
+      where: { ...where, tenantId },
       include: [
         {
           model: models.CrossSlip,
           as: 'crossSlip',
+          where: { tenantId },
+          required: false
         },
         {
           model: models.Voucher,
           required: false,
           as: 'debitVoucher',
+          where: { tenantId },
           include: [{
             model: models.VoucherFile,
-            as: 'files'
+            as: 'files',
+            where: { tenantId },
+            required: false
           }]
         },
         {
           model: models.Voucher,
           required: false,
           as: 'creditVoucher',
+          where: { tenantId },
           include: [{
             model: models.VoucherFile,
-            as: 'files'
+            as: 'files',
+            where: { tenantId },
+            required: false
           }]
         }, {
           model: models.TaxRule,
-          as: 'debitTaxRule'
+          as: 'debitTaxRule',
+          where: { tenantId },
+          required: false
         }, {
           model: models.TaxRule,
-          as: 'creditTaxRule'
+          as: 'creditTaxRule',
+          where: { tenantId },
+          required: false
         }, {
           model: models.Project,
-          as: 'projectData'
+          as: 'projectData',
+          where: { tenantId },
+          required: false
         }
       ],
       order: [
@@ -92,17 +106,17 @@ const	get_details = async (fy, account, sub_account) => {
 
 export default {
   get: (req, res, next) => {
+    const tenantId = req.currentTenantId;
     let term =  parseInt(req.params.term);
     let account = req.params.account;
     let sub_account = parseInt(req.params.sub_account);
-    //console.log('/api/ledger/', term, account, sub_account);
-    //console.log(term);
     models.FiscalYear.findOne({
       where: {
+        tenantId,
         term: term
       }
     }).then((fy) => {
-      get_details(fy, account, sub_account).then((ledger)=> {
+      get_details(fy, account, sub_account, tenantId).then((ledger)=> {
         res.json(ledger);
       })
     });

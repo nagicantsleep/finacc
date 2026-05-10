@@ -22,7 +22,8 @@ export default (sequelize, DataTypes) => {
     middle: DataTypes.STRING,
     minor: DataTypes.STRING,
     field: DataTypes.INTEGER,
-    adding: DataTypes.INTEGER
+    adding: DataTypes.INTEGER,
+    tenantId: { type: DataTypes.INTEGER, allowNull: false }
   }, {
     sequelize,
     modelName: 'AccountClass',

@@ -8,13 +8,14 @@ export default (sequelize, DataTypes) => {
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-			this.belongsTo(models.Item, {
+			this.belongsTo(models.Document, {
 				foreignKey: 'documentId',
 				onDelete: 'CASCADE'
 			});
     }
   }
   DocumentFile.init({
+    tenantId: { type: DataTypes.INTEGER, allowNull: false },
     documentId: DataTypes.INTEGER,
     name: DataTypes.STRING,
     mimeType: DataTypes.STRING,

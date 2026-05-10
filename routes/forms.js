@@ -1,6 +1,5 @@
 import express from 'express';
 const router = express.Router();
-import {is_authenticated} from '../libs/user.js';
 import explanatory_journal from '../forms/explanatory_journal.js';
 import general_ledger from '../forms/general_ledger.js';
 import subsidiary_ledger from '../forms/subsidiary_ledger.js';
@@ -19,12 +18,15 @@ import myCompany from '../libs/my-company.js';
 
 const __dirname = import.meta.dirname;
 
-router.get('/explanatory_journal/:term', is_authenticated, async (req, res, next) => {
+router.get('/explanatory_journal/:term', async (req, res, next) => {
 	if (( req.session.user.accounting ) ||
     	( req.session.user.fiscalBrowsing )) {
     if  ( req.query.format === 'pdf' )  {
-      const company = await myCompany();
-      const {fy, dates} = await initializeExplanatoryJournal(req.params.term);
+      const company = await myCompany(req.currentTenantId);
+      if (!company) {
+        return res.status(404).json({ error: 'Company not found. Please register a company with class 自社.' });
+      }
+      const {fy, dates} = await initializeExplanatoryJournal(req.params.term, req.currentTenantId);
       print('explanatory-journal', {
         fy: fy,
         dates: dates,
@@ -37,7 +39,7 @@ router.get('/explanatory_journal/:term', is_authenticated, async (req, res, next
     if	( req.query.format === 'html' )	{
       res.sendFile(path.join(__dirname, '../views/form.html'));
     } else {
-      explanatory_journal(parseInt(req.params.term)).then((buff) => {
+      explanatory_journal(parseInt(req.params.term), req.currentTenantId).then((buff) => {
         res.send(buff);
       });
     }
@@ -45,12 +47,12 @@ router.get('/explanatory_journal/:term', is_authenticated, async (req, res, next
 		res.redirect('/home');
 	}
 });
-router.get('/general_ledger/:term', is_authenticated, async (req, res, next) => {
+router.get('/general_ledger/:term', async (req, res, next) => {
 	if (( req.session.user.accounting ) ||
         ( req.session.user.fiscalBrowsing )) {
     if  ( req.query.format === 'pdf' )  {
-      const company = await myCompany();
-      const {fy, accountPages, ledgerPages} = await initializeGeneralLedger(req.params.term);
+      const company = await myCompany(req.currentTenantId);
+      const {fy, accountPages, ledgerPages} = await initializeGeneralLedger(req.params.term, req.currentTenantId);
       print('general-ledger', {
         fy: fy,
         company: company,
@@ -64,7 +66,7 @@ router.get('/general_ledger/:term', is_authenticated, async (req, res, next) => 
     if	( req.query.format === 'html')	{
       res.sendFile(path.join(__dirname, '../views/form.html'));
     } else {
-      general_ledger(parseInt(req.params.term)).then((buff) => {
+      general_ledger(parseInt(req.params.term), req.currentTenantId).then((buff) => {
         res.send(buff);
       })
     }
@@ -72,12 +74,12 @@ router.get('/general_ledger/:term', is_authenticated, async (req, res, next) => 
 		res.redirect('/home');
 	}
 });
-router.get('/subsidiary_ledger/:term', is_authenticated, async (req, res, next) => {
+router.get('/subsidiary_ledger/:term', async (req, res, next) => {
 	if (( req.session.user.accounting ) ||
         ( req.session.user.fiscalBrowsing )) {
     if  ( req.query.format === 'pdf' )  {
-      const company = await myCompany();
-      const {fy, ledgerPages} = await initializeSubsidiaryLedger(req.params.term);
+      const company = await myCompany(req.currentTenantId);
+      const {fy, ledgerPages} = await initializeSubsidiaryLedger(req.params.term, req.currentTenantId);
       print('subsidiary-ledger', {
         fy: fy,
         company: company,
@@ -90,7 +92,7 @@ router.get('/subsidiary_ledger/:term', is_authenticated, async (req, res, next) 
     if	( req.query.format === 'html')	{
       res.sendFile(path.join(__dirname, '../views/form.html'));
     } else {
-      subsidiary_ledger(parseInt(req.params.term)).then((buff) => {
+      subsidiary_ledger(parseInt(req.params.term), req.currentTenantId).then((buff) => {
         res.send(buff);
       })
     }
@@ -98,12 +100,12 @@ router.get('/subsidiary_ledger/:term', is_authenticated, async (req, res, next) 
 		res.redirect('/home');
 	}
 });
-router.get('/trial_balance/:term', is_authenticated, async (req, res, next) => {
+router.get('/trial_balance/:term', async (req, res, next) => {
 	if (( req.session.user.accounting ) ||
       ( req.session.user.fiscalBrowsing )) {
     if  ( req.query.format === 'pdf' )  {
-      const company = await myCompany();
-      const {fy, assetPages, liabilitiesAndCapitalPages, incomeStatementPages} = await initializeTrialBalance(req.params.term);
+      const company = await myCompany(req.currentTenantId);
+      const {fy, assetPages, liabilitiesAndCapitalPages, incomeStatementPages} = await initializeTrialBalance(req.params.term, req.currentTenantId);
       print('trial-balance', {
         fy: fy,
         company: company,
@@ -118,7 +120,7 @@ router.get('/trial_balance/:term', is_authenticated, async (req, res, next) => {
     if	( req.query.format === 'html')	{
       res.sendFile(path.join(__dirname, '../views/form.html'));
     } else {
-      trial_balance(parseInt(req.params.term)).then((buff) => {
+      trial_balance(parseInt(req.params.term), null, req.currentTenantId).then((buff) => {
         res.send(buff);
       })
     }
@@ -126,22 +128,22 @@ router.get('/trial_balance/:term', is_authenticated, async (req, res, next) => {
 		res.redirect('/home');
 	}
 });
-router.get('/trial_balance/:term/:month', is_authenticated, (req, res, next) => {
+router.get('/trial_balance/:term/:month', (req, res, next) => {
 	if (( req.session.user.accounting ) ||
       ( req.session.user.fiscalBrowsing )) {
-    trial_balance(parseInt(req.params.term), req.params.month).then((buff) => {
+    trial_balance(parseInt(req.params.term), req.params.month, req.currentTenantId).then((buff) => {
       res.send(buff);
     })
 	} else {
 		res.redirect('/home');
 	}
 });
-router.get('/financial_statement/:term', is_authenticated, async (req, res, next) => {
+router.get('/financial_statement/:term', async (req, res, next) => {
 	if (( req.session.user.accounting ) ||
       ( req.session.user.fiscalBrowsing )) {
     if  ( req.query.format === 'pdf' )  {
-      const company = await myCompany();
-      const {fy, bsLines, plOut, sgaPage, asset, liabilities, networth, sgaSum} = await initializeFinancialStatement(req.params.term);
+      const company = await myCompany(req.currentTenantId);
+      const {fy, bsLines, plOut, sgaPage, asset, liabilities, networth, sgaSum} = await initializeFinancialStatement(req.params.term, req.currentTenantId);
       print('financial-statement', {
         fy: fy,
         company: company,
@@ -160,7 +162,7 @@ router.get('/financial_statement/:term', is_authenticated, async (req, res, next
     if	( req.query.format === 'html')	{
       res.sendFile(path.join(__dirname, '../views/form.html'));
     } else {
-      financial_statement(parseInt(req.params.term)).then((buff) => {
+      financial_statement(parseInt(req.params.term), req.currentTenantId).then((buff) => {
         res.send(buff);
       })
     }
@@ -169,7 +171,7 @@ router.get('/financial_statement/:term', is_authenticated, async (req, res, next
 	}
 });
 
-router.get('/transaction/:form/:id', is_authenticated, async (req, res) => {
+router.get('/transaction/:form/:id', async (req, res) => {
   console.log(req.query);
   if  (( !req.query ) ||
        ( !req.query.format ) ||
@@ -177,8 +179,9 @@ router.get('/transaction/:form/:id', is_authenticated, async (req, res) => {
     res.sendFile(path.join(__dirname, '../views/form.html'));
   } else
   if  ( req.query.format === 'pdf' )  {
-    const company = await myCompany();
-    const transaction = await models.TransactionDocument.findByPk(req.params.id, {
+    const company = await myCompany(req.currentTenantId);
+    const transaction = await models.TransactionDocument.findOne({
+      where: { id: req.params.id, tenantId: req.currentTenantId },
       include: [
         {
           model: models.Task,
@@ -211,12 +214,12 @@ router.get('/transaction/:form/:id', is_authenticated, async (req, res) => {
         {
           model: models.User,
           as: 'handleUser',
-          attributes: ['name'],
+          attributes: ['name', 'legalName'],
           include: [
             {
-              model: models.Member,
-              as: 'member',
-              attributes: ['legalName', 'tradingName']
+              model: models.TenantMember,
+              as: 'memberships',
+              attributes: ['tradingName']
             }
           ]
         },

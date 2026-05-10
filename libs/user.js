@@ -6,6 +6,16 @@ import _passport from 'passport';
 import local from 'passport-local';
 const Local = local.Strategy;
 
+export const buildSessionUser = (user) => ({
+  id: user.id,
+  name: user.name,
+  legalName: user.legalName,
+  legalRuby: user.legalRuby,
+  email: user.email,
+  telNo: user.telNo,
+  deauthorizedAt: user.deauthorizedAt
+});
+
 _passport.use(new Local({
     usernameField: 'user_name',
     passwordField: 'password',
@@ -21,12 +31,12 @@ _passport.use(new Local({
         //console.log('auth', user);
         return done(null, {
           user_name: user_name,
-          user: user.dataValues
+          user: buildSessionUser(user)
         });
       }).catch((e) => {
         console.log('login error', e);
         return done(null, false, {
-          message: 'fail'
+          message: e?.message || 'fail'
         });
       });
     });
@@ -70,11 +80,11 @@ export	const	auth_user = (name, password) => {
           done(user);
         } else {
           //console.log("auth fail");
-          fail(user);
+          fail(new Error('パスワードが違います。'));
         }
       } else {
         //console.log("user none");
-        fail(null);
+        fail(new Error('ユーザーが存在しません。'));
       }
     });
   });
@@ -100,5 +110,6 @@ export default {
   is_authenticated: is_authenticated,
   auth_user: auth_user,
   passwd: passwd,
-  passport: passport
+  passport: passport,
+  buildSessionUser: buildSessionUser
 };

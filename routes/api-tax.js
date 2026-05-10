@@ -4,11 +4,13 @@ const Op = models.Sequelize.Op;
 export default {
   get: async(req, res, next) => {
     res.set('Access-Control-Allow-Origin', '*');
+    const tenantId = req.currentTenantId;
     let result = {};
     switch  (req.query.type) {
       case  'active':
         result = await models.TaxRule.findAll({
           where: {
+            tenantId,
             [Op.and]: [
               {
                 [Op.or]: [
@@ -29,6 +31,7 @@ export default {
         break;
       default:
         result = await models.TaxRule.findAll({
+          where: { tenantId },
           order: [
             [ 'displayOrder', 'ASC']
           ]
@@ -41,21 +44,26 @@ export default {
   },
   put: async(req, res, next) => {
     res.set('Access-Control-Allow-Origin', '*');
+    const tenantId = req.currentTenantId;
     let taxRules = req.body.values;
     for ( const taxRule of taxRules ) {
       if  ( taxRule.id ) {
-        let result = await models.TaxRule.findByPk(taxRule.id);
+        let result = await models.TaxRule.findOne({
+          where: { tenantId, id: taxRule.id }
+        });
         if  ( !taxRule.label )  {
           await result.destroy();
         } else {
           result.set(taxRule);
+          result.tenantId = tenantId;
           await result.save();
         }
       } else {
-        await models.TaxRule.create(taxRule);
+        await models.TaxRule.create({ ...taxRule, tenantId });
       }
     }
     models.TaxRule.findAll({
+      where: { tenantId },
       order: [
         [ 'displayOrder', 'asc']
       ]

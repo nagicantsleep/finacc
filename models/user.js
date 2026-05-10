@@ -14,11 +14,18 @@ import {Model} from 'sequelize';
 export default (sequelize, DataTypes) => {
 	class User extends Model  {
     static  associate(models) {
-      this.hasOne(models.Member, {
+      // Has many tenant memberships
+      this.hasMany(models.TenantMember, {
         foreignKey: 'userId',
-        sourceKey: 'id',
-        as: 'member'
-      })
+        as: 'memberships'
+      });
+      // Belongs to many tenants through TenantMember
+      this.belongsToMany(models.Tenant, {
+        through: models.TenantMember,
+        foreignKey: 'userId',
+        otherKey: 'tenantId',
+        as: 'tenants'
+      });
     }
     set password(p) {
       this.hashPassword = bcrypt.hashSync(p, SALT_ROUNDS);
@@ -45,19 +52,85 @@ export default (sequelize, DataTypes) => {
 		}
   }
   User.init({
-    name: DataTypes.STRING,
-    hashPassword: DataTypes.STRING,
-    deauthorizedAt: DataTypes.DATE,
-    accounting: DataTypes.BOOLEAN,
-    fiscalBrowsing: DataTypes.BOOLEAN,
-    approvable: DataTypes.BOOLEAN,
-    administrable: DataTypes.BOOLEAN,
-    companyManagement: DataTypes.BOOLEAN,
-    inventoryManagement: DataTypes.BOOLEAN,
-    personnelManagement: DataTypes.BOOLEAN
+    // Authentication
+    name: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: true,
+      comment: 'Login username'
+    },
+    hashPassword: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
+    deauthorizedAt: {
+      type: DataTypes.DATE,
+      allowNull: true,
+      comment: 'Global account disable'
+    },
+
+    // Real-world identity (moved from Member)
+    legalName: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      comment: '戸籍名 - legal/official name'
+    },
+    legalRuby: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      comment: '読み - phonetic reading'
+    },
+    legalSex: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      comment: '戸籍性別 - legal sex'
+    },
+    birthDate: {
+      type: DataTypes.DATEONLY,
+      allowNull: true,
+      comment: '誕生日'
+    },
+
+    // Global contact info
+    zip: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      comment: '郵便番号'
+    },
+    address1: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      comment: '住所'
+    },
+    address2: {
+      type: DataTypes.STRING,
+      allowNull: true
+    },
+    email: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      comment: 'Required for password reset'
+    },
+    telNo: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      comment: '電話'
+    }
   }, {
     sequelize,
-    modelName: 'User'
+    modelName: 'User',
+    hooks: {
+      beforeValidate: (user) => {
+        // Rule 1: legalName is required
+        if (!user.legalName || user.legalName.trim() === '') {
+          throw new Error('legalName is required');
+        }
+        // Rule 2: email is required
+        if (!user.email || user.email.trim() === '') {
+          throw new Error('email is required');
+        }
+      }
+    }
   });
   return User;
 };

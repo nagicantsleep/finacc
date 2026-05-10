@@ -19,8 +19,10 @@ const screen = (req, res, next) => {
 
 const form_out = async (req, res, form) => {
   let id = req.params.id;
-  const company = await myCompany();
-  let transaction = await models.TransactionDocument.findByPk(id, {
+  const tenantId = req.currentTenantId;
+  const company = await myCompany(tenantId);
+  let transaction = await models.TransactionDocument.findOne({
+    where: { id, tenantId },
     include: [{
         model: models.Company,
         as: 'company'
@@ -32,10 +34,12 @@ const form_out = async (req, res, form) => {
       {
         model: models.User,
         as: 'handleUser',
+        attributes: ['name', 'legalName'],
         include: [
           {
-            model: models.Member,
-            as: 'member'
+            model: models.TenantMember,
+            as: 'memberships',
+            attributes: ['tradingName']
           }
         ]
       }

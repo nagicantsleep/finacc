@@ -26,6 +26,8 @@ export default {
         voucher: realPath('voucher.js'),
         'bank-ledger': realPath('bank-ledger.js'),
         index: realPath('index.js'),
+        login: realPath('login.js'),
+        logon: realPath('logon.js'),
         changes: realPath('changes.js'),
 /*
         setup: realPath('setup.js')

@@ -12,17 +12,19 @@ export default (sequelize, DataTypes) => {
       this.belongsToMany(models.Account, {
         through: 'LabelAccounts',
         foreignKey: 'labelId',
-        otherKey: 'accountCode',
-        targetKey: 'accountCode',
+        otherKey: 'accountId',
         as: 'accounts'
       });
     }
   };
   Label.init({
+    tenantId: {
+      type: DataTypes.INTEGER,
+      allowNull: false
+    },
     name: {
       type: DataTypes.STRING,
-      allowNull: false,
-      unique: true
+      allowNull: false
     },
     description: {
       type: DataTypes.TEXT
@@ -30,6 +32,9 @@ export default (sequelize, DataTypes) => {
   }, {
     sequelize,
     modelName: 'Label',
+    indexes: [
+      { unique: true, fields: ['tenantId', 'name'] }
+    ]
   });
   return Label;
 };

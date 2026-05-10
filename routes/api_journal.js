@@ -3,15 +3,16 @@ const Op = models.Sequelize.Op;
 
 export default {
   get: async (req, res, next) => {
+    const tenantId = req.currentTenantId;
     let year =  parseInt(req.params.year);
     let month =  parseInt(req.params.month);
-    //console.log('/api/journal/', year, month);
     
     let cross_slips = [];
 
     let slips = await models.CrossSlip.findAll({
       where: {
         [Op.and]: {
+          tenantId,
           year: year,
           month: month
         }
@@ -37,34 +38,47 @@ export default {
       let slip = slips[i];
       let details = await models.CrossSlipDetail.findAll({
         where: {
-          crossSlipId: slip.id
+          crossSlipId: slip.id,
+          tenantId: tenantId
         },
         include: [
           {
             model: models.Voucher,
             required: false,
             as: 'debitVoucher',
+            where: { tenantId },
             include: [{
               model: models.VoucherFile,
-              as: 'files'
+              as: 'files',
+              where: { tenantId },
+              required: false
             }]
           }, {
             model: models.Voucher,
             required: false,
             as: 'creditVoucher',
+            where: { tenantId },
             include: [{
               model: models.VoucherFile,
-              as: 'files'
+              as: 'files',
+              where: { tenantId },
+              required: false
             }]
           }, {
             model: models.TaxRule,
-            as: 'debitTaxRule'
+            as: 'debitTaxRule',
+            where: { tenantId },
+            required: false
           }, {
             model: models.TaxRule,
-            as: 'creditTaxRule'
+            as: 'creditTaxRule',
+            where: { tenantId },
+            required: false
           }, {
             model: models.Project,
-            as: 'projectData'
+            as: 'projectData',
+            where: { tenantId },
+            required: false
           }
         ],
           order: [
