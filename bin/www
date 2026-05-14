@@ -5,6 +5,7 @@
  */
 
 import app from "../app.js";
+import { checkDatabase, applyMigration } from "../bin/check-db.js";
 import _debug from "debug";
 const debug = _debug("kaikei");
 import http from "http";
@@ -30,6 +31,19 @@ var server = http.createServer(app);
 
 */
 app.listen(port);
+
+const startup = async () => {
+  try {
+    const dbExists = await checkDatabase();
+    if (!dbExists) {
+      console.log('Database not found — creating...');
+    }
+    await applyMigration();
+  } catch (e) {
+    console.error('Database initialization failed:', e.message);
+  }
+};
+startup();
 //server.listen(port, host);
 server.on("error", onError);
 server.on("listening", onListening);

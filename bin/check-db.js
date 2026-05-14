@@ -14,7 +14,15 @@ if (config.use_env_variable) {
 } else {
   sequelize = new Sequelize(config.database, config.username, config.password, config);
 }
-const checkDatabase = async () => {
+export const createDatabase = async () => {
+  console.log(execSync('npx sequelize-cli db:create').toString());
+}
+
+export const applyMigration = async () => {
+  console.log(execSync('npx sequelize-cli db:migrate').toString());
+}
+
+export const checkDatabase = async () => {
   try {
     const [results, metadata]  = await sequelize.query(`SELECT 1 FROM pg_database WHERE datname = '${config.database}';`);
     return true;
@@ -23,26 +31,24 @@ const checkDatabase = async () => {
   }
 }
 
-const createDatabase = async () => {
-  console.log(execSync('npx sequelize-cli db:create').toString());
-}
+// Auto-run only when executed directly (not imported)
+const isMain = process.argv[1] && (
+  process.argv[1].endsWith('check-db.js') || process.argv[1].endsWith('check-db')
+);
 
-const applyMigration = async () => {
-  console.log(execSync('npx sequelize-cli db:migrate').toString());
-}
-
-(async () => {
-  try {
-    //
-    let databaseExists = await checkDatabase();
-    if (!databaseExists){
-      await createDatabase();
+if (isMain) {
+  (async () => {
+    try {
+      let databaseExists = await checkDatabase();
+      if (!databaseExists){
+        await createDatabase();
+      }
+      await applyMigration();
+    }catch (e){
+      console.log(e.message);
+      process.exit(1);
+    }finally{
+      await sequelize.close();
     }
-    await applyMigration();
-  }catch (e){
-    console.log(e.message);
-    process.exit(1);
-  }finally{
-    await sequelize.close();
-  }
-})();
+  })();
+}
