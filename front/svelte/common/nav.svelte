@@ -31,6 +31,11 @@
           </a>
         </li>
         <li>
+          <a href="#" class="dropdown-item" on:click|preventDefault={openTenantCreate}>
+            <i class="bi bi-building-add me-1"></i>テナント作成
+          </a>
+        </li>
+        <li>
           <a href="#" class="dropdown-item" on:click|preventDefault={switchTenantFromApp}>
             <i class="bi bi-arrow-left-right me-1"></i>テナント切替
             {#if switchingTenant}
@@ -60,11 +65,41 @@ export let status;
 
 let profileModal;
 let switchingTenant = false;
+let creatingTenant = false;
 
 const openProfile = () => profileModal?.show();
 
 const onProfileUpdated = (event) => {
   status.user = { ...status.user, ...event.detail };
+};
+
+const openTenantCreate = async () => {
+  if (creatingTenant) {
+    return;
+  }
+
+  const name = window.prompt('テナント名を入力してください。');
+  if (!name?.trim()) {
+    return;
+  }
+
+  const slug = window.prompt('スラッグを入力してください。空欄なら自動生成します。') || '';
+  creatingTenant = true;
+  try {
+    const res = await axios.post('/api/tenant', {
+      name: name.trim(),
+      slug: slug.trim() || undefined
+    });
+    if (res.data.result !== 'OK') {
+      window.alert(res.data.message || 'テナントの作成に失敗しました。');
+      return;
+    }
+    window.location.reload();
+  } catch (err) {
+    window.alert(err.response?.data?.message || 'テナントの作成に失敗しました。');
+  } finally {
+    creatingTenant = false;
+  }
 };
 
 const switchTenantFromApp = async () => {
