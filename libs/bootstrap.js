@@ -1,6 +1,6 @@
 import models from '../models/index.js';
 
-const DEFAULT_COMPANY_CLASSES = [
+export const DEFAULT_COMPANY_CLASSES = [
   { name: '国内購買先', displayOrder: 1, isClient: false },
   { name: '海外購買先', displayOrder: 2, isClient: false },
   { name: '国内外注', displayOrder: 3, isClient: false },

@@ -9,7 +9,7 @@
 		"build-ssr": "vite build --config vite.config.ssr.js",
 		"watch": "vite build -w",
 		"watch-ssr": "vite build -w --config vite.config.ssr.js",
-		"test": "cross-env APP_NAME=hieronymus-test mocha --timeout 15000 test/**/*.test.mjs",
+"test": "cross-env NODE_ENV=test APP_NAME=hieronymus-test mocha --timeout 15000 test/**/*.test.mjs",
 		"prepublishOnly": "npm test",
 		"dev": "cross-env APP_NAME=hieronymus-dev node --watch ./bin/www",
 		"start-dev": "cross-env APP_NAME=hieronymus-dev node ./bin/www",

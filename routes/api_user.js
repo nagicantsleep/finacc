@@ -1,7 +1,7 @@
 import models from '../models/index.js';
 const Op = models.Sequelize.Op;
 import {passwd, passport, is_authenticated, buildSessionUser} from '../libs/user.js';
-import {bootstrapTenantMember} from '../libs/bootstrap.js';
+import {bootstrapTenantMember, DEFAULT_COMPANY_CLASSES} from '../libs/bootstrap.js';
 import {switchTenant, overlayMembershipPermissions, clearMembershipPermissions} from '../libs/tenant.js';
 
 const MEMBERSHIP_PERMISSION_FIELDS = [
@@ -22,35 +22,44 @@ const sessionUserResponse = (sessionUser = {}) => {
   return user;
 };
 
-async function createOwnedTenant(user, name, transaction) {
-  const baseSlug = (name || user.legalName || user.name || 'tenant')
+async function createOwnedTenant(user, name, transaction, slugInput) {
+  const baseSlug = (slugInput || name || user.legalName || user.name || 'tenant')
     .toLowerCase()
     .replace(/[^a-z0-9-]/g, '-')
     .replace(/-+/g, '-')
     .replace(/^-|-$/g, '')
     .slice(0, 40) || 'tenant';
-  const slug = `${baseSlug}-${Date.now().toString(36)}`;
+  const slug = slugInput ? baseSlug : `${baseSlug}-${Date.now().toString(36)}`;
 
-  const tenant = await models.Tenant.create({
-    slug,
-    name,
-    status: 'active'
-  }, { transaction });
+  const existingTenant = await models.Tenant.findOne({
+    where: { [Op.or]: [{ slug }, { name }] },
+    transaction
+  });
+  if (existingTenant) {
+    const duplicateField = existingTenant.slug === slug ? 'スラッグ' : 'テナント名';
+    const error = new Error(`${duplicateField}は既に使用されています。`);
+    error.statusCode = 409;
+    throw error;
+  }
+
+  const tenant = await models.Tenant.create({ slug, name, status: 'active' }, { transaction });
 
   await models.TenantMember.create({
-    userId: user.id,
-    tenantId: tenant.id,
-    isOwner: true,
-    status: 'active',
-    isDefault: false,
-    accounting: true,
-    fiscalBrowsing: true,
-    approvable: true,
-    administrable: true,
-    companyManagement: true,
-    inventoryManagement: true,
-    personnelManagement: true,
+    userId: user.id, tenantId: tenant.id,
+    isOwner: true, status: 'active', isDefault: false,
+    accounting: true, fiscalBrowsing: true, approvable: true,
+    administrable: true, companyManagement: true,
+    inventoryManagement: true, personnelManagement: true,
     tenantSettings: true
+  }, { transaction });
+
+  const companyClasses = await models.CompanyClass.bulkCreate(
+    DEFAULT_COMPANY_CLASSES.map((c) => ({ ...c, tenantId: tenant.id })),
+    { transaction, returning: true }
+  );
+  const ownCompanyClass = companyClasses.find((c) => c.name === '自社');
+  await models.Company.create({
+    tenantId: tenant.id, companyClassId: ownCompanyClass.id, name: '本社'
   }, { transaction });
 
   return tenant;
@@ -504,19 +513,20 @@ export default {
     }
 
     const name = req.body.name?.trim();
+    const slug = req.body.slug?.trim();
     if (!name) {
       return res.status(400).json({ result: 'NG', message: 'テナント名を入力してください。' });
     }
 
     const transaction = await models.sequelize.transaction();
     try {
-      const tenant = await createOwnedTenant(req.session.user, name, transaction);
+      const tenant = await createOwnedTenant(req.session.user, name, transaction, slug);
       await transaction.commit();
       res.json({ result: 'OK', tenant: { id: tenant.id, name: tenant.name, slug: tenant.slug } });
     } catch (err) {
       await transaction.rollback();
       console.error('tenant create error', err);
-      res.status(500).json({ result: 'NG', message: 'テナントの作成に失敗しました。' });
+      res.status(err.statusCode || 500).json({ result: 'NG', message: err.message || 'テナントの作成に失敗しました。' });
     }
   },
   updateTenant: async (req, res, next) => {

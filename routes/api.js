@@ -47,6 +47,7 @@ router.get('/user/tenants', is_authenticated, user.tenants);
 router.get('/user/session-status', is_authenticated, user.sessionStatus);
 router.post('/user/select-tenant', is_authenticated, user.selectTenant);
 router.post('/user/tenant', is_authenticated, user.createTenant);
+router.post('/tenant', is_authenticated, user.createTenant);
 router.put('/user/tenant/:id', is_authenticated, user.updateTenant);
 router.delete('/user/tenant/:id', is_authenticated, user.deleteTenant);
 router.get('/user/:id', is_authenticated, requireTenant, user.get);
