@@ -20,6 +20,7 @@ export default defineConfig({
         common: realPath('common.js'),
         index: realPath('index.js'),
         login: realPath('login.js'),
+        logon: realPath('logon.js'),
         setup: realPath('setup.js'),
         form: realPath('form.js')
       },
