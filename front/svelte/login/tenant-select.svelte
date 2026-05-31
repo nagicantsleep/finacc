@@ -136,12 +136,12 @@ function logout() {
 <style>
   .tenant-select-box {
     width: 100%;
-    max-width: 480px;
+    max-width: 360px;
   }
-  
-  @media (min-width: 600px) {
+
+  @media (min-width: 480px) {
     .tenant-select-box {
-      width: 480px;
+      width: 360px;
     }
   }
   
@@ -171,16 +171,16 @@ function logout() {
   }
   
   .tenant-card:hover {
-    border-color: #0d6efd;
-    background: #f8f9ff;
+    border-color: #2a9d8f;
+    background: #f0faf9;
     transform: translateY(-1px);
-    box-shadow: 0 2px 4px rgba(13, 110, 253, 0.1);
+    box-shadow: 0 2px 4px rgba(42, 157, 143, 0.15);
   }
-  
+
   .tenant-card.selected {
-    border-color: #0d6efd;
-    background: #e8f0ff;
-    box-shadow: 0 2px 4px rgba(13, 110, 253, 0.15);
+    border-color: #2a9d8f;
+    background: #e8f7f5;
+    box-shadow: 0 2px 4px rgba(42, 157, 143, 0.2);
   }
   
   .tenant-info {
@@ -208,7 +208,7 @@ function logout() {
   
   .tenant-card:hover .tenant-arrow {
     transform: translateX(2px);
-    color: #0d6efd;
+    color: #2a9d8f;
   }
   
   .badge {
