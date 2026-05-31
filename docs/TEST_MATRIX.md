@@ -1,9 +1,6 @@
 # Test Matrix
 
-This file maps product behavior to proof.
-
-No product behavior has been defined or implemented yet. Do not mark a row
-implemented until tests or validation evidence exist.
+This file maps product behavior to proof. Evidence is **mandatory** before marking implemented.
 
 ## Status Values
 
@@ -11,23 +8,51 @@ implemented until tests or validation evidence exist.
 | --- | --- |
 | planned | Accepted as intended behavior, not implemented |
 | in_progress | Actively being built |
-| implemented | Implemented and proof exists |
+| implemented | Implemented with tests/validation evidence |
 | changed | Contract changed after earlier implementation |
 | retired | No longer part of the product contract |
+
+---
+
+## Evidence Types
+
+| Type | Coverage | Command/Location |
+| --- | --- | --- |
+| Unit | Pure domain/application logic | `test/*.test.mjs` |
+| Integration | API contracts, DB integrity, Sequelize hooks | `npm test` |
+| E2E | User-visible browser flows | Playwright tests |
+| Platform | Shell, Docker, SSR builds | `npm run build`, `npm run build-ssr` |
+
+---
 
 ## Matrix
 
 | Story | Contract | Unit | Integration | E2E | Platform | Status | Evidence |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| TBD | Add rows when story packets are created | no | no | no | no | planned | none |
+| AUTH-001 | User registration & login | no | ✅ | no | no | implemented | `test/accounting-slice.test.mjs` |
+| AUTH-002 | Session management | no | ✅ | no | no | implemented | `test/accounting-slice.test.mjs` |
+| TENANT-001 | Multi-tenant isolation | no | ✅ | no | no | implemented | `test/accounting-slice.test.mjs` |
+| LEDGER-001 | Account CRUD | no | ✅ | no | no | in_progress | `test/accounting-slice.test.mjs` |
+| BUILD-001 | Vite SPA build | no | no | no | ✅ | implemented | `dist/` output |
+| BUILD-002 | SSR build | no | no | no | ✅ | implemented | `dist-ssr/` output |
+| TBD | Add rows when stories created | no | no | no | no | planned | none |
+
+---
+
+## Test Commands
+
+```bash
+npm test                    # Integration tests (Mocha + Supertest)
+npm run build               # Vite SPA build
+npm run build-ssr           # SSR build
+npx playwright test         # E2E tests (if configured)
+```
+
+---
 
 ## Evidence Rules
 
-- Unit proof covers pure domain and application rules.
-- Integration proof covers backend enforcement, data integrity, provider
-  behavior, jobs, or service contracts.
-- E2E proof covers user-visible browser flows.
-- Platform proof covers only shell, deployment, mobile, desktop, or runtime
-  behavior that cannot be proven in lower layers.
-- A story can be implemented without every proof column if the story packet
-  explains why.
+- A story is **implemented** only when test evidence exists
+- Integration tests use Supertest agent pattern for session isolation
+- Tenant isolation verified via direct DB queries with unique suffix per test
+- Mark `changed` if contract changes after implementation — do not delete rows

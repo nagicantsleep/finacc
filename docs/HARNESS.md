@@ -1,52 +1,106 @@
 # Harness
 
-The project goal is to provide a reusable operating harness that lets humans and
-agents turn a future product spec into safe, validated work.
+> **Project:** Hieronymus — Accounting application (fin-acc)
+> **Stack:** Express.js · Svelte 4.x + Routify · PostgreSQL + Sequelize · Passport.js
 
-The app is what users touch. The harness is what agents touch.
+The harness provides a reusable operating framework that lets humans and agents
+turn a future product spec into safe, validated work.
 
 ## Mental Model
 
-```text
-------------------+
-| Human intent    |
-+------------------+
-         |
-         v
-+------------------+
-| Feature intake   |
-+------------------+
-         |
-         v
-+------------------+
-| Story packet     |
-+------------------+
-         |
-         v
-+------------------+
-| Agent work loop  |
-+------------------+
-         |
-         v
-+------------------+
-| Product delta    |
-+------------------+
-         |
-         v
-+------------------+
-| Validation proof |
-+------------------+
-         |
-         v
-+------------------+
-| Harness delta    |
-+------------------+
-         |
-         v
-+------------------+
-| Next intent      |
-+------------------+
 ```
+Human intent
+    ↓
+Feature intake (classify → lane)
+    ↓
+Story packet
+    ↓
+Agent work loop
+    ↓
+Product delta
+    ↓
+Validation proof
+    ↓
+Harness delta (if friction found)
+    ↓
+Next intent
+```
+
+## Commands
+
+```bash
+# Development
+npm run dev          # Dev server with watch (APP_NAME=hieronymus-dev)
+npm start-dev        # Dev server without watch
+npm start            # Production start
+
+# Testing
+npm test             # Integration tests (Mocha + Supertest + Playwright)
+
+# Building
+npm run build        # Vite SPA build → dist/
+npm run build-ssr    # SSR build → dist-ssr/
+```
+
+## Validation Ladder
+
+| Tier | When | How |
+|------|------|-----|
+| Tiny | Copy, names, config | `npm run build` (smoke) |
+| Normal | Story-sized behavior | `npm test` + manual check |
+| High-risk | Auth, data, multi-domain | Full test suite + review |
+
+## Source Hierarchy
+
+```
+User-provided spec/prompt
+    ↓
+docs/product/*        # Current product contract
+docs/stories/*        # Story packets and evidence
+docs/decisions/*      # Architecture decisions
+TEST_MATRIX.md        # Behavior-to-proof control panel
+```
+
+## Task Loop
+
+1. Classify request → choose lane (tiny/normal/high-risk)
+2. Create/update story packet if needed
+3. Implement in selected lane
+4. Run validation (`npm test`, `npm run build`)
+5. Record trace
+6. Capture friction → `docs/HARNESS_BACKLOG.md`
+
+## Quick Reference
+
+| Topic | Location |
+|-------|----------|
+| Git workflow | `AGENTS.md` — Epic branching strategy |
+| Auth layers | `docs/ARCHITECTURE.md` — Multi-Tenant Pattern |
+| Naming conventions | `docs/ARCHITECTURE.md` — Naming Conventions |
+| Test patterns | `docs/TEST_MATRIX.md` |
+
+## Harness Change Policy
+
+**Agents may update directly:**
+- Story status and evidence
+- Test matrix rows
+- Links from story packets to product docs
+- Validation notes and reports
+- Small clarifications tied to current task
+
+**Agents should ask before:**
+- Changing architecture direction
+- Removing validation requirements
+- Changing risk classification rules
+
+## Done Definition
+
+A task is done only when:
+- Requested change is completed or blocker documented
+- Relevant docs and test matrix entries are current
+- Validation commands were run
+- Trace recorded (files read, files changed, outcome)
+- Harness friction captured if found
 
 Every task has two possible outputs:
 

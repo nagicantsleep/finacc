@@ -78,3 +78,36 @@ documentation.
 A structured record of what an agent did during a task: actions taken, files
 read, files changed, decisions made, errors encountered, outcome, and any
 harness friction discovered.
+
+---
+
+## Project Terms (Hieronymus)
+
+### Tenant
+
+A business entity in the multi-tenant system. All data includes `tenantId`.
+Users belong to a tenant via session. Routes enforce tenant scope.
+
+### CrossSlip
+
+A journal entry that transfers amounts between accounts. Core domain object.
+
+### Trial Balance
+
+Report showing all account balances to verify debits = credits.
+
+### FiscalYear
+
+A fiscal/financial year period for accounting. Typically Apr-Mar in Japan.
+
+### Account
+
+An accounting account (asset, liability, equity, revenue, expense).
+
+### Passport.js Auth
+
+Authentication middleware using local strategy. Sessions stored in PostgreSQL.
+
+### Sequelize ORM
+
+ORM for PostgreSQL. Models live in `models/`, registered in `models/index.js`.

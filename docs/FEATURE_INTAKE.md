@@ -1,144 +1,108 @@
 # Feature Intake
 
-Every implementation prompt enters the intake gate before code changes. A new
-project spec also enters through this gate before it becomes product docs,
-stories, or implementation work.
-
-The human does not need to classify risk. The harness does.
+Every implementation prompt enters the intake gate before code changes.
 
 ## Intake Flow
 
-```text
+```
 User prompt
-    |
-    v
+    ↓
 Classify input type
-    |
-    v
+    ↓
 Restate as work item
-    |
-    v
-Find affected product docs and stories
-    |
-    v
+    ↓
+Find affected surface (routes/, models/, libs/, front/)
+    ↓
 Run risk checklist
-    |
-    v
+    ↓
 Choose lane: tiny, normal, or high-risk
 ```
 
 ## Input Types
 
-Use the input type to decide where the work should land before choosing the risk
-lane.
-
 | Type | Use when | Typical artifact |
-| --- | --- | --- |
-| New spec | Turning a user-provided project spec into harness-ready docs | Product docs, candidate epics, decisions |
-| Spec slice | Implementing selected behavior from an accepted spec | Story packet |
-| Change request | Changing, fixing, or refining accepted behavior | Story packet or direct patch |
-| New initiative | Adding a larger product area that needs multiple stories | Initiative notes plus story packets |
-| Maintenance request | Changing technical, operational, or dependency behavior | Story packet, validation report, or decision |
-| Harness improvement | Improving how humans and agents collaborate | Direct docs update or `scripts/bin/harness-cli backlog add` |
-
-Do not create or extend a monolithic spec by default after intake. Use product
-docs, stories, decisions, and initiative notes as the living surface.
+|------|----------|------------------|
+| New spec | Project spec → product docs | `docs/product/*`, decisions |
+| Spec slice | Implementing selected behavior | Story packet |
+| Change request | Changing, fixing, refining behavior | Story packet |
+| New initiative | Larger product area | Initiative notes + stories |
+| Maintenance request | Dependencies, architecture, perf | Story packet or decision |
+| Harness improvement | Improving agent collaboration | `docs/HARNESS_BACKLOG.md` |
 
 ## Lanes
 
 ### Tiny
 
-Use for low-risk docs, copy, names, or narrow edits.
-
-Also use for initial project setup when the work is limited to installing
-declared dependencies, wiring a server entrypoint, adding a health/smoke
-endpoint, or opening a local development database connection without creating
-domain schema, CRUD behavior, auth, authorization, provider integration, or
-data migration. A health endpoint in a new benchmark or scaffolded project is
-smoke proof, not a public contract escalation by itself.
+Use for low-risk: copy, names, config changes, CSS tweaks.
 
 Requirements:
-
-- Patch directly.
-- Keep affected docs current.
-- Run available quick checks.
-- Update the harness only if friction was found.
+- Patch directly
+- Run quick checks (`npm test` or `npm run build`)
+- Update affected docs
 
 ### Normal
 
 Use for story-sized behavior with bounded blast radius.
 
 Requirements:
-
-- Create or update one story file from `docs/templates/story.md`.
-- Link relevant product docs.
-- Add or update validation expectations.
-- Implement the smallest vertical slice when implementation exists.
-- Record or update proof status with `scripts/bin/harness-cli story add` and
-  `scripts/bin/harness-cli story update`.
+- Create or update story packet from `docs/templates/story.md`
+- Link relevant product docs
+- Implement smallest vertical slice
+- Run `npm test` before claiming done
 
 ### High-Risk
 
-Use when the work can affect security, data, scope, contracts, or multiple
-roles/platforms.
+Use when work affects: **Auth**, **Authorization**, **Data model**, **Audit**, **External systems**.
 
 Requirements:
-
-- Create a story folder using `docs/templates/high-risk-story/`.
-- Fill in `execplan.md`, `overview.md`, `design.md`, and `validation.md`.
-- Ask for human confirmation before implementation if direction is ambiguous.
-- Record a decision when behavior or architecture changes meaningfully.
+- Create high-risk story folder from `docs/templates/high-risk-story/`
+- Fill in overview, design, execplan, validation
+- Ask for human confirmation before implementation
+- Record decision if architecture changes
 
 ## Risk Checklist
 
-Mark one flag for each item that applies:
+| Risk flag | Applies when work touches |
+|-----------|---------------------------|
+| Auth | login, logout, sessions, JWT, password (Passport.js) |
+| Authorization | tenant scope, roles, permissions |
+| Data model | Sequelize models, migrations, schema changes |
+| Audit | audit logs, privacy, sensitive data |
+| External systems | email, payments, webhooks |
+| Public contracts | API shape, response envelope |
+| Multi-domain | more than one product area changes |
+| Existing behavior | changing implemented behavior |
 
-| Risk flag | Applies when the work touches |
-| --- | --- |
-| Auth | login, logout, sessions, JWT, password, refresh token |
-| Authorization | roles, permissions, tenant or company scope |
-| Data model | schema, migrations, uniqueness, deletion, retention |
-| Audit/security | audit logs, privacy, sensitive data, access logs |
-| External systems | email, payments, cloud services, provider SDKs, queues, webhooks |
-| Public contracts | API shape, response envelope, client-visible behavior |
-| Cross-platform | desktop/mobile/browser split, native shell behavior, deep links |
-| Existing behavior | already implemented or test-covered behavior changes |
-| Weak proof | unclear or missing tests around the affected area |
-| Multi-domain | more than one product domain changes at once |
+### Classification
 
-## Classification
+```
+0-1 flags  → tiny or normal
+2-3 flags  → normal with stronger validation
+4+ flags   → high-risk
 
-```text
-0-1 flags:
-  tiny or normal, based on code impact
-
-2-3 flags:
-  normal with stronger validation
-
-4+ flags:
-  high-risk
-
-Any hard gate:
-  high-risk unless the human explicitly narrows scope
+Hard gates (always high-risk):
+- Auth / Authorization
+- Data loss or migration
+- Audit/security
 ```
 
-Hard gates:
+## Project-Specific Triggers
 
-- Auth.
-- Authorization.
-- Data loss or migration.
-- Audit/security.
-- External provider behavior.
-- Removing or weakening validation requirements.
+| Trigger | Action |
+|---------|--------|
+| Changes to `routes/` | Read adjacent API routes for patterns |
+| Changes to `models/` | Check `models/index.js` registry |
+| Changes to `libs/` | Verify exports used by routes |
+| Changes to `front/svelte/` | Check component patterns |
+| Tenant isolation changes | Treat as **high-risk** |
+| Auth/Passport changes | Treat as **high-risk** |
 
 ## Output
 
-At the end of intake, the agent should be able to say:
-
-```text
+```
 Lane: normal
-Reason: touches authorization, API contract, and audit behavior.
-Docs: permissions, account-settings, audit-log.
-Story: docs/stories/epics/E02-access-control/US-014-manager-updates-role.md.
-Validation: unit, integration, E2E.
+Reason: touches API contract and tenant isolation
+Files: routes/api_account.js, models/Account.js
+Story: docs/stories/US-XXX-*.md
+Validation: npm test (✅/❌)
 ```

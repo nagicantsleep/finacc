@@ -1,133 +1,106 @@
 # Architecture
 
-No application stack is selected yet.
+> **Stack:** Express.js 4.x · Svelte 4.x + Routify 2.x · Vite 5.x · PostgreSQL + Sequelize 6.x · Passport.js · EJS + Sprightly
 
-No application code exists yet. This document defines generic architecture
-questions and boundary rules that future implementation should adapt after a
-user-provided spec and stack decision exist.
+This document defines the architectural boundaries, layering rules, and patterns
+specific to this project.
 
-## Discovery Before Shape
+---
 
-Before proposing implementation shape, identify:
+## Project Structure
 
-- Product surfaces: browser, mobile, desktop, CLI, API, worker, or service.
-- Runtime stack: language, framework, database, queues, providers, and hosting.
-- Core domains: the product concepts that deserve stable names and contracts.
-- Boundary inputs: user input, API requests, webhooks, jobs, files, credentials,
-  provider payloads, and environment configuration.
-- Validation ladder: the smallest checks that can prove the selected stack.
-
-Record stack choices in `docs/decisions/` when they meaningfully constrain
-future work.
-
-## Default Layering
-
-```text
-domain
-  <- application
-      <- infrastructure
-          <- interface
-              <- app surfaces
+```
+fin-acc/
+├── bin/               # Entry point (www)
+├── config/            # DB config, env, module-list
+├── front/             # Frontend assets
+│   ├── javascripts/   # Plain JS utilities
+│   ├── stylesheets/   # CSS
+│   └── svelte/       # Svelte components (main UI)
+├── libs/              # Backend utilities
+│   ├── user.js        # is_authenticated
+│   ├── tenant.js      # requireTenant
+│   └── *.js           # Ledger, trial_balance, etc.
+├── models/            # Sequelize models (35+ models)
+│   └── index.js       # Model registry
+├── routes/            # API routes (25+ files)
+│   ├── api*.js        # API endpoints
+│   └── *.js           # Page routes
+├── migrations/        # Sequelize migrations
+├── test/              # Integration tests (*.test.mjs)
+├── views/             # EJS/Sprightly templates (.spy)
+├── app.js             # Express app entry
+└── package.json
 ```
 
-## Candidate Structure
+---
 
-```text
-app/
-  domain/
-    entities/
-    value-objects/
-    repositories/
-    services/
+## Layering
 
-  application/
-    commands/
-    queries/
-    handlers/
-
-  infrastructure/
-    database/
-    logging/
-    notifications/
-
-  interface/
-    controllers/
-    dto/
-    presenters/
-    routes/
-    middlewares/
-
-surfaces/
-  browser/
-  mobile/
-  desktop/
-  cli/
+```
+interface层 (routes/)
+    ↓
+libs层 (utilities)
+    ↓
+models层 (Sequelize ORM)
+    ↓
+database (PostgreSQL)
 ```
 
-This is a thinking template, not a scaffold. Create real folders only when a
-story enters implementation and the selected stack needs them.
+---
 
-## Dependency Rule
+## Multi-Tenant Pattern
 
-Inner layers must not depend on outer layers.
+**All models include `tenantId` column.**
 
-| Layer | May depend on | Must not depend on |
-| --- | --- | --- |
-| domain | nothing project-external except tiny pure utilities | framework, database, UI, provider, process/env |
-| application | domain | framework, UI, provider, database concrete clients |
-| infrastructure | domain, application | interface controllers or UI |
-| interface | all backend layers | UI state or platform shell assumptions |
-| app surfaces | API contracts and app-facing clients | domain internals directly |
+| Middleware | Purpose |
+|------------|---------|
+| `is_authenticated` | Verify session user exists |
+| `requireTenant` | Ensure request has valid tenant context |
+
+Auth layers:
+```
+Public    → /login, /signup, /api/user/login, /api/user/signup
+User-scope → /logon, /api/user/password, /api/user/profile
+Tenant-scope → All business routes (/, /home, /api/* except auth)
+```
+
+---
+
+## Naming Conventions
+
+| Type | Pattern | Example |
+|------|---------|---------|
+| API routes | `api_*.js` | `routes/api_account.js` |
+| Models | PascalCase singular | `CrossSlip`, `FiscalYear` |
+| Svelte components | kebab-case | `journal-entry.svelte` |
+| Migrations | `YYYYMMDDHHMMSS-*.js` | `20240501000000-create-account.js` |
+
+---
 
 ## Parse-First Boundary Rule
 
 Unknown data must be parsed at boundaries before it enters inner code.
 
-Boundaries include:
-
-- HTTP request bodies, params, and query strings.
-- Session payloads and identity claims.
-- Environment variables.
-- Database rows returned from external clients.
-- Platform shell payloads.
-- Deep links, tokens, and signed URLs.
-- Provider webhooks, events, and async payloads.
-
-Target flow:
-
-```text
-unknown input
-  -> parser
-  -> typed DTO or command
-  -> application use case
-  -> domain object/value object
+```
+unknown input → parser → typed DTO → application logic → domain object
 ```
 
-Inner layers should work with meaningful product types such as `UserId`,
-`AccountId`, `WorkspaceId`, `Role`, `DateRange`, or domain-specific IDs,
-rather than repeatedly validating raw strings.
+---
 
-## Command/Query Boundary
+## Command/Query Separation
 
-If the product has both reads and writes, keep command/query separation clear at
-the code level even when the storage layer is simple:
+- **Commands** (`routes/api_*.js`): POST/PUT/DELETE — mutate state, own audit side effects
+- **Queries** (`routes/api_*.js`): GET — read state, format for consumers
+- **Shared rules** live in `libs/` or `models/`, not in routes
 
-- Commands mutate state and own audit side effects.
-- Queries read state and format for consumers.
-- Shared domain rules live in domain/application, not controllers.
+---
 
 ## Observability Contract
 
-The future server should emit one canonical JSON log line per request with:
+Canonical JSON log per request:
+```
+{timestamp, level, request_id, user_id?, action, duration_ms, status_code, message}
+```
 
-- timestamp
-- level
-- request_id
-- user_id when known
-- action
-- duration_ms
-- status_code
-- message
-
-Audit logs are product records. Application logs are operational records. Do not
-use one as a substitute for the other.
+Audit logs ≠ application logs. Do not substitute one for the other.
