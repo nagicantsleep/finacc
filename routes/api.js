@@ -45,6 +45,8 @@ router.delete('/admin/backup/:date', is_authenticated, requireTenant, admin.dele
 router.get('/user', is_authenticated, user.get);
 router.get('/user/tenants', is_authenticated, user.tenants);
 router.get('/user/session-status', is_authenticated, user.sessionStatus);
+router.get('/user/language-pair', is_authenticated, requireTenant, user.languagePair);
+router.put('/user/language-pair', is_authenticated, requireTenant, user.updateLanguagePair);
 router.post('/user/select-tenant', is_authenticated, user.selectTenant);
 router.post('/user/tenant', is_authenticated, user.createTenant);
 router.post('/tenant', is_authenticated, user.createTenant);

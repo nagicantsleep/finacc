@@ -74,7 +74,7 @@ import OkModal from './common/ok-modal.svelte';
 import Router from './components/router.svelte';
 import BilingualText from './components/bilingual-text.svelte';
 import {currentPage, getStore} from '../javascripts/router.js';
-import { loadDictionaries } from '../javascripts/bilingual.js';
+import { loadDictionaries, languagePair } from '../javascripts/bilingual.js';
 import { getCompanyInfo } from '../../libs/utils.js';
 import ja from '../javascripts/locales/ja.json';
 import vi from '../javascripts/locales/vi.json';
@@ -183,6 +183,17 @@ onMount(async () => {
   console.log('index onMount');
   status.pathname = location.pathname;
   // currentPage.set(location.pathname);
+
+  // Fetch language pair preference from server
+  try {
+    const langRes = await axios.get('/api/user/language-pair');
+    if (langRes.data && langRes.data.languagePair) {
+      languagePair.set(langRes.data.languagePair);
+    }
+  } catch (e) {
+    console.log('language-pair fetch failed, using default', e);
+  }
+
   const res = await axios.get('/api/user');
   status.user = res.data.user;
   status.company = await getCompanyInfo();

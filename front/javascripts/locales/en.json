@@ -161,6 +161,8 @@
   "language_pair_vi_ja": "Vietnamese / Japanese",
   "language_pair_vi_en": "Vietnamese / English",
   "language_pair_ja_en": "Japanese / English",
+  "language_pair_ja_vi": "Japanese / Vietnamese",
+  "language_pair_en_ja": "English / Japanese",
 
   "no_data": "No data",
   "loading": "Loading...",

@@ -161,6 +161,8 @@
   "language_pair_vi_ja": "ベトナム語／日本語",
   "language_pair_vi_en": "ベトナム語／英語",
   "language_pair_ja_en": "日本語／英語",
+  "language_pair_ja_vi": "日本語／ベトナム語",
+  "language_pair_en_ja": "英語／日本語",
 
   "no_data": "データがありません",
   "loading": "読み込み中...",
