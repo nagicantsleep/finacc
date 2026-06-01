@@ -5,14 +5,14 @@
     </div>
     <div class="card">
       <div class="card-body login-card-body">
-        <p class="fs-4 text-center ">ログイン</p>
+        <p class="fs-4 text-center "><BilingualText key="login" /></p>
         <p class="text-{msg_type} text-center">{message}</p>
         <div class="mb-3">
-          <label for="user_input">ユーザー名</label>
+          <label for="user_input"><BilingualText key="username" /></label>
           <input type="text" bind:value={user_name} class="form-control" placeholder="ユーザー名">
         </div>
         <div class="mb-3">
-          <label for="password_input">パスワード</label>
+          <label for="password_input"><BilingualText key="password" /></label>
           <input type="password" bind:value={password} class="form-control" placeholder="パスワード">
         </div>
         <div class="row d-flex justify-content-center">
@@ -23,9 +23,9 @@
               {#if isSubmitting}
                 <span class="spinner-border spinner-border-sm me-2"></span>
               {/if}
-              ログイン
+              <BilingualText key="login" />
             </button>
-            <a on:click|preventDefault={change} href="#" class="text-center">アカウント登録はこちら</a>
+            <a on:click|preventDefault={change} href="#" class="text-center"><BilingualText key="signup_link" /></a>
           </div>
         </div>
       </div>
@@ -35,6 +35,7 @@
 <script>
 import {onMount, beforeUpdate, afterUpdate, createEventDispatcher} from 'svelte';
 import axios from 'axios';
+import BilingualText from '../components/bilingual-text.svelte';
 export let current;
 
 let user_name = '';
@@ -60,17 +61,17 @@ const Login = async () => {
     message = 'ユーザー名またはパスワードが入力されていません。';
     return;
   }
-  
+
   isSubmitting = true;
-  
+
   try {
     const response = await axios.post('/api/user/login', {
       user_name,
       password
     });
-    
+
     console.log('result', response.data);
-    
+
     if (response.data.result === 'OK') {
       if (response.data.requiresTenantSelection) {
         window.location = '/logon';

@@ -1,25 +1,27 @@
-    <TableMaintenance
-      title={'取引文書種別'}
-      endpoint={'/api/transaction/kinds'}
-      columns={[
+<TableMaintenance
+  title="transaction_kind"
+  endpoint={'/api/transaction/kinds'}
+  columns={[
   { type: "id", name: 'id'},
   { type: "order", name: 'displayOrder'},
-  { type: "text", name: 'label', title: "文書種別名", align: "left"},
+  { type: "text", name: 'label', title: "kind", align: "left"},
   { type: "checkbox", name: 'hasDetails', title: "明細有無", width: "100px"},
-  { type: "dropdown", name: 'hasDocument', title: "書類有無", width: "100px",
+  { type: "dropdown", name: 'hasDocument', title: "document", width: "100px",
     source:[
       [0, 'なし'],
       [1, '任意'],
       [2, '必須'],
     ]
   },
-  { type: "checkbox", name: 'forCustomer', title: "顧客用", width: "70px"},
-  { type: "dropdown", name: 'bookId', title: '作成証憑', width: '200px',
+  { type: "checkbox", name: 'forCustomer', title: "customer", width: "70px"},
+  { type: "dropdown", name: 'bookId', title: "voucher_class", width: '200px',
     func: getClasses
   }
 ]}></TableMaintenance>
+
 <script>
 import TableMaintenance from './table-maintenance.svelte';
+import BilingualText from '../components/bilingual-text.svelte';
 import axios from 'axios';
 
 export let status;

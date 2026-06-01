@@ -38,7 +38,7 @@
   </div>
   {#if ( input === 'view' || input === 'input') }
     <div class="row mb-2">
-      <label for="companyName" class="col-1 col-form-label">相手先名</label>
+      <label for="companyName" class="col-1 col-form-label"><BilingualText key="company_name" inline /></label>
       <div class="col-11">
         <input type="text" id="companyName" class="form-control"
           bind:value={companyName} disabled={( input === 'view' ) ? true : false}/>
@@ -52,7 +52,7 @@
       </div>
     </div>
     <div class="row mb-2">
-      <label for="address1" class="col-1 col-form-label">住所</label>
+      <label for="address1" class="col-1 col-form-label"><BilingualText key="address" inline /></label>
       <div class="col-11">
         <input type="text" id="address1" class="form-control"
           bind:value={address1} disabled={( input === 'view' ) ? true : false}>
@@ -66,7 +66,7 @@
       </div>
     </div>
     <div class="row mb-2">
-      <label for="chargeName" class="col-1 col-form-label">担当者</label>
+      <label for="chargeName" class="col-1 col-form-label"><BilingualText key="charge_name" inline /></label>
       <div class="col-11">
         <input type="text" id="chargeName" class="form-control"
           bind:value={chargeName} disabled={( input === 'view' ) ? true : false}>
@@ -87,6 +87,7 @@ import axios from 'axios';
 import {onMount, beforeUpdate, afterUpdate, createEventDispatcher} from 'svelte';
 const dispatch = createEventDispatcher();
 import CompanyEntry from '../company/company-entry.svelte';
+import BilingualText from '../../components/bilingual-text.svelte';
 
 export let companyId = '';
 export let register = '';

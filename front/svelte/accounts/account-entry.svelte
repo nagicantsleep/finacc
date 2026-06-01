@@ -1,7 +1,23 @@
+<script>
+import {onMount, beforeUpdate, afterUpdate, createEventDispatcher} from 'svelte';
+import  InputNumber from '../components/input-number.svelte';
+import BilingualText from '../components/bilingual-text.svelte';
+import {TAX_CLASS} from '../../../libs/utils';
+
+export  let account;
+export  let subAccount;
+export  let mode;
+
+beforeUpdate(() => {
+    console.log({account});
+    console.log({subAccount});
+})
+</script>
+
 <div class="container-fluid">
     <div class="row">
         <div class="col-3">
-            科目クラス
+            <BilingualText key="account_class" />
         </div>
         <div class="col-9">
             <div class="row">
@@ -71,7 +87,7 @@
         </div>
     </div>
     <div class="row">
-        <div class="col-3">借方金額</div>
+        <div class="col-3"><BilingualText key="debit" /></div>
         <div class="col-9">
             {#if ( ( mode == 'new-sub-account' ) || ( mode == 'edit-sub-account' ) )}
             <InputNumber
@@ -83,7 +99,7 @@
         </div>
     </div>
     <div class="row">
-        <div class="col-3">貸方金額</div>
+        <div class="col-3"><BilingualText key="credit" /></div>
         <div class="col-9">
             {#if ( ( mode == 'new-sub-account' ) || ( mode == 'edit-sub-account' ) )}
             <InputNumber
@@ -95,7 +111,7 @@
         </div>
     </div>
     <div class="row">
-        <div class="col-3">残高</div>
+        <div class="col-3"><BilingualText key="balance" /></div>
         <div class="col-9">
             {#if ( ( mode == 'new-sub-account' ) || ( mode == 'edit-sub-account' ) )}
             <InputNumber
@@ -107,18 +123,3 @@
         </div>
     </div>
 </div>
-
-<script>
-import {onMount, beforeUpdate, afterUpdate, createEventDispatcher} from 'svelte';
-import  InputNumber from '../components/input-number.svelte';
-import {TAX_CLASS} from '../../../libs/utils';
-
-export  let account;
-export  let subAccount;
-export  let mode;
-
-beforeUpdate(() => {
-    console.log({account});
-    console.log({subAccount});
-})
-</script>

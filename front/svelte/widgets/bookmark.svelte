@@ -4,6 +4,7 @@
 <script>
 import entries from '../../../config/module-list.js';
 import HTMLPanel from './html-panel.svelte';
+import BilingualText from '../../components/bilingual-text.svelte';
 import {isSameOrigin, fetchTitleFromUrl} from '../../javascripts/utils.js';
 import axios from 'axios';
 
@@ -42,7 +43,7 @@ export const create = async (option, status) => {
     options.image ||= preview.image;
     options.description ||= preview.description;
   }
-  
+
   return	(options);
 }
 

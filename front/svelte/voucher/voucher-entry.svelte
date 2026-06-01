@@ -1,13 +1,13 @@
 <div class="entry">
   <div class="page-title d-flex justify-content-between">
-    <h1>証憑情報</h1>
-  </div> 
+    <h1><BilingualText key="voucher_info" /></h1>
+  </div>
   <div class="">
     <div class="content">
       <div class="body full-height-2">
         {#if !ok }
         <div class="border rounded border-danger mb-3 ms-2 me-2 p-3">
-          <h5 class="fs-5 text-danger"><i class="bi bi-exclamation-triangle-fill"></i>&nbsp;エラー</h5>
+          <h5 class="fs-5 text-danger"><i class="bi bi-exclamation-triangle-fill"></i>&nbsp;<BilingualText key="error" /></h5>
           <ul>
             {#each errorMessages as errorMessage}
               <li class="text-danger">{errorMessage}</li>
@@ -25,11 +25,11 @@
       <div class="footer">
         <button type="button" class="btn btn-secondary" disabled={disabled}
           on:click={close_}
-          >もどる</button>
+          ><BilingualText key="back" /></button>
         {#if ( voucher && voucher.id && voucher.id > 0 )}
           <button type="button" class="btn btn-danger" disabled={disabled}
               on:click={delete_}
-                  id="delete-button">削除</button>
+                  id="delete-button"><BilingualText key="delete" /></button>
           <button type="button" class="btn btn-success" disabled={disabled}
             on:click|preventDefault={() => {
               console.log('voucher', voucher);
@@ -49,11 +49,11 @@
                 });
               }
             }}
-            id="slip-button">伝票</button>
+            id="slip-button"><BilingualText key="voucher_slip" /></button>
         {/if}
         <button type="button" class="btn btn-primary" disabled={disabled}
             on:click={save}
-            id="save-button">保存</button>
+            id="save-button"><BilingualText key="save" /></button>
       </div>
     </div>
   </div>
@@ -69,6 +69,7 @@ import {onMount, beforeUpdate, afterUpdate, createEventDispatcher} from 'svelte'
 const dispatch = createEventDispatcher();
 import VoucherInfo from './voucher-info.svelte';
 import {currentVoucher, getStore} from '../../javascripts/current-record.js'
+import BilingualText from '../../components/bilingual-text.svelte';
 
 
 export let voucher;
@@ -87,7 +88,7 @@ const create_voucher = async (_voucher) => {
 const update_voucher = async (_voucher) => {
   console.log('save_voucher', _voucher);
   let result = await axios.put('/api/voucher', _voucher);
-     
+
   console.log(result);
   return	(result);
 }
