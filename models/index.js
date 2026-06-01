@@ -29,6 +29,7 @@ import TaxRule from './tax-rule.js';
 import TransactionDocument from './transaction-document.js';
 import TransactionDetail from './transaction-detail.js';
 import TransactionKind from './transaction-kind.js';
+import Translation from './translation.js';
 import Tenant from './tenant.js';
 import TenantMember from './tenantmember.js';
 import User from './user.js';
@@ -78,6 +79,7 @@ const models = {
   Task: Task(sequelize, DataTypes),
   TaskDetail: TaskDetail(sequelize, DataTypes),
   TaxRule: TaxRule(sequelize, DataTypes),
+  Translation: Translation(sequelize, DataTypes),
   Tenant: Tenant(sequelize, DataTypes),
   TenantMember: TenantMember(sequelize, DataTypes),
   TransactionDocument: TransactionDocument(sequelize, DataTypes),
