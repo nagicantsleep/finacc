@@ -72,8 +72,15 @@ import Task from './task/task.svelte';
 import OkModal from './common/ok-modal.svelte';
 
 import Router from './components/router.svelte';
+import BilingualText from './components/bilingual-text.svelte';
 import {currentPage, getStore} from '../javascripts/router.js';
+import { loadDictionaries } from '../javascripts/bilingual.js';
 import { getCompanyInfo } from '../../libs/utils.js';
+import ja from '../javascripts/locales/ja.json';
+import vi from '../javascripts/locales/vi.json';
+import en from '../javascripts/locales/en.json';
+
+loadDictionaries({ ja, vi, en });
 
 export let term;
 
