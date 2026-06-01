@@ -12,10 +12,10 @@
 		  <table class="table table-bordered">
         <thead class="table-light">
           <th colspan="2">
-            日付 / 伝番
+            <BilingualText key="voucher_info" />
           </th>
           <th style="width: 100px;">
-            作成者
+            <BilingualText key="username" />
           </th>
           <th style="width: 100px;">
             更新者
@@ -49,7 +49,7 @@
             </td>
           </tr>
           {/each}
-        </tbody>              
+        </tbody>
       </table>
     </div>
   </div>
@@ -76,6 +76,7 @@ const dispatch = createEventDispatcher();
 import CrossSlipModal from '../cross-slip/cross-slip-modal.svelte';
 import {setAccounts} from '../../javascripts/cross-slip';
 import { v4 as uuidv4 } from "uuid";
+import BilingualText from '../../components/bilingual-text.svelte';
 
 export let status;
 export let toast;

@@ -10,11 +10,11 @@
   <div class="footer">
     <button type="button" class="btn btn-primary"
       on:click|preventDefault={update}>
-      更新
+      <BilingualText key="update" />
     </button>
     <button type="button" class="btn btn-danger"
       on:click|preventDefault={cancel}>
-      取消
+      <BilingualText key="cancel" />
     </button>
   </div>
 </div>
@@ -22,6 +22,7 @@
 <script>
 import {onMount, beforeUpdate, afterUpdate, createEventDispatcher} from 'svelte';
 import SpreadSheet from '../components/spreadsheet.svelte';
+import BilingualText from '../components/bilingual-text.svelte';
 import axios from 'axios';
 import {eventBus} from '../../javascripts/table-maintenance.js';
 

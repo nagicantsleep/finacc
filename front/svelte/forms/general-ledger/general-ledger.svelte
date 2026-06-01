@@ -1,11 +1,11 @@
 <FrontCover
-	title="総勘定元帳"
+  title="ledger"
   {fy}
   {company}
   ></FrontCover>
 {#if accountPages}
 <AccountPage
-	title="総勘定元帳"
+  title="ledger"
   {fy}
   {company}
   {accountPages}
@@ -14,7 +14,7 @@
 <LedgerPage
   {fy}
   {company}
-	title="総勘定元帳"
+  title="ledger"
   {ledgerPage}
   ></LedgerPage>
 {/each}
@@ -23,6 +23,7 @@
 import AccountPage from '../components/account-page.svelte';
 import FrontCover from '../components/front-cover.svelte';
 import LedgerPage from '../components/ledger-page.svelte';
+import BilingualText from '../../components/bilingual-text.svelte';
 
 export let fy;
 export let company;

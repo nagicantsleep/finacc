@@ -1,6 +1,6 @@
 <div class="entry">
   <div class="page-title d-flex justify-content-between">
-    <h1>品目情報</h1>
+    <h1><BilingualText key="item_info" /></h1>
   </div> 
   <div class="full-height fontsize-12pt">
     <div class="content">

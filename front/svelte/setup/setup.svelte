@@ -7,10 +7,10 @@
   <div class="border rounded p-3">
     <form novalidate>
       <div class="mb-3">
-        <label for="year" class="form-label">会計年度（西暦）&nbsp;<span class="badge bg-danger">必須</span></label>
+        <label for="year" class="form-label"><BilingualText key="fiscal_year" />&nbsp;<span class="badge bg-danger">必須</span></label>
         <div class="input-group">
-          <input type="number" class="form-control {invalid.year ? "is-invalid" : "is-valid"} " placeholder="会計年度（西暦）" id="year" min="1900" bind:value={form.year} >
-          <span class="input-group-text">年度</span>
+          <input type="number" class="form-control {invalid.year ? "is-invalid" : "is-valid"} " id="year" min="1900" bind:value={form.year} >
+          <span class="input-group-text"><BilingualText key="fiscal_year" /></span>
         </div>
         {#if invalid.year }
           <div class="text-danger">
@@ -19,10 +19,10 @@
         {/if}
       </div>
       <div class="mb-3">
-        <label for="term" class="form-label">期&nbsp;<span class="badge bg-danger">必須</span></label>
+        <label for="term" class="form-label"><BilingualText key="term" />&nbsp;<span class="badge bg-danger">必須</span></label>
         <div class="input-group">
-          <input type="number" class="form-control {invalid.term ? "is-invalid" : "is-valid"}" placeholder="期" id="term" min="1" bind:value={form.term} >
-          <span class="input-group-text">期</span>
+          <input type="number" class="form-control {invalid.term ? "is-invalid" : "is-valid"}" id="term" min="1" bind:value={form.term} >
+          <span class="input-group-text"><BilingualText key="term" /></span>
         </div>
         {#if invalid.term }
           <div class="text-danger">
@@ -31,7 +31,7 @@
         {/if}
       </div>
       <div class="mb-3">
-        <label for="startDate" class="form-label">開始日付&nbsp;<span class="badge bg-danger">必須</span></label>
+        <label for="startDate" class="form-label"><BilingualText key="start_date" />&nbsp;<span class="badge bg-danger">必須</span></label>
         <input type="date" id="startDate" class="form-control {invalid.startDate ? "is-invalid" : "is-valid"}" bind:value={form.startDate} >
         {#if invalid.startDate }
           <div class="text-danger">
@@ -40,7 +40,7 @@
         {/if}
       </div>
       <div class="mb-3">
-        <label for="endDate" class="form-label">終了日付&nbsp;<span class="badge bg-danger">必須</span></label>
+        <label for="endDate" class="form-label"><BilingualText key="end_date" />&nbsp;<span class="badge bg-danger">必須</span></label>
         <input type="date" id="endDate" class="form-control {invalid.endDate ? "is-invalid" : "is-valid"}" bind:value={form.endDate} >
         {#if invalid.endDate }
           <div class="text-danger">
@@ -63,7 +63,7 @@
         {/if}
       </div>
       <div class="mb-3">
-        <label for="companyClass" class="form-label">組織種別&nbsp;<span class="badge bg-danger">必須</span></label>
+        <label for="companyClass" class="form-label"><BilingualText key="company_class" />&nbsp;<span class="badge bg-danger">必須</span></label>
         <select id="companyClass" class="form-control"
           bind:value={form.companyClass}>
           <option value={0}></option>
@@ -96,6 +96,7 @@
   import axios from 'axios';
   import {onMount} from 'svelte';
   import {ROUNDING_METHOD} from '../../../libs/utils.js';
+  import BilingualText from '../../components/bilingual-text.svelte';
 
   let form = {};
   let invalid = {};
@@ -204,7 +205,7 @@
     }
     return  true;
   }
-  const isFormDataValid = () =>{ 
+  const isFormDataValid = () =>{
     console.log(form);
     let count = 0;
     if ( !isYearValid() ){

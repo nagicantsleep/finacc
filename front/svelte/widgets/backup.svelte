@@ -1,18 +1,14 @@
 <div class="menu">
   <div class="header">
     <button class="btn btn-primary" on:click|preventDefault={backup}>
-      バックアップ
+      <BilingualText key="backup" />
     </button>
   </div>
   <div class="body">
     <table class="table table-bordered">
       <thead class="table-light">
-        <th>
-          取得日時
-        </th>
-        <th>
-          処理
-        </th>
+        <th>取得日時</th>
+        <th>処理</th>
       </thead>
       <tbody>
         {#each files as file, i}
@@ -22,17 +18,17 @@
           </td>
           <td style="text-align:center;">
             {#if (i == 0) }
-            <btton class="btn btn-success" on:click|preventDefault={() => restore(i)}>
-              復元
-            </btton>
+            <button class="btn btn-success" on:click|preventDefault={() => restore(i)}>
+              <BilingualText key="restore" />
+            </button>
             {:else}
-            <btton class="btn btn-warning" on:click|preventDefault={() => restore(i)}>
-              復元
-            </btton>
+            <button class="btn btn-warning" on:click|preventDefault={() => restore(i)}>
+              <BilingualText key="restore" />
+            </button>
             {/if}
-            <btton class="btn btn-danger" on:click|preventDefault={() => remove(i)}>
-              削除
-            </btton>
+            <button class="btn btn-danger" on:click|preventDefault={() => remove(i)}>
+              <BilingualText key="delete" />
+            </button>
           </td>
         </tr>
         {/each}
@@ -52,6 +48,7 @@ import axios from 'axios';
 import {onMount, beforeUpdate} from 'svelte';
 import eventBus from '../../javascripts/event-bus.js';
 import OkModal from '../common/ok-modal.svelte';
+import BilingualText from '../../components/bilingual-text.svelte';
 
 export let toast;
 export let status;

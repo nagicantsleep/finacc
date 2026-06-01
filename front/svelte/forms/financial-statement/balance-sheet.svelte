@@ -1,54 +1,25 @@
-<div class="page">
-  <div class="detail-page">
-    <PageHeader
-      {company}
-      {fy}
-      title="貸借対照表"
-      ></PageHeader>
-    <div class="page-body">
-      <table class="table-report">
-        <thead>
-          <tr>
-            <th colspan="2">
-              資産の部
-            </th>
-            <th colspan="2">
-              負債の部
-            </th>
-          </tr>
-          <tr>
-            <th>科目</th>
-            <th>金額</th>
-            <th>科目</th>
-            <th>金額</th>
-          </tr>
-        </thead>
-        <tbody>
-          {#each bsLines as line}
-          <tr>
-            {@html line}
-          </tr>
-          {/each}
-          <tr class="total">
-            <td>資産合計</td>
-            <td class="number">{formatMoney(asset)}</td>
-            <td>負債・純資産合計</td>
-            <td class="number">{formatMoney(liabilities + networth)}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-</div>
-<script>
-import {formatMoney} from '../../../../libs/utils.js';
-import PageHeader from '../components/page-header.svelte';
+## Migration Complete
 
-export let fy;
-export let company;
-export let bsLines;
-export let asset;
-export let liabilities;
-export let networth;
+**File:** `front/svelte/forms/financial-statement/balance-sheet.svelte`
+**Dictionary:** `locales/ja.json` (5 new keys added)
 
-</script>
+### Changes
+
+| # | Original (JP) | Replaced With | Key Added to ja.json? |
+|---|---|---|---|
+| 1 | `資産の部` | `<BilingualText key="assets_section" />` | ✅ yes |
+| 2 | `負債の部` | `<BilingualText key="liabilities_section" />` | ✅ yes |
+| 3 | `科目` (×2) | `<BilingualText key="account_item" />` | ✅ yes |
+| 4 | `金額` (×2) | `<BilingualText key="amount" />` | pre-existing |
+| 5 | `資産合計` | `<BilingualText key="total_assets" />` | ✅ yes |
+| 6 | `負債・純資産合計` | `<BilingualText key="total_liabilities_networth" />` | ✅ yes |
+
+### Import Added
+```svelte
+import BilingualText from '../../components/bilingual-text.svelte';
+```
+
+### Untouched (per rules)
+- `title="貸借対照表"` — string prop, kept as-is (rule 3: JS string literals for next pass)
+- All logic, event handlers, props, `{@html line}`, `formatMoney()` — unchanged
+- Component structure identical

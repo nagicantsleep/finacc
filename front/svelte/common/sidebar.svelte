@@ -15,7 +15,7 @@
           <!-- svelte-ignore a11y-missing-attribute -->
           <a class="nav-link">
 					  <i class="bi bi-menu-button-wide me-1"></i>
-            メニュー
+            <BilingualText key="menu" />
           </a>
           {#if ( isMenuEditMode)}
           <div>
@@ -58,7 +58,7 @@
               on:click|preventDefault={() => {
                 link(`/menu/${entry.id}`);
               }}>
-              <Icon class="nav-icon{ isMenuEditMode ? ' drag-handle' : ''}" 
+              <Icon class="nav-icon{ isMenuEditMode ? ' drag-handle' : ''}"
                 icon="bi:circle"></Icon>
 							{entry.title}
             </a>
@@ -83,51 +83,51 @@
       {#if ( entry.title && ( !entry.authority || entry.authority(status.user, status.company) )) }
 			<li class="nav-item">
 			  <a class={ $currentPage && $currentPage.match(entry.match) ? 'nav-link active': 'nav-link'}
-          draggable="true"
-          data-type={entry.name}
-          on:dragstart={startDrag}
-          on:click|preventDefault={() => {
-            link(entry.href(status));
-          }}
-          href="#">
-          {#if ( entry.icon )}
-          {#if ( entry.icon.name)}
-          <Icon class="nav-icon me-1" icon={entry.icon.name}></Icon>
-          {:else}
-          <img src={entry.icon.src} class="icon-img">
-          {/if}
-          {:else}
-          <Icon class="nav-icon" icon="bi:circle"></Icon>
-          {/if}
-          {entry.title}
-        </a>
-        {#if ( entry.submenu && ( status.pathname.match(entry.match) ) )}
-        <ul>
-          {#each entry.submenu as subentry}
-          <li class="nav-item">
-            <a class={ $currentPage && $currentPage.match(subentry.match) ? 'nav-link active': 'nav-link'}
-              draggable="true"
-              data-type={entry.name}
-              on:dragstart={startDrag}
-              on:click|preventDefault={() => {
-                link(subentry.href(status));
-              }}
-              href="#">
-              {#if subentry.icon}
-              {#if ( subentry.icon.name)}
-              <Icon class="nav-icon" icon={subentry.icon.name}></Icon>
-              {:else}
-              <img src={subentry.icon.src} class="icon-img">
-              {/if}
-              {:else}
-              <Icon class="nav-icon" icon="fa6-solid:circle"></Icon>
-              {/if}
-              {subentry.title}
-            </a>
-          </li>
-          {/each}
-        </ul>
+        draggable="true"
+        data-type={entry.name}
+        on:dragstart={startDrag}
+        on:click|preventDefault={() => {
+          link(entry.href(status));
+        }}
+        href="#">
+        {#if ( entry.icon )}
+        {#if ( entry.icon.name)}
+        <Icon class="nav-icon me-1" icon={entry.icon.name}></Icon>
+        {:else}
+        <img src={entry.icon.src} class="icon-img">
         {/if}
+        {:else}
+        <Icon class="nav-icon" icon="bi:circle"></Icon>
+        {/if}
+        {entry.title}
+      </a>
+      {#if ( entry.submenu && ( status.pathname.match(entry.match) ) )}
+      <ul>
+        {#each entry.submenu as subentry}
+        <li class="nav-item">
+          <a class={ $currentPage && $currentPage.match(subentry.match) ? 'nav-link active': 'nav-link'}
+            draggable="true"
+            data-type={entry.name}
+            on:dragstart={startDrag}
+            on:click|preventDefault={() => {
+              link(subentry.href(status));
+            }}
+            href="#">
+            {#if subentry.icon}
+            {#if ( subentry.icon.name)}
+            <Icon class="nav-icon" icon={subentry.icon.name}></Icon>
+            {:else}
+            <img src={subentry.icon.src} class="icon-img">
+            {/if}
+            {:else}
+            <Icon class="nav-icon" icon="fa6-solid:circle"></Icon>
+            {/if}
+            {subentry.title}
+          </a>
+        </li>
+        {/each}
+      </ul>
+      {/if}
 			</li>
       {/if}
       {/each}
@@ -149,6 +149,7 @@ import menu from '../../../config/module-list.js';
 import Sortable from 'sortablejs';
 import Icon from '@iconify/svelte';
 import LanguagePairSelector from '../widgets/language-pair-selector.svelte';
+import BilingualText from '../../components/bilingual-text.svelte';
 import eventBus from '../../javascripts/event-bus.js';
 import {currentMenu, getStore} from '../../javascripts/current-record.js'
 import { currentPage, link } from '../../javascripts/router.js';
