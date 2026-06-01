@@ -1,4 +1,5 @@
 import models from '../models/index.js';
+import { enrichBilingual } from '../libs/bilingual-helper.js';
 import fs from 'fs';
 const Op = models.Sequelize.Op;
 import {getCompanyInfo, putCompanyInfo} from '../libs/utils.js';
@@ -125,19 +126,22 @@ export default {
       });
     }
   },
-  kindsGet: (req, res, next) => {
+  kindsGet: async (req, res, next) => {
     const tenantId = req.currentTenantId;
     res.set('Access-Control-Allow-Origin', '*');
-    models.CompanyClass.findAll({
+    let kinds = await models.CompanyClass.findAll({
       where: { tenantId },
       order: [
         [ 'displayOrder', 'asc']
       ]
-    }).then((kinds) => {
-      res.json({
-        values: kinds
-      })
-    })
+    });
+    const lp = req.query.languagePair ? JSON.parse(req.query.languagePair) : req.session?.languagePair;
+    if (lp) {
+      kinds = await enrichBilingual('CompanyClass', kinds, lp);
+    }
+    res.json({
+      values: kinds
+    });
   },
   kindsPut: async (req, res, next) => {
     const tenantId = req.currentTenantId;
