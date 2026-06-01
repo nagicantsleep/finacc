@@ -54,7 +54,8 @@ export async function bootstrapTenantMember(user, t) {
     {
       slug,
       name: `${user.legalName}さんの組織`,
-      status: 'active'
+      status: 'active',
+      settings: { languagePair: { primary: 'ja', secondary: 'vi' } }
     },
     { transaction: t }
   );
