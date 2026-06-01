@@ -694,6 +694,72 @@ export default {
       res.json({ result: 'NG', message: 'ログオフに失敗しました。' });
     }
   },
+  languagePair: async (req, res, next) => {
+    if (!req.session || !req.session.user) {
+      return res.status(401).json({ result: 'NG', message: '認証されていません。' });
+    }
+
+    try {
+      const systemDefault = { primary: 'ja', secondary: 'vi' };
+
+      // 1. Try TenantMember override
+      if (req.currentTenantId) {
+        const membership = await models.TenantMember.findOne({
+          where: { userId: req.session.user.id, tenantId: req.currentTenantId, status: 'active' }
+        });
+        if (membership && membership.languagePair) {
+          return res.json({ result: 'OK', languagePair: membership.languagePair, source: 'member' });
+        }
+      }
+
+      // 2. Try Tenant default
+      if (req.currentTenantId) {
+        const tenant = await models.Tenant.findByPk(req.currentTenantId);
+        if (tenant && tenant.settings && tenant.settings.languagePair) {
+          return res.json({ result: 'OK', languagePair: tenant.settings.languagePair, source: 'tenant' });
+        }
+      }
+
+      // 3. System fallback
+      return res.json({ result: 'OK', languagePair: systemDefault, source: 'system' });
+    } catch (err) {
+      console.error('languagePair error', err);
+      res.status(500).json({ result: 'NG', message: '言語設定の取得に失敗しました。' });
+    }
+  },
+  updateLanguagePair: async (req, res, next) => {
+    if (!req.session || !req.session.user) {
+      return res.status(401).json({ result: 'NG', message: '認証されていません。' });
+    }
+    if (!req.currentTenantId) {
+      return res.status(403).json({ result: 'NG', message: 'テナントが選択されていません。' });
+    }
+
+    const { primary, secondary } = req.body;
+    if (!primary || !secondary || !['ja', 'vi', 'en'].includes(primary) || !['ja', 'vi', 'en'].includes(secondary)) {
+      return res.status(400).json({ result: 'NG', message: '無効な言語ペアです。' });
+    }
+    if (primary === secondary) {
+      return res.status(400).json({ result: 'NG', message: 'primary と secondary は異なる言語を指定してください。' });
+    }
+
+    try {
+      const membership = await models.TenantMember.findOne({
+        where: { userId: req.session.user.id, tenantId: req.currentTenantId, status: 'active' }
+      });
+      if (!membership) {
+        return res.status(404).json({ result: 'NG', message: 'メンバーシップが見つかりません。' });
+      }
+
+      membership.languagePair = { primary, secondary };
+      await membership.save();
+
+      res.json({ result: 'OK', languagePair: membership.languagePair });
+    } catch (err) {
+      console.error('updateLanguagePair error', err);
+      res.status(500).json({ result: 'NG', message: '言語設定の更新に失敗しました。' });
+    }
+  },
   selectTenant: async (req, res, next) => {
     if (!req.session || !req.session.user) {
       return res.status(401).json({

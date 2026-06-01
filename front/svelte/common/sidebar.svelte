@@ -133,6 +133,7 @@
       {/each}
     </ul>
   </nav>
+  <LanguagePairSelector />
 </div>
 
 
@@ -147,6 +148,7 @@ import {onMount, afterUpdate, createEventDispatcher, tick} from 'svelte';
 import menu from '../../../config/module-list.js';
 import Sortable from 'sortablejs';
 import Icon from '@iconify/svelte';
+import LanguagePairSelector from '../widgets/language-pair-selector.svelte';
 import eventBus from '../../javascripts/event-bus.js';
 import {currentMenu, getStore} from '../../javascripts/current-record.js'
 import { currentPage, link } from '../../javascripts/router.js';

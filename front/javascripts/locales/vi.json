@@ -161,6 +161,8 @@
   "language_pair_vi_ja": "Tiếng Nhật / Tiếng Việt",
   "language_pair_vi_en": "Tiếng Việt / Tiếng Anh",
   "language_pair_ja_en": "Tiếng Nhật / Tiếng Anh",
+  "language_pair_ja_vi": "Tiếng Nhật / Tiếng Việt",
+  "language_pair_en_ja": "Tiếng Anh / Tiếng Nhật",
 
   "no_data": "Không có dữ liệu",
   "loading": "Đang tải...",
