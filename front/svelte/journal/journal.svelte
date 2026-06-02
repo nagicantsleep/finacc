@@ -1,8 +1,7 @@
 <div class="list">
   <div class="page-title d-flex justify-content-between">
-  	<h1>仕訳日記帳</h1>
-  	<a href="/forms/explanatory_journal/{status.fy.term}?format=pdf" download="仕訳日記帳-{today}.pdf" class="btn btn-primary">
-    	仕訳日記帳をダウンロード&nbsp;<i class="bi bi-download"></i>
+  	<h1><BilingualText key="journal" /></h1>
+  	<a href="/forms/explanatory_journal/{status.fy.term}?format=pdf" download="仕訳日記帳-{today}.pdf" class="btn btn-primary"><BilingualText key="download_journal" /><i class="bi bi-download"></i>
   	</a>
 	</div>
 	<ul class="page-subtitle nav">
@@ -13,25 +12,24 @@
         	on:click={() => {
           	openMonth(date.year, date.month)
         	}}>
-        	{date.month}月
+        	{date.month}{$bi('month_label')}
       	</button>
       	{:else}
       	<button type="button" class="btn btn-outline-primary me-2"
       		on:click={() => {
         		openMonth(date.year, date.month)
       		}}>
-        	{date.month}月
+        	{date.month}{$bi('month_label')}
       	</button>
       	{/if}
     	</li>
   	{/each}
 	</ul>
 	<div class="page-subtitle d-flex justify-content-between">
-  	<h2>{year}年 {month}月</h2>
+  	<h2>{year}{$bi('year_label')} {month}{$bi('month_label')}</h2>
   	<div>
     	<button type="button" class="btn btn-primary" id="open-cross-slip"
-    		on:click={openSlip}>
-        仕訳明細入力&nbsp;<i class="bi bi-pencil-square"></i>
+    		on:click={openSlip}><BilingualText key="journal_detail_entry_space" /><i class="bi bi-pencil-square"></i>
       </button>
   	</div>
 	</div>
@@ -65,6 +63,8 @@ import CrossSlipModal from '../cross-slip/cross-slip-modal.svelte';
 import {setAccounts, findAccount, findSubAccountByCode} from '../../javascripts/cross-slip';
 import {numeric, dateStr} from '../../../libs/utils.js';
 import {currentPage} from '../../javascripts/router.js';
+import BilingualText from '../components/bilingual-text.svelte';
+import { bi } from '../../javascripts/bilingual.js';
 export let status;
 
 let year;

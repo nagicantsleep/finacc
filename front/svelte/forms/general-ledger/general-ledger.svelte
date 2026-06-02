@@ -5,7 +5,7 @@
   ></FrontCover>
 {#if accountPages}
 <AccountPage
-  title="ledger"
+  titleKey="ledger"
   {fy}
   {company}
   {accountPages}
@@ -14,7 +14,7 @@
 <LedgerPage
   {fy}
   {company}
-  title="ledger"
+  titleKey="ledger"
   {ledgerPage}
   ></LedgerPage>
 {/each}

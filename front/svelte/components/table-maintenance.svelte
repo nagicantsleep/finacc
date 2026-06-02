@@ -38,7 +38,7 @@
 <script>
 import {onMount, beforeUpdate, afterUpdate, createEventDispatcher} from 'svelte';
 import SpreadSheet from '../components/spreadsheet.svelte';
-import BilingualText from '../../components/bilingual-text.svelte';
+import BilingualText from './bilingual-text.svelte';
 import axios from 'axios';
 import {eventBus} from '../../javascripts/table-maintenance.js';
 

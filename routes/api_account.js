@@ -1,6 +1,7 @@
 import models from '../models/index.js';
 const Op = models.Sequelize.Op;
 import Accounts from '../libs/accounts.js';
+import { enrichBilingual } from '../libs/bilingual-helper.js';
 
 export default {
   get: async (req, res, next) => {
@@ -30,8 +31,11 @@ export default {
         tenantId,
         id: id
       }
-    }).then((data) => {
-      console.log({data});
+    }).then(async (data) => {
+      if (data) {
+        const lp = req.query.languagePair ? JSON.parse(req.query.languagePair) : req.session?.languagePair;
+        if (lp) await enrichBilingual('AccountClass', [data], lp);
+      }
       res.json(data);
     });
   },

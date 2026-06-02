@@ -1,26 +1,16 @@
 <div class="card">
   <div class="card-header">
-    <h5 class="card-title">年度選択</h5>
+    <h5 class="card-title"><BilingualText key="fiscal_year_select" /></h5>
   </div>
   <div class="card-body">
     <div class="row h-100" style="overflow-y: scroll;">
       <table class="table table-bordered">
         <thead class="table-light">
-          <th scol="col">
-            年度
-          </th>
-          <th col="col">
-            開始年月日
-          </th>
-          <th col="col">
-            終了年月日
-          </th>
-          <th col="col">
-            税込み会計
-          </th>
-          <th col="col">
-            年度末処理
-          </th>
+          <th scol="col"><BilingualText key="fiscal_year" /></th>
+          <th col="col"><BilingualText key="start_date" /></th>
+          <th col="col"><BilingualText key="end_date" /></th>
+          <th col="col"><BilingualText key="tax_included" /></th>
+          <th col="col"><BilingualText key="year_end_process" /></th>
         </thead>
         <tbody>
           {#each lines as line}
@@ -28,24 +18,24 @@
             <td>
               {#if ( line.term != status.fy.term)}
               <a href="/home/{line.term}">
-                {line.term}期
+                {line.term}{$bi('period_suffix')}
               </a>
               {:else}
               <span>
                 <i class="fas fa-check"></i>
-                {line.term}期
+                {line.term}{$bi('period_suffix')}
               </span>
               {/if}
             </td>
             <td>
-              {line.startDate.getFullYear()}年({wareki(line.startDate)})
-              {line.startDate.getMonth()+1}月
-              {line.startDate.getDate()}日
+              {line.startDate.getFullYear()}{$bi('year')}({wareki(line.startDate)})
+              {line.startDate.getMonth()+1}{$bi('month')}
+              {line.startDate.getDate()}{$bi('day')}
             </td>
             <td>
-              {line.endDate.getFullYear()}年({wareki(line.endDate)})
-              {line.endDate.getMonth()+1}月
-              {line.endDate.getDate()}日
+              {line.endDate.getFullYear()}{$bi('year')}({wareki(line.endDate)})
+              {line.endDate.getMonth()+1}{$bi('month')}
+              {line.endDate.getDate()}{$bi('day')}
             </td>
             <td>
               <input type="checkbox" bind:checked={line.taxIncluded}
@@ -53,9 +43,7 @@
             </td>
             <td>
               {#if ( status.user && status.user.administrable )}
-              <a class="btn btn-danger closing" href="/closing/{line.term}">
-                繰越
-              </a>
+              <a class="btn btn-danger closing" href="/closing/{line.term}"><BilingualText key="carry_forward" /></a>
               {/if}
             </td>
           </tr>
@@ -80,6 +68,8 @@ import axios from 'axios';
 import {onMount, beforeUpdate, afterUpdate, createEventDispatcher} from 'svelte';
 import {wareki} from '../../../libs/utils';
 
+import { bi } from '../../javascripts/bilingual.js';
+import BilingualText from '../components/bilingual-text.svelte';
 export  let status;
 
 let lines = [];

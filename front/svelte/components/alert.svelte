@@ -8,7 +8,7 @@
     {/if}
 </div>
 <script>
-import BilingualText from '../../components/bilingual-text.svelte';
+import BilingualText from './bilingual-text.svelte';
 export let alert;
 export let alert_level;
 </script>

@@ -7,6 +7,7 @@ import {currentCompany, getStore} from '../../javascripts/current-record.js'
 import CompanyInfo from './company-info.svelte';
 import OkModal from '../common/ok-modal.svelte';
 import BilingualText from '../components/bilingual-text.svelte';
+import { bi } from '../../javascripts/bilingual.js';
 
 export let status;
 export let company;
@@ -35,21 +36,21 @@ const update_company = async (company) => {
 }
 
 const delete_company = async (company) => {
-  title = '顧客情報の削除';
+  title = $bi('company_delete_title');
   description = `
 <table style="font-size:12px;">
   <tbody>
     <tr>
-      <td>名前</td><td>${company.name}</td>
+      <td>${$bi('name')}</td><td>${company.name}</td>
     </tr>
     <tr>
-      <td>種別</td><td>${company.companyClass?.name}</td>
+      <td>${$bi('kind')}</td><td>${company.companyClass?.name}</td>
     </tr>
     <tr>
-      <td>住所</td><td>${company.address1}<br>${company.address2}</td>
+      <td>${$bi('address')}</td><td>${company.address1}<br>${company.address2}</td>
     </tr>
     <tr>
-      <td>担当者</td><td>${company.chargeName}</td>
+      <td>${$bi('person_in_charge')}</td><td>${company.chargeName}</td>
     </tr>
   </tbody>
 </table>
@@ -73,27 +74,27 @@ const validateForm = () => {
   errorMessages = [];
   if ( company.name === undefined ){
     ok = false;
-    errorMessages.push("名前が未入力です。");
+    errorMessages.push($bi('error_name_required'));
   }
   if ( company.name !== undefined && company.name.trim().length === 0 ){
     ok = false;
-    errorMessages.push("名前が未入力です。");
+    errorMessages.push($bi('error_name_required'));
   }
   if ( company.ruby === undefined ){
     ok = false;
-    errorMessages.push("フリガナが未入力です。");
+    errorMessages.push($bi('error_furigana_required'));
   }
   if ( company.ruby !== undefined && company.ruby.trim().length === 0 ){
     ok = false;
-    errorMessages.push("フリガナが未入力です。");
+    errorMessages.push($bi('error_furigana_required'));
   }
   if ( company.key === undefined ){
     ok = false;
-    errorMessages.push("呼び出しキーが未入力です。");
+    errorMessages.push($bi('error_key_required'));
   }
   if ( company.key !== undefined && company.key.trim().length === 0 ){
     ok = false;
-    errorMessages.push("呼び出しキーが未入力です。");
+    errorMessages.push($bi('error_key_required'));
   }
   errorMessages = errorMessages;
   return ok;

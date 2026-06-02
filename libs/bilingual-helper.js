@@ -7,9 +7,9 @@ const TRANSLATION_MAP = {
   // Master / reference tables
   CompanyClass: { name: (rec) => `name:${rec.name}` },
   ItemClass: { name: (rec) => `name:${rec.name}` },
-  TransactionKind: { label: (rec) => `label:${rec.id}-${rec.label}` },
+  TransactionKind: { label: (rec) => `label:${rec.label}` },
   VoucherClass: { name: (rec) => `name:${rec.name}` },
-  TaxRule: { label: (rec) => `label:${rec.id}-${rec.label}` },
+  TaxRule: { label: (rec) => `label:${rec.label}` },
   MemberClass: { title: (rec) => `title:${rec.title}` },
   AccountClass: {
     major: (rec) => `major:${rec.major}`,

@@ -3,6 +3,7 @@ import { onMount } from 'svelte';
 import InvoiceView from './invoice.svelte';
 import myCompany from '../../../../libs/my-company.js';
 
+import BilingualText from '../../components/bilingual-text.svelte';
 export let id;
 
 console.log('params:', id);
@@ -22,6 +23,6 @@ onMount(async () => {
 {#if transaction && company}
   <InvoiceView {transaction} {company} />
 {:else}
-  <p>読み込み中...</p>
+  <p><BilingualText key="loading" /></p>
 {/if}
   

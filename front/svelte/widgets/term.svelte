@@ -34,14 +34,14 @@
   	        {/if}
     	    </td>
       	  <td>
-        	  {line.startDate.getFullYear()}年({wareki(line.startDate)})
-		          {line.startDate.getMonth()+1}月
-  	        {line.startDate.getDate()}日
+        	  {line.startDate.getFullYear()}{$bi('year')}({wareki(line.startDate)})
+		          {line.startDate.getMonth()+1}{$bi('month')}
+  	        {line.startDate.getDate()}{$bi('day')}
     	    </td>
       	  <td>
-        	  {line.endDate.getFullYear()}年({wareki(line.endDate)})
-		          {line.endDate.getMonth()+1}月
-  	        {line.endDate.getDate()}日
+        	  {line.endDate.getFullYear()}{$bi('year')}({wareki(line.endDate)})
+		          {line.endDate.getMonth()+1}{$bi('month')}
+  	        {line.endDate.getDate()}{$bi('day')}
     	    </td>
       	  <td>
         	  <input type="checkbox" bind:checked={line.taxIncluded}
@@ -73,7 +73,8 @@ td {
 import axios from 'axios';
 import {onMount, beforeUpdate, afterUpdate, createEventDispatcher} from 'svelte';
 import {wareki} from '../../../libs/utils';
-import BilingualText from '../../components/bilingual-text.svelte';
+import BilingualText from '../components/bilingual-text.svelte';
+import { bi } from '../../javascripts/bilingual.js';
 
 export  let status;
 

@@ -1,5 +1,17 @@
+<script>
+import {formatDate} from '../../../../libs/utils.js';
+import { bi } from '../../../javascripts/bilingual.js';
+
+export let title;
+export let titleKey;
+export let company;
+export let fy;
+
+$: displayTitle = titleKey ? bi(titleKey) : title;
+</script>
+
 <svelte:head>
-  <title>{title}::Hieronymus</title>
+  <title>{displayTitle}::Hieronymus</title>
   <meta http-equiv="Content-Language" content="ja" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="/style/paperA4.css">
@@ -8,13 +20,13 @@
 <div class="page">
   <div class="title-page">
     <div class="title">
-      {title}
+      {displayTitle}
     </div>
     <div class="company-name">
       {company.name}
     </div>
     <div class="term">
-      {fy.year}年度
+      {fy.year}{bi('fiscal_year')}
     </div>
     <div class="month">
       {formatDate(fy.startDate, 'ja')}〜
@@ -22,11 +34,3 @@
     </div>
   </div>
 </div>
-
-<script>
-import {formatDate} from '../../../../libs/utils.js';
-
-export let title;
-export let company;
-export let fy;
-</script>

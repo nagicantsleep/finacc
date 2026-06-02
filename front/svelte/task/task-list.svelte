@@ -1,28 +1,20 @@
 <div class="list">
   <div class="page-title d-flex justify-content-between">
-    <h1 class="fs-3">案件一覧</h1>
+    <h1 class="fs-3"><BilingualText key="project_list" /></h1>
     <button type="button" class="btn btn-primary"
     on:click={() => {
       link('/task/new');
     }}
-    id="task-info">新規入力&nbsp;<i class="bi bi-pencil-square"></i></button>
+    id="task-info"><BilingualText key="new_entry" /><i class="bi bi-pencil-square"></i></button>
   </div>
   <div class="full-height-1 fontsize-12pt">
     <table class="table table-bordered">
       <thead class="table-light">
         <tr>
-          <th scope="col" style="width: 300px;">
-            相手先
-          </th>
-          <th scope="col">
-            件名
-          </th>
-          <th scope="col" style="width: 100px;">
-            発生日
-          </th>
-          <th scope="col" style="width: 100px;">
-            終了日
-          </th>
+          <th scope="col" style="width: 300px;"><BilingualText key="counterparty" /></th>
+          <th scope="col"><BilingualText key="task_subject" /></th>
+          <th scope="col" style="width: 100px;"><BilingualText key="occurrence_date" /></th>
+          <th scope="col" style="width: 100px;"><BilingualText key="project_end" /></th>
         </tr>
       </thead>
       <tbody>
@@ -95,6 +87,7 @@ import eventBus from '../../javascripts/event-bus.js';
 import {parseParams, buildParam} from '../../javascripts/params.js';
 import { link } from '../../javascripts/router.js';
 
+import BilingualText from '../components/bilingual-text.svelte';
 export let status;
 export let tasks;
 

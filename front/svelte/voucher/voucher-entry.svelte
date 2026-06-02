@@ -60,7 +60,6 @@
 </div>
 <script>
 /*
-  voucherに関する処理をここで行い、voucher_fileに関する処理をVoucherInfoで行うのは、なんか変である。
   voucher_fileに関する処理もここに移した方が良いかも知れない。
 */
 import axios from 'axios';
@@ -69,7 +68,8 @@ import {onMount, beforeUpdate, afterUpdate, createEventDispatcher} from 'svelte'
 const dispatch = createEventDispatcher();
 import VoucherInfo from './voucher-info.svelte';
 import {currentVoucher, getStore} from '../../javascripts/current-record.js'
-import BilingualText from '../../components/bilingual-text.svelte';
+import BilingualText from '../components/bilingual-text.svelte';
+import { bi } from '../../javascripts/bilingual.js';
 
 
 export let voucher;
@@ -115,7 +115,7 @@ const validateForm = () => {
   errorMessages = [];
   if ( voucher.companyId === undefined ) {
     ok = false;
-    errorMessages.push("相手先が未入力もしくは、取引先に存在しない相手先が入力されました。");
+    errorMessages.push($bi('counterparty_error'));
   }
   return ok;
 }

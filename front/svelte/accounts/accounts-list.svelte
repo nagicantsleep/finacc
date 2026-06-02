@@ -1,39 +1,17 @@
 <table class="table table-bordered">
   <thead class="table-light">
     <tr>
-      <th scope="col" style="width: 120px;">
-        大分類
-      </th>
-      <th scope="col" style="width: 120px;">
-        中分類
-      </th>
-      <th scope="col" style="width: 140px;">
-        小分類
-      </th>
-      <th scope="col">
-        勘定科目
-      </th>
-      <th scope="col" style="width: 80px;">
-        科目<br/>コード
-      </th>
-      <th scope="col" style="width: 120px;">
-        補助科目
-      </th>
-      <th scope="col" style="width: 50px;">
-        課税区分
-      </th>
-      <th scope="col" style="width: 60px;">
-        検索キー
-      </th>
-      <th scope="col" style="width: 100px;">
-        借方金額
-      </th>
-      <th scope="col" style="width: 100px;">
-        貸方金額
-      </th>
-      <th scope="col" style="width: 100px;">
-        残高
-      </th>
+      <th scope="col" style="width: 120px;"><BilingualText key="major_class" /></th>
+      <th scope="col" style="width: 120px;"><BilingualText key="middle_class" /></th>
+      <th scope="col" style="width: 140px;"><BilingualText key="minor_class" /></th>
+      <th scope="col"><BilingualText key="chart_of_accounts" /></th>
+      <th scope="col" style="width: 80px;"><BilingualText key="account" /><br/><BilingualText key="code" /></th>
+      <th scope="col" style="width: 120px;"><BilingualText key="sub_account" /></th>
+      <th scope="col" style="width: 50px;"><BilingualText key="tax_category" /></th>
+      <th scope="col" style="width: 60px;"><BilingualText key="search_key" /></th>
+      <th scope="col" style="width: 100px;"><BilingualText key="debit_amount" /></th>
+      <th scope="col" style="width: 100px;"><BilingualText key="credit_amount" /></th>
+      <th scope="col" style="width: 100px;"><BilingualText key="balance" /></th>
     </tr>
   </thead>
   <tbody>
@@ -123,6 +101,7 @@ import {onMount, beforeUpdate, afterUpdate, createEventDispatcher} from 'svelte'
 const dispatch = createEventDispatcher();
 import {taxClass} from '../../../libs/utils.js';
 
+import BilingualText from '../components/bilingual-text.svelte';
 export	let	status;
 export	let	lines;
 export	let	accounts;

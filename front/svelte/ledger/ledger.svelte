@@ -1,7 +1,6 @@
 <div class="page-title d-flex justify-content-between">
-  <h1>元帳</h1>
-  <a href="/forms/general_ledger/{status.fy.term}?format=pdf" download="総勘定元帳-{today}.pdf" class="btn btn-primary">
-    総勘定元帳をダウンロード&nbsp;<i class="bi bi-download"></i>
+  <h1><BilingualText key="ledger" /></h1>
+  <a href="/forms/general_ledger/{status.fy.term}?format=pdf" download="{$bi('form_print_gl')}-{today}.pdf" class="btn btn-primary"><BilingualText key="download_general_ledger" /><i class="bi bi-download"></i>
   </a>
 </div>
 <AccountSelect
@@ -29,13 +28,11 @@
         } else {
           link(`/changes/${status.fy.term}/${accountCode}`)
         }
-      }}>
-      推移表を見る
-    </button>
+      }}><BilingualText key="view_trends" /></button>
     {/if}
     <button type="button" class="btn btn-primary" id="open-cross-slip"
     	on:click={openSlip}>
-      伝票入力&nbsp;<i class="bi bi-pencil-square"></i>
+      {$bi('voucher_entry')}&nbsp;<i class="bi bi-pencil-square"></i>
     </button>
   </div>
 </nav>
@@ -56,11 +53,8 @@
         on:click={() => {
           link(`/changes/${status.fy.term}/${accountCode}/${subAccountCode}`)
         }}
-        disabled={!subAccountCode}>
-      	推移表を見る
-    	</button>
-      <a href="/forms/subsidiary_ledger/{status.fy.term}?format=pdf" download="補助元帳-{today}.pdf" class="btn btn-primary">
-          補助元帳をダウンロード&nbsp;<i class="bi bi-download"></i>
+        disabled={!subAccountCode}><BilingualText key="view_trends" /></button>
+      <a href="/forms/subsidiary_ledger/{status.fy.term}?format=pdf" download="{$bi('form_print_sl')}-{today}.pdf" class="btn btn-primary"><BilingualText key="download_sub_ledger" /><i class="bi bi-download"></i>
       </a>
     </div>
   </div>
@@ -93,6 +87,7 @@
 
 import axios from 'axios';
 import {onMount, beforeUpdate, afterUpdate, createEventDispatcher} from 'svelte';
+import {get} from 'svelte/store';
 import LedgerList from './ledger-list.svelte';
 import CrossSlipModal from '../cross-slip/cross-slip-modal.svelte';
 import {ledgerLines} from '../../../libs/ledger';
@@ -102,6 +97,8 @@ import {setAccounts} from '../../javascripts/cross-slip';
 import parse_account_code from '../../../libs/parse_account_code';
 import {currentPage, link} from '../../javascripts/router.js';
 
+import {bi} from '../../javascripts/bilingual.js';
+import BilingualText from '../components/bilingual-text.svelte';
 export let status;
 
 let modalCount = 0;
@@ -120,22 +117,22 @@ let sums;
 let lines;
 let fields = [
   {
-    title: '資産',
+    title: $bi('chart_assets'),
     accounts: []
   },{
-    title: '負債',
+    title: $bi('chart_liabilities'),
     accounts: []
   },{
-    title: '純資産',
+    title: $bi('chart_net_assets'),
     accounts: []
   },{
-    title: '売上高',
+    title: $bi('chart_revenue'),
     accounts: []
   },{
-    title: '売上原価',
+    title: $bi('chart_cost_of_sales'),
     accounts: []
   },{
-    title: '営業外',
+    title: $bi('chart_non_operating'),
     accounts: []
   }
 ];

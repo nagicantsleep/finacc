@@ -1,10 +1,9 @@
 {#key $currentPage}
 <div class="list">
   <div class="page-title d-flex justify-content-between">
-  	<h1>残高試算表</h1>
+  	<h1><BilingualText key="trial_balance" /></h1>
   	<a href="/forms/trial_balance/{status.fy.term}?format=pdf"
-      download="残高試算表.pdf" class="btn btn-primary">
-    	残高試算表をダウンロード&nbsp;<i class="bi bi-download"></i>
+      download="{$bi('trial_balance')}.pdf" class="btn btn-primary"><BilingualText key="download_trial_balance" /><i class="bi bi-download"></i>
   	</a>
 	</div>
 	<ul class="page-subtitle nav me-auto">
@@ -13,16 +12,12 @@
     	<button type="button" class="btn btn-primary disabled me-2"
       	on:click={() => {
           openMonth("");
-        }}>
-      	年度
-    	</button>
+        }}><BilingualText key="fiscal_year" /></button>
     	{:else}
     	<button type="button" class="btn btn-outline-primary me-2"
       	on:click={() => {
         	openMonth("");
-      	}}>
-      	年度
-    	</button>
+      	}}><BilingualText key="fiscal_year" /></button>
     	{/if}
   	</li>
   	{#each dates as date}
@@ -32,14 +27,14 @@
       	on:click={() => {
           openMonth(`${date.year}-${date.month}`);
         }}>
-  	    {date.month}&nbsp;月
+  	    {date.month}{$bi('month')}
     	</button>
 	    {:else}
   	  <button type="button" class="btn btn-outline-primary me-2"
       on:click={() => {
         openMonth(`${date.year}-${date.month}`);
       }}>
-      {date.month}&nbsp;月
+      {date.month}{$bi('month')}
   	  </button>
     	{/if}
 	  </li>
@@ -62,6 +57,8 @@ import {numeric} from '../../../libs/utils.js';
 import {dc} from '../../../libs/parse_account_code';
 import {currentPage, link} from '../../javascripts/router.js';
 
+import BilingualText from '../components/bilingual-text.svelte';
+import { bi } from '../../javascripts/bilingual.js';
 export let status;
 export let alert;
 export let alert_level;

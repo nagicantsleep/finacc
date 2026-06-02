@@ -1,24 +1,16 @@
 <div class="card">
   <div class="card-header">
-    <h5 class="card-title">バックアップ</h5>
+    <h5 class="card-title"><BilingualText key="backup" /></h5>
   </div>
   <div class="card-body">
-    <button class="btn btn-primary" on:click|preventDefault={backup}>
-      バックアップ作成
-    </button>
-    <button class="btn btn-info" on:click|preventDefault={upload}>
-      アップロード
-    </button>
+    <button class="btn btn-primary" on:click|preventDefault={backup}><BilingualText key="create_backup" /></button>
+    <button class="btn btn-info" on:click|preventDefault={upload}><BilingualText key="upload" /></button>
     <input type="file" class="d-none" id="backup-file" on:change={doUpload} />
     <div class="row h-100" style="margin-top: 20px;">
       <table class="table table-bordered">
         <thead class="table-light">
-          <th>
-            取得日時
-          </th>
-          <th>
-            処理
-          </th>
+          <th><BilingualText key="retrieved_at" /></th>
+          <th><BilingualText key="process" /></th>
         </thead>
         <tbody>
           {#if files}
@@ -29,20 +21,12 @@
             </td>
             <td style="text-align:center;">
               {#if (i == 0) }
-              <btton class="btn btn-success" on:click|preventDefault={() => restore(i)}>
-                復元
-              </btton>
+              <btton class="btn btn-success" on:click|preventDefault={() => restore(i)}><BilingualText key="restore" /></btton>
               {:else}
-              <btton class="btn btn-warning" on:click|preventDefault={() => restore(i)}>
-                復元
-              </btton>
+              <btton class="btn btn-warning" on:click|preventDefault={() => restore(i)}><BilingualText key="restore" /></btton>
               {/if}
-              <btton class="btn btn-danger" on:click|preventDefault={() => remove(i)}>
-                削除
-              </btton>
-              <btton class="btn btn-info" on:click|preventDefault={() => download(i)}>
-                ダウンロード
-              </btton>
+              <btton class="btn btn-danger" on:click|preventDefault={() => remove(i)}><BilingualText key="delete" /></btton>
+              <btton class="btn btn-info" on:click|preventDefault={() => download(i)}><BilingualText key="download" /></btton>
             </td>
           </tr>
           {/each}
@@ -63,9 +47,14 @@
 <script>
 import axios from 'axios';
 import {onMount, beforeUpdate, afterUpdate, createEventDispatcher} from 'svelte';
+import {get} from 'svelte/store';
+import {bi, languagePair} from '../../javascripts/bilingual.js';
+import jaDict from '../../javascripts/locales/ja.json';
+import viDict from '../../javascripts/locales/vi.json';
 
 import OkModal from '../common/ok-modal.svelte';
 
+import BilingualText from '../components/bilingual-text.svelte';
 export let toast;
 
 let files;
@@ -76,8 +65,14 @@ let operation;
 let restoreFile;
 let removeFile;
 
+const DICT = { ja: jaDict, vi: viDict };
 const fileName = (file) => {
-  return  `${file.getFullYear()}年${file.getMonth()+1}月${file.getDate()}日${file.toLocaleTimeString()}`
+  const pair = get(languagePair);
+  const dict = DICT[pair.primary] || jaDict;
+  const y = dict['year'] || jaDict['year'];
+  const m = dict['month'] || jaDict['month'];
+  const d = dict['day'] || jaDict['day'];
+  return `${file.getFullYear()}${y}${file.getMonth()+1}${m}${file.getDate()}${d} ${file.toLocaleTimeString()}`
 }
 
 const download = (i) => {
@@ -108,7 +103,7 @@ const doUpload = (ev) => {
       'Content-Type': 'multipart/form-data'
     }
   }).then(() => {
-    toast.show('バックアップ', 'アップロード完了しました');
+    toast.show($bi('backup'), $bi('backup_upload_complete'));
     files = undefined;
   });
 }
@@ -117,11 +112,11 @@ const remove = (i) => {
   console.log('remove');
   removeFile = files[i];
   if  ( i > 0 ) {
-    description = `${fileName(removeFile)}に取得した<br />${i}世代前のバックアップを削除します。<br />よろしいですか？`;
+    description = `${fileName(removeFile)}${$bi('taken_on')}<br />${i}${$bi('gen_backup_before')}`;
   } else {
-    description = `${fileName(removeFile)}に取得した<br />バックアップを削除します。<br />よろしいですか？`;
+    description = `${fileName(removeFile)}${$bi('taken_on')}<br />${$bi('backup_delete_simple')}`;
   }
-  title = 'バックアップの削除';
+  title = $bi('backup_delete_title');
   operation = doRemove;
   modal.show();
 }
@@ -129,11 +124,11 @@ const restore = (i) => {
   console.log('restore');
   restoreFile = files[i];
   if  ( i > 0 ) {
-    description = `${fileName(restoreFile)}に取得した<br />${i}世代前のバックアップから復元します。<br />よろしいですか？`;
+    description = `${fileName(restoreFile)}${$bi('taken_on')}<br />${i}${$bi('gen_backup_restore_before')}`;
   } else {
-    description = `${fileName(restoreFile)}に取得した<br />バックアップから復元します。<br />よろしいですか？`;
+    description = `${fileName(restoreFile)}${$bi('taken_on')}<br />${$bi('backup_restore_simple')}`;
   }
-  title = 'バックアップの復元';
+  title = $bi('backup_restore_title');
   operation = doRestore;
   modal.show();
 }
@@ -141,7 +136,7 @@ const doRestore = (ev) => {
   console.log(ev.detail);
   if  ( ev.detail ) {
     console.log('Yes');
-    toast.show('バックアップ', '復元開始しました');
+    toast.show($bi('backup'), $bi('restore_started'));
     axios.post('/api/admin/restore', {
       date: restoreFile
     }).then((result) => {
@@ -149,7 +144,7 @@ const doRestore = (ev) => {
       if  ( data.code === 0 ) {
         window.location = '/home';
         toast.remove();
-        toast.show('バックアップ', '復元完了しました');
+        toast.show($bi('backup'), $bi('restore_completed'));
       }
     })
   }
@@ -158,17 +153,17 @@ const doRemove = (ev) => {
 console.log(ev.detail);
   if  ( ev.detail ) {
     axios.delete(`/api/admin/backup/${removeFile.toJSON()}`).then(() => {
-      toast.show('バックアップ', 'バックアップ削除しました')
+      toast.show($bi('backup'), $bi('backup_deleted_msg'))
       files = undefined;
     })
   }
 }
 
 const backup = () => {
-  toast.show('バックアップ', 'バックアップ開始しました')
+  toast.show($bi('backup'), $bi('backup_started'))
   axios.post('/api/admin/backup').then(() => {
     toast.remove();
-    toast.show('バックアップ', 'バックアップ終了しました');
+    toast.show($bi('backup'), $bi('backup_ended'));
     files = undefined;
   })
 }

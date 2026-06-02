@@ -5,14 +5,14 @@
         <input type="text" autocomplete="off" class="number" name="year"
           id="slip-year" size="2" maxlength="5" disabled="disabled"
           bind:value={slip.year}>
-        <span class="input-group-text">年</span>
+        <span class="input-group-text"><BilingualText key="year" /></span>
         <input type="text" autocomplete="off" class="number" name="month"
           id="slip-month" size="2" maxlength="3"
           bind:value={slip.month}>
-        <span class="input-group-text">月</span>
+        <span class="input-group-text"><BilingualText key="month" /></span>
         <input type="text" autocomplete="off" class="number" name="day" id="slip-day" size="2" maxlength="3"
             bind:value={slip.day}>
-        <span class="input-group-text">日</span>
+        <span class="input-group-text"><BilingualText key="day" /></span>
         {#if slip.no}
         <span class="input-group-text">No. {slip.no}</span>
         {/if}
@@ -21,16 +21,16 @@
     <div class="col">
       <div class="row">
         <div class="col-4 input-group-text">
-          入力:
+          {$bi('entry_label')}:
           {slip.createrName || ''}
         </div>
         <div class="col-8 input-group-text">
-          承認:
+          {$bi('approve')}:
           {slip.approverName || ''}
           {#if (slip.approvedAt)}
-          ({slip.approvedAt.getFullYear()}年
-          {slip.approvedAt.getMonth()+1}月
-          {slip.approvedAt.getDate()}日)
+          ({slip.approvedAt.getFullYear()}{$bi('year_num')}
+          {slip.approvedAt.getMonth()+1}{$bi('month_num')}
+          {slip.approvedAt.getDate()}{$bi('day')})
           {/if}
         </div>
       </div>
@@ -39,21 +39,11 @@
   <div class="row">
     <table class="table table-striped table-bordered">
       <thead class="table-light">
-        <th>
-          借方科目
-        </th>
-        <th style="width:120px;">
-          金額
-        </th>
-        <th>
-          適用
-        </th>
-        <th>
-          貸方科目
-        </th>
-        <th style="width:120px;">
-          金額
-        </th>
+        <th><BilingualText key="debit_account" /></th>
+        <th style="width:120px;"><BilingualText key="amount" /></th>
+        <th><BilingualText key="application" /></th>
+        <th><BilingualText key="credit_account" /></th>
+        <th style="width:120px;"><BilingualText key="amount" /></th>
         <th>
         </th>
       </thead>
@@ -94,7 +84,7 @@
                 bind:value={line.application1}>
               <div class="project me-auto">
                 <select class="form-control" style="line-height:1;padding:0.375rem" bind:value={line.projectId}>
-                  <option value={null}>-- プロジェクト --</option>
+                  <option value={null}><BilingualText key="project_placeholder" /></option>
                   {#each projects as project}
                   <option value={project.id}>{project.name}</option>
                   {/each}
@@ -117,7 +107,7 @@
                     computeTax(i, 'd');
                     makeTaxLine();
                   }}>
-                  <option value={null}> -- 未選択 --</option>
+                  <option value={null}><BilingualText key="unselected" /></option>
                   {#each taxRules as ent}
                   <option value={ent.id}>{ent.label}</option>
                   {#if ent.taxClass === findTaxClass(line.debitAccount, line.debitSubAccount)}
@@ -138,7 +128,7 @@
                     computeTax(i, 'c');
                     makeTaxLine();
                   }}>
-                  <option value={null}> -- 未選択 --</option>
+                  <option value={null}><BilingualText key="unselected" /></option>
                   {#each taxRules as ent}
                   <option value={ent.id}>{ent.label}</option>
                   {#if ent.taxClass === findTaxClass(line.creditAccount, line.creditSubAccount)}
@@ -214,9 +204,7 @@
             { sums.debit_amount ? sums.debit_amount.toLocaleString() : ''}<br />
             { sums.debit_tax ? sums.debit_tax.toLocaleString() : ''}
           </td>
-          <td>
-            合計
-          </td>
+          <td><BilingualText key="total" /></td>
           <td>
           </td>
           <td class="number">
@@ -245,6 +233,8 @@ import Account from './account.svelte';
 import {field} from '../../../libs/parse_account_code';
 import {findTaxRule, computeTax as _computeTax} from '../../../libs/sales-tax.js';
 
+import BilingualText from '../components/bilingual-text.svelte';
+import { bi } from '../../javascripts/bilingual.js';
 export let accounts;
 export let slip;
 export let fy;
@@ -266,7 +256,7 @@ onMount(async () => {
       showProject = false;
     }
   } catch (err) {
-    console.error("部門会計情報の取得または部門リストの取得に失敗しました:", err);
+    console.error($bi('console_error_project_fetch'), err);
     showProject = false;
   }
 });

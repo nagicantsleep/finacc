@@ -74,4 +74,18 @@ export const _bDerived = derived(languagePair, ($pair) => {
   });
 });
 
-export default { languagePair, _b, _bDerived, loadDictionaries };
+/**
+ * Reactive derived: returns a flat bilingual string "primary / secondary".
+ * Use in reactive statements: $: title = $bi('save');
+ */
+export const bi = derived(languagePair, ($pair) => {
+  return (key) => {
+    const primaryDict = dictionaries[$pair.primary] || {};
+    const secondaryDict = dictionaries[$pair.secondary] || {};
+    const p = primaryDict[key] ?? key;
+    const s = secondaryDict[key] ?? key;
+    return p === s ? p : `${p} / ${s}`;
+  };
+});
+
+export default { languagePair, _b, _bDerived, bi, loadDictionaries };

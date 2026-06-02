@@ -3,8 +3,8 @@
   <div class="page-title d-flex justify-content-between">
   	<h1><BilingualText key="trial_balance" /></h1>
   	<a href="/forms/trial_balance/{status.fy.term}?format=pdf"
-      download="残高試算表.pdf" class="btn btn-primary">
-    	<BilingualText key="trial_balance" />をダウンロード&nbsp;<i class="bi bi-download"></i>
+      download="{$bi('trial_balance')}.pdf" class="btn btn-primary">
+    	<BilingualText key="trial_balance" /><BilingualText key="download_report" /><i class="bi bi-download"></i>
   	</a>
 	</div>
 	<ul class="page-subtitle nav me-auto">
@@ -32,14 +32,14 @@
       	on:click={() => {
           openMonth(`${date.year}-${date.month}`);
         }}>
-  	    {date.month}&nbsp;月
+  	    {date.month}{$bi('month')}
     	</button>
 	    {:else}
   	  <button type="button" class="btn btn-outline-primary me-2"
       on:click={() => {
         openMonth(`${date.year}-${date.month}`);
       }}>
-      {date.month}&nbsp;月
+      {date.month}{$bi('month')}
   	  </button>
     	{/if}
 	  </li>
@@ -58,6 +58,7 @@
 import axios from 'axios';
 import {onMount} from 'svelte';
 import BilingualText from './components/bilingual-text.svelte';
+import { bi } from '../javascripts/bilingual.js';
 import TrialBalanceList from './trial-balance-list.svelte';
 import {numeric} from '../../../libs/utils.js';
 import {dc} from '../../../libs/parse_account_code';

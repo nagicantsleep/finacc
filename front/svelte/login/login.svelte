@@ -9,11 +9,11 @@
         <p class="text-{msg_type} text-center">{message}</p>
         <div class="mb-3">
           <label for="user_input"><BilingualText key="username" /></label>
-          <input type="text" bind:value={user_name} class="form-control" placeholder="ユーザー名">
+          <input type="text" bind:value={user_name} class="form-control" placeholder={$bi('user_name_placeholder')}>
         </div>
         <div class="mb-3">
           <label for="password_input"><BilingualText key="password" /></label>
-          <input type="password" bind:value={password} class="form-control" placeholder="パスワード">
+          <input type="password" bind:value={password} class="form-control" placeholder={$bi('password_placeholder')}>
         </div>
         <div class="row d-flex justify-content-center">
           <div class="col-lg-8 col-4 d-grid">
@@ -58,7 +58,7 @@ onMount(() => {
 const Login = async () => {
   if (!user_name || !password) {
     msg_type = 'danger';
-    message = 'ユーザー名またはパスワードが入力されていません。';
+    message = $bi('error_login_required');
     return;
   }
 
@@ -80,12 +80,12 @@ const Login = async () => {
       }
     } else {
       msg_type = 'danger';
-      message = response.data.message || 'ユーザー名またはパスワードが違います。';
+      message = response.data.message || $bi('login_user_pw_wrong');
       isSubmitting = false;
     }
   } catch (err) {
     console.error('login error', err);
-    message = 'エラーが発生しました。';
+    message = $bi('login_error_occurred');
     msg_type = 'danger';
     isSubmitting = false;
   }

@@ -1,26 +1,18 @@
 <div class="page-title d-flex justify-content-between">
-  <h1>プロジェクト台帳</h1>
+  <h1><BilingualText key="project_ledger" /></h1>
   <button type="button" class="btn btn-primary"
     on:click={() => {
       openProject(null);
-    }}>新規プロジェクト入力&nbsp;<i class="bi bi-pencil-square"></i></button>
+    }}><BilingualText key="new_project_entry_space" /><i class="bi bi-pencil-square"></i></button>
 </div>
 <div class="full-height-1 fontsize-12pt">
   <table class="table table-bordered">
     <thead class="table-light">
       <tr>
-        <th scope="col" style="width: 200px;">
-          プロジェクト名
-        </th>
-        <th scope="col" style="width: 150px;">
-          コード
-        </th>
-        <th scope="col" style="width: 150px;">
-          開始日
-        </th>
-        <th scope="col" style="width: 150px;">
-          終了日
-        </th>
+        <th scope="col" style="width: 200px;"><BilingualText key="project_name_dup" /></th>
+        <th scope="col" style="width: 150px;"><BilingualText key="code" /></th>
+        <th scope="col" style="width: 150px;"><BilingualText key="project_start" /></th>
+        <th scope="col" style="width: 150px;"><BilingualText key="project_end" /></th>
         <th scope="col" style="width: 120px;"></th>
       </tr>
     </thead>
@@ -43,7 +35,7 @@
           {line.endDate || ''}
         </td>
         <td>
-          <button type="button" class="btn btn-sm btn-info" on:click={() => openSummary(line)}>集計表示</button>
+          <button type="button" class="btn btn-sm btn-info" on:click={() => openSummary(line)}><BilingualText key="summary_view" /></button>
         </td>
       </tr>
       {/each}
@@ -63,6 +55,7 @@ const dispatch = createEventDispatcher();
 import { buildParam, parseParams } from '../../javascripts/params';
 import { link } from '../../javascripts/router.js';
 
+import BilingualText from '../components/bilingual-text.svelte';
 export let status;
 export let projects;
 

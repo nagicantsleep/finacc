@@ -1,35 +1,35 @@
 <div class="list">
   <div class="page-title d-flex justify-content-between">
-    <h1>役職員一覧</h1>
+    <h1><BilingualText key="member_list" /></h1>
     <button type="button" class="btn btn-primary"
       on:click={() => {
         openMember(null);
       }}
-      id="member-info">役職員入力&nbsp;<i class="bi bi-pencil-square"></i></button>
+      id="member-info"><BilingualText key="member_entry_space" /><i class="bi bi-pencil-square"></i></button>
   </div> 
   <div class="full-height-1 fontsize-12pt">
     <table class="table table-bordered">
       <thead class="table-light">
         <tr>
-          <th scope="col" style="width: 120px;">クラス</th>
-          <th scope="col" style="width: 200px;">名前</th>
-          <th scope="col" style="width: 70px;">状態</th>
-          <th scope="col" class="th-perm">連携</th>
-          <th scope="col" class="th-perm">管理者</th>
-          <th scope="col" class="th-perm">会計</th>
-          <th scope="col" class="th-perm">会計<br>(閲覧)</th>
-          <th scope="col" class="th-perm">承認<br>可能</th>
-          <th scope="col" class="th-perm">顧客<br>管理</th>
-          <th scope="col" class="th-perm">在庫<br>管理</th>
-          <th scope="col" class="th-perm">人事<br>管理</th>
-          <th scope="col" style="width: 100px;">入社日</th>
+          <th scope="col" style="width: 120px;"><BilingualText key="class_name" /></th>
+          <th scope="col" style="width: 200px;"><BilingualText key="name" /></th>
+          <th scope="col" style="width: 70px;"><BilingualText key="status" /></th>
+          <th scope="col" class="th-perm"><BilingualText key="link" /></th>
+          <th scope="col" class="th-perm"><BilingualText key="administrator" /></th>
+          <th scope="col" class="th-perm"><BilingualText key="accounting" /></th>
+          <th scope="col" class="th-perm"><BilingualText key="accounting" /><br><BilingualText key="view_only" /></th>
+          <th scope="col" class="th-perm"><BilingualText key="approve" /><br><BilingualText key="possible" /></th>
+          <th scope="col" class="th-perm"><BilingualText key="customer" /><br><BilingualText key="administration" /></th>
+          <th scope="col" class="th-perm"><BilingualText key="inventory" /><br><BilingualText key="administration" /></th>
+          <th scope="col" class="th-perm"><BilingualText key="personnel" /><br><BilingualText key="administration" /></th>
+          <th scope="col" style="width: 100px;"><BilingualText key="hire_date" /></th>
         </tr>
         <tr>
           <th style="padding:5px;">
             <select class="form-select form-select-sm" id="memberClass"
               on:input={handleFilterChange}
               bind:value={memberClassId}>
-              <option value={-1}>全て</option>
+              <option value={-1}><BilingualText key="all" /></option>
               {#each classes as line}
               <option value={line.id}>{line.title}</option>
               {/each}
@@ -60,7 +60,7 @@
           </td>
           <td>
             <span class="badge {line.status === 'active' ? 'bg-success' : 'bg-secondary'}">
-              {line.status === 'active' ? '在職' : '退職'}
+              {line.status === 'active' ? $bi('active') : $bi('retired')}
             </span>
           </td>
           <td class="text-center">{#if line.userId}●{/if}</td>
@@ -96,6 +96,7 @@ const dispatch = createEventDispatcher();
 import {parseParams} from '../../javascripts/params.js';
 import { link } from '../../javascripts/router.js';
 
+import BilingualText from '../components/bilingual-text.svelte';
 export let status;
 export	let	members;
 export  let classes;

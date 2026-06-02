@@ -2,7 +2,7 @@
   {#if !noTitle }
   <div class="row">
     <div class="col-1">
-      <label for="title" class="col-form-label">表題</label>
+      <label for="title" class="col-form-label"><BilingualText key="title_label" /></label>
     </div>
     <div class="col-11">
     	<input type="text" class="form-control" id="title"
@@ -52,6 +52,7 @@ import DocumentFormat from './document-format.svelte';
 import Editor from './editor.svelte';
 import textConvert from '../../../libs/text-convert.js';
 import {onMount, beforeUpdate, afterUpdate, createEventDispatcher} from 'svelte';
+import BilingualText from '../components/bilingual-text.svelte';
 const dispatch = createEventDispatcher();
 
 export let document;

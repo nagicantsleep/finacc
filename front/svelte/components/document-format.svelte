@@ -1,4 +1,4 @@
-<label for="format" class="col-1 col-form-label">形式</label>
+<label for="format" class="col-1 col-form-label"><BilingualText key="format" /></label>
 <div class="col-2" id="format">
   <select class="form-control w-100"
     bind:value={type} disabled={disabled}>
@@ -9,6 +9,7 @@
 </div>
 
 <script>
+import BilingualText from './bilingual-text.svelte';
 const DOC_FORMAT = [
   ["file",      ""],
   ["text",      "Text"],

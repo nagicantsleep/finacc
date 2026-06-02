@@ -5,7 +5,7 @@
   {ledgerPages}
   ></SubsidiaryLedger>
 {:else}
-<p>読み込み中...</p>
+<p><BilingualText key="loading" /></p>
 {/if}
 
 <script>
@@ -14,6 +14,7 @@ import SubsidiaryLedger from './subsidiary-ledger.svelte';
 import myCompany from '../../../../libs/my-company.js';
 import initializeSubsidiaryLedger from '../../../../libs/init-subsidiary-ledger.js';
 
+import BilingualText from '../../components/bilingual-text.svelte';
 export let term;
 
 let fy;

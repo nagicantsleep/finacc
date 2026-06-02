@@ -1,15 +1,15 @@
 <div class="container-fluid">
   <div class="page-title d-flex justify-content-between mt-2">
-  	<h1>プロジェクト集計</h1>
+  	<h1><BilingualText key="project_summary" /></h1>
     <div>
-      <button class="btn btn-primary" on:click={downloadCSV} disabled={!summaryBody.length}>CSVダウンロード</button>
+      <button class="btn btn-primary" on:click={downloadCSV} disabled={!summaryBody.length}><BilingualText key="csv_download" /></button>
     </div>
 	</div>
 
   <div class="row page-subtitle align-items-center">
     <div class="col-md-4">
       <select class="form-select" name="projectId" value={selectedProjectId} on:change={handleChange}>
-        <option value={null}>プロジェクトを選択...</option>
+        <option value={null}><BilingualText key="select_project_hint" /></option>
         {#each projects as project}
           <option value={project.id}>{project.name}</option>
         {/each}
@@ -34,7 +34,7 @@
       <ProjectSummaryList header={summaryHeader} body={summaryBody} />
     </div>
   {:else}
-    <p>表示するデータがありません。</p>
+    <p><BilingualText key="no_display_data" /></p>
   {/if}
 
 </div>
@@ -45,6 +45,7 @@
   import { currentPage, link } from '../../javascripts/router.js';
   import { Line } from "svelte-chartjs";
   import ProjectSummaryList from './project-summary-list.svelte';
+import BilingualText from '../components/bilingual-text.svelte';
   import {
     Chart as ChartJS,
     Title,
@@ -90,7 +91,7 @@
   
   const downloadCSV = () => {
     if (!summaryHeader.length || !summaryBody.length) return;
-    const header = ['月', ...summaryHeader.map(h => h.name)];
+    const header = [$bi('month_label'), ...summaryHeader.map(h => h.name)];
     const rows = summaryBody.map(row => {
       const yearMonth = `${row.year}/${String(row.month).padStart(2, '0')}`;
       const values = summaryHeader.map(h => row[h.name] || 0);
