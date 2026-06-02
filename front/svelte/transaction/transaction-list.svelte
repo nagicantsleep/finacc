@@ -1,34 +1,22 @@
 <div class="list">
   <div class="page-title d-flex justify-content-between">
-    <h1>取引一覧</h1>
+    <h1><BilingualText key="transaction_list" /></h1>
     <button type="button" class="btn btn-primary"
       on:click={() => {
         link('/transaction/new');
       }}
-      id="transaction-info">新規入力&nbsp;<i class="bi bi-pencil-square"></i></button>
+      id="transaction-info"><BilingualText key="new_entry" /><i class="bi bi-pencil-square"></i></button>
   </div> 
   <div class="full-height-1 fontsize-12pt">
     <table class="table table-bordered">
       <thead class="table-light">
         <tr>
-          <th scope="col" style="width: 150px;">
-            種別
-          </th>
-          <th scope="col" style="width: 300px;">
-            相手先
-          </th>
-          <th scope="col" style="">
-            件名
-          </th>
-          <th scope="col" style="width: 100px;">
-            担当
-          </th>
-          <th scope="col" style="width: 100px;">
-            発生日
-          </th>
-          <th scope="col" style="width: 120px;">
-            金額
-          </th>
+          <th scope="col" style="width: 150px;"><BilingualText key="kind" /></th>
+          <th scope="col" style="width: 300px;"><BilingualText key="counterparty" /></th>
+          <th scope="col" style=""><BilingualText key="task_subject" /></th>
+          <th scope="col" style="width: 100px;"><BilingualText key="person_in_charge" /></th>
+          <th scope="col" style="width: 100px;"><BilingualText key="occurrence_date" /></th>
+          <th scope="col" style="width: 120px;"><BilingualText key="amount" /></th>
         </tr>
       </thead>
       <tbody>
@@ -42,7 +30,7 @@
                 link(`${location.pathname}?${param}`);
               }}
               value={status.params ? parseInt(status.params.get('kind')) : -1}>
-              <option value={-1}>全て</option>
+              <option value={-1}><BilingualText key="all" /></option>
               {#each transactionKinds as ent}
               <option value={ent.id}>{ent.label}</option>
               {/each}
@@ -116,6 +104,7 @@ import {onMount, beforeUpdate, afterUpdate} from 'svelte';
 import {parseParams, buildParam} from '../../javascripts/params.js';
 import { link } from '../../javascripts/router.js';
 
+import BilingualText from '../components/bilingual-text.svelte';
 export let status;
 export let transactions;
 

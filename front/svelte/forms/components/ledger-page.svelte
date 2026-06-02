@@ -11,24 +11,12 @@
       <table class="table">
         <thead>
           <tr>
-            <th colspan="2">
-              日付 / 伝番
-            </th>
-            <th style="width: 100px;">
-              相手勘定科目<br/>相手補助科目
-            </th>
-            <th>
-              適用<br/>補助科目
-            </th>
-            <th style="width: 100px;">
-              借方金額
-            </th>
-            <th style="width: 100px;">
-              貸方金額
-            </th>
-            <th style="width: 100px;">
-              残高
-            </th>
+            <th colspan="2"><BilingualText key="date_voucher_no" /></th>
+            <th style="width: 100px;"><BilingualText key="counter_account" /><br/><BilingualText key="counter_sub_account" /></th>
+            <th><BilingualText key="application" /><br/><BilingualText key="sub_account" /></th>
+            <th style="width: 100px;"><BilingualText key="debit_amount" /></th>
+            <th style="width: 100px;"><BilingualText key="credit_amount" /></th>
+            <th style="width: 100px;"><BilingualText key="balance" /></th>
           </tr>
         </thead>
         <tbody>
@@ -36,9 +24,7 @@
           <tr style="height:12px;">
             <td colspan="3">
             </td>
-            <td class="text">
-              繰越金額
-            </td>
+            <td class="text"><BilingualText key="carry_forward_amount" /></td>
             <td class="number">
             </td>
             <td class="number">
@@ -103,9 +89,7 @@
           <tr class="total" style="height:36px;">
             <td colspan="3">
             </td>
-            <td class="text">
-              合計
-            </td>
+            <td class="text"><BilingualText key="total" /></td>
             <td class="number">
               {formatMoney(ledgerPage.sums.debitAmount)}<br/>
               {formatMoney(ledgerPage.sums.debitTax)}
@@ -129,6 +113,7 @@
 import PageHeader from '../components/page-header.svelte';
 import {formatMoney} from '../../../../libs/utils.js';
 
+import BilingualText from '../../components/bilingual-text.svelte';
 export let company;
 export let fy;
 export let title;

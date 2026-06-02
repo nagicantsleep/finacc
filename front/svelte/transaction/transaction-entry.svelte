@@ -1,10 +1,10 @@
 <div class="entry">
   <div class="page-title d-flex justify-content-between">
-    <h1>取引文書(見積/請求/取引情報)</h1>
+    <h1><BilingualText key="transaction_docs" /></h1>
     {#if transaction?.no}
-    <span>管理番号:&nbsp;{transaction.no}</span>
+    <span><BilingualText key="management_no" />:&nbsp;{transaction.no}</span>
     {:else}
-    <span>新規</span>
+    <span><BilingualText key="new" /></span>
     {/if}
   </div> 
   <div class="row full-height fontsize-12pt">
@@ -23,11 +23,11 @@
       </div>
       <div class="footer">
         <button type="button" class="btn btn-secondary" disabled={disabled}
-          on:click={back}>もどる</button>
+          on:click={back}><BilingualText key="back" /></button>
         {#if ( transaction && transaction.id && transaction.id > 0 )}
         <button type="button" class="btn btn-danger" disabled={disabled}
           on:click={deleteTransaction}
-          id="delete-button">削除</button>
+          id="delete-button"><BilingualText key="delete" /></button>
         <button type="button" class="btn btn-info" disabled={disabled}
           on:click={() => {
               transaction.id = undefined;
@@ -35,21 +35,21 @@
               save()
             }
           }
-          id="create-button">複製</button>
+          id="create-button"><BilingualText key="duplicate" /></button>
         {/if}
         <button type="button" class="btn btn-primary" disabled={disabled}
           on:click={save}
-          id="save-button">保存</button>
+          id="save-button"><BilingualText key="save" /></button>
         {#if ( transaction && transaction.id && transaction.id > 0 )}
         {#if ( transaction.kind.book && transaction.kind.book.form )}
         <a href="/forms/transaction/{transaction.kind.book.form}/{transaction.id}"
         	class="btn btn-info" target="_blank" disabled={disabled}>
-          {transaction.kind.label}書作成
+          {transaction.kind.label}<BilingualText key="document_form" />{$bi('create_btn')}
           <Icon icon="mdi:language-html5" width="24" color="#E34F26" />
         </a>
         <a href="/forms/transaction/{transaction.kind.book.form}/{transaction.id}?format=pdf"
         	class="btn btn-info" target="_blank" disabled={disabled}>
-          {transaction.kind.label}書作成
+          {transaction.kind.label}<BilingualText key="document_form" />{$bi('create_btn')}
           <Icon icon="mdi:file-pdf-box" width="24" color="#D32F2F" />
         </a>
         {#if (transaction.voucherId)}
@@ -57,12 +57,12 @@
           on:click={() => {
             link(`/voucher/entry/${transaction.voucherId}`)
           }
-        }>証憑参照</button>
+        }><BilingualText key="voucher_ref" /></button>
         {:else}
         {#if ( transaction.kind.forBook )}
         <button type="button" class="btn btn-info" disabled={disabled}
           on:click={book}
-          >計上</button>
+          ><BilingualText key="posting" /></button>
         {/if}
         {/if}
         {/if}
@@ -89,6 +89,8 @@ import {currentTransaction, currentTask, getStore} from '../../javascripts/curre
 import {bindFile} from '../../javascripts/document.js';
 import { link } from '../../javascripts/router.js';
 
+import BilingualText from '../components/bilingual-text.svelte';
+import { bi } from '../../javascripts/bilingual.js';
 export	let	status;
 export let toast;
 export	let transaction;
@@ -105,7 +107,7 @@ let operation = () => {};
 
 const book = (event) => {
   axios.post(`/api/transaction/book/${transaction.id}`).then((result) => {
-    toast.show(`${transaction.kind.label}書`, '計上しました');
+    toast.show(`${transaction.kind.label}` + $bi('document_form'), $bi('posted_successfully'));
     axios.get(`/api/transaction/${transaction.id}`).then((result) => {
       transaction = result.data.transaction;
     });
@@ -126,18 +128,18 @@ const update_transaction = async (_transaction) => {
 
 const deleteTransaction = (event) => {
   console.log('deleteTransaction', transaction);
-  title = '取引の削除';
+  title = $bi('transaction_delete_title');
   description = `
 <table style="font-size:12px;">
   <tbody>
     <tr>
-			<td>相手先</td><td>${transaction.companyName || ''}</td>
+			<td>${$bi('counterparty')}</td><td>${transaction.companyName || ''}</td>
 		</tr>
     <tr>
-			<td>件名</td><td>${transaction.subject || ''}</td>
+			<td>${$bi('subject')}</td><td>${transaction.subject || ''}</td>
 		</tr>
     <tr>
-			<td>担当</td><td>${transaction.handleUser?.memberships?.[0]?.tradingName || transaction.handleUser?.legalName || ''}</td>
+			<td>${$bi('person_in_charge')}</td><td>${transaction.handleUser?.memberships?.[0]?.tradingName || transaction.handleUser?.legalName || ''}</td>
     </tr>
   </tbody>
 </table>
@@ -175,11 +177,11 @@ const save = () => {
   console.log('kind', transaction.kindId);
   if  ( (!transaction.kindId) || (transaction.kindId == 0) )	{
     ok = false;
-    errorMessages.push('種別を入力してください。');
+    errorMessages.push($bi('error_kind_required'));
   }
   if  ( !transaction.handledBy )	{
     ok = false;
-    errorMessages.push('弊社担当を入力してください。');
+    errorMessages.push($bi('error_handler_required'));
   }
   console.log({ok}, {errorMessages});
   if	( ok )	{
@@ -211,7 +213,7 @@ const save = () => {
             }
           });
         } else {
-          errorMessages.push('保存できませんでした。');
+          errorMessages.push($bi('error_save_failed'));
           errorMessages = errorMessages;
         }
     	});

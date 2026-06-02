@@ -1,5 +1,5 @@
 <FrontCover
-	title="補助元帳"
+  titleKey="subsidiary_ledger"
   {fy}
   {company}
   ></FrontCover>
@@ -7,7 +7,7 @@
 <LedgerPage
   {fy}
   {company}
-	title="補助元帳"
+	titleKey="subsidiary_ledger"
   {ledgerPage}
   ></LedgerPage>
 {/each}

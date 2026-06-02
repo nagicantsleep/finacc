@@ -3,7 +3,7 @@
     <div class={(register === 'true' ) ? 'col-10' : 'col-12'}>
       <input type="text" autocomplete="off"
         class="form-control"
-        placeholder="検索キー"
+        placeholder="{$bi('search_key')}"
         bind:value={inputValue}
         on:input={onUserInput}
         on:keydown={keyCheck}
@@ -25,13 +25,9 @@
     {#if (register === 'true') }
     <div class="col-2">
       <button type="button" class="btn btn-primary"
-        on:click={openEntry}>
-        登録
-      </button>
+        on:click={openEntry}><BilingualText key="register" /></button>
       {#if (!companyId)}
-      <button type="button" class="btn btn-danger" disabled=true>
-        未登録
-      </button>
+      <button type="button" class="btn btn-danger" disabled=true><BilingualText key="unregistered" /></button>
     	{/if}
     </div>
     {/if}
@@ -45,7 +41,7 @@
         </div>
       </div>
     <div class="row mb-2">
-      <label for="zip" class="col-1 col-form-label">郵便番号</label>
+      <label for="zip" class="col-1 col-form-label"><BilingualText key="zip_code" /></label>
       <div class="col-2">
         <input type="text" id="zip" class="form-control"
           bind:value={zip} disabled={( input === 'view' ) ? true : false}>
@@ -88,6 +84,7 @@ import {onMount, beforeUpdate, afterUpdate, createEventDispatcher} from 'svelte'
 const dispatch = createEventDispatcher();
 import CompanyEntry from '../company/company-entry.svelte';
 import BilingualText from './bilingual-text.svelte';
+import { bi } from '../../javascripts/bilingual.js';
 
 export let companyId = '';
 export let register = '';

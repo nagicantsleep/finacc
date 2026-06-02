@@ -5,7 +5,7 @@
   {dates}
   ></ExplanatoryJournal>
 {:else}
-  <p>読み込み中...</p>
+  <p><BilingualText key="loading" /></p>
 {/if}
 <script>
 import { onMount } from 'svelte';
@@ -14,6 +14,7 @@ import initializeExplanatoryJournal from '../../../../libs/init-explanatory-jour
 
 import ExplanatoryJournal from './explanatory-journal.svelte';
 
+import BilingualText from '../../components/bilingual-text.svelte';
 export let term;
 
 let fy;

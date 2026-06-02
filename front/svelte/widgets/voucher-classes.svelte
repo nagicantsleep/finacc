@@ -14,11 +14,11 @@ export let status;
   { type: "order", name: 'displayOrder'},
   { type: "text", name: 'name', title: "company_class_name", align: "left"},
   { type: "checkbox", name: 'send', title: "send", width: "50px"},
-  { type: "dropdown", name: 'form', title: "プログラム名", width: "200px",
+  { type: "dropdown", name: 'form', title: "program_name", width: "200px",
   source: [
-    [ 'invoice', '請求書' ],
-    [ 'receipt', '領収書' ],
-    [ 'estimate', '見積書']
+    [ 'invoice', 'invoice_form_label' ],
+    [ 'receipt', 'receipt_form_label' ],
+    [ 'estimate', 'estimate_form_label']
     ]
   }
   ]}></TableMaintenance>

@@ -4,7 +4,7 @@
     <div class="row">
     	<ul class="list-group">
         <li class="list-group-item">
-          件数: {count}
+          <BilingualText key="count_label" />: {count}
         </li>
       </ul>
     </div>
@@ -17,12 +17,8 @@
           <th style="width: 100px;">
             <BilingualText key="username" />
           </th>
-          <th style="width: 100px;">
-            更新者
-          </th>
-          <th>
-            適用
-          </th>
+          <th style="width: 100px;"><BilingualText key="updated_by" /></th>
+          <th><BilingualText key="application" /></th>
         </thead>
         <tbody>
           {#each slips as slip}

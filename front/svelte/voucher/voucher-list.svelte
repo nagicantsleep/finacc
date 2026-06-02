@@ -1,11 +1,11 @@
 <div class="list">
   <div class="page-title d-flex justify-content-between">
-    <h1>証憑一覧</h1>
+    <h1><BilingualText key="voucher_list" /></h1>
     <button type="button" class="btn btn-primary"
   	  on:click={() => {
     	  openVoucher(null);
   	  }}
-		  id="voucher-info">証憑入力&nbsp;<i class="bi bi-pencil-square"></i>
+		  id="voucher-info"><BilingualText key="voucher_entry_space" /><i class="bi bi-pencil-square"></i>
     </button>
   </div>
   <ul class="page-subtitle nav me-auto">
@@ -18,7 +18,7 @@
               month: `${date.year}-${date.month}`
             });
           }}>
-          {date.month}&nbsp;月
+          {date.month}&nbsp;{$bi('month_label')}
         </button>
         {:else}
         <button type="button" class="btn btn-outline-primary me-2"
@@ -27,7 +27,7 @@
               month: `${date.year}-${date.month}`
             });
           }}>
-          {date.month}&nbsp;月
+          {date.month}&nbsp;{$bi('month_label')}
         </button>
         {/if}
       </li>
@@ -58,30 +58,14 @@
     <table class="table table-bordered">
       <thead class="table-light">
         <tr>
-          <th scope="col" style="width: 150px;">
-            種別
-          </th>
-          <th scope="col" style="width: 200px;">
-            相手先
-          </th>
-          <th scope="col" style="width: 120px;">
-            発生日
-          </th>
-          <th scope="col" style="width: 120px;">
-            支払日
-          </th>
-          <th scope="col" style="width: 100px;">
-            金額
-          </th>
-          <th scope="col">
-            説明
-          </th>
-          <th scope="col" style="width:150px;">
-            ファイル
-          </th>
-          <th scope="col" style="width: 100px;">
-            処理者
-          </th>
+          <th scope="col" style="width: 150px;"><BilingualText key="kind" /></th>
+          <th scope="col" style="width: 200px;"><BilingualText key="counterparty" /></th>
+          <th scope="col" style="width: 120px;"><BilingualText key="occurrence_date" /></th>
+          <th scope="col" style="width: 120px;"><BilingualText key="payment_date" /></th>
+          <th scope="col" style="width: 100px;"><BilingualText key="amount" /></th>
+          <th scope="col"><BilingualText key="description" /></th>
+          <th scope="col" style="width:150px;"><BilingualText key="file" /></th>
+          <th scope="col" style="width: 100px;"><BilingualText key="processor" /></th>
         </tr>
       </thead>
       <tbody>
@@ -90,7 +74,7 @@
             <select class="form-select"
                 on:input={changeVoucherType}
                 value={status.params ? parseInt(status.params.get('type')): -1}>
-              <option value={-1}>全て</option>
+              <option value={-1}><BilingualText key="all" /></option>
               {#each voucherClasses as voucherClass}
               <option value={voucherClass.id}>{voucherClass.name}</option>
               {/each}
@@ -107,10 +91,10 @@
           <td>
           </td>
           <td>
-            <input type="text" class="number" placeholder="下限" size="12" maxlength="13"
+            <input type="text" class="number" placeholder={$bi('lower_limit')} size="12" maxlength="13"
                 bind:value={lowerAmount}
                 on:keypress={changeAmount} />
-            <input type="text" class="number" placeholder="上限" size="12" maxlength="13"
+            <input type="text" class="number" placeholder={$bi('upper_limit')} size="12" maxlength="13"
                 bind:value={upperAmount}
                 on:keypress={changeAmount} />
           </td>
@@ -234,6 +218,8 @@ import CompanySelect from '../components/company-select.svelte';
 
 import {numeric, formatDate} from '../../../libs/utils';
 import {onMount, beforeUpdate, afterUpdate, createEventDispatcher} from 'svelte';
+import BilingualText from '../components/bilingual-text.svelte';
+import { bi } from '../../javascripts/bilingual.js';
 const dispatch = createEventDispatcher();
 
 export let status;

@@ -1,12 +1,3 @@
-<div class="brand-container">
-  <a href="#" class="brand-link"
-    on:click|preventDefault={() => {
-      link('/home');
-    }}>
-      <img src="/public/logo.png" alt="Logo" class="brand-image">
-      <span class="brand-text">Hieronymus</span>
-  </a>
-</div>
 <div class="sidebar">
 	<nav class="mt-2">
     <ul class="nav nav-pills nav-sidebar flex-column">
@@ -14,7 +5,7 @@
         <div class="d-flex align-items-center justify-content-between" style="width:240px;">
           <!-- svelte-ignore a11y-missing-attribute -->
           <a class="nav-link">
-					  <i class="bi bi-menu-button-wide me-1"></i>
+						<i class="bi bi-menu-button-wide me-1"></i>
             <BilingualText key="menu" />
           </a>
           {#if ( isMenuEditMode)}
@@ -81,8 +72,8 @@
     <ul class="nav nav-pills nav-sidebar flex-column">
       {#each menu as entry}
       {#if ( entry.title && ( !entry.authority || entry.authority(status.user, status.company) )) }
-			<li class="nav-item">
-			  <a class={ $currentPage && $currentPage.match(entry.match) ? 'nav-link active': 'nav-link'}
+		<li class="nav-item">
+		  <a class={ $currentPage && $currentPage.match(entry.match) ? 'nav-link active': 'nav-link'}
         draggable="true"
         data-type={entry.name}
         on:dragstart={startDrag}
@@ -128,7 +119,7 @@
         {/each}
       </ul>
       {/if}
-			</li>
+		</li>
       {/if}
       {/each}
     </ul>
@@ -150,6 +141,7 @@ import Sortable from 'sortablejs';
 import Icon from '@iconify/svelte';
 import LanguagePairSelector from '../widgets/language-pair-selector.svelte';
 import BilingualText from '../components/bilingual-text.svelte';
+import { bi } from '../../javascripts/bilingual.js';
 import eventBus from '../../javascripts/event-bus.js';
 import {currentMenu, getStore} from '../../javascripts/current-record.js'
 import { currentPage, link } from '../../javascripts/router.js';
@@ -174,8 +166,8 @@ let deleteEntry;
 const deleteMenu = (entry) => {
   deleteEntry = entry;
   eventBus.emit('okModal', {
-    title:'メニューの削除',
-    description: `メニュー「${entry.title}」を削除します<br/>よろしいですか？`,
+    title: $bi('sidebar_delete_menu'),
+    description: `メニュー「${entry.title}」` + $bi('menu_delete_confirm'),
     reply: 'deleteMenu'
   });
 }

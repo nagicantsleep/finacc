@@ -1,24 +1,12 @@
 <table class="table table-bordered">
   <thead class="table-light">
     <tr>
-      <th scope="col" colspan="2">
-        日付 / 伝番
-      </th>
-      <th scope="col" style="width: 150px;">
-        相手勘定科目<br/>相手補助科目
-      </th>
-      <th scope="col" style="width: 300px;">
-        適用<br/>補助科目
-      </th>
-      <th scope="col" style="width: 100px;">
-        借方金額
-      </th>
-      <th scope="col" style="width: 100px;">
-        貸方金額
-      </th>
-      <th scope="col" style="width: 100px;">
-        残高
-      </th>
+      <th scope="col" colspan="2"><BilingualText key="date_voucher_no" /></th>
+      <th scope="col" style="width: 150px;"><BilingualText key="counter_account" /><br/><BilingualText key="counter_sub_account" /></th>
+      <th scope="col" style="width: 300px;"><BilingualText key="application" /><br/><BilingualText key="sub_account" /></th>
+      <th scope="col" style="width: 100px;"><BilingualText key="debit_amount" /></th>
+      <th scope="col" style="width: 100px;"><BilingualText key="credit_amount" /></th>
+      <th scope="col" style="width: 100px;"><BilingualText key="balance" /></th>
     </tr>
   </thead>
   <tbody>
@@ -30,9 +18,7 @@
       </td>
       <td>
       </td>
-      <td>
-        繰越金額
-      </td>
+      <td><BilingualText key="carry_forward_amount" /></td>
       <td class="number">
       </td>
       <td class="number">
@@ -144,9 +130,7 @@
       </td>
       <td>
       </td>
-      <td>
-        合計
-      </td>
+      <td><BilingualText key="total" /></td>
       <td class="number">
         {sums.debitAmount.toLocaleString()}<br/>
         {sums.debitTax.toLocaleString()}
@@ -165,6 +149,7 @@
 
 <script>
 import {onMount, beforeUpdate, afterUpdate, createEventDispatcher} from 'svelte';
+import BilingualText from '../components/bilingual-text.svelte';
 const dispatch = createEventDispatcher();
 
 export	let status;

@@ -1,5 +1,5 @@
 <FrontCover
-  title="仕訳日記帳"
+  titleKey="journal"
   {company}
   {fy}
   ></FrontCover>
@@ -10,31 +10,19 @@
     <PageHeader
       {company}
       {fy}
-      title="仕訳日記帳"
-      left_item={`${date.month}月度`}
+      titleKey="journal"
+      left_item={`${date.month}${$bi('month_num')}`}
     ></PageHeader>
     <div class="page-body">
       <table class="table table-bordered">
         <thead>
           <tr>
-            <th scope="col" colspan="2">
-              日付 / 伝番
-            </th>
-            <th scope="col" style="width: 120px;">
-              借方金額
-            </th>
-            <th scope="col" style="width: 100px;">
-              借方科目<br/>補助科目
-            </th>
-            <th scope="col">
-              適用
-            </th>
-            <th scope="col" style="width: 120px;">
-              貸方科目<br/>補助科目
-            </th>
-            <th scope="col" style="width: 100px;">
-              貸方金額
-            </th>
+            <th scope="col" colspan="2"><BilingualText key="date_voucher_no" /></th>
+            <th scope="col" style="width: 120px;"><BilingualText key="debit_amount" /></th>
+            <th scope="col" style="width: 100px;"><BilingualText key="debit_account" /><br/><BilingualText key="sub_account" /></th>
+            <th scope="col"><BilingualText key="application" /></th>
+            <th scope="col" style="width: 120px;"><BilingualText key="credit_account" /><br/><BilingualText key="sub_account" /></th>
+            <th scope="col" style="width: 100px;"><BilingualText key="credit_amount" /></th>
           </tr>
         </thead>
         <tbody>
@@ -94,9 +82,7 @@
             </td>
             <td>
             </td>
-            <td class="text">
-              合計
-            </td>
+            <td class="text"><BilingualText key="total" /></td>
             <td>
             </td>
             <td class="number">
@@ -117,6 +103,8 @@ import FrontCover from '../components/front-cover.svelte';
 import PageHeader from '../components/page-header.svelte';
 import {formatMoney} from '../../../../libs/utils.js';
 
+import BilingualText from '../../components/bilingual-text.svelte';
+import { bi } from '../../../javascripts/bilingual.js';
 export let fy;
 export let company;
 export let dates;

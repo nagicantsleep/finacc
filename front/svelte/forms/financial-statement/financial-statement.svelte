@@ -1,5 +1,5 @@
 <FrontCover
-	title="決算報告書"
+	titleKey="report_financial"
   {fy}
   {company}
   ></FrontCover>

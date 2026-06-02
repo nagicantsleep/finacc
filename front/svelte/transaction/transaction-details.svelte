@@ -1,32 +1,15 @@
 <table class="table table-striped table-bordered details">
   <thead>
     <tr>
-      <th scope="col" style="width:200px;">
-        商品名<br/>
-        規格
-      </th>
-      <th scope="col" style="width:120px;">
-        単価
-      </th>
-      <th scope="col" style="width: 100px;">
-        数量<br/>
-        単位
-      </th>
-      <th scope="col" style="width: 120px;">
-        消費税
-      </th>
-      <th scope="col" style="width: 110px;">
-        金額<br/>
-        消費税
-      </th>
-      <th scope="col">
-        説明
-      </th>
+      <th scope="col" style="width:200px;"><BilingualText key="product_name" /><br/><BilingualText key="specification" /></th>
+      <th scope="col" style="width:120px;"><BilingualText key="unit_price" /></th>
+      <th scope="col" style="width: 100px;"><BilingualText key="quantity" /><br/><BilingualText key="unit" /></th>
+      <th scope="col" style="width: 120px;"><BilingualText key="tax" /></th>
+      <th scope="col" style="width: 110px;"><BilingualText key="amount" /><br/><BilingualText key="tax" /></th>
+      <th scope="col"><BilingualText key="description" /></th>
       <th scope="col" style="width:90px;">
       </th>
-      <th scope="col" style="width: 20px;">
-        小計
-      </th>
+      <th scope="col" style="width: 20px;"><BilingualText key="subtotal" /></th>
     </tr>
   </thead>
   <tbody>
@@ -34,7 +17,7 @@
     <tr>
       <td class="input">
         {#if ( details[i].itemId === 0 )}
-        <span style="font-size:12pt;">※&nbsp;小計&nbsp;※</span>
+        <span style="font-size:12pt;"><BilingualText key="subtotal_marked" /></span>
         {:else}
         <ItemSelect
           product={true}
@@ -71,7 +54,7 @@
             const rule = findTaxRule(details[i].taxRuleId, taxRules);
             details[i].tax = computeTax(details[i].amount, rule);
         }}>
-          <option value={null}> -- 未選択 --</option>
+          <option value={null}><BilingualText key="unselected" /></option>
             {#each taxRules as ent}
             <option value={ent.id}>{ent.label}</option>
             {/each}
@@ -131,9 +114,7 @@
     </tr>
     {/each}
     <tr>
-      <td colspan="4" style="vertical-align:middle;">
-        合計
-      </td>
+      <td colspan="4" style="vertical-align:middle;"><BilingualText key="total" /></td>
       <td class="input number">
         <input type="text" class="number form-control" size="10" maxlength="11" disabled="true"
           value={sum.toLocaleString()}>
@@ -170,6 +151,7 @@ import {onMount, beforeUpdate, afterUpdate, createEventDispatcher} from 'svelte'
 const dispatch = createEventDispatcher();
 import {findTaxRule, computeTax} from '../../../libs/sales-tax.js';
 
+import BilingualText from '../components/bilingual-text.svelte';
 export  let details;
 export  let sum;
 export  let tax;

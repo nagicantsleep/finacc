@@ -2,31 +2,23 @@
 {#if ( count > 0 ) }
 <div class="card">
   <div class="card-header">
-    <h3 class="card-title">承認待ち</h3>
+    <h3 class="card-title"><BilingualText key="approval_pending" /></h3>
   </div>
   <div class="card-body">
     <div class="row">
     	<ul class="list-group">
         <li class="list-group-item">
-          件数: {count}
+          {$bi('approve_pending_count')}: {count}
         </li>
       </ul>
     </div>
 	  <div class="row full-height" style="overflow-y: scroll;">
 		  <table class="table table-bordered">
         <thead class="table-light">
-          <th colspan="2">
-            日付 / 伝番
-          </th>
-          <th style="width: 100px;">
-            作成者
-          </th>
-          <th style="width: 100px;">
-            更新者
-          </th>
-          <th>
-            適用
-          </th>
+          <th colspan="2"><BilingualText key="date_voucher_no" /></th>
+          <th style="width: 100px;"><BilingualText key="created_by" /></th>
+          <th style="width: 100px;"><BilingualText key="updated_by" /></th>
+          <th><BilingualText key="application" /></th>
         </thead>
         <tbody>
           {#each slips as slip}
@@ -89,6 +81,7 @@ import CrossSlipModal from '../cross-slip/cross-slip-modal.svelte';
 import Modal from 'bootstrap/js/dist/modal';
 import {setAccounts} from '../../javascripts/cross-slip';
 
+import BilingualText from '../components/bilingual-text.svelte';
 export let status;
 export let toast;
 

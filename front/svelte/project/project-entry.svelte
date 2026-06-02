@@ -52,6 +52,7 @@
   import { link } from '../../javascripts/router.js';
   import { currentProject } from '../../javascripts/current-record.js';
   import BilingualText from '../components/bilingual-text.svelte';
+  import { bi } from '../../javascripts/bilingual.js';
 
   const dispatch = createEventDispatcher();
 
@@ -68,15 +69,15 @@
       project = response.data;
       currentProject.set(project);
       dispatch('close');
-      history.back(); // 保存後に戻る
+      history.back();
     } catch (err) {
       console.error("プロジェクトの保存に失敗しました:", err);
-      alert('エラー: プロジェクトの保存に失敗しました。');
+      alert($bi('error_save_project'));
     }
   };
 
   const remove = async () => {
-    if (!project.id || !confirm(`プロジェクト「${project.name}」を削除します。よろしいですか？`)) {
+    if (!project.id || !confirm($bi('confirm_delete_project'))) {
       return;
     }
     try {
@@ -85,7 +86,7 @@
       history.back(); // 削除後に戻る
     } catch (err) {
       console.error("プロジェクトの削除に失敗しました:", err);
-      alert('エラー: プロジェクトの削除に失敗しました。');
+      alert($bi('error_delete_project'));
     }
   };
 

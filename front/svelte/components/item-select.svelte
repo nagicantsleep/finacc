@@ -2,7 +2,7 @@
   type="text"
   class="form-control"
   autocomplete="off"
-  placeholder="検索キー"
+  placeholder="{$bi('search_key')}"
   bind:value={inputValue}
   on:input={onUserInput}
   on:keydown={keyCheck}
@@ -23,6 +23,7 @@
 <script>
 import axios from 'axios';
 import {onMount, beforeUpdate, afterUpdate, createEventDispatcher} from 'svelte';
+import { bi } from '../../javascripts/bilingual.js';
 const dispatch = createEventDispatcher();
 
 export let itemId;

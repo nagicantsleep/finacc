@@ -20,7 +20,7 @@
         {/if}
         <button type="button" class="btn btn-primary"
             on:click={save}
-            id="save-button">保存&nbsp;<i class="bi bi-save"></i></button>
+            id="save-button"><BilingualText key="save_space" /><i class="bi bi-save"></i></button>
       </div>
     </div>
   </div>

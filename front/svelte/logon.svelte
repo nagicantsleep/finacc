@@ -2,13 +2,13 @@
   <TenantSelect></TenantSelect>
   <div class="logon-manage card mt-4">
     <div class="card-body">
-      <h5 class="card-title mb-3">所有テナント管理</h5>
+      <h5 class="card-title mb-3"><BilingualText key="manage_owned_tenants" /></h5>
       {#if manageMessage}
         <p class="text-{manageMessageType} mb-3">{manageMessage}</p>
       {/if}
       <div class="input-group mb-3">
-        <input class="form-control" bind:value={newTenantName} placeholder="新しいテナント名">
-        <button class="btn btn-outline-primary" on:click={createTenant} disabled={submittingCreate}>作成</button>
+        <input class="form-control" bind:value={newTenantName} placeholder={$bi('new_tenant_name')}>
+        <button class="btn btn-outline-primary" on:click={createTenant} disabled={submittingCreate}><BilingualText key="create_btn" /></button>
       </div>
 
       <div class="tenant-manage-list">
@@ -16,8 +16,8 @@
           <div class="tenant-manage-item">
             <input class="form-control" bind:value={tenant.tenantName}>
             <div class="tenant-manage-actions">
-              <button class="btn btn-outline-secondary" on:click={() => updateTenant(tenant)} disabled={tenant.saving}>更新</button>
-              <button class="btn btn-outline-danger" on:click={() => deleteTenant(tenant)} disabled={tenant.saving}>削除</button>
+              <button class="btn btn-outline-secondary" on:click={() => updateTenant(tenant)} disabled={tenant.saving}><BilingualText key="update" /></button>
+              <button class="btn btn-outline-danger" on:click={() => deleteTenant(tenant)} disabled={tenant.saving}><BilingualText key="delete" /></button>
             </div>
           </div>
         {/each}
@@ -30,6 +30,8 @@
 import axios from 'axios';
 import TenantSelect from './login/tenant-select.svelte';
 
+import { bi } from '../javascripts/bilingual.js';
+import BilingualText from './components/bilingual-text.svelte';
 let ownedTenants = [];
 let newTenantName = '';
 let manageMessage = '';
@@ -45,7 +47,7 @@ async function loadOwnedTenants() {
         .map((tenant) => ({ ...tenant, saving: false }));
     }
   } catch (err) {
-    manageMessage = err.response?.data?.message || '所有テナントの取得に失敗しました。';
+    manageMessage = err.response?.data?.message || $bi('tenant_fetch_failed');
     manageMessageType = 'danger';
   }
 }
@@ -58,15 +60,15 @@ async function createTenant() {
     const response = await axios.post('/api/user/tenant', { name: newTenantName });
     if (response.data.result === 'OK') {
       newTenantName = '';
-      manageMessage = 'テナントを作成しました。';
+      manageMessage = $bi('tenant_created_msg');
       manageMessageType = 'success';
       await loadOwnedTenants();
     } else {
-      manageMessage = response.data.message || 'テナントの作成に失敗しました。';
+      manageMessage = response.data.message || $bi('tenant_create_failed_msg');
       manageMessageType = 'danger';
     }
   } catch (err) {
-    manageMessage = err.response?.data?.message || 'テナントの作成に失敗しました。';
+    manageMessage = err.response?.data?.message || $bi('tenant_create_failed_msg');
     manageMessageType = 'danger';
   }
   submittingCreate = false;
@@ -79,15 +81,15 @@ async function updateTenant(tenant) {
   try {
     const response = await axios.put(`/api/user/tenant/${tenant.tenantId}`, { name: tenant.tenantName });
     if (response.data.result === 'OK') {
-      manageMessage = 'テナントを更新しました。';
+      manageMessage = $bi('tenant_updated_msg');
       manageMessageType = 'success';
       await loadOwnedTenants();
     } else {
-      manageMessage = response.data.message || 'テナントの更新に失敗しました。';
+      manageMessage = response.data.message || $bi('tenant_update_failed_msg');
       manageMessageType = 'danger';
     }
   } catch (err) {
-    manageMessage = err.response?.data?.message || 'テナントの更新に失敗しました。';
+    manageMessage = err.response?.data?.message || $bi('tenant_update_failed_msg');
     manageMessageType = 'danger';
   }
   tenant.saving = false;
@@ -95,21 +97,21 @@ async function updateTenant(tenant) {
 
 async function deleteTenant(tenant) {
   if (tenant.saving) return;
-  if (!window.confirm(`「${tenant.tenantName}」を削除しますか？`)) return;
+  if (!window.confirm(`「${tenant.tenantName}」${$bi('confirm_delete_tenant_suffix')}`)) return;
   tenant.saving = true;
   manageMessage = '';
   try {
     const response = await axios.delete(`/api/user/tenant/${tenant.tenantId}`);
     if (response.data.result === 'OK') {
-      manageMessage = 'テナントを削除しました。';
+      manageMessage = $bi('tenant_deleted_msg');
       manageMessageType = 'success';
       await loadOwnedTenants();
     } else {
-      manageMessage = response.data.message || 'テナントの削除に失敗しました。';
+      manageMessage = response.data.message || $bi('tenant_delete_failed_msg');
       manageMessageType = 'danger';
     }
   } catch (err) {
-    manageMessage = err.response?.data?.message || 'テナントの削除に失敗しました。';
+    manageMessage = err.response?.data?.message || $bi('tenant_delete_failed_msg');
     manageMessageType = 'danger';
   }
   tenant.saving = false;

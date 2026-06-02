@@ -1,15 +1,12 @@
 <table class="table">
   <thead>
     <tr>
-      <th style="width:250px;">品名・規格</th>
-      <th style="width:100px;">単価</th>
-      <th style="width:50px;">数量</th>
-      <th style="width:50px;">単位</th>
-      <th style="width:100px;">
-        金額<br/>
-        消費税
-      </th>
-      <th>備考</th>
+      <th style="width:250px;"><BilingualText key="product_spec" /></th>
+      <th style="width:100px;"><BilingualText key="unit_price" /></th>
+      <th style="width:50px;"><BilingualText key="quantity" /></th>
+      <th style="width:50px;"><BilingualText key="unit" /></th>
+      <th style="width:100px;"><BilingualText key="amount" /><br/><BilingualText key="tax" /></th>
+      <th><BilingualText key="remarks" /></th>
     </tr>
   </thead>
   <tbody>
@@ -20,7 +17,7 @@
         {@html line.itemName || '&nbsp;'}<br/>
         {@html line.itemSpec || '&nbsp;'}
         {:else}
-        ※小計※
+        ※{$bi('subtotal_marked')}※
         {/if}
       </td>
       {#if line.itemId !== 0}
@@ -43,20 +40,20 @@
   <tfoot>
     <tr>
       <td colspan="2" rowspan={transaction.taxClass !== 0 ? 3 : 2}></td>
-      <td colspan="2" class="sums">小&nbsp;&nbsp;&nbsp;計</td>
+      <td colspan="2" class="sums"><BilingualText key="subtotal_short" /></td>
       <td class="number">{formatMoney(transaction.amount)}</td>
       <td rowspan={transaction.taxClass !== 0 ? 3 : 2}></td>
     </tr>
     {#if transaction.taxClass !== 0}
     <tr>
-      <td colspan="2" class="sums">消費税</td>
+      <td colspan="2" class="sums"><BilingualText key="tax" /></td>
       <td class="number">
         {formatMoney(transaction.tax)}
       </td>
     </tr>
     {/if}
     <tr>
-      <td colspan="2" class="sums"><strong>合&nbsp;&nbsp;&nbsp;計</strong></td>
+      <td colspan="2" class="sums"><strong><BilingualText key="grand_total_short" /></strong></td>
       <td class="number">
         <strong>
           {formatMoney(transaction.amount)}
@@ -68,6 +65,8 @@
 <script>
 import {BANK_ACCOUNT_TYPE, formatMoney} from '../../../../libs/utils.js';
 
+import BilingualText from '../../components/bilingual-text.svelte';
+import { bi } from '../../../javascripts/bilingual.js';
 export let transaction;
 
 const formatNumber = (num) => {

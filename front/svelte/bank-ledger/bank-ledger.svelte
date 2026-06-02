@@ -10,7 +10,7 @@
         style="background-color:var(--bs-primary);color:white;"
         rolw="button" data-bs-toggle="dropdown" aria-expanded="false">
         {#if accountCode}
-        {BANK_ACCOUNTS.find((el) => el[0] == accountCode)[1]}
+        {$bi(BANK_ACCOUNTS.find((el) => el[0] == accountCode)[1])}
         {:else}
         <BilingualText key="account" />
         {/if}
@@ -169,6 +169,7 @@ import {onMount, afterUpdate} from 'svelte';
 import {ledgerLines} from '../../../libs/ledger';
 import {setAccounts} from '../../javascripts/cross-slip';
 import CrossSlipModal from '../cross-slip/cross-slip-modal.svelte';
+import { bi } from '../../javascripts/bilingual.js';
 import BilingualText from '../components/bilingual-text.svelte';
 import {DateString} from '../../../libs/utils.js';
 import {currentPage} from '../../javascripts/router.js';
@@ -189,10 +190,10 @@ let popUp;
 $: checkPage($currentPage);
 
 const BANK_ACCOUNTS = [
-  [ '1010000',	'当座預金' ],
-  [ '1010010',	'普通預金' ],
-  [ '1010020',	'定期預金' ],
-  [ '1010030',	'定期積立' ]
+  [ '1010000',	'bank_checking_dep' ],
+  [ '1010010',	'bank_savings_dep' ],
+  [ '1010020',	'bank_time_dep' ],
+  [ '1010030',	'bank_fixed_dep' ]
 ];
 
 const link = (href) => {

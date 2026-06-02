@@ -1,6 +1,6 @@
 <div class="entry">
   <div class="page-title d-flex justify-content-between">
-    <h1>案件情報</h1>
+    <h1><BilingualText key="project_info" /></h1>
   </div> 
   <div class="row full-height-1 fontsize-12pt">
     <div class="content">
@@ -17,26 +17,26 @@
       </div>
       <div class="footer">
         <button type="button" class="btn btn-secondary" disabled={disabled}
-          on:click={back}>もどる</button>
+          on:click={back}><BilingualText key="back" /></button>
         {#if ( task && task.id && task.id > 0 )}
         <button type="button" class="btn btn-danger" disabled={disabled}
           on:click={deleteTask}
-          id="delete-button">削除</button>
+          id="delete-button"><BilingualText key="delete" /></button>
         <button type="button" class="btn btn-primary" disabled={disabled}
           on:click={() => {
               task.id = undefined;
               save()
             }
           }
-          id="create-button">複製</button>
+          id="create-button"><BilingualText key="duplicate" /></button>
         {/if}
         <button type="button" class="btn btn-primary" disabled={disabled}
           on:click={save}
-          id="save-button">保存</button>
+          id="save-button"><BilingualText key="save" /></button>
         {#if ( task && task.id && ( !transaction || !transaction.id ))}
         <button type="button" class="btn btn-warning"
           on:click={create}
-          id="save-button">取引文書作成</button>
+          id="save-button"><BilingualText key="create_transaction_doc" /></button>
 				{/if}
       </div>
     </div>
@@ -63,6 +63,7 @@ import eventBus from '../../javascripts/event-bus.js';
 import {currentTask, currentTransaction, getStore} from '../../javascripts/current-record.js'
 import { link, currentPage } from '../../javascripts/router.js';
 
+import BilingualText from '../components/bilingual-text.svelte';
 export  let users;
 export	let	status;
 export	let task;
@@ -91,15 +92,15 @@ const update_task = async (_task) => {
 }
 const deleteTask = (event) => {
   console.log('deleteTask', task);
-  title = '案件の削除';
+  title = $bi('task_delete_title');
   description = `
 <table style="font-size:12px;">
   <tbody>
     <tr>
-			<td>相手先</td><td>${task.companyName || ''}</td>
+			<td>${$bi('counterparty')}</td><td>${task.companyName || ''}</td>
 		</tr>
     <tr>
-			<td>件名</td><td>${task.subject || ''}</td>
+			<td>${$bi('subject')}</td><td>${task.subject || ''}</td>
 		</tr>
   </tbody>
 `;
@@ -127,7 +128,7 @@ const save = () => {
     task.companyId = undefined;
   }
   if  ( !task.subject ) {
-    errorMessages.push('件名を入れてください');
+    errorMessages.push($bi('task_subject_required'));
   }
   if  ( errorMessages.length === 0 )  {
     try {
@@ -152,14 +153,14 @@ const save = () => {
             link(url);
           }
         } else {
-          errorMessages.push('保存できませんでした。');
+          errorMessages.push($bi('save_failed'));
           errorMessages = errorMessages;
         }
       });
     }
     catch(e) {
       console.log(e);
-      errorMessages.push('保存できませんでした。');
+      errorMessages.push($bi('save_failed'));
     }
   } else {
 

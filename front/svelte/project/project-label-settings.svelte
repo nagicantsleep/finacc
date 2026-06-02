@@ -1,17 +1,17 @@
 <div class="container-fluid">
   <div class="page-title d-flex justify-content-between">
-    <h1>プロジェクトの集計設定</h1>
+    <h1><BilingualText key="project_summary_settings" /></h1>
     <div>
-      <button type="button" class="btn btn-secondary me-2" on:click={() => window.history.back()}>もどる</button>
-      <button type="button" class="btn btn-primary" on:click={save}>保存</button>
+      <button type="button" class="btn btn-secondary me-2" on:click={() => window.history.back()}><BilingualText key="back" /></button>
+      <button type="button" class="btn btn-primary" on:click={save}><BilingualText key="save" /></button>
     </div>
   </div>
-  <p>下の一覧からこのプロジェクトで使うラベルを選択し、上の「このプロジェクトのラベル」欄でドラッグ＆ドロップして表示順を並べ替えてください。</p>
+  <p><BilingualText key="label_drag_hint" /></p>
 
   <div class="row mt-3">
     <div class="col-12">
       <!-- 上段: 紐付けられたラベル（並べ替え可能） -->
-      <h5>このプロジェクトの集計用ラベル（ドラッグ＆ドロップで並べ替え）</h5>
+      <h5><BilingualText key="project_labels_drag" /></h5>
       <div class="list-group mb-4" bind:this={projectListElement}>
         {#key projectLabels}
           {#each projectLabels as label (label.id)}
@@ -20,16 +20,16 @@
                 <i class="fas fa-grip-lines me-2" style="cursor: grab;"></i>
                 {label.name}
               </span>
-              <button class="btn btn-sm btn-outline-danger" on:click={() => uncheckLabel(label.id)}>削除</button>
+              <button class="btn btn-sm btn-outline-danger" on:click={() => uncheckLabel(label.id)}><BilingualText key="delete" /></button>
             </div>
           {:else}
-            <div class="list-group-item text-muted">下の一覧からラベルを選択してください。</div>
+            <div class="list-group-item text-muted"><BilingualText key="select_label_hint" /></div>
           {/each}
         {/key}
       </div>
 
       <!-- 下段: 利用可能な全ラベル（チェックボックス付き） -->
-      <h5>利用可能なすべての集計用ラベル</h5>
+      <h5><BilingualText key="all_labels" /></h5>
       <div class="account-list border p-3" style="height: 300px; overflow-y: auto;">
         {#each allLabels as label (label.id)}
           <div class="form-check">
@@ -48,7 +48,9 @@
   import axios from 'axios';
   import { onMount, tick } from 'svelte';
   import Sortable from 'sortablejs';
+  import { bi } from '../../javascripts/bilingual.js';
 
+import BilingualText from '../components/bilingual-text.svelte';
   export let status;
 
   let allLabels = [];
@@ -93,10 +95,10 @@
 
     try {
       await axios.put(`/api/projects/${status.id}/labels`, { labels: labelsToSave });
-      alert('保存しました。');
+      alert($bi('save_success'));
     } catch (err) {
       console.error("ラベルの保存に失敗しました:", err);
-      alert('エラー: 保存に失敗しました。');
+      alert($bi('save_failed'));
     }
   };
 

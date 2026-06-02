@@ -1,5 +1,5 @@
 <div class="page-title d-flex justify-content-between">
-  <h1>科目管理</h1>
+  <h1><BilingualText key="account_management2" /></h1>
 </div>
 <div class="full-height-1 fontsize-12pt">
   <AccountsList
@@ -33,6 +33,7 @@ import {numeric, formatDate} from '../../../libs/utils.js';
 import {parseParams, buildParam} from '../../javascripts/params.js';
 import { currentPage } from '../../javascripts/router.js';
 
+import BilingualText from '../components/bilingual-text.svelte';
 export let status;
 
 let accounts;

@@ -4,9 +4,7 @@
     on:drop={onDrop}
     on:dragover={onDragOver}>
     {#if !files || files.length === 0}
-    <div class="mt-3 p-3">
-      アップロードされたファイルはありません。
-    </div>
+    <div class="mt-3 p-3"><BilingualText key="no_files_uploaded" /></div>
     {:else}
     {#each files as file}
     <div class="col-2">
@@ -43,6 +41,7 @@
 import {onMount, beforeUpdate, afterUpdate, createEventDispatcher} from 'svelte';
 import axios from 'axios';
 
+import BilingualText from '../components/bilingual-text.svelte';
 export let files;
 export let document;
 

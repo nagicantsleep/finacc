@@ -113,6 +113,7 @@ import {onMount, beforeUpdate, afterUpdate, createEventDispatcher} from 'svelte'
 const dispatch = createEventDispatcher();
 import CrossSlip from './cross-slip.svelte';
 import BilingualText from '../components/bilingual-text.svelte';
+import { bi } from '../../javascripts/bilingual.js';
 
 
 export let accounts;
@@ -198,27 +199,27 @@ const save = (event) => {
       if (( !slip.lines[i].debitAccount ) &&
           ( slip.lines[i].debitAmount != 0 ) )	{
         ok = false;
-        errorMessages.push(`${i+1}行目 : 借方科目に未登録の勘定科目が入力されています。`);
+        errorMessages.push(`${i+1}{$bi('row_label')} : {$bi('error_debit_unregistered')}`);
       }
       if  (( !slip.lines[i].debitAccount ) &&
            ( slip.lines[i].debitAmount != 0 ))  {
         ok = false;
-        errorMessages.push(`${i+1}行目 : 借方科目が未入力です。`);
+        errorMessages.push(`${i+1}{$bi('row_label')} : {$bi('error_debit_missing')}`);
       }
       if  (( !slip.lines[i].creditAccount ) &&
            ( slip.lines[i].creditAmount != 0 ))	{
         ok = false;
-        errorMessages.push(`${i+1}行目 : 貸方科目が未入力です。`);
+        errorMessages.push(`${i+1}{$bi('row_label')} : {$bi('error_credit_missing')}`);
       }
     }
     if	( sums.debit != sums.credit )	{
       ok = false;
-      errorMessages.push("借方の金額と貸方の合計金額が不一致です。");
+      errorMessages.push($bi('error_debit_credit_mismatch'));
     }
   } else {
     ok = false;
     slip.day = tempDay;
-    errorMessages.push("日付が正しくありません。");
+    errorMessages.push($bi('error_invalid_date'));
   }
   if	( ok )	{
     console.log("保存直前のslipオブジェクト:", JSON.stringify(slip, null, 2));

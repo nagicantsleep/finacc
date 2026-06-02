@@ -14,15 +14,15 @@
       </div>
       <div class="footer">
         <button type="button" class="btn btn-secondary" disabled={disabled}
-          on:click={back}>もどる</button>
+          on:click={back}><BilingualText key="back" /></button>
         {#if ( item && item.id && item.id > 0 )}
         <button type="button" class="btn btn-danger" disabled={disabled}
           on:click={deleteItem}
-          id="delete-button">削除</button>
+          id="delete-button"><BilingualText key="delete" /></button>
         {/if}
         <button type="button" class="btn btn-primary" disabled={disabled}
           on:click={save}
-          id="save-button">保存</button>
+          id="save-button"><BilingualText key="save" /></button>
       </div>
     </div>
   </div>
@@ -45,6 +45,7 @@ import {currentItem, getStore} from '../../javascripts/current-record.js'
 import eventBus from '../../javascripts/event-bus.js';
 import FormError from '../common/form-error.svelte';
 import BilingualText from '../components/bilingual-text.svelte';
+import { bi } from '../../javascripts/bilingual.js';
 import { link } from '../../javascripts/router.js';
 
 export let status;
@@ -70,21 +71,21 @@ const update_item = async (_item) => {
 }
 
 const deleteItem = (event) => {
-  title = '品目の削除';
+  title = $bi('item_delete_title');
   description = `
 <table style="font-size:12px;">
   <tbody>
     <tr>
-			<td>種別</td><td>${item.itemClass.name}</td>
+			<td>${$bi('item_class_label')}</td><td>${item.itemClass.name}</td>
 		</tr>
     <tr>
-			<td>一般名</td><td>${item.name || ''}</td>
+			<td>${$bi('general_name')}</td><td>${item.name || ''}</td>
 		</tr>
     <tr>
-			<td>正式名</td><td>${item.normalName || ''}</td>
+			<td>${$bi('formal_name')}</td><td>${item.normalName || ''}</td>
 		</tr>
     <tr>
-			<td>規格</td><td>${item.spec || ''}</td>
+			<td>${$bi('specification')}</td><td>${item.spec || ''}</td>
     </tr>
   </tbody>
 `;
@@ -110,12 +111,12 @@ const save = () => {
     item.itemClassId = parseInt(item.itemClassId);
   } else {
     ok = false;
-    errorMessages.push('種別が未入力です')
+    errorMessages.push($bi('item_class_required'))
   }
   if  (( !item.key ) ||
        ( item.key === ''))  {
     ok = false;
-    errorMessages.push("呼び出しキーが未入力です。");
+    errorMessages.push($bi('item_key_required'));
   }
   if  ( !ok )  {
     errorMessages = errorMessages;

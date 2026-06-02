@@ -2,21 +2,11 @@
   <table class="table table-bordered">
     <thead class="table-light">
       <tr>
-        <th scope="col" style="width: 100px;">
-          勘定科目
-        </th>
-        <th scope="col" style="width: 100px;">
-          繰越金額
-        </th>
-        <th scope="col" style="width: 100px;">
-          借方金額
-        </th>
-        <th scope="col" style="width: 100px;">
-          貸方金額
-        </th>
-        <th scope="col" style="width: 100px;">
-          残高
-        </th>
+        <th scope="col" style="width: 100px;"><BilingualText key="chart_of_accounts" /></th>
+        <th scope="col" style="width: 100px;"><BilingualText key="carry_forward_amount" /></th>
+        <th scope="col" style="width: 100px;"><BilingualText key="debit_amount" /></th>
+        <th scope="col" style="width: 100px;"><BilingualText key="credit_amount" /></th>
+        <th scope="col" style="width: 100px;"><BilingualText key="balance" /></th>
       </tr>
     </thead>
     <tbody>
@@ -58,6 +48,7 @@
 <script>
 import { link } from '../../javascripts/router.js';
 
+import BilingualText from '../components/bilingual-text.svelte';
 export	let status;
 export	let	lines;
 

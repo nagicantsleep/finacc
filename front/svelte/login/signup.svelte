@@ -28,11 +28,11 @@
                 bind:value={user_name}
                 class="form-control"
                 class:is-invalid={errors.user_name}
-                placeholder="ユーザー名（半角英数字）"
+                placeholder={$bi('username_hint')}
                 autocomplete="username"
                 disabled={isSubmitting}
               >
-              <small class="form-text text-muted">半角英数字、4〜20文字</small>
+              <small class="form-text text-muted"><BilingualText key="password_hint" /></small>
               {#if errors.user_name}
                 <div class="invalid-feedback">{errors.user_name}</div>
               {/if}
@@ -46,11 +46,11 @@
                 bind:value={password}
                 class="form-control"
                 class:is-invalid={errors.password}
-                placeholder="パスワード"
+                placeholder={$bi('password_placeholder')}
                 autocomplete="new-password"
                 disabled={isSubmitting}
               >
-              <small class="form-text text-muted">8文字以上</small>
+              <small class="form-text text-muted"><BilingualText key="password_length" /></small>
               {#if errors.password}
                 <div class="invalid-feedback">{errors.password}</div>
               {/if}
@@ -64,7 +64,7 @@
                 bind:value={confirmPassword}
                 class="form-control"
                 class:is-invalid={errors.confirmPassword}
-                placeholder="パスワード（確認）"
+                placeholder={$bi('password_confirm')}
                 autocomplete="new-password"
                 disabled={isSubmitting}
               >
@@ -85,7 +85,7 @@
                 bind:value={legalName}
                 class="form-control"
                 class:is-invalid={errors.legalName}
-                placeholder="山田 太郎"
+                placeholder={$bi('name_placeholder')}
                 autocomplete="name"
                 disabled={isSubmitting}
               >
@@ -101,7 +101,7 @@
                 id="legalRuby"
                 bind:value={legalRuby}
                 class="form-control"
-                placeholder="ヤマダ タロウ"
+                placeholder={$bi('furigana_placeholder')}
                 autocomplete="off"
                 disabled={isSubmitting}
               >
@@ -186,7 +186,7 @@
                 id="address1"
                 bind:value={address1}
                 class="form-control"
-                placeholder="東京都渋谷区..."
+                placeholder={$bi('address_placeholder')}
                 autocomplete="address-line1"
                 disabled={isSubmitting}
               >
@@ -199,7 +199,7 @@
                 id="address2"
                 bind:value={address2}
                 class="form-control"
-                placeholder="○○ビル 101号室"
+                placeholder={$bi('address2_placeholder')}
                 autocomplete="address-line2"
                 disabled={isSubmitting}
               >
@@ -231,6 +231,7 @@
 <script>
 import axios from 'axios';
 import {onMount} from 'svelte';
+import {get} from 'svelte/store';
 import { link } from '../../javascripts/router.js';
 import BilingualText from '../components/bilingual-text.svelte';
 import { languagePair } from '../../javascripts/bilingual.js';
@@ -302,39 +303,39 @@ function validateForm() {
   let isValid = true;
   
   if (!user_name || user_name.trim().length === 0) {
-    errors.user_name = 'ユーザー名を入力してください。';
+    errors.user_name = bi($languagePair, 'signup_error_username_required');
     isValid = false;
   } else if (!/^[a-zA-Z0-9_]+$/.test(user_name)) {
-    errors.user_name = 'ユーザー名は半角英数字とアンダースコアのみ使用できます。';
+    errors.user_name = bi($languagePair, 'signup_error_username_invalid');
     isValid = false;
   } else if (user_name.length < 4 || user_name.length > 20) {
-    errors.user_name = 'ユーザー名は4〜20文字で入力してください。';
+    errors.user_name = bi($languagePair, 'signup_error_username_length');
     isValid = false;
   }
-  
+
   if (!password || password.length === 0) {
-    errors.password = 'パスワードを入力してください。';
+    errors.password = bi($languagePair, 'signup_error_password_required');
     isValid = false;
   } else if (password.length < 8) {
-    errors.password = 'パスワードは8文字以上で入力してください。';
+    errors.password = bi($languagePair, 'signup_error_password_length');
     isValid = false;
   }
-  
+
   if (password !== confirmPassword) {
-    errors.confirmPassword = 'パスワードが一致していません。';
+    errors.confirmPassword = bi($languagePair, 'signup_error_password_mismatch');
     isValid = false;
   }
-  
+
   if (!legalName || legalName.trim().length === 0) {
-    errors.legalName = '氏名を入力してください。';
+    errors.legalName = bi($languagePair, 'signup_error_name_required');
     isValid = false;
   }
-  
+
   if (!email || email.trim().length === 0) {
-    errors.email = 'メールアドレスを入力してください。';
+    errors.email = bi($languagePair, 'signup_error_email_required');
     isValid = false;
   } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    errors.email = '有効なメールアドレスを入力してください。';
+    errors.email = bi($languagePair, 'signup_error_email_invalid');
     isValid = false;
   }
   
@@ -351,7 +352,7 @@ const SignUp = async () => {
   
   if (!validateForm()) {
     msg_type = 'danger';
-    message = '入力内容を確認してください。';
+    message = bi($languagePair, 'signup_validation_prompt');
     return;
   }
   
@@ -390,18 +391,18 @@ const SignUp = async () => {
     const response = await axios.post('/api/user/signup', payload);
     
     if (response.data.result === 'OK') {
-      successMessage = '登録が完了しました。ログインページへ移動します...';
+      successMessage = bi($languagePair, 'signup_register_success');
       setTimeout(() => {
         link('/login');
       }, 2000);
     } else {
-      message = response.data.message || '登録に失敗しました。';
+      message = response.data.message || bi($languagePair, 'signup_register_fail');
       msg_type = 'danger';
       isSubmitting = false;
     }
   } catch (err) {
     console.error('signup error', err);
-    message = err.response?.data?.message || 'エラーが発生しました。';
+    message = err.response?.data?.message || bi($languagePair, 'login_error_occurred');
     msg_type = 'danger';
     isSubmitting = false;
   }

@@ -42,9 +42,9 @@
         { type: "checkbox", name: 'hasDetails', title: "detail", width: "100px"},
         { type: "dropdown", name: 'hasDocument', title: "file", width: "100px",
           source:[
-            [0, 'なし'],
-            [1, '任意'],
-            [2, '必須'],
+            [0, $bi('home_opt_none')],
+            [1, $bi('home_opt_optional')],
+            [2, $bi('home_opt_required')],
           ]
         },
         { type: "checkbox", name: 'forCustomer', title: "customer", width: "70px"},
@@ -68,9 +68,9 @@
         { type: "checkbox", name: 'send', title: "send", width: "50px"},
         { type: "dropdown", name: 'form', title: "kind", width: "150px",
           source: [
-            [ 'invoice', '請求書' ],
-            [ 'receipt', '領収書' ],
-            [ 'estimate', '見積書']
+            [ 'invoice', $bi('invoice_form_label') ],
+            [ 'receipt', $bi('receipt_form_label') ],
+            [ 'estimate', $bi('estimate_form_label')]
           ]
         }
       ]}>
@@ -103,10 +103,10 @@
         { type: "text", name: 'label', title: "item_name", align: "left"},
         { type: "dropdown", name: 'taxClass', title: "account_class", width: "80px",
           source: [
-            [ 0, '非課税' ],
-            [ 1, '内税' ],
-            [ 2, '外税'],
-            [ 9, '別計算']
+            [ 0, $bi('home_tax_exempt') ],
+            [ 1, $bi('home_tax_inner') ],
+            [ 2, $bi('home_tax_outer')],
+            [ 9, $bi('home_tax_separate')]
           ]
         },
         { type: "numeric", name: 'rate', title: "tax", width: "50px"},
@@ -125,6 +125,7 @@ import Backup from '../home/backup.svelte';
 import SystemSettings from '../home/system-settings.svelte';
 import TableMaintenance from '../components/table-maintenance.svelte';
 import BilingualText from '../components/bilingual-text.svelte';
+import { bi } from '../../javascripts/bilingual.js';
 
 export let status;
 export let toast;

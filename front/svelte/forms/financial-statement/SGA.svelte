@@ -3,18 +3,14 @@
     <PageHeader
       {company}
       {fy}
-      title="販売費及び一般管理費内訳書"
+      titleKey="sga_breakdown"
       ></PageHeader>
     <div class="page-body">
       <table class="table-narrow">
         <thead>
           <tr>
-            <th>
-              科目
-            </th>
-            <th>
-              金額
-            </th>
+            <th><BilingualText key="account" /></th>
+            <th><BilingualText key="amount" /></th>
           </tr>
         </thead>
         <tbody>
@@ -29,7 +25,7 @@
           </tr>
           {/each}
           <tr class="total">
-            <td>合計</td>
+            <td><BilingualText key="total" /></td>
             <td class="number">
               {formatMoney(sgaSum)}
             </td>
@@ -44,6 +40,7 @@
 import {formatMoney} from '../../../../libs/utils.js';
 import PageHeader from '../components/page-header.svelte';
 
+import BilingualText from '../../components/bilingual-text.svelte';
 export let fy;
 export let company;
 export let sgaPage;

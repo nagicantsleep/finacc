@@ -1,5 +1,5 @@
 <svelte:head>
-  <title>見積書::Hieronymus</title>
+  <title>{$bi('estimate_title')}</title>
   <meta http-equiv="Content-Language" content="ja" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="/public/bootstrap-icons/font/bootstrap-icons.css">
@@ -9,37 +9,37 @@
 <div class="transaction">
   <header class="estimate-header">
     <div class="info">
-      <p class="strong">{transaction.companyName || ''} 御中</p>
-      <p class="strong"><span>件名</span>&nbsp;{transaction.subject || ''}</p>
+      <p class="strong">{transaction.companyName || ''} {$bi('company_honorific')}</p>
+      <p class="strong"><span><BilingualText key="task_subject" /></span>&nbsp;{transaction.subject || ''}</p>
       <div class="salutation">
-        <p>下記の通り御見積申し上げます。</p>
+        <p><BilingualText key="estimate_intro" /></p>
       </div>
       <div class="condition">
-        <p class="title">納入場所</p>
-        <p class="item">お打ち合わせ通り</p>
+        <p class="title"><BilingualText key="delivery_location" /></p>
+        <p class="item"><BilingualText key="per_agreement" /></p>
       </div>
       <div class="condition">
-        <p class="title">支払条件</p>
+        <p class="title"><BilingualText key="payment_terms" /></p>
         <p class="item">{transaction.paymentMethod || ''}</p>
       </div>
       <div class="condition">
-        <p class="title">納期</p>
-        <p class="item">{formatDate(transaction.deliveryLimit, 'お打ち合わせ通り')}</p>
+        <p class="title"><BilingualText key="delivery_limit" /></p>
+        <p class="item">{formatDate(transaction.deliveryLimit, $bi('per_agreement'))}</p>
       </div>
       <div class="condition">
-        <p class="title">有効期限</p>
-        <p class="item">{formatDate(transaction.expiringDate, '御見積後１ヶ月以内')}</p>
+        <p class="title"><BilingualText key="validity" /></p>
+        <p class="item">{formatDate(transaction.expiringDate, $bi('validity_fallback'))}</p>
       </div>
     </div>
     <div class="">
       <div class="title-info">
         <div class="title-line">
-          <h1>御見積書</h1>
+          <h1><BilingualText key="estimate_form" /></h1>
           <div style="margin-left:20px;margin-top:10px;font-size:14px;">
             <span>No. {transaction.no}</span>
           </div>
         </div>
-        <p>発行日:&nbsp;{formatDate(transaction.issueDate)}</p>
+        <p>{$bi('issue_date')}:&nbsp;{formatDate(transaction.issueDate)}</p>
       </div>
       <div class="company-info">
         {#if company.logo}
@@ -61,7 +61,7 @@
         <p class="homepage">{company.homepage}</p>
         {/if}
         <p class="handler">
-          担当:&nbsp;
+          {$bi('person_in_charge')}:&nbsp;
           {#if transaction.handleUser.memberships?.[0]?.tradingName}
           {transaction.handleUser.memberships[0].tradingName}
           {:else}
@@ -73,7 +73,7 @@
   </header>
   <main>
     <div class="total-amount">
-      <div class="title">合計金額</div>
+      <div class="title"><BilingualText key="total_amount" /></div>
       <div class="amount">{formatMoney(transaction.amount)}</div>
     </div>
     <Details
@@ -84,6 +84,9 @@
 import Details from '../components/details.svelte';
 import {formatMoney} from '../../../../libs/utils.js';
 
+import BilingualText from '../../components/bilingual-text.svelte';
+import { bi } from '../../../javascripts/bilingual.js';
+
 export let transaction;
 export let company;
    
@@ -92,7 +95,7 @@ console.log('estimate.svelte');
 const formatDate = (dateStr, fallback) => {
   if (!dateStr) return fallback;
   const date = new Date(dateStr);
-  return `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
+  return `${date.getFullYear()}${$bi('year_num')}${date.getMonth() + 1}${$bi('month_num')}${date.getDate()}${$bi('day')}`;
 };
       
 </script>
