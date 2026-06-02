@@ -44,6 +44,7 @@ import {bindFile} from '../../javascripts/document';
 import {currentItem, getStore} from '../../javascripts/current-record.js'
 import eventBus from '../../javascripts/event-bus.js';
 import FormError from '../common/form-error.svelte';
+import BilingualText from '../components/bilingual-text.svelte';
 import { link } from '../../javascripts/router.js';
 
 export let status;

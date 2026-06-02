@@ -96,7 +96,7 @@
   import axios from 'axios';
   import {onMount} from 'svelte';
   import {ROUNDING_METHOD} from '../../../libs/utils.js';
-  import BilingualText from '../../components/bilingual-text.svelte';
+  import BilingualText from '../components/bilingual-text.svelte';
 
   let form = {};
   let invalid = {};

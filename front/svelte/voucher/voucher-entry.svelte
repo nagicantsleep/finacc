@@ -69,7 +69,7 @@ import {onMount, beforeUpdate, afterUpdate, createEventDispatcher} from 'svelte'
 const dispatch = createEventDispatcher();
 import VoucherInfo from './voucher-info.svelte';
 import {currentVoucher, getStore} from '../../javascripts/current-record.js'
-import BilingualText from '../../components/bilingual-text.svelte';
+import BilingualText from '../components/bilingual-text.svelte';
 
 
 export let voucher;

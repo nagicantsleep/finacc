@@ -76,7 +76,7 @@ const dispatch = createEventDispatcher();
 import CrossSlipModal from '../cross-slip/cross-slip-modal.svelte';
 import {setAccounts} from '../../javascripts/cross-slip';
 import { v4 as uuidv4 } from "uuid";
-import BilingualText from '../../components/bilingual-text.svelte';
+import BilingualText from '../components/bilingual-text.svelte';
 
 export let status;
 export let toast;

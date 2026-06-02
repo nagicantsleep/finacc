@@ -73,7 +73,7 @@ td {
 import axios from 'axios';
 import {onMount, beforeUpdate, afterUpdate, createEventDispatcher} from 'svelte';
 import {wareki} from '../../../libs/utils';
-import BilingualText from '../../components/bilingual-text.svelte';
+import BilingualText from '../components/bilingual-text.svelte';
 
 export  let status;
 

@@ -1,6 +1,6 @@
 <script>
 import TableMaintenance from './table-maintenance.svelte';
-import BilingualText from '../../components/bilingual-text.svelte';
+import BilingualText from '../components/bilingual-text.svelte';
 
 export let status;
 

@@ -48,7 +48,7 @@ import axios from 'axios';
 import {onMount, beforeUpdate} from 'svelte';
 import eventBus from '../../javascripts/event-bus.js';
 import OkModal from '../common/ok-modal.svelte';
-import BilingualText from '../../components/bilingual-text.svelte';
+import BilingualText from '../components/bilingual-text.svelte';
 
 export let toast;
 export let status;
