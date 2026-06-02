@@ -708,6 +708,7 @@ export default {
           where: { userId: req.session.user.id, tenantId: req.currentTenantId, status: 'active' }
         });
         if (membership && membership.languagePair) {
+          req.session.languagePair = membership.languagePair;
           return res.json({ result: 'OK', languagePair: membership.languagePair, source: 'member' });
         }
       }
@@ -716,11 +717,13 @@ export default {
       if (req.currentTenantId) {
         const tenant = await models.Tenant.findByPk(req.currentTenantId);
         if (tenant && tenant.settings && tenant.settings.languagePair) {
+          req.session.languagePair = tenant.settings.languagePair;
           return res.json({ result: 'OK', languagePair: tenant.settings.languagePair, source: 'tenant' });
         }
       }
 
       // 3. System fallback
+      req.session.languagePair = systemDefault;
       return res.json({ result: 'OK', languagePair: systemDefault, source: 'system' });
     } catch (err) {
       console.error('languagePair error', err);
@@ -754,6 +757,7 @@ export default {
       membership.languagePair = { primary, secondary };
       await membership.save();
 
+      req.session.languagePair = membership.languagePair;
       res.json({ result: 'OK', languagePair: membership.languagePair });
     } catch (err) {
       console.error('updateLanguagePair error', err);

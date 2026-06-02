@@ -1,4 +1,5 @@
 import models from '../models/index.js';
+import { enrichBilingual } from '../libs/bilingual-helper.js';
 const Op = models.Sequelize.Op;
 import {print} from '../libs/print.js';
 import {DateString} from '../libs/utils.js';
@@ -397,15 +398,18 @@ export default {
       }
     }
   },
-  kindsGet: (req, res, next) => {
+  kindsGet: async (req, res, next) => {
     res.set('Access-Control-Allow-Origin', '*');
     const tenantId = req.currentTenantId;
-    models.TransactionKind.findAll({
+    let kinds = await models.TransactionKind.findAll({
       where: { tenantId },
       order: [['displayOrder', 'asc']]
-    }).then((kinds) => {
-      res.json({ values: kinds });
     });
+    const lp = req.query.languagePair ? JSON.parse(req.query.languagePair) : req.session?.languagePair;
+    if (lp) {
+      kinds = await enrichBilingual('TransactionKind', kinds, lp);
+    }
+    res.json({ values: kinds });
   },
   kindsPut: async (req, res, next) => {
     res.set('Access-Control-Allow-Origin', '*');

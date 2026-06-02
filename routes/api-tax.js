@@ -1,4 +1,5 @@
 import models from '../models/index.js';
+import { enrichBilingual } from '../libs/bilingual-helper.js';
 const Op = models.Sequelize.Op;
 
 export default {
@@ -37,6 +38,10 @@ export default {
           ]
         });
         break;
+    }
+    const lp = req.query.languagePair ? JSON.parse(req.query.languagePair) : req.session?.languagePair;
+    if (lp) {
+      result = await enrichBilingual('TaxRule', result, lp);
     }
     res.json({
       values: result

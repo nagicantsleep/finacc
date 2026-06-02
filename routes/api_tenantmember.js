@@ -1,4 +1,5 @@
 import models from '../models/index.js';
+import { enrichBilingual } from '../libs/bilingual-helper.js';
 const Op = models.Sequelize.Op;
 
 /**
@@ -114,12 +115,17 @@ export default {
       });
     }
   },
-  classes: (req, res, next) => {
-    models.MemberClass.findAll().then((result) => {
+  classes: async (req, res, next) => {
+    try {
+      let result = await models.MemberClass.findAll();
+      const lp = req.query.languagePair ? JSON.parse(req.query.languagePair) : req.session?.languagePair;
+      if (lp) {
+        result = await enrichBilingual('MemberClass', result, lp);
+      }
       res.json({ values: result });
-    }).catch(() => {
+    } catch (e) {
       res.json({ code: -1 });
-    });
+    }
   },
   getDisplayName
 };
