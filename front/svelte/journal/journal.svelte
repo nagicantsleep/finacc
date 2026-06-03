@@ -1,7 +1,7 @@
 <div class="list">
   <div class="page-title d-flex justify-content-between">
-  	<h1><BilingualText key="journal" /></h1>
-  	<a href="/forms/explanatory_journal/{status.fy.term}?format=pdf" download="仕訳日記帳-{today}.pdf" class="btn btn-primary"><BilingualText key="download_journal" /><i class="bi bi-download"></i>
+  	<h1><BilingualText key="journal" stacked={false} /></h1>
+  	<a href="/forms/explanatory_journal/{status.fy.term}?format=pdf" download="仕訳日記帳-{today}.pdf" class="btn btn-primary"><BilingualText key="download_journal" stacked={false} /><i class="bi bi-download"></i>
   	</a>
 	</div>
 	<ul class="page-subtitle nav">
@@ -12,14 +12,14 @@
         	on:click={() => {
           	openMonth(date.year, date.month)
         	}}>
-        	{date.month}{$bi('month_label')}
+        	<BilingualText stacked={false} primary={date.month} secondary={$bi('month_label')} />
       	</button>
       	{:else}
       	<button type="button" class="btn btn-outline-primary me-2"
       		on:click={() => {
         		openMonth(date.year, date.month)
       		}}>
-        	{date.month}{$bi('month_label')}
+        	<BilingualText stacked={false} primary={date.month} secondary={$bi('month_label')} />
       	</button>
       	{/if}
     	</li>
@@ -29,7 +29,7 @@
   	<h2>{year}{$bi('year_label')} {month}{$bi('month_label')}</h2>
   	<div>
     	<button type="button" class="btn btn-primary" id="open-cross-slip"
-    		on:click={openSlip}><BilingualText key="journal_detail_entry_space" /><i class="bi bi-pencil-square"></i>
+    		on:click={openSlip}><BilingualText key="journal_detail_entry_space" stacked={false} /><i class="bi bi-pencil-square"></i>
       </button>
   	</div>
 	</div>
