@@ -19,9 +19,9 @@
           <tr>
             <th scope="col" colspan="2"><BilingualText key="date_voucher_no" /></th>
             <th scope="col" style="width: 120px;"><BilingualText key="debit_amount" /></th>
-            <th scope="col" style="width: 100px;"><BilingualText key="debit_account" /><br/><BilingualText key="sub_account" /></th>
+            <th scope="col" style="width: 100px;"><BilingualText key="debit_account" stacked={false} /><br/><BilingualText key="sub_account" stacked={false} /></th>
             <th scope="col"><BilingualText key="application" /></th>
-            <th scope="col" style="width: 120px;"><BilingualText key="credit_account" /><br/><BilingualText key="sub_account" /></th>
+            <th scope="col" style="width: 120px;"><BilingualText key="credit_account" stacked={false} /><br/><BilingualText key="sub_account" stacked={false} /></th>
             <th scope="col" style="width: 100px;"><BilingualText key="credit_amount" /></th>
           </tr>
         </thead>

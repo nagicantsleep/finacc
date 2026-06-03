@@ -5,7 +5,7 @@
       <th style="width:100px;"><BilingualText key="unit_price" /></th>
       <th style="width:50px;"><BilingualText key="quantity" /></th>
       <th style="width:50px;"><BilingualText key="unit" /></th>
-      <th style="width:100px;"><BilingualText key="amount" /><br/><BilingualText key="tax" /></th>
+      <th style="width:100px;"><BilingualText key="amount" stacked={false} /><br/><BilingualText key="tax" stacked={false} /></th>
       <th><BilingualText key="remarks" /></th>
     </tr>
   </thead>
