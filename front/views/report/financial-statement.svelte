@@ -1,0 +1,42 @@
+<FrontCover
+	title={<BilingualText key="report_financial" />}
+  {fy}
+  {company}
+  ></FrontCover>
+<BalanceSheet
+  {fy}
+  {company}
+  {bsLines}
+  {asset}
+  {liabilities}
+  {networth}
+  ></BalanceSheet>
+<PL
+  {fy}
+  {company}
+  {plOut}
+  ></PL>
+<SGA
+  {fy}
+  {company}
+  {sgaPage}
+  {sgaSum}
+  ></SGA>
+<script>
+import BilingualText from '../../components/bilingual-text.svelte';
+import FrontCover from '../components/front-cover.svelte';
+import BalanceSheet from './balance-sheet.svelte';
+import PL from './pl.svelte';
+import SGA from './SGA.svelte';
+
+export let fy;
+export let company;
+export let bsLines;
+export let plOut;
+export let sgaPage;
+export let asset;
+export let liabilities;
+export let networth;
+export let sgaSum;
+
+</script>
