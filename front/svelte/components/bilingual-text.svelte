@@ -15,7 +15,7 @@
 -->
 <span
   class="bilingual-text"
-  style="display:{inline ? 'inline-flex' : 'inline-block'};flex-direction:column;line-height:1.4;vertical-align:middle"
+  style="display:{inline ? 'inline-flex' : 'flex'};flex-direction:column;line-height:1.4;vertical-align:middle"
 >
   <span class="bilingual-primary" style="font-weight:600;line-height:1.4">{_primary}</span>
   <span class="bilingual-secondary" style="font-size:0.78em;color:#666;line-height:1.25">{_secondary}</span>

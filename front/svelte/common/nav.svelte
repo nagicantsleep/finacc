@@ -17,7 +17,10 @@
     <span class="text-danger fw-bold"><i class="bi bi-exclamation-diamond-fill"></i><BilingualText key="select_fiscal_year" /></span>
     {/if}
   </span>
-  <ul class="navbar-nav ms-auto">
+  <ul class="navbar-nav ms-auto align-items-center">
+    <li class="nav-item">
+      <LanguagePairSelector />
+    </li>
     <li class="nav-item dropdown">
       <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" id="user_menu"
           role="button" aria-expanded="false">
@@ -58,6 +61,7 @@
 import axios from 'axios';
 import {wareki} from '../../../libs/utils';
 import ProfileModal from './profile-modal.svelte';
+import LanguagePairSelector from '../widgets/language-pair-selector.svelte';
 
 import BilingualText from '../components/bilingual-text.svelte';
 import { bi } from '../../javascripts/bilingual.js';

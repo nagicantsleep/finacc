@@ -163,6 +163,7 @@ import {RESIGN_REASON} from '../../../libs/member';
 import {BANK_ACCOUNT_TYPE} from '../../../libs/utils';
 
 import BilingualText from '../components/bilingual-text.svelte';
+import { bi } from '../../javascripts/bilingual.js';
 export	let	member;
 export  let classes;
 export  let users;

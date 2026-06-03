@@ -234,22 +234,14 @@ import {onMount} from 'svelte';
 import {get} from 'svelte/store';
 import { link } from '../../javascripts/router.js';
 import BilingualText from '../components/bilingual-text.svelte';
-import { languagePair } from '../../javascripts/bilingual.js';
-import jaDict from '../../javascripts/locales/ja.json';
-import viDict from '../../javascripts/locales/vi.json';
-import enDict from '../../javascripts/locales/en.json';
+import { bi, _b } from '../../javascripts/bilingual.js';
 
 // Option text can't host a component; build "primary / secondary" strings reactively.
-const DICT = { ja: jaDict, vi: viDict, en: enDict };
-const bi = (pair, key) => {
-  const p = (DICT[pair.primary] || {})[key] ?? key;
-  const s = (DICT[pair.secondary] || {})[key] ?? key;
-  return p === s ? p : `${p} / ${s}`;
-};
-$: selectPleaseText = bi($languagePair, 'select_please');
-$: genderMaleText = bi($languagePair, 'gender_male');
-$: genderFemaleText = bi($languagePair, 'gender_female');
-$: genderOtherText = bi($languagePair, 'gender_other');
+$: biFn = $bi;
+$: selectPleaseText = $bi('select_please');
+$: genderMaleText = $bi('gender_male');
+$: genderFemaleText = $bi('gender_female');
+$: genderOtherText = $bi('gender_other');
 
 // Login credentials
 let user_name = '';
@@ -303,39 +295,39 @@ function validateForm() {
   let isValid = true;
   
   if (!user_name || user_name.trim().length === 0) {
-    errors.user_name = bi($languagePair, 'signup_error_username_required');
+    errors.user_name = get(bi)('signup_error_username_required');
     isValid = false;
   } else if (!/^[a-zA-Z0-9_]+$/.test(user_name)) {
-    errors.user_name = bi($languagePair, 'signup_error_username_invalid');
+    errors.user_name = get(bi)('signup_error_username_invalid');
     isValid = false;
   } else if (user_name.length < 4 || user_name.length > 20) {
-    errors.user_name = bi($languagePair, 'signup_error_username_length');
+    errors.user_name = get(bi)('signup_error_username_length');
     isValid = false;
   }
 
   if (!password || password.length === 0) {
-    errors.password = bi($languagePair, 'signup_error_password_required');
+    errors.password = get(bi)('signup_error_password_required');
     isValid = false;
   } else if (password.length < 8) {
-    errors.password = bi($languagePair, 'signup_error_password_length');
+    errors.password = get(bi)('signup_error_password_length');
     isValid = false;
   }
 
   if (password !== confirmPassword) {
-    errors.confirmPassword = bi($languagePair, 'signup_error_password_mismatch');
+    errors.confirmPassword = get(bi)('signup_error_password_mismatch');
     isValid = false;
   }
 
   if (!legalName || legalName.trim().length === 0) {
-    errors.legalName = bi($languagePair, 'signup_error_name_required');
+    errors.legalName = get(bi)('signup_error_name_required');
     isValid = false;
   }
 
   if (!email || email.trim().length === 0) {
-    errors.email = bi($languagePair, 'signup_error_email_required');
+    errors.email = get(bi)('signup_error_email_required');
     isValid = false;
   } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    errors.email = bi($languagePair, 'signup_error_email_invalid');
+    errors.email = get(bi)('signup_error_email_invalid');
     isValid = false;
   }
   
@@ -352,7 +344,7 @@ const SignUp = async () => {
   
   if (!validateForm()) {
     msg_type = 'danger';
-    message = bi($languagePair, 'signup_validation_prompt');
+    message = get(bi)('signup_validation_prompt');
     return;
   }
   
@@ -391,18 +383,18 @@ const SignUp = async () => {
     const response = await axios.post('/api/user/signup', payload);
     
     if (response.data.result === 'OK') {
-      successMessage = bi($languagePair, 'signup_register_success');
+      successMessage = get(bi)('signup_register_success');
       setTimeout(() => {
         link('/login');
       }, 2000);
     } else {
-      message = response.data.message || bi($languagePair, 'signup_register_fail');
+      message = response.data.message || get(bi)('signup_register_fail');
       msg_type = 'danger';
       isSubmitting = false;
     }
   } catch (err) {
     console.error('signup error', err);
-    message = err.response?.data?.message || bi($languagePair, 'login_error_occurred');
+    message = err.response?.data?.message || get(bi)('login_error_occurred');
     msg_type = 'danger';
     isSubmitting = false;
   }
