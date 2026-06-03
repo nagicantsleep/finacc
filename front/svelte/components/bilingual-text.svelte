@@ -1,18 +1,20 @@
 <!--
   BilingualText — renders text in a stacked bilingual layout.
   Primary language on top (bold), secondary below (smaller, muted).
+  Set `stacked={false}` to render a single line "primary / secondary"
+  (or just one value when both languages resolve to the same string).
+  Useful for compact headers and table <th> cells where the stacked
+  layout would overlap.
 
   Props:
     key       — dictionary key, auto-resolves both languages
     primary   — override primary text (alternative to key)
     secondary — override secondary text (alternative to key)
     inline    — use inline-flex (default: inline-block)
-
-  Usage examples:
-    <BilingualText key="save" />
-    <BilingualText primary="保存" secondary="Lưu" />
-    <BilingualText key="save" inline />
+    stacked   — render primary on top of secondary (default: true).
+                When false, render on a single line: "p / s" or just "p".
 -->
+{#if stacked}
 <span
   class="bilingual-text"
   style="display:{inline ? 'inline-flex' : 'flex'};flex-direction:column;line-height:1.4;vertical-align:middle"
@@ -20,6 +22,17 @@
   <span class="bilingual-primary" style="font-weight:600;line-height:1.4">{_primary}</span>
   <span class="bilingual-secondary" style="font-size:0.78em;color:#666;line-height:1.25">{_secondary}</span>
 </span>
+{:else}
+<span class="bilingual-text bilingual-inline" style="display:{inline ? 'inline-flex' : 'inline-flex'};align-items:baseline;gap:0.25em;white-space:nowrap">
+  {#if _primary === _secondary}
+    <span class="bilingual-primary" style="font-weight:600">{_primary}</span>
+  {:else}
+    <span class="bilingual-primary" style="font-weight:600">{_primary}</span>
+    <span class="bilingual-sep" style="color:#666">/</span>
+    <span class="bilingual-secondary" style="font-size:0.85em;color:#666">{_secondary}</span>
+  {/if}
+</span>
+{/if}
 
 <script>
   import { languagePair } from '../../javascripts/bilingual.js';
@@ -32,6 +45,8 @@
   export let secondary = undefined;
   /** @type {boolean} */
   export let inline = false;
+  /** @type {boolean} */
+  export let stacked = true;
 
   // Dictionaries are loaded in index.svelte via loadDictionaries(),
   // stored in a module-level variable in bilingual.js. Here we access

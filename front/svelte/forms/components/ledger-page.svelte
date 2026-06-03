@@ -12,8 +12,8 @@
         <thead>
           <tr>
             <th colspan="2"><BilingualText key="date_voucher_no" /></th>
-            <th style="width: 100px;"><BilingualText key="counter_account" /><br/><BilingualText key="counter_sub_account" /></th>
-            <th><BilingualText key="application" /><br/><BilingualText key="sub_account" /></th>
+            <th style="width: 100px;"><BilingualText key="counter_account" stacked={false} /><br/><BilingualText key="counter_sub_account" stacked={false} /></th>
+            <th><BilingualText key="application" stacked={false} /><br/><BilingualText key="sub_account" stacked={false} /></th>
             <th style="width: 100px;"><BilingualText key="debit_amount" /></th>
             <th style="width: 100px;"><BilingualText key="credit_amount" /></th>
             <th style="width: 100px;"><BilingualText key="balance" /></th>

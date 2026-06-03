@@ -1,12 +1,13 @@
 <div class="page-header">
   <div class="ledger-title">
-    {#if titleKey}<BilingualText key={titleKey} inline />{:else}{title}{/if}
+    {#if titleKey}<BilingualText key={titleKey} />{:else}{title}{/if}
   </div>
   <div class="company-name">
     {company.name}
   </div>
   <div class="term">
-    {fy.year}<BilingualText key="fiscal_year" inline />
+    <span class="term-year">{fy.year}</span>
+    <BilingualText key="fiscal_year" />
   </div>
   <div class="date">
     {formatDate(null, 'ja')}
