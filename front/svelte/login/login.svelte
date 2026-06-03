@@ -8,12 +8,12 @@
         <p class="fs-4 text-center "><BilingualText key="login" /></p>
         <p class="text-{msg_type} text-center">{message}</p>
         <div class="mb-3">
-          <label for="user_input"><BilingualText key="username" /></label>
-          <input type="text" bind:value={user_name} class="form-control" placeholder={$bi('user_name_placeholder')}>
+          <label for="user_input"><BilingualText key="username" layout="row" secondaryStrong /></label>
+          <input type="text" bind:value={user_name} class="form-control">
         </div>
         <div class="mb-3">
-          <label for="password_input"><BilingualText key="password" /></label>
-          <input type="password" bind:value={password} class="form-control" placeholder={$bi('password_placeholder')}>
+          <label for="password_input"><BilingualText key="password" layout="row" secondaryStrong /></label>
+          <input type="password" bind:value={password} class="form-control">
         </div>
         <div class="row d-flex justify-content-center">
           <div class="col-lg-8 col-4 d-grid">

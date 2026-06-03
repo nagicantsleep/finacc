@@ -552,7 +552,7 @@
   "signup_error_username_length": "Username must be 4-20 characters.",
   "signup_error_username_required": "Please enter a username.",
   "signup_heading": "Sign Up",
-  "signup_link": "Create an account",
+  "signup_link": "Sign up",
   "signup_register_fail": "Registration failed.",
   "signup_register_success": "Registration complete. Redirecting to the login page...",
   "signup_title": "Account Registration",
