@@ -3,16 +3,11 @@
   </ul>
   <span class="havbar-text">
     {#if ( status.fy.startDate && status.fy.endDate )}
-    {$bi('term')}{status.fy.term}{$bi('period_suffix')}
-    ({status.fy.startDate.getFullYear()}{$bi('nav_year_suffix')}
-    ({wareki(status.fy.startDate)})
-        {status.fy.startDate.getMonth()+1}{$bi('nav_month_suffix')}
-        {status.fy.startDate.getDate()}{$bi('nav_day_suffix')}
-    〜
-    {status.fy.endDate.getFullYear()}{$bi('nav_year_suffix')}
-    ({wareki(status.fy.endDate)})
-        {status.fy.endDate.getMonth()+1}{$bi('nav_month_suffix')}
-        {status.fy.endDate.getDate()}{$bi('nav_day_suffix')})
+    {#if fiscalHeader.primary === fiscalHeader.secondary}
+      {fiscalHeader.primary}
+    {:else}
+      {fiscalHeader.primary} / {fiscalHeader.secondary}
+    {/if}
     {:else}
     <span class="text-danger fw-bold"><i class="bi bi-exclamation-diamond-fill"></i><BilingualText key="select_fiscal_year" /></span>
     {/if}
@@ -59,17 +54,22 @@
 
 <script>
 import axios from 'axios';
-import {wareki} from '../../../libs/utils';
+import {formatFiscalHeader} from '../../../libs/utils';
 import ProfileModal from './profile-modal.svelte';
 import LanguagePairSelector from '../widgets/language-pair-selector.svelte';
 
 import BilingualText from '../components/bilingual-text.svelte';
-import { bi } from '../../javascripts/bilingual.js';
+import { bi, languagePair } from '../../javascripts/bilingual.js';
 export let status;
 
 let profileModal;
 let switchingTenant = false;
 let creatingTenant = false;
+
+$: fiscalHeader = {
+  primary: formatFiscalHeader(status.fy, $languagePair?.primary || 'ja'),
+  secondary: formatFiscalHeader(status.fy, $languagePair?.secondary || 'vi')
+};
 
 const openProfile = () => profileModal?.show();
 

@@ -69,6 +69,40 @@ export const wareki = (date) => {
   return dateTimeFormat.format(new Date(date));
 }
 
+/**
+ * Build a single, locale-shaped fiscal-year header string.
+ *
+ * Replaces the old token-level \$bi() approach (which inserted \`/\` and the
+ * secondary suffix inside every date component). One complete string per
+ * language — the caller joins primary and secondary.
+ *
+ * @param {{term: number, startDate: Date, endDate: Date} | null | undefined} fy
+ * @param {string} lang - 'ja' | 'vi' | 'en'
+ * @returns {string}
+ */
+export const formatFiscalHeader = (fy, lang) => {
+  if (!fy || !fy.startDate || !fy.endDate) return '';
+  const term = fy.term;
+  const s = fy.startDate;
+  const e = fy.endDate;
+  const pad2 = (n) => String(n).padStart(2, '0');
+
+  switch (lang) {
+    case 'ja': {
+      const wS = wareki(s);
+      const wE = wareki(e);
+      return `第${term}期 ${s.getFullYear()}年${s.getMonth() + 1}月${s.getDate()}日（${wS}）〜 ${e.getFullYear()}年${e.getMonth() + 1}月${e.getDate()}日（${wE}）`;
+    }
+    case 'vi':
+      return `Kỳ ${term}: ${pad2(s.getDate())}/${pad2(s.getMonth() + 1)}/${s.getFullYear()} – ${pad2(e.getDate())}/${pad2(e.getMonth() + 1)}/${e.getFullYear()}`;
+    case 'en':
+    default: {
+      const monthFmt = new Intl.DateTimeFormat('en-US', { month: 'short' });
+      return `Term ${term}: ${monthFmt.format(s)} ${s.getDate()}, ${s.getFullYear()} – ${monthFmt.format(e)} ${e.getDate()}, ${e.getFullYear()}`;
+    }
+  }
+}
+
 export const DateString = (d) => {
   return	DateFormat(d, 'YYYY-MM-DD');
 }
