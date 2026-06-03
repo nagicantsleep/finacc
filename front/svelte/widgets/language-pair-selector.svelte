@@ -10,7 +10,7 @@
 -->
 <div class="d-flex align-items-center" style="font-size:0.85rem; padding: 0 0.5rem;">
   <select class="form-select form-select-sm" style="width:auto; min-width:120px;" bind:value={selectedPair} on:change={onChange} title={currentLabel}>
-    {#each PAIR_OPTIONS as opt}
+    {#each optionLabels as opt}
       <option value="{opt.value}">{opt.label}</option>
     {/each}
   </select>
@@ -18,15 +18,19 @@
 
 <script>
   import axios from 'axios';
-  import { _bDerived, languagePair } from '../../javascripts/bilingual.js';
+  import { languagePair } from '../../javascripts/bilingual.js';
   import ja from '../../javascripts/locales/ja.json';
   import vi from '../../javascripts/locales/vi.json';
   import en from '../../javascripts/locales/en.json';
 
   const DICT = { ja, vi, en };
 
-  // Self-name of each language (always shown in its own form: 日本語, Tiếng Việt, English).
+  // Self-name of each language, rendered in its own script
+  // (日本語, Tiếng Việt, English) — looked up in that language's own dict.
   const LANG_SELF = { ja: 'lang_ja', vi: 'lang_vi', en: 'lang_en' };
+  function selfName(lang) {
+    return DICT[lang]?.[LANG_SELF[lang]] ?? lang;
+  }
 
   // Hardcoded pair options so the dropdown label is independent of $languagePair.
   // Each option shows "primary-self / secondary-self" (e.g. 日本語/Tiếng Việt).
@@ -39,23 +43,13 @@
     { value: 'en,vi', primary: 'en', secondary: 'vi' }
   ];
 
-  // Simple local lookup for the selector labels
-  function _b(key) {
-    const pair = $languagePair || { primary: 'ja', secondary: 'vi' };
-    const pd = DICT[pair.primary] || {};
-    const sd = DICT[pair.secondary] || {};
-    return { primary: pd[key] ?? key, secondary: sd[key] ?? key };
-  }
-
-  // Build the option labels (e.g. "日本語/Tiếng Việt") once.
-  $: optionLabels = PAIR_OPTIONS.map((opt) => {
-    const pKey = LANG_SELF[opt.primary];
-    const sKey = LANG_SELF[opt.secondary];
-    return {
-      value: opt.value,
-      label: `${_b(pKey).primary}/${_b(sKey).primary}`
-    };
-  });
+  // Build the option labels (e.g. "日本語/Tiếng Việt") once. Each option's
+  // label is independent of $languagePair — self-names come from each
+  // language's own dictionary.
+  const optionLabels = PAIR_OPTIONS.map((opt) => ({
+    value: opt.value,
+    label: `${selfName(opt.primary)}/${selfName(opt.secondary)}`
+  }));
 
   let selectedPair = 'ja,vi';
 
