@@ -81,6 +81,8 @@
           link(entry.href(status));
         }}
         href="#">
+        <span class="sidebar-row">
+          <span class="sidebar-row__icon">
         {#if ( entry.icon )}
         {#if ( entry.icon.name)}
         <Icon class="nav-icon me-1" icon={entry.icon.name}></Icon>
@@ -90,7 +92,15 @@
         {:else}
         <Icon class="nav-icon" icon="bi:circle"></Icon>
         {/if}
-        {entry.title}
+          </span>
+          <span class="sidebar-row__text">
+        {#if MODULE_I18N[entry.name]}
+          <BilingualText key={MODULE_I18N[entry.name]} />
+        {:else}
+          {entry.title}
+        {/if}
+          </span>
+        </span>
       </a>
       {#if ( entry.submenu && ( status.pathname.match(entry.match) ) )}
       <ul>
@@ -104,6 +114,8 @@
               link(subentry.href(status));
             }}
             href="#">
+            <span class="sidebar-row">
+              <span class="sidebar-row__icon">
             {#if subentry.icon}
             {#if ( subentry.icon.name)}
             <Icon class="nav-icon" icon={subentry.icon.name}></Icon>
@@ -113,7 +125,15 @@
             {:else}
             <Icon class="nav-icon" icon="fa6-solid:circle"></Icon>
             {/if}
-            {subentry.title}
+              </span>
+              <span class="sidebar-row__text">
+            {#if SUBMENU_I18N[subentry.title]}
+              <BilingualText key={SUBMENU_I18N[subentry.title]} />
+            {:else}
+              {subentry.title}
+            {/if}
+              </span>
+            </span>
           </a>
         </li>
         {/each}
@@ -124,13 +144,31 @@
       {/each}
     </ul>
   </nav>
-  <LanguagePairSelector />
 </div>
 
 
 <style>
 .icon {
   margin-right: 0.5rem;
+}
+
+/* Sidebar row layout: 1 row, 2 columns.
+   Col 1: icon. Col 2: 2 stacked lines (BilingualText renders primary on top,
+   secondary below). Both columns are vertically centered. */
+.sidebar-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.4rem;
+}
+.sidebar-row__icon {
+  flex: 0 0 auto;
+  display: inline-flex;
+}
+.sidebar-row__text {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: inline-flex;
 }
 </style>
 <script>
@@ -139,7 +177,6 @@ import {onMount, afterUpdate, createEventDispatcher, tick} from 'svelte';
 import menu from '../../../config/module-list.js';
 import Sortable from 'sortablejs';
 import Icon from '@iconify/svelte';
-import LanguagePairSelector from '../widgets/language-pair-selector.svelte';
 import BilingualText from '../components/bilingual-text.svelte';
 import { bi } from '../../javascripts/bilingual.js';
 import eventBus from '../../javascripts/event-bus.js';
@@ -152,6 +189,36 @@ export let mainCount;
 let menuItems;
 let isMenuEditMode = false;
 let menuTemplates = [];
+
+// Map config/module-list.js entry.name -> i18n key for the menu title.
+// Falls back to entry.title (hardcoded JA) if the name has no mapping.
+const MODULE_I18N = {
+  'menu': 'menu',
+  'journal': 'journal',
+  'ledger': 'ledger',
+  'bank-ledger': 'bank_ledger',
+  'trial-balance': 'trial_balance',
+  'changes': 'changes',
+  'voucher': 'voucher_info',
+  'accounts': 'account_management2',
+  'company': 'company_management',
+  'project': 'project_management',
+  'task': 'task_management',
+  'transaction': 'transaction_document',
+  'item': 'item_management',
+  'member': 'member_management',
+  'home': 'home'
+};
+
+// Map submenu hardcoded JA title -> i18n key
+const SUBMENU_I18N = {
+  '設定': 'settings',
+  '集計用ラベル管理': 'label_management',
+  'プロジェクト集計': 'project_summary',
+  '品目管理': 'item_management',
+  '取引先管理': 'company_management',
+  'プロジェクト管理': 'project_management'
+};
 
 const newMenu = (template) => {
   currentMenu.set({
@@ -166,7 +233,7 @@ let deleteEntry;
 const deleteMenu = (entry) => {
   deleteEntry = entry;
   eventBus.emit('okModal', {
-    title: $bi('sidebar_delete_menu'),
+    title: $bi('menu_delete'),
     description: `メニュー「${entry.title}」` + $bi('menu_delete_confirm'),
     reply: 'deleteMenu'
   });

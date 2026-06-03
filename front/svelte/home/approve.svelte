@@ -82,6 +82,7 @@ import Modal from 'bootstrap/js/dist/modal';
 import {setAccounts} from '../../javascripts/cross-slip';
 
 import BilingualText from '../components/bilingual-text.svelte';
+import { bi } from '../../javascripts/bilingual.js';
 export let status;
 export let toast;
 

@@ -1,18 +1,18 @@
 <!--
-  LanguagePairSelector — dropdown in sidebar for selecting language pair.
+  LanguagePairSelector — compact dropdown for the top navbar.
+
+  Renders the current pair as "日本語/Tiếng Việt" (primary self-name / secondary self-name)
+  using lang_ja/lang_vi/lang_en keys. Pair options are hardcoded as
+  (primary, secondary) tuples so each option's display is independent of
+  the current $languagePair.
 
   Props: none (reads/writes languagePair store + calls API)
 -->
-<div class="p-2 border-top" style="margin-top:auto">
-  <label class="form-label small text-muted mb-1" style="font-size:0.75rem">
-    {$_b('language_pair').primary}<br>
-    <span style="font-size:0.7rem">{$_b('language_pair').secondary}</span>
-  </label>
-  <select class="form-select form-select-sm" bind:value={selectedPair} on:change={onChange}>
-    <option value="ja,vi">{$_b('language_pair_ja_vi').primary}<br>{$_b('language_pair_ja_vi').secondary}</option>
-    <option value="vi,ja">{$_b('language_pair_vi_ja').primary}<br>{$_b('language_pair_vi_ja').secondary}</option>
-    <option value="ja,en">{$_b('language_pair_ja_en').primary}<br>{$_b('language_pair_ja_en').secondary}</option>
-    <option value="en,ja">{$_b('language_pair_en_ja').primary}<br>{$_b('language_pair_en_ja').secondary}</option>
+<div class="d-flex align-items-center" style="font-size:0.85rem; padding: 0 0.5rem;">
+  <select class="form-select form-select-sm" style="width:auto; min-width:120px;" bind:value={selectedPair} on:change={onChange} title={currentLabel}>
+    {#each PAIR_OPTIONS as opt}
+      <option value="{opt.value}">{opt.label}</option>
+    {/each}
   </select>
 </div>
 
@@ -25,6 +25,20 @@
 
   const DICT = { ja, vi, en };
 
+  // Self-name of each language (always shown in its own form: 日本語, Tiếng Việt, English).
+  const LANG_SELF = { ja: 'lang_ja', vi: 'lang_vi', en: 'lang_en' };
+
+  // Hardcoded pair options so the dropdown label is independent of $languagePair.
+  // Each option shows "primary-self / secondary-self" (e.g. 日本語/Tiếng Việt).
+  const PAIR_OPTIONS = [
+    { value: 'ja,vi', primary: 'ja', secondary: 'vi' },
+    { value: 'vi,ja', primary: 'vi', secondary: 'ja' },
+    { value: 'ja,en', primary: 'ja', secondary: 'en' },
+    { value: 'en,ja', primary: 'en', secondary: 'ja' },
+    { value: 'vi,en', primary: 'vi', secondary: 'en' },
+    { value: 'en,vi', primary: 'en', secondary: 'vi' }
+  ];
+
   // Simple local lookup for the selector labels
   function _b(key) {
     const pair = $languagePair || { primary: 'ja', secondary: 'vi' };
@@ -33,12 +47,28 @@
     return { primary: pd[key] ?? key, secondary: sd[key] ?? key };
   }
 
+  // Build the option labels (e.g. "日本語/Tiếng Việt") once.
+  $: optionLabels = PAIR_OPTIONS.map((opt) => {
+    const pKey = LANG_SELF[opt.primary];
+    const sKey = LANG_SELF[opt.secondary];
+    return {
+      value: opt.value,
+      label: `${_b(pKey).primary}/${_b(sKey).primary}`
+    };
+  });
+
   let selectedPair = 'ja,vi';
 
   // Sync dropdown to store on init
   $: if ($languagePair) {
     selectedPair = `${$languagePair.primary},${$languagePair.secondary}`;
   }
+
+  // Title for the <select> element: shows the current selection in compact form.
+  $: currentLabel = (() => {
+    const opt = optionLabels.find((o) => o.value === selectedPair);
+    return opt ? opt.label : '';
+  })();
 
   async function onChange() {
     const [primary, secondary] = selectedPair.split(',');

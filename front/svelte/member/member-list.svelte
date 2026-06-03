@@ -97,6 +97,7 @@ import {parseParams} from '../../javascripts/params.js';
 import { link } from '../../javascripts/router.js';
 
 import BilingualText from '../components/bilingual-text.svelte';
+import { bi } from '../../javascripts/bilingual.js';
 export let status;
 export	let	members;
 export  let classes;
