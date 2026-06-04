@@ -28,19 +28,20 @@ export default {
           term = req.session.term;
         }
       }
+      const lp = req.query.languagePair ? JSON.parse(req.query.languagePair) : req.session?.languagePair;
       let ret;
       if (ym) {
         const year = parseInt(ym[0]);
         const monthIndex = parseInt(ym[1]) - 1;
         lastDate = new Date(year, monthIndex + 1, 0);
-        ret = await trial_balance(tenantId, term, lastDate, { monthly: true });
+        ret = await trial_balance(tenantId, term, lastDate, { monthly: true }, lp);
       } else {
         const fy = await models.FiscalYear.findOne({ where: { tenantId, term: term }});
         if (!fy) {
           return res.status(404).json({ error: `Fiscal year for term ${term} not found.` });
         }
         lastDate = new Date(fy.endDate);
-        ret = await trial_balance(tenantId, term, lastDate);
+        ret = await trial_balance(tenantId, term, lastDate, {}, lp);
       }
 
       res.json(ret.lines);
