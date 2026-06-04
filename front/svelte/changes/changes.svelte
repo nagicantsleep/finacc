@@ -1,6 +1,6 @@
-<div class="page-title d-flex justify-content-between align-items-center mt-2">
+<div class="page-title d-flex justify-content-between align-items-center">
   <div class="d-flex align-items-center">
-    <h1><BilingualText key="changes" /></h1>
+    <h1 class="page-title-bilingual mb-0"><BilingualText key="changes" inline={true} /></h1>
     {#if account}
       <h2 class="ms-3 mb-0 fs-4">{account.name}</h2>
     {/if}
@@ -65,6 +65,15 @@
     lines={lines}/>
 </div>
 <style>
+.page-title-bilingual {
+  display: inline-flex;
+  align-items: center;
+  line-height: 1.3;
+}
+.page-title {
+  margin-top: 0.75rem;
+  margin-bottom: 1rem;
+}
 </style>
 
 <script>
