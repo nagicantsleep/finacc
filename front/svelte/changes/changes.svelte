@@ -46,7 +46,7 @@
     </div>
   </div>
 {/if}
-{#if (lines.length > 0)}
+{#if chartData && chartData.datasets && chartData.datasets.length > 0}
 <div class="d-flex justify-content-between">
   <div></div>
   <div>
@@ -58,7 +58,9 @@
         on:change={() => {updateChart() }}><BilingualText key="cumulative" /></label>
   </div>
 </div>
-<Line data={chartData} options={{}}/>
+<div class="chart-area">
+  <Line data={chartData} options={{maintainAspectRatio: false}}/>
+</div>
 {/if}
 <div class="change-list">
   <ChangesList
@@ -73,6 +75,9 @@
 .page-title {
   margin-top: 0.75rem;
   margin-bottom: 1rem;
+}
+.chart-area {
+  max-height: 400px;
 }
 </style>
 
