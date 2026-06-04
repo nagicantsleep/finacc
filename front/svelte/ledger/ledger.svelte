@@ -137,22 +137,28 @@ let sums;
 let lines;
 let fields = [
   {
-    title: $bi('chart_assets'),
+    title: '資産',
+    titleVi: 'Tài sản',
     accounts: []
   },{
-    title: $bi('chart_liabilities'),
+    title: '負債',
+    titleVi: 'Nợ phải trả',
     accounts: []
   },{
-    title: $bi('chart_net_assets'),
+    title: '純資産',
+    titleVi: 'Vốn chủ sở hữu',
     accounts: []
   },{
-    title: $bi('chart_revenue'),
+    title: '売上高',
+    titleVi: 'Doanh thu',
     accounts: []
   },{
-    title: $bi('chart_cost_of_sales'),
+    title: '売上原価',
+    titleVi: 'Giá vốn',
     accounts: []
   },{
-    title: $bi('chart_non_operating'),
+    title: '営業外',
+    titleVi: 'Ngoài HĐKD',
     accounts: []
   }
 ];
