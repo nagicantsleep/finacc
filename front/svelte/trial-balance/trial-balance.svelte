@@ -58,7 +58,7 @@ import {dc} from '../../../libs/parse_account_code';
 import {currentPage, link} from '../../javascripts/router.js';
 
 import BilingualText from '../components/bilingual-text.svelte';
-import { bi } from '../../javascripts/bilingual.js';
+import { bi, languagePair } from '../../javascripts/bilingual.js';
 export let status;
 export let alert;
 export let alert_level;
@@ -88,6 +88,11 @@ const openMonth = (month) => {
   link(href);
 }
 
+const lpQuery = () => {
+  const pair = $languagePair;
+  return `?languagePair=${encodeURIComponent(JSON.stringify(pair))}`;
+}
+
 const updateLines = async () => {
   // status.fy.term が未設定の場合はAPIを呼ばない
   if (!status || !status.fy || !status.fy.term) {
@@ -97,9 +102,9 @@ const updateLines = async () => {
   let _lines = [];
   let url;
   if  ( status.month ) {
-    url = `/api/trial-balance/${status.month}`;
+    url = `/api/trial-balance/${status.month}${lpQuery()}`;
   } else {
-    url = `/api/trial-balance`;
+    url = `/api/trial-balance${lpQuery()}`;
   }
   const result = await axios.get(url);
   let data = result.data;
@@ -111,6 +116,7 @@ const updateLines = async () => {
     if	( account.code.length > 7 ) continue;
     let new_line = {
       name: account.name,
+      nameVi: account.nameVi || '',
       pickup: numeric(account.pickup),
       debit: numeric(account.debit),
       credit: numeric(account.credit),
@@ -124,12 +130,16 @@ const updateLines = async () => {
 
     if ( last_account.middle_name != account.middle_name ) {
       _lines.push({
-        name: `【${account.middle_name}】`
+        name: `【${account.middle_name}】`,
+        middle_name: account.middle_name,
+        middle_nameVi: account.middle_nameVi || ''
       });
     }
     if ( last_account.minor_name != account.minor_name ) {
       _lines.push({
-        name: account.minor_name
+        name: account.minor_name,
+        minor_name: account.minor_name,
+        minor_nameVi: account.minor_nameVi || ''
       });
     }
     if	(( new_line.pickup != 0 ) ||

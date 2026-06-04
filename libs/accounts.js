@@ -223,8 +223,9 @@ export default class {
       ]
     });
 
-    // Enrich all accounts and sub-accounts in one pass
+    // Enrich all accounts, sub-accounts, and account classes in one pass
     if (languagePair) {
+      await enrichBilingual('AccountClass', accountClasses, languagePair);
       const allAccs = accountClasses.flatMap(acl => acl.accounts || []);
       if (allAccs.length > 0) {
         await enrichBilingual('Account', allAccs, languagePair);
@@ -243,6 +244,9 @@ export default class {
         major_name: acl.major,
         middle_name: acl.middle,
         minor_name: acl.minor,
+        major_nameVi: acl.getDataValue('majorVi') || '',
+        middle_nameVi: acl.getDataValue('middleVi') || '',
+        minor_nameVi: acl.getDataValue('minorVi') || '',
         acl_id: acl.id,
         acl_code: make_klass(acl.field, acl.adding)
       };
