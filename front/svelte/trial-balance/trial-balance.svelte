@@ -1,40 +1,40 @@
 {#key $currentPage}
 <div class="list">
   <div class="page-title d-flex justify-content-between">
-  	<h1><BilingualText key="trial_balance" /></h1>
+  	<h1 class="page-title-bilingual"><BilingualText key="trial_balance" inline={true} /></h1>
   	<a href="/forms/trial_balance/{status.fy.term}?format=pdf"
-      download="{$bi('trial_balance')}.pdf" class="btn btn-primary"><BilingualText key="download_trial_balance" /><i class="bi bi-download"></i>
+      download="{$bi('trial_balance')}.pdf" class="btn btn-primary btn-bilingual"><BilingualText key="download_trial_balance" inline={true} /><i class="bi bi-download"></i>
   	</a>
 	</div>
 	<ul class="page-subtitle nav me-auto">
   	<li class="nav-item">
     	{#if ( !status.month  )}
-    	<button type="button" class="btn btn-primary disabled me-2"
+    	<button type="button" class="btn btn-primary month-btn disabled me-2"
       	on:click={() => {
           openMonth("");
-        }}><BilingualText key="fiscal_year" /></button>
+        }}><BilingualText key="fiscal_year" stacked={true} /></button>
     	{:else}
-    	<button type="button" class="btn btn-outline-primary me-2"
+    	<button type="button" class="btn btn-outline-primary month-btn me-2"
       	on:click={() => {
         	openMonth("");
-      	}}><BilingualText key="fiscal_year" /></button>
+      	}}><BilingualText key="fiscal_year" stacked={true} /></button>
     	{/if}
   	</li>
   	{#each dates as date}
   	<li class="nav-item">
     	{#if (date.ym == status.month)}
-    	<button type="button" class="btn btn-primary disabled me-2"
+    	<button type="button" class="btn btn-primary month-btn disabled me-2"
       	on:click={() => {
           openMonth(`${date.year}-${date.month}`);
         }}>
-  	    {date.month}{$bi('month')}
+  	    <BilingualText key={`month_${date.month}`} stacked={true} />
     	</button>
 	    {:else}
-  	  <button type="button" class="btn btn-outline-primary me-2"
+  	  <button type="button" class="btn btn-outline-primary month-btn me-2"
       on:click={() => {
         openMonth(`${date.year}-${date.month}`);
       }}>
-      {date.month}{$bi('month')}
+      <BilingualText key={`month_${date.month}`} stacked={true} />
   	  </button>
     	{/if}
 	  </li>
@@ -48,6 +48,32 @@
 	</div>
 </div>
 {/key}
+
+<style>
+.page-title {
+  margin-bottom: 1rem;
+}
+.month-btn {
+  min-height: 56px;
+  line-height: 1.2;
+  white-space: normal;
+  padding: 0.25rem 0.5rem;
+}
+.btn-bilingual {
+  min-height: 56px;
+  line-height: 1.2;
+  white-space: normal;
+  padding: 0.25rem 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.page-title-bilingual {
+  display: inline-flex;
+  align-items: center;
+  line-height: 1.3;
+}
+</style>
 
 <script>
 import axios from 'axios';
