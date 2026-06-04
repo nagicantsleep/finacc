@@ -118,7 +118,7 @@ import {setAccounts} from '../../javascripts/cross-slip';
 import parse_account_code from '../../../libs/parse_account_code';
 import {currentPage, link} from '../../javascripts/router.js';
 
-import {bi} from '../../javascripts/bilingual.js';
+import {bi, languagePair} from '../../javascripts/bilingual.js';
 import BilingualText from '../components/bilingual-text.svelte';
 export let status;
 
@@ -171,6 +171,12 @@ const _link = (event) => {
   link(event.detail);
 }
 
+// Build `?languagePair=<json>` suffix so backend can enrich via enrichBilingual
+const lpQuery = () => {
+  const pair = $languagePair;
+  return `?languagePair=${encodeURIComponent(JSON.stringify(pair))}`;
+}
+
 const accountSelect = (code) => {
   let href;
   if  ( code.sub )  {
@@ -184,7 +190,7 @@ const accountSelect = (code) => {
 }
 
 const update = async (list) => {
-  let result = await axios.get(`/api/account/${accountCode}`);
+  let result = await axios.get(`/api/account/${accountCode}${lpQuery()}`);
   account = result.data;
   console.log('update', account);
   //console.log('account', account);
@@ -213,7 +219,7 @@ const checkPage = () => {
 }
 
 onMount(() => {
-  axios.get(`/api/accounts`).then((res) => {
+  axios.get(`/api/accounts${lpQuery()}`).then((res) => {
     accounts = res.data;
     setAccounts(accounts);
     for ( let i = 0; i < accounts.length; i ++ ) {
@@ -274,9 +280,9 @@ const updateList = () => {
   let pr;
   if ( subAccountCode ) {
     console.log('sub');
-    pr = axios.get(`/api/ledger/${status.fy.term}/${accountCode}/${subAccountCode}`);
+    pr = axios.get(`/api/ledger/${status.fy.term}/${accountCode}/${subAccountCode}${lpQuery()}`);
   } else {
-    pr = axios.get(`/api/ledger/${status.fy.term}/${accountCode}`);
+    pr = axios.get(`/api/ledger/${status.fy.term}/${accountCode}${lpQuery()}`);
   }
   details = [];
   pr.then((result) => {
