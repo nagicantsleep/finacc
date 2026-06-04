@@ -8,25 +8,28 @@
   	{#each dates as date}
     	<li class="nav-item">
       	{#if (date.month == month)}
-      	<button type="button" class="btn btn-primary disabled me-2"
+      	<button type="button" class="btn btn-primary month-btn disabled me-2"
         	on:click={() => {
           	openMonth(date.year, date.month)
         	}}>
-        	<BilingualText stacked={false} primary={date.month} secondary={$bi('month_label')} />
+        	<BilingualText key={`month_${date.month}`} stacked={true} />
       	</button>
       	{:else}
-      	<button type="button" class="btn btn-outline-primary me-2"
+      	<button type="button" class="btn btn-outline-primary month-btn me-2"
       		on:click={() => {
         		openMonth(date.year, date.month)
       		}}>
-        	<BilingualText stacked={false} primary={date.month} secondary={$bi('month_label')} />
+        	<BilingualText key={`month_${date.month}`} stacked={true} />
       	</button>
       	{/if}
     	</li>
   	{/each}
 	</ul>
 	<div class="page-subtitle d-flex justify-content-between">
-  	<h2>{year}{$bi('year_label')} {month}{$bi('month_label')}</h2>
+  	<h2 class="d-flex align-items-baseline gap-2">
+  		<span>{year}{$bi('year_label')}</span>
+  		<BilingualText key={`month_${month}`} stacked={true} />
+  	</h2>
   	<div>
     	<button type="button" class="btn btn-primary" id="open-cross-slip"
     		on:click={openSlip}><BilingualText key="journal_detail_entry_space" stacked={false} /><i class="bi bi-pencil-square"></i>
@@ -51,6 +54,12 @@
 {/key}
 {/if}
 <style>
+.month-btn {
+  min-height: 56px;
+  line-height: 1.2;
+  white-space: normal;
+  padding: 0.25rem 0.5rem;
+}
 </style>
 
   <script>
