@@ -102,22 +102,26 @@ export default {
     });
   },
   all: (req, res, next) => {
-    Accounts.all(req.currentTenantId).then((lines) => {
+    const lp = req.query.languagePair ? JSON.parse(req.query.languagePair) : req.session?.languagePair;
+    Accounts.all(req.currentTenantId, lp).then((lines) => {
       res.json(lines);
     });
   },
   all2: async (req, res, next) => {
-    Accounts.all2(req.currentTenantId, req.params.term).then((lines) => {
+    const lp = req.query.languagePair ? JSON.parse(req.query.languagePair) : req.session?.languagePair;
+    Accounts.all2(req.currentTenantId, req.params.term, lp).then((lines) => {
       res.json(lines);
     });
   },
   all3: async (req, res, next) => {
-    Accounts.all3(req.currentTenantId, req.params.term).then((lines) => {
+    const lp = req.query.languagePair ? JSON.parse(req.query.languagePair) : req.session?.languagePair;
+    Accounts.all3(req.currentTenantId, req.params.term, lp).then((lines) => {
       res.json(lines);
     });
   },
   all4: async (req, res, next) => {
-    Accounts.all4(req.currentTenantId, req.params.term).then((lines) => {
+    const lp = req.query.languagePair ? JSON.parse(req.query.languagePair) : req.session?.languagePair;
+    Accounts.all4(req.currentTenantId, req.params.term, lp).then((lines) => {
       res.json(lines);
     });
   }

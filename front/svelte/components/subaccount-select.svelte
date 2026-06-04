@@ -6,13 +6,14 @@
         on:click={() => {
           select(account.accountCode, sub.subAccountCode);
         }}>
-        {sub.name}
+        <BilingualText primary={sub.name} secondary={sub.nameVi} inline={true} />
       </button>
     </li>
   {/each}
 </ul>
 <script>
 import {createEventDispatcher} from 'svelte';
+import BilingualText from './bilingual-text.svelte';
 
 export let account;
 export let sub_account_code;

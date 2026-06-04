@@ -11,6 +11,12 @@ const TRANSLATION_MAP = {
   VoucherClass: { name: (rec) => `name:${rec.name}` },
   TaxRule: { label: (rec) => `label:${rec.label}` },
   MemberClass: { title: (rec) => `title:${rec.title}` },
+  Account: {
+    name: (rec) => `name:${rec.name}`
+  },
+  SubAccount: {
+    name: (rec) => `name:${rec.name}`
+  },
   AccountClass: {
     major: (rec) => `major:${rec.major}`,
     middle: (rec) => `middle:${rec.middle}`,
