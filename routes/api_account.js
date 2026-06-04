@@ -21,6 +21,9 @@ export default {
         required: false
       }],
     });
+    if (!account) {
+      return res.status(404).json({ error: `Account not found: ${account_code}` });
+    }
     res.json(account);
   },
   get_class: (req, res, next) => {
@@ -73,6 +76,9 @@ export default {
         accountCode: req.body.code
       }
     });
+    if (!account) {
+      return res.status(404).json({ error: `Account not found: ${req.body.code}` });
+    }
     account.key = req.body.key;
     account.name = req.body.name;
     account.taxClass = req.body.tax_class;

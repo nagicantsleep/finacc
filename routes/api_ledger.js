@@ -105,20 +105,25 @@ export const	get_details = async (fy, account, sub_account, tenantId) => {
 }
 
 export default {
-  get: (req, res, next) => {
+  get: async (req, res, next) => {
     const tenantId = req.currentTenantId;
     let term =  parseInt(req.params.term);
     let account = req.params.account;
     let sub_account = parseInt(req.params.sub_account);
-    models.FiscalYear.findOne({
-      where: {
-        tenantId,
-        term: term
+    try {
+      const fy = await models.FiscalYear.findOne({
+        where: {
+          tenantId,
+          term: term
+        }
+      });
+      if (!fy) {
+        return res.status(404).json({ error: `Fiscal year not found: term=${term}` });
       }
-    }).then((fy) => {
-      get_details(fy, account, sub_account, tenantId).then((ledger)=> {
-        res.json(ledger);
-      })
-    });
+      const ledger = await get_details(fy, account, sub_account, tenantId);
+      res.json(ledger);
+    } catch (err) {
+      next(err);
+    }
   },
 };
