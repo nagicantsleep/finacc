@@ -47,7 +47,7 @@ export default class {
           sub_lines.push({
             key: sub.key,
             name: sub.name,
-            nameVi: sub.nameVi || '',
+            nameVi: sub.getDataValue('nameVi') || '',
             code: sub.subAccountCode,
             taxClass: sub.taxClass
           });
@@ -55,7 +55,7 @@ export default class {
         lines.push({
           key: acc.key,
           name: acc.name,
-          nameVi: acc.nameVi || '',
+          nameVi: acc.getDataValue('nameVi') || '',
           code: acc.accountCode,
           taxClass: acc.taxClass,
           subAccounts: sub_lines
@@ -64,7 +64,7 @@ export default class {
         lines.push({
           key: acc.key,
           name: acc.name,
-          nameVi: acc.nameVi || '',
+          nameVi: acc.getDataValue('nameVi') || '',
           code: acc.accountCode,
           taxClass: acc.taxClass
         });
@@ -115,7 +115,7 @@ export default class {
             id: suba.id,
             key: suba.key,
             name: suba.name,
-            nameVi: suba.nameVi || '',
+            nameVi: suba.getDataValue('nameVi') || '',
             code: suba.subAccountCode,
             taxClass: suba.taxClass,
             debit: rem ? rem.debit : 0,
@@ -139,7 +139,7 @@ export default class {
           minor_name: acc.accountClass.minor,
           key: acc.key,
           name: acc.name,
-          nameVi: acc.nameVi || '',
+          nameVi: acc.getDataValue('nameVi') || '',
           code: acc.accountCode,
           taxClass: acc.taxClass,
           subAccounts: sub_lines,
@@ -164,7 +164,7 @@ export default class {
           minor_name: acc.accountClass.minor,
           key: acc.key,
           name: acc.name,
-          nameVi: acc.nameVi || '',
+          nameVi: acc.getDataValue('nameVi') || '',
           code: acc.accountCode,
           taxClass: acc.taxClass,
           debit: rem ? rem.debit : 0,
@@ -265,7 +265,7 @@ export default class {
               id: suba.id,
               key: suba.key,
               name: suba.name,
-              nameVi: suba.nameVi || '',
+              nameVi: suba.getDataValue('nameVi') || '',
               code: suba.subAccountCode,
               taxClass: suba.taxClass,
               ...subRem
@@ -277,7 +277,7 @@ export default class {
             id: acc.id,
             key: acc.key,
             name: acc.name,
-            nameVi: acc.nameVi || '',
+            nameVi: acc.getDataValue('nameVi') || '',
             code: acc.accountCode,
             taxClass: acc.taxClass,
             subAccounts: sub_lines,
@@ -289,7 +289,7 @@ export default class {
             id: acc.id,
             key: acc.key,
             name: acc.name,
-            nameVi: acc.nameVi || '',
+            nameVi: acc.getDataValue('nameVi') || '',
             code: acc.accountCode,
             taxClass: acc.taxClass,
             ...accRem
@@ -365,7 +365,7 @@ export default class {
   id: suba.id,
   key: suba.key,
   name: suba.name,
-  nameVi: suba.nameVi || '',
+  nameVi: suba.getDataValue('nameVi') || '',
   code: suba.subAccountCode,
   taxClass: suba.taxClass,
   debit: rem ? rem.debit : 0,
@@ -391,7 +391,7 @@ export default class {
   acl_code: make_klass(acl.field, acl.adding),
   key: acc.key,
   name: acc.name,
-  nameVi: acc.nameVi || '',
+  nameVi: acc.getDataValue('nameVi') || '',
   code: acc.accountCode,
   taxClass: acc.taxClass,
   subAccounts: sub_lines,
@@ -418,7 +418,7 @@ export default class {
   acl_code: make_klass(acl.field, acl.adding),
   key: acc.key,
   name: acc.name,
-  nameVi: acc.nameVi || '',
+  nameVi: acc.getDataValue('nameVi') || '',
   code: acc.accountCode,
   taxClass: acc.taxClass,
   debit: rem ? rem.debit : 0,
