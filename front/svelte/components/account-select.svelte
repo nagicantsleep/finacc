@@ -5,7 +5,7 @@
       id="field_{index}"
       rolw="button"
       data-bs-toggle="dropdown" aria-expanded="false">
-      <BilingualText primary={field.title} secondary={field.titleVi} inline={true} />
+      <BilingualText key={field.titleKey} inline={true} />
     </button>
     <ul class="dropdown-menu" aria-labelledby="field_{index}">
       {#each field.accounts as account}

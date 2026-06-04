@@ -138,28 +138,22 @@ let sums;
 let lines;
 let fields = [
   {
-    title: '資産',
-    titleVi: 'Tài sản',
+    titleKey: 'chart_assets',
     accounts: []
   },{
-    title: '負債',
-    titleVi: 'Nợ phải trả',
+    titleKey: 'chart_liabilities',
     accounts: []
   },{
-    title: '純資産',
-    titleVi: 'Vốn chủ sở hữu',
+    titleKey: 'chart_net_assets',
     accounts: []
   },{
-    title: '売上高',
-    titleVi: 'Doanh thu',
+    titleKey: 'chart_revenue',
     accounts: []
   },{
-    title: '売上原価',
-    titleVi: 'Giá vốn',
+    titleKey: 'chart_cost_of_sales',
     accounts: []
   },{
-    title: '営業外',
-    titleVi: 'Ngoài HĐKD',
+    titleKey: 'chart_non_operating',
     accounts: []
   }
 ];
