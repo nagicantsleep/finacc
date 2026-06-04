@@ -17,9 +17,14 @@
       <LanguagePairSelector />
     </li>
     <li class="nav-item dropdown">
-      <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" id="user_menu"
+      <a href="#" class="nav-link dropdown-toggle user-menu-toggle" data-bs-toggle="dropdown" id="user_menu"
           role="button" aria-expanded="false">
-        <span class="d-none d-md-inline">{status.user.name}</span>
+        <span
+          class="user-avatar"
+          aria-hidden="true"
+          title={status.user.name}
+        >{(status.user.name || '?').trim().charAt(0).toUpperCase()}</span>
+        <span class="d-none d-md-inline user-menu-name">{status.user.name}</span>
       </a>
       <ul class="dropdown-menu dropdown-menu-end"
           aria-labelledby="user_menu">
