@@ -463,6 +463,8 @@
   "form_create": "帳票作成",
   "other": "その他",
   "entry_label": "入力",
+  "entry_person": "入力者",
+  "approve_person": "承認者",
   "fy_suffix": "度",
   "error_debit_unregistered": "借方科目に未登録の勘定科目が入力されています。",
   "error_debit_missing": "借方科目が未入力です。",

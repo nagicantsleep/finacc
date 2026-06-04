@@ -538,6 +538,8 @@
   "validity_fallback": "Trong vòng 1 tháng sau báo giá",
   "bank_transfer_destination": "[Tài khoản nhận chuyển khoản]",
   "entry_label": "Nhập",
+  "entry_person": "Người nhập",
+  "approve_person": "Người duyệt",
   "fy_suffix": "năm tài chính",
   "error_debit_unregistered": "TK nợ có tài khoản chưa đăng ký.",
   "error_debit_missing": "Chưa nhập tài khoản nợ.",
