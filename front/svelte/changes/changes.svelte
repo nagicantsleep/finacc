@@ -121,22 +121,22 @@ let subAccountCode;
 
 let fields = [
   {
-    title: 'chart_assets',
+    titleKey: 'chart_assets',
     accounts: []
   },{
-    title: 'chart_liabilities',
+    titleKey: 'chart_liabilities',
     accounts: []
   },{
-    title: 'chart_net_assets',
+    titleKey: 'chart_net_assets',
     accounts: []
   },{
-    title: 'chart_revenue',
+    titleKey: 'chart_revenue',
     accounts: []
   },{
-    title: 'chart_cost_of_sales',
+    titleKey: 'chart_cost_of_sales',
     accounts: []
   },{
-    title: 'chart_non_operating',
+    titleKey: 'chart_non_operating',
     accounts: []
   }
 ];
