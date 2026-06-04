@@ -54,6 +54,9 @@
 {/key}
 {/if}
 <style>
+.page-title {
+  margin-bottom: 1rem;
+}
 .month-btn {
   min-height: 56px;
   line-height: 1.2;
