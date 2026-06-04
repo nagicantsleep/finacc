@@ -1,7 +1,7 @@
 <div class="list">
   <div class="page-title d-flex justify-content-between">
-  	<h1><BilingualText key="journal" stacked={false} /></h1>
-  	<a href="/forms/explanatory_journal/{status.fy.term}?format=pdf" download="仕訳日記帳-{today}.pdf" class="btn btn-primary"><BilingualText key="download_journal" stacked={false} /><i class="bi bi-download"></i>
+  	<h1 class="page-title-bilingual"><BilingualText key="journal" inline={true} /></h1>
+  	<a href="/forms/explanatory_journal/{status.fy.term}?format=pdf" download="仕訳日記帳-{today}.pdf" class="btn btn-primary btn-bilingual"><BilingualText key="download_journal" inline={true} /><i class="bi bi-download"></i>
   	</a>
 	</div>
 	<ul class="page-subtitle nav">
@@ -26,13 +26,13 @@
   	{/each}
 	</ul>
 	<div class="page-subtitle d-flex justify-content-between">
-  	<h2 class="d-flex align-items-baseline gap-2">
-  		<span>{year}{$bi('year_label')}</span>
-  		<BilingualText key={`month_${month}`} stacked={true} />
+  	<h2 class="d-flex align-items-center gap-3">
+  		<BilingualText primary={year} secondary={$bi('year_label')} inline={true} />
+  		<BilingualText key={`month_${month}`} inline={true} />
   	</h2>
   	<div>
-    	<button type="button" class="btn btn-primary" id="open-cross-slip"
-    		on:click={openSlip}><BilingualText key="journal_detail_entry_space" stacked={false} /><i class="bi bi-pencil-square"></i>
+    	<button type="button" class="btn btn-primary btn-bilingual" id="open-cross-slip"
+    		on:click={openSlip}><BilingualText key="journal_detail_entry_space" inline={true} /><i class="bi bi-pencil-square"></i>
       </button>
   	</div>
 	</div>
@@ -59,6 +59,20 @@
   line-height: 1.2;
   white-space: normal;
   padding: 0.25rem 0.5rem;
+}
+.btn-bilingual {
+  min-height: 56px;
+  line-height: 1.2;
+  white-space: normal;
+  padding: 0.25rem 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.page-title-bilingual {
+  display: inline-flex;
+  align-items: center;
+  line-height: 1.3;
 }
 </style>
 
