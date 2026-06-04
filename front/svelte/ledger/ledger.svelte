@@ -98,6 +98,9 @@
   align-items: center;
   line-height: 1.3;
 }
+.page-title {
+  margin-bottom: 0.75rem;
+}
 </style>
 
 <script>
