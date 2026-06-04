@@ -20,7 +20,7 @@
   style="display:{inline ? 'inline-flex' : 'flex'};flex-direction:column;line-height:1.4;vertical-align:middle"
 >
   <span class="bilingual-primary" style="font-weight:600;line-height:1.4">{_primary}</span>
-  <span class="bilingual-secondary" style="font-size:0.78em;color:#666;line-height:1.25">{_secondary}</span>
+  <span class="bilingual-secondary" style="font-size:0.78em;line-height:1.25">{_secondary}</span>
 </span>
 {:else}
 <span class="bilingual-text bilingual-inline" style="display:{inline ? 'inline-flex' : 'inline-flex'};align-items:baseline;gap:0.25em;white-space:nowrap">
@@ -28,8 +28,8 @@
     <span class="bilingual-primary" style="font-weight:600">{_primary}</span>
   {:else}
     <span class="bilingual-primary" style="font-weight:600">{_primary}</span>
-    <span class="bilingual-sep" style="color:#666">/</span>
-    <span class="bilingual-secondary" style="font-size:0.85em;color:#666">{_secondary}</span>
+    <span class="bilingual-sep">/</span>
+    <span class="bilingual-secondary" style="font-size:0.85em">{_secondary}</span>
   {/if}
 </span>
 {/if}

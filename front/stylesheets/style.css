@@ -44,6 +44,22 @@
   color: var(--bs-table-color) !important;
 }
 
+/* BilingualText — secondary line color is context-aware.
+   Default (light bg): #666 stays subordinate. On dark teal surfaces
+   (sidebar, table th), lighten to maintain ≥4.5:1 contrast on #264653. */
+.bilingual-secondary,
+.bilingual-sep {
+  color: #666;
+}
+.sidebar .bilingual-secondary,
+.sidebar .bilingual-sep {
+  color: #b8c5ca;
+}
+.table th .bilingual-secondary,
+.table th .bilingual-sep {
+  color: #cfe2e8;
+}
+
 .card {
   background-color: #fff;
   border-radius: 0.3rem;
