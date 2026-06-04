@@ -1,6 +1,6 @@
 <div class="page-title d-flex justify-content-between">
-  <h1><BilingualText key="ledger" /></h1>
-  <a href="/forms/general_ledger/{status.fy.term}?format=pdf" download="{$bi('form_print_gl')}-{today}.pdf" class="btn btn-primary"><BilingualText key="download_general_ledger" /><i class="bi bi-download"></i>
+  <h1 class="page-title-bilingual"><BilingualText key="ledger" inline={true} /></h1>
+  <a href="/forms/general_ledger/{status.fy.term}?format=pdf" download="{$bi('form_print_gl')}-{today}.pdf" class="btn btn-primary btn-bilingual"><BilingualText key="download_general_ledger" inline={true} /><i class="bi bi-download"></i>
   </a>
 </div>
 <AccountSelect
@@ -21,18 +21,18 @@
   {/if}
   <div>
     {#if (account)}
-    <button type="button" class="btn btn-info"
+    <button type="button" class="btn btn-info btn-bilingual"
       on:click={() => {
         if (subAccountCode) {
           link(`/changes/${status.fy.term}/${accountCode}/${subAccountCode}`)
         } else {
           link(`/changes/${status.fy.term}/${accountCode}`)
         }
-      }}><BilingualText key="view_trends" /></button>
+      }}><BilingualText key="view_trends" inline={true} /></button>
     {/if}
-    <button type="button" class="btn btn-primary" id="open-cross-slip"
+    <button type="button" class="btn btn-primary btn-bilingual" id="open-cross-slip"
     	on:click={openSlip}>
-      {$bi('voucher_entry')}&nbsp;<i class="bi bi-pencil-square"></i>
+      <BilingualText key="voucher_entry" inline={true} /><i class="bi bi-pencil-square"></i>
     </button>
   </div>
 </nav>
@@ -49,12 +49,12 @@
       {/key}
     </div>
     <div class="col-4" style="text-align:right;">
-      <button type="button" class="btn btn-info"
+      <button type="button" class="btn btn-info btn-bilingual"
         on:click={() => {
           link(`/changes/${status.fy.term}/${accountCode}/${subAccountCode}`)
         }}
-        disabled={!subAccountCode}><BilingualText key="view_trends" /></button>
-      <a href="/forms/subsidiary_ledger/{status.fy.term}?format=pdf" download="{$bi('form_print_sl')}-{today}.pdf" class="btn btn-primary"><BilingualText key="download_sub_ledger" /><i class="bi bi-download"></i>
+        disabled={!subAccountCode}><BilingualText key="view_trends" inline={true} /></button>
+      <a href="/forms/subsidiary_ledger/{status.fy.term}?format=pdf" download="{$bi('form_print_sl')}-{today}.pdf" class="btn btn-primary btn-bilingual"><BilingualText key="download_sub_ledger" inline={true} /><i class="bi bi-download"></i>
       </a>
     </div>
   </div>
@@ -82,6 +82,26 @@
   on:close={updateList}></CrossSlipModal>
 {/key}
 {/if}
+
+<style>
+.btn-bilingual {
+  min-height: 56px;
+  line-height: 1.2;
+  white-space: normal;
+  padding: 0.25rem 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.page-title-bilingual {
+  display: inline-flex;
+  align-items: center;
+  line-height: 1.3;
+}
+.page-title {
+  margin-bottom: 0.75rem;
+}
+</style>
 
 <script>
 
