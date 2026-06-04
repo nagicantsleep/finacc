@@ -9,7 +9,7 @@
   Props: none (reads/writes languagePair store + calls API)
 -->
 <div class="d-flex align-items-center" style="font-size:0.85rem; padding: 0 0.5rem;">
-  <select class="form-select form-select-sm" style="width:auto; min-width:120px;" bind:value={selectedPair} on:change={onChange} title={currentLabel}>
+  <select class="form-select form-select-sm" style="width:auto; min-width:120px;" bind:value={selectedPair} title={currentLabel}>
     {#each optionLabels as opt}
       <option value="{opt.value}">{opt.label}</option>
     {/each}
@@ -52,10 +52,21 @@
   }));
 
   let selectedPair = 'ja,vi';
+  // Tracks the last pair value that has been synced to/from the store.
+  // Used to break the reactive feedback loop between `selectedPair` and
+  // `$languagePair` (e.g. when index.svelte fetches the persisted pair
+  // from /api/user/language-pair on init).
+  let lastSyncedPair = 'ja,vi';
 
-  // Sync dropdown to store on init
+  // External store -> dropdown (e.g. server fetch on init)
   $: if ($languagePair) {
-    selectedPair = `${$languagePair.primary},${$languagePair.secondary}`;
+    const fromStore = `${$languagePair.primary},${$languagePair.secondary}`;
+    if (fromStore !== lastSyncedPair) {
+      lastSyncedPair = fromStore;
+      if (selectedPair !== fromStore) {
+        selectedPair = fromStore;
+      }
+    }
   }
 
   // Title for the <select> element: shows the current selection in compact form.
@@ -64,15 +75,17 @@
     return opt ? opt.label : '';
   })();
 
-  async function onChange() {
+  // Dropdown -> store (user click). Reactive statement with lastSyncedPair
+  // guard fires exactly once per user selection; avoids the bind:value +
+  // on:change race where on:change could fire before bind:value updated
+  // selectedPair (causing languagePair.set with the previous value).
+  $: if (selectedPair && selectedPair !== lastSyncedPair) {
+    lastSyncedPair = selectedPair;
     const [primary, secondary] = selectedPair.split(',');
     const newPair = { primary, secondary };
     languagePair.set(newPair);
-
-    try {
-      await axios.put('/api/user/language-pair', newPair);
-    } catch (e) {
+    axios.put('/api/user/language-pair', newPair).catch((e) => {
       console.log('Failed to persist language pair', e);
-    }
+    });
   }
 </script>
