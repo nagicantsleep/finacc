@@ -22,7 +22,7 @@
             on:click={() => {
               openAccount(account[0])}
             }>
-            <BilingualText primary={account[1]} inline={true} />
+            <BilingualText key={account[1]} inline={true} />
           </button>
         </li>
         {/each}

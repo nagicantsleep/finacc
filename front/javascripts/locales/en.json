@@ -191,6 +191,8 @@
   "end_date_required_msg": "End date is required.",
   "entry_input": "Voucher Entry",
   "entry_label": "Entry",
+  "entry_person": "Entry by",
+  "approve_person": "Approver",
   "error": "Error",
   "error_credit_missing": "Credit account is missing.",
   "error_debit_credit_mismatch": "Debit total and credit total do not match.",

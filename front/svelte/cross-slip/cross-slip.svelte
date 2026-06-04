@@ -1,18 +1,26 @@
 <div class="container-fluid crossslip">
   <div class="row mb-3">
     <div class="col-5">
-      <div class="input-group">
-        <input type="text" autocomplete="off" class="number" name="year"
-          id="slip-year" size="2" maxlength="5" disabled="disabled"
-          bind:value={slip.year}>
-        <span class="input-group-text"><BilingualText key="year" /></span>
+      <div class="input-group date-group">
+        <span class="badge bg-secondary year-badge">
+          <input type="text" autocomplete="off" class="number year-input" name="year"
+            id="slip-year" size="4" maxlength="5" disabled="disabled"
+            bind:value={slip.year}>
+        </span>
+        <span class="input-group-text stacked-label">
+          <BilingualText key="year" stacked={false} inline={true} />
+        </span>
         <input type="text" autocomplete="off" class="number" name="month"
-          id="slip-month" size="2" maxlength="3"
+          id="slip-month" size="4" maxlength="3"
           bind:value={slip.month}>
-        <span class="input-group-text"><BilingualText key="month" /></span>
-        <input type="text" autocomplete="off" class="number" name="day" id="slip-day" size="2" maxlength="3"
+        <span class="input-group-text stacked-label">
+          <BilingualText key="month" stacked={false} inline={true} />
+        </span>
+        <input type="text" autocomplete="off" class="number" name="day" id="slip-day" size="4" maxlength="3"
             bind:value={slip.day}>
-        <span class="input-group-text"><BilingualText key="day" /></span>
+        <span class="input-group-text stacked-label">
+          <BilingualText key="day" stacked={false} inline={true} />
+        </span>
         {#if slip.no}
         <span class="input-group-text">No. {slip.no}</span>
         {/if}
@@ -20,17 +28,19 @@
     </div>
     <div class="col">
       <div class="row">
-        <div class="col-4 input-group-text">
-          {$bi('entry_label')}:
-          {slip.createrName || ''}
+        <div class="col-4 input-group-text stacked-label">
+          <BilingualText key="entry_person" stacked={false} inline={true} />:
+          <span class="ms-1 person-name">{slip.createrName || ''}</span>
         </div>
-        <div class="col-8 input-group-text">
-          {$bi('approve')}:
-          {slip.approverName || ''}
+        <div class="col-8 input-group-text stacked-label">
+          <BilingualText key="approve_person" stacked={false} inline={true} />:
+          <span class="ms-1 person-name">{slip.approverName || ''}</span>
           {#if (slip.approvedAt)}
-          ({slip.approvedAt.getFullYear()}{$bi('year_num')}
-          {slip.approvedAt.getMonth()+1}{$bi('month_num')}
-          {slip.approvedAt.getDate()}{$bi('day')})
+          <span class="ms-2 approved-time">
+            ({slip.approvedAt.getFullYear()}{$bi('year_num')}
+            {slip.approvedAt.getMonth()+1}{$bi('month_num')}
+            {slip.approvedAt.getDate()}{$bi('day')})
+          </span>
           {/if}
         </div>
       </div>
@@ -40,10 +50,10 @@
     <table class="table table-striped table-bordered">
       <thead class="table-light">
         <th><BilingualText key="debit_account" /></th>
-        <th style="width:120px;"><BilingualText key="amount" /></th>
+        <th class="col-amount"><BilingualText key="amount" /></th>
         <th><BilingualText key="application" /></th>
         <th><BilingualText key="credit_account" /></th>
-        <th style="width:120px;"><BilingualText key="amount" /></th>
+        <th class="col-amount"><BilingualText key="amount" /></th>
         <th>
         </th>
       </thead>
@@ -220,6 +230,71 @@
 </div>
 
 <style>
+/* Cross-slip form readability — scoped to .crossslip only.
+   All rules use > or descendant selectors of .crossslip so
+   they cannot leak to other pages. */
+
+/* (A) Muted secondary text: increase contrast inside this form */
+:global(.crossslip .bilingual-secondary) {
+  color: var(--bs-gray-700);
+  font-size: 0.85em;
+  line-height: 1.3;
+}
+
+/* (C) Date group: compact width */
+:global(.crossslip .date-group) {
+  flex-wrap: nowrap;
+}
+:global(.crossslip .year-badge) {
+  font-size: 1rem;
+  padding: 0.375rem 0.6rem;
+  display: inline-flex;
+  align-items: center;
+}
+:global(.crossslip .year-input) {
+  background: transparent;
+  border: 0;
+  color: white;
+  font-weight: 600;
+  text-align: center;
+  width: 4.5ch;
+  padding: 0;
+}
+:global(.crossslip .stacked-label) {
+  white-space: nowrap;
+  font-size: 0.85em;
+  padding: 0.375rem 0.5rem;
+  line-height: 1.2;
+}
+:global(.crossslip .stacked-label .bilingual-text) {
+  display: inline-flex;
+  flex-direction: row;
+  gap: 0.25em;
+  align-items: baseline;
+}
+
+/* Person display: bold the name, lighter the label */
+:global(.crossslip .person-name) {
+  font-weight: 600;
+}
+:global(.crossslip .approved-time) {
+  color: var(--bs-gray-600);
+  font-size: 0.85em;
+}
+
+/* (D) Cell padding/line-height */
+:global(.crossslip table) th,
+:global(.crossslip table) td {
+  padding: 0.5rem 0.6rem;
+  vertical-align: middle;
+  line-height: 1.5;
+}
+
+/* (E) Wider amount cell for amount+tax stacked inputs */
+:global(.crossslip .col-amount) {
+  width: 150px;
+  min-width: 150px;
+}
 </style>
 
 <script>
