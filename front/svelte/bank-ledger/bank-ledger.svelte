@@ -1,28 +1,28 @@
 <div class="list">
   <div class="page-title d-flex justify-content-between">
-    <h1><BilingualText key="bank_ledger" /></h1>
+    <h1 class="page-title-bilingual"><BilingualText key="bank_ledger" inline={true} /></h1>
   </div>
   <ul class="page-subtitle d-flex justify-content-between">
     <div class="nav">
     <li class="nav-item dropdown">
       <button type="button"
-        class="btn nav-link dropdown-toggle"
+        class="btn nav-link dropdown-toggle account-dropdown-toggle"
         style="background-color:var(--bs-primary);color:white;"
-        rolw="button" data-bs-toggle="dropdown" aria-expanded="false">
+        role="button" data-bs-toggle="dropdown" aria-expanded="false">
         {#if accountCode}
-        {$bi(BANK_ACCOUNTS.find((el) => el[0] == accountCode)[1])}
+        <BilingualText key={BANK_ACCOUNTS.find((el) => el[0] == accountCode)[1]} inline={true} />
         {:else}
-        <BilingualText key="account" />
+        <BilingualText key="account" inline={true} />
         {/if}
       </button>
       <ul class="dropdown-menu" aria-labelledby="field">
         {#each BANK_ACCOUNTS as account}
         <li>
-          <button type="button" class="btn btn-link dropdown-item"
+          <button type="button" class="btn btn-link dropdown-item account-dropdown-item"
             on:click={() => {
               openAccount(account[0])}
             }>
-            {account[1]}
+            <BilingualText primary={account[1]} inline={true} />
           </button>
         </li>
         {/each}
@@ -161,6 +161,37 @@
 {/if}
   
 <style>
+/* Bilingual H1 + buttons need more height than the global
+   `.page-title { height: 50px }` to avoid the H1 overflowing
+   into the `.page-subtitle` row (which contains the account
+   dropdown — see issue #147). */
+.page-title {
+  height: auto;
+  min-height: 50px;
+  flex-wrap: wrap;
+  row-gap: 0.25rem;
+}
+.page-title-bilingual {
+  display: inline-flex;
+  align-items: center;
+  line-height: 1.3;
+  margin: 4px 0;
+}
+.account-dropdown-toggle,
+.account-dropdown-item {
+  min-height: 44px;
+  line-height: 1.2;
+  white-space: normal;
+  padding: 0.25rem 0.6rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.account-dropdown-item {
+  width: 100%;
+  text-align: left;
+  text-decoration: none;
+}
 </style>
 
 <script>
@@ -169,7 +200,6 @@ import {onMount, afterUpdate} from 'svelte';
 import {ledgerLines} from '../../../libs/ledger';
 import {setAccounts} from '../../javascripts/cross-slip';
 import CrossSlipModal from '../cross-slip/cross-slip-modal.svelte';
-import { bi } from '../../javascripts/bilingual.js';
 import BilingualText from '../components/bilingual-text.svelte';
 import {DateString} from '../../../libs/utils.js';
 import {currentPage} from '../../javascripts/router.js';
