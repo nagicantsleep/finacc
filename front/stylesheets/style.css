@@ -60,6 +60,33 @@
   color: #cfe2e8;
 }
 
+/* User menu avatar — circular placeholder showing first letter of user name.
+   Sits inside the navbar user menu trigger next to the name. */
+.user-menu-toggle {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 0.5rem;
+}
+.user-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: var(--bs-primary);
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.95rem;
+  line-height: 1;
+  user-select: none;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.15);
+}
+.user-menu-toggle:hover .user-avatar,
+.user-menu-toggle:focus .user-avatar {
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.3);
+}
+
 .card {
   background-color: #fff;
   border-radius: 0.3rem;
