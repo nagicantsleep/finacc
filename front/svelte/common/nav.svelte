@@ -25,15 +25,15 @@
           aria-labelledby="user_menu">
         <li>
           <a href="#" class="dropdown-item" on:click|preventDefault={openProfile}>
-            <i class="bi bi-person-circle me-1"></i><BilingualText key="profile" /></a>
+            <i class="bi bi-person-circle me-1"></i><BilingualText key="profile" stacked={false} /></a>
         </li>
         <li>
           <a href="#" class="dropdown-item" on:click|preventDefault={openTenantCreate}>
-            <i class="bi bi-building-add me-1"></i><BilingualText key="create_tenant" /></a>
+            <i class="bi bi-building-add me-1"></i><BilingualText key="create_tenant" stacked={false} /></a>
         </li>
         <li>
           <a href="#" class="dropdown-item" on:click|preventDefault={switchTenantFromApp}>
-            <i class="bi bi-arrow-left-right me-1"></i><BilingualText key="nav_tenant_switch" />
+            <i class="bi bi-arrow-left-right me-1"></i><BilingualText key="nav_tenant_switch" stacked={false} />
             {#if switchingTenant}
               <span class="spinner-border spinner-border-sm ms-2" role="status" aria-hidden="true"></span>
             {/if}
@@ -42,7 +42,7 @@
         <li><hr class="dropdown-divider"></li>
         <li>
           <a href="/logout" class="dropdown-item">
-            <i class="bi bi-power me-1"></i><BilingualText key="nav_sign_out" />
+            <i class="bi bi-power me-1"></i><BilingualText key="nav_sign_out" stacked={false} />
           </a>
         </li>
       </ul>
