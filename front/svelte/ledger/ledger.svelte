@@ -99,7 +99,8 @@
   line-height: 1.3;
 }
 .page-title {
-  margin-bottom: 0.75rem;
+  margin-top: 0.75rem;
+  margin-bottom: 1rem;
 }
 </style>
 
