@@ -1,5 +1,5 @@
-<div class="page-title d-flex justify-content-between">
-  <h1><BilingualText key="account_management2" /></h1>
+<div class="page-title d-flex justify-content-between align-items-center flex-wrap">
+  <h1 class="page-title-bilingual mb-0"><BilingualText key="account_management2" inline={true} /></h1>
 </div>
 <div class="full-height-1 fontsize-12pt">
   <AccountsList
@@ -20,6 +20,14 @@
 </AccountModal>
 
 <style>
+.page-title-bilingual {
+  display: inline-flex;
+  align-items: center;
+  line-height: 1.3;
+}
+.page-title {
+  margin-bottom: 1rem;
+}
 </style>
 
 <script>

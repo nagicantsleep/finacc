@@ -1,12 +1,12 @@
 <div class="list">
-  <div class="page-title d-flex justify-content-between">
-    <h1><BilingualText key="member_list" /></h1>
-    <button type="button" class="btn btn-primary"
+  <div class="page-title d-flex justify-content-between align-items-center flex-wrap">
+    <h1 class="page-title-bilingual mb-0"><BilingualText key="member_list" inline={true} /></h1>
+    <button type="button" class="btn btn-primary btn-bilingual flex-shrink-0"
       on:click={() => {
         openMember(null);
       }}
-      id="member-info"><BilingualText key="member_entry_space" /><i class="bi bi-pencil-square"></i></button>
-  </div> 
+      id="member-info"><BilingualText key="member_entry_space" inline={true} /><i class="bi bi-pencil-square"></i></button>
+  </div>
   <div class="full-height-1 fontsize-12pt">
     <table class="table table-bordered">
       <thead class="table-light">
@@ -87,6 +87,23 @@
     line-height: 1.3;
     vertical-align: bottom;
     white-space: normal;
+  }
+  .page-title-bilingual {
+    display: inline-flex;
+    align-items: center;
+    line-height: 1.3;
+  }
+  .btn-bilingual {
+    min-height: 56px;
+    line-height: 1.2;
+    white-space: normal;
+    padding: 0.25rem 0.5rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  .page-title {
+    margin-bottom: 1rem;
   }
 </style>
 
