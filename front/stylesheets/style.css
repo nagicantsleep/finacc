@@ -164,8 +164,7 @@ tbody {
 }
 
 .content-wrapper,
-.main-footer,
-.main-header {
+.main-footer {
   margin-left: 250px;
 }
 
@@ -180,6 +179,7 @@ tbody {
 
 .topbar .main-header {
   flex: 1 1 auto;
+  margin-left: 0;
   min-width: 0;
 }
 
