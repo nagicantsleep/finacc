@@ -1,13 +1,15 @@
-<div class="page-title d-flex justify-content-between align-items-center flex-wrap">
-  <h1 class="page-title-bilingual mb-0"><BilingualText key="account_management2" inline={true} /></h1>
-</div>
-<div class="full-height-1 fontsize-12pt">
-  <AccountsList
-    status={status}
-    lines={lines}
-    accounts={accounts}
-    on:open={openAccount}>
-  </AccountsList>
+<div class="list">
+  <div class="page-title d-flex justify-content-between align-items-center flex-wrap">
+    <h1 class="page-title-bilingual mb-0"><BilingualText key="account_management2" inline={true} /></h1>
+  </div>
+  <div class="full-height-1 fontsize-12pt">
+    <AccountsList
+      status={status}
+      lines={lines}
+      accounts={accounts}
+      on:open={openAccount}>
+    </AccountsList>
+  </div>
 </div>
 
 <AccountModal
