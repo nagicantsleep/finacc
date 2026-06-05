@@ -32,9 +32,13 @@
 .table {
   background-color: #fff;
   border-radius: 0.3rem;
-  &>:not(caption)>*>*  {
+  // Restrict white-cell override to td; th needs the dark teal below (#184).
+  &>:not(caption)>*>td  {
       background-color: #fff;
   }
+  // Specificity (0,1,2) beats Bootstrap's `.table>:not(caption)>*>*` (0,1,1)
+  // so the dark teal header holds even when <thead class="table-light"> (#184).
+  table.table th,
   th {
     background-color: #264653;
     color: #fff;

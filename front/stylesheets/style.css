@@ -34,9 +34,10 @@
   background-color: #fff;
   border-radius: 0.3rem;
 }
-.table > :not(caption) > * > * {
+.table > :not(caption) > * > td {
   background-color: #fff;
 }
+table.table th,
 .table th {
   background-color: #264653;
   color: #fff;
