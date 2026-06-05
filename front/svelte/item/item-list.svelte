@@ -1,13 +1,14 @@
-<div class="page-title d-flex justify-content-between align-items-center flex-wrap">
-  <h1 class="page-title-bilingual mb-0"><BilingualText key="item_list" inline={true} /></h1>
-  <button type="button" class="btn btn-primary btn-bilingual flex-shrink-0"
-    on:click={() => {
-      openItem(null);
-    }}
-    id="item-info"><BilingualText key="item_entry_space" inline={true} /><i class="bi bi-pencil-square"></i></button>
-</div>
-<div class="full-height-1 fontsize-12pt">
-  <table class="table table-bordered">
+<div class="list">
+  <div class="page-title d-flex justify-content-between align-items-center flex-wrap">
+    <h1 class="page-title-bilingual mb-0"><BilingualText key="item_list" inline={true} /></h1>
+    <button type="button" class="btn btn-primary btn-bilingual flex-shrink-0"
+      on:click={() => {
+        openItem(null);
+      }}
+      id="item-info"><BilingualText key="item_entry_space" inline={true} /><i class="bi bi-pencil-square"></i></button>
+  </div>
+  <div class="full-height-1 fontsize-12pt">
+    <table class="table table-bordered">
     <thead class="table-light">
       <tr>
         <th scope="col" style="width: 150px;"><BilingualText key="class_name" /></th>
@@ -96,6 +97,7 @@
       {/each}
     </tbody>
   </table>
+  </div>
 </div>
 
 <style>
