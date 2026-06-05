@@ -217,10 +217,13 @@ ul.nav {
   list-style: none;
 }
 .page-title {
-  height:50px;
+  min-height: 50px;
+  height: auto;
+  flex-wrap: wrap;
+  row-gap: 0.25rem;
   h1 {
     font-size: 1.75rem;
-    margin:6px;
+    margin: 6px;
   }
   input[type="text"] {
     font-size:1.75rem;
