@@ -5,6 +5,9 @@
     </div>
     <div class="card">
       <div class="card-body login-card-body">
+        <div class="d-flex justify-content-end mb-2">
+          <LanguagePairSelector save={false} />
+        </div>
         <p class="fs-4 text-center"><BilingualText key="signup_heading" /></p>
         
         {#if successMessage}
@@ -235,6 +238,7 @@ import {get} from 'svelte/store';
 import { link } from '../../javascripts/router.js';
 import BilingualText from '../components/bilingual-text.svelte';
 import { bi, _b } from '../../javascripts/bilingual.js';
+import LanguagePairSelector from '../widgets/language-pair-selector.svelte';
 
 // Option text can't host a component; build "primary / secondary" strings reactively.
 $: biFn = $bi;

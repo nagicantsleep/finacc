@@ -6,7 +6,11 @@
   (primary, secondary) tuples so each option's display is independent of
   the current $languagePair.
 
-  Props: none (reads/writes languagePair store + calls API)
+  Props:
+    save — when true (default), persist the pick to the user via
+           PUT /api/user/language-pair. Set false on outer pages
+           (login/signup) where there is no authenticated user yet:
+           the pick only updates the client store for immediate display.
 -->
 <div class="d-flex align-items-center" style="font-size:0.85rem; padding: 0 0.5rem;">
   <select class="form-select form-select-sm" style="width:auto; min-width:120px;" bind:value={selectedPair} title={currentLabel}>
@@ -22,6 +26,10 @@
   import ja from '../../javascripts/locales/ja.json';
   import vi from '../../javascripts/locales/vi.json';
   import en from '../../javascripts/locales/en.json';
+
+  // When false, only update the client store (no API persist).
+  // Used by outer pages (login/signup) where no user session exists yet.
+  export let save = true;
 
   const DICT = { ja, vi, en };
 
@@ -84,8 +92,10 @@
     const [primary, secondary] = selectedPair.split(',');
     const newPair = { primary, secondary };
     languagePair.set(newPair);
-    axios.put('/api/user/language-pair', newPair).catch((e) => {
-      console.log('Failed to persist language pair', e);
-    });
+    if (save) {
+      axios.put('/api/user/language-pair', newPair).catch((e) => {
+        console.log('Failed to persist language pair', e);
+      });
+    }
   }
 </script>

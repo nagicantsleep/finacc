@@ -88,7 +88,7 @@ describe('Language Pair API (#89)', function () {
     assert.equal(res.body.result, 'OK');
     assert.equal(res.body.languagePair.primary, 'ja');
     assert.equal(res.body.languagePair.secondary, 'en');
-    assert.equal(res.body.source, 'member');
+    assert.equal(res.body.source, 'user');
   });
 
   it('PUT rejects same language for primary and secondary', async function () {
@@ -110,6 +110,69 @@ describe('Language Pair API (#89)', function () {
   it('language-pair requires authentication (302 redirect without login)', async function () {
     const res = await request(app).get('/api/user/language-pair').expect(302);
     assert.ok(res.headers.location, 'should redirect to login');
+  });
+});
+
+describe('Language Pair — first-login default init (#176)', function () {
+  this.timeout(30000);
+
+  it('login with languagePair seeds a brand-new user preference', async function () {
+    const user = makeUser('seed');
+    const agent = request.agent(app);
+
+    await agent
+      .post('/api/user/signup')
+      .send({
+        user_name: user.name,
+        password: user.password,
+        legalName: user.legalName,
+        email: user.email
+      })
+      .expect('Content-Type', /json/);
+
+    // Login carrying the pair picked on the outer (login) page.
+    const loginRes = await agent
+      .post('/api/user/login')
+      .send({ user_name: user.name, password: user.password, languagePair: { primary: 'vi', secondary: 'en' } })
+      .expect(200);
+    assert.equal(loginRes.body.result, 'OK');
+
+    // The seeded preference is now the user's own.
+    const res = await agent.get('/api/user/language-pair').expect(200);
+    assert.equal(res.body.languagePair.primary, 'vi');
+    assert.equal(res.body.languagePair.secondary, 'en');
+    assert.equal(res.body.source, 'user');
+  });
+
+  it('login languagePair does NOT override an existing user preference', async function () {
+    const user = makeUser('noov');
+    const agent = request.agent(app);
+
+    await agent
+      .post('/api/user/signup')
+      .send({
+        user_name: user.name,
+        password: user.password,
+        legalName: user.legalName,
+        email: user.email
+      })
+      .expect('Content-Type', /json/);
+
+    // First login seeds vi-en.
+    await agent
+      .post('/api/user/login')
+      .send({ user_name: user.name, password: user.password, languagePair: { primary: 'vi', secondary: 'en' } })
+      .expect(200);
+
+    // Second login carries a different pair — must be ignored (preference already set).
+    await agent
+      .post('/api/user/login')
+      .send({ user_name: user.name, password: user.password, languagePair: { primary: 'ja', secondary: 'en' } })
+      .expect(200);
+
+    const res = await agent.get('/api/user/language-pair').expect(200);
+    assert.equal(res.body.languagePair.primary, 'vi');
+    assert.equal(res.body.languagePair.secondary, 'en');
   });
 });
 
