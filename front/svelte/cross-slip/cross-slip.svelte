@@ -40,7 +40,7 @@
 	</div>
   <div class="row">
     <table class="table table-striped table-bordered">
-      <thead class="table-light">
+      <thead class="table-dark-header">
         <th class="col-account"><BilingualText key="debit_account" /></th>
         <th class="col-amount"><BilingualText key="amount" /></th>
         <th><BilingualText key="application" /></th>
@@ -232,6 +232,20 @@
 :global(.crossslip .bilingual-secondary) {
   font-size: 0.85em;
   line-height: 1.3;
+}
+
+/* (A.1) Issue #180: dark header band (matches btn-secondary navy
+   `#264653` used by the voucher/save buttons). Light text reads on
+   dark background; secondary bilingual line inherits white at lower
+   opacity via the global rule above. */
+:global(.crossslip .table-dark-header) {
+  background-color: var(--bs-secondary, #264653);
+  color: #fff;
+}
+:global(.crossslip .table-dark-header th) {
+  background-color: var(--bs-secondary, #264653);
+  color: #fff;
+  border-bottom-color: rgba(255, 255, 255, 0.25);
 }
 
 /* (C) Date group: compact width */
