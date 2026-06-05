@@ -3,24 +3,16 @@
     <div class="col-5">
       <div class="input-group date-group">
         <span class="badge bg-secondary year-badge">
-          <input type="text" autocomplete="off" class="number year-input" name="year"
-            id="slip-year" size="4" maxlength="5" disabled="disabled"
-            bind:value={slip.year}>
+          <span class="year-input">{slip.year || ''}</span>
         </span>
         <span class="input-group-text stacked-label">
           <BilingualText key="year" stacked={false} inline={true} />
         </span>
-        <input type="text" autocomplete="off" class="number" name="month"
-          id="slip-month" size="4" maxlength="3"
-          bind:value={slip.month}>
-        <span class="input-group-text stacked-label">
-          <BilingualText key="month" stacked={false} inline={true} />
-        </span>
-        <input type="text" autocomplete="off" class="number" name="day" id="slip-day" size="4" maxlength="3"
-            bind:value={slip.day}>
-        <span class="input-group-text stacked-label">
-          <BilingualText key="day" stacked={false} inline={true} />
-        </span>
+        <input type="date" class="form-control date-picker"
+          id="slip-date"
+          min={minDate} max={maxDate}
+          value={slipDate}
+          on:change={onDateChange}>
         {#if slip.no}
         <span class="input-group-text">No. {slip.no}</span>
         {/if}
@@ -49,12 +41,12 @@
   <div class="row">
     <table class="table table-striped table-bordered">
       <thead class="table-light">
-        <th><BilingualText key="debit_account" /></th>
+        <th class="col-account"><BilingualText key="debit_account" /></th>
         <th class="col-amount"><BilingualText key="amount" /></th>
         <th><BilingualText key="application" /></th>
-        <th><BilingualText key="credit_account" /></th>
+        <th class="col-account"><BilingualText key="credit_account" /></th>
         <th class="col-amount"><BilingualText key="amount" /></th>
-        <th>
+        <th class="col-action">
         </th>
       </thead>
       <tbody id="cross-slip">
@@ -174,7 +166,7 @@
               on:focusout={makeTaxLine}>
             {/if}
           </td>
-          <td style="width:130px;">
+          <td class="col-action">
             {#if (slip.approvedAt) }
             {#if ( ( line.debitVoucherId !== null ) || ( line.creditVoucherId !== null ))}
             <Icon icon="fa:file"></Icon>
@@ -234,9 +226,10 @@
    All rules use > or descendant selectors of .crossslip so
    they cannot leak to other pages. */
 
-/* (A) Muted secondary text: increase contrast inside this form */
+/* (A) Secondary text: inherit parent color (legible on dark th and
+   light cells alike); keep it smaller/subordinate. Color handled
+   globally in style.css via inherit + opacity. */
 :global(.crossslip .bilingual-secondary) {
-  color: var(--bs-gray-700);
   font-size: 0.85em;
   line-height: 1.3;
 }
@@ -295,6 +288,47 @@
   width: 150px;
   min-width: 150px;
 }
+/* Fixed-layout column sizing: give account + action columns explicit
+   widths so the Note/application column absorbs the remaining space. */
+:global(.crossslip .col-account) {
+  width: 18%;
+}
+:global(.crossslip .col-action) {
+  width: 110px;
+}
+
+/* (F) Overflow containment (issue #1): the form used fixed `size=`
+   character widths on inputs, which forced the table wider than the
+   modal and overflowed. Make the table fill the modal and let every
+   field shrink to its cell instead of its `size` attribute. */
+:global(.crossslip table) {
+  width: 100%;
+  table-layout: fixed;
+}
+:global(.crossslip td input[type="text"]),
+:global(.crossslip td .search-input),
+:global(.crossslip td .form-control),
+:global(.crossslip td select) {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+/* Flex rows inside the Note/application cell: allow children to shrink
+   below their content/`size` width so nothing pushes past the cell. */
+:global(.crossslip .application) {
+  gap: 0.25rem;
+}
+:global(.crossslip .application > *) {
+  min-width: 0;
+}
+:global(.crossslip .application > input) {
+  flex: 1 1 auto;
+}
+/* Date picker fills remaining width of the compact date group */
+:global(.crossslip .date-picker) {
+  flex: 1 1 auto;
+  min-width: 0;
+}
 </style>
 
 <script>
@@ -302,7 +336,7 @@ import axios from 'axios';
 import Icon from '@iconify/svelte';
 
 import {findTaxClass} from '../../javascripts/cross-slip';
-import {numeric, getCompanyInfo} from '../../../libs/utils';
+import {numeric, getCompanyInfo, DateString} from '../../../libs/utils';
 import {onMount, beforeUpdate, afterUpdate, createEventDispatcher} from 'svelte';
 import Account from './account.svelte';
 import {field} from '../../../libs/parse_account_code';
@@ -319,6 +353,27 @@ let projects = [];
 let showProject = false;
 
 $: slip.year = slip.month < ( fy.startDate.getMonth() + 1 ) ? fy.endDate.getFullYear() : fy.startDate.getFullYear();
+
+// Date picker (issue #2): single native date input bounded to the
+// fiscal-year range. Year stays auto-derived (above) and shown in the
+// badge; picking a date writes back month/day.
+const pad2 = (n) => ('0' + n).slice(-2);
+$: minDate = fy.startDate ? DateString(fy.startDate) : undefined;
+$: maxDate = fy.endDate ? DateString(fy.endDate) : undefined;
+$: slipDate = ( slip.year && slip.month && slip.day )
+  ? `${slip.year}-${pad2(slip.month)}-${pad2(slip.day)}`
+  : '';
+const onDateChange = (event) => {
+  const v = event.target.value; // YYYY-MM-DD
+  if ( !v ) {
+    slip.day = undefined;
+    return;
+  }
+  const [y, m, d] = v.split('-').map((n) => parseInt(n, 10));
+  slip.month = m;
+  slip.day = d;
+  slip = slip;
+};
 
 onMount(async () => {
   try {

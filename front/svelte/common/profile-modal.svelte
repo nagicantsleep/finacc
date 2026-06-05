@@ -1,4 +1,4 @@
-<div class="modal" bind:this={modalEl} tabindex="-1" data-bs-backdrop="static">
+<div class="modal" bind:this={modalEl} tabindex="-1">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">

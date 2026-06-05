@@ -44,20 +44,16 @@
   }
 }
 
-/* BilingualText — secondary line color is context-aware.
-   Default (light bg): #666 stays subordinate. On dark teal surfaces
-   (sidebar, table th), lighten to maintain ≥4.5:1 contrast on #264653. */
+/* BilingualText — secondary line tracks its parent's text color via
+   `inherit` + reduced opacity. This keeps it subordinate yet legible on
+   ANY surface: dark text on light backgrounds, light text on dark
+   surfaces (sidebar, table th, colored buttons). No per-surface overrides
+   needed — the secondary line always matches whatever color the parent
+   element uses. */
 .bilingual-secondary,
 .bilingual-sep {
-  color: #666;
-}
-.sidebar .bilingual-secondary,
-.sidebar .bilingual-sep {
-  color: #b8c5ca;
-}
-.table th .bilingual-secondary,
-.table th .bilingual-sep {
-  color: #cfe2e8;
+  color: inherit;
+  opacity: 0.7;
 }
 
 /* User menu avatar — circular placeholder showing first letter of user name.
