@@ -162,14 +162,6 @@ export default (sequelize, DataTypes) => {
       defaultValue: false
     },
 
-    // Language pair preference (user override)
-    languagePair: {
-      type: DataTypes.JSONB,
-      allowNull: true,
-      defaultValue: null,
-      comment: 'User-level language pair override. Null = inherit tenant default. e.g. {"primary":"ja","secondary":"vi"}'
-    },
-
     // Tenant-internal identity & display
     tradingName: {
       type: DataTypes.STRING,

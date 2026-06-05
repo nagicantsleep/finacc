@@ -5,6 +5,9 @@
     </div>
     <div class="card">
       <div class="card-body login-card-body">
+        <div class="d-flex justify-content-end mb-2">
+          <LanguagePairSelector save={false} />
+        </div>
         <p class="fs-4 text-center "><BilingualText key="login" /></p>
         <p class="text-{msg_type} text-center">{message}</p>
         <div class="mb-3">
@@ -36,7 +39,9 @@
 import {onMount, beforeUpdate, afterUpdate, createEventDispatcher} from 'svelte';
 import axios from 'axios';
 import BilingualText from '../components/bilingual-text.svelte';
-import { bi } from '../../javascripts/bilingual.js';
+import { bi, languagePair } from '../../javascripts/bilingual.js';
+import { get } from 'svelte/store';
+import LanguagePairSelector from '../widgets/language-pair-selector.svelte';
 export let current;
 
 let user_name = '';
@@ -68,7 +73,8 @@ const Login = async () => {
   try {
     const response = await axios.post('/api/user/login', {
       user_name,
-      password
+      password,
+      languagePair: get(languagePair)
     });
 
     console.log('result', response.data);
