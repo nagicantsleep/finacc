@@ -4,11 +4,22 @@
 {:else if ( getStore(currentPage) === '/signup' ) }
 <SignUp></SignUp>
 {:else}
-<nav class="main-header navbar navbar-expand-lg">
-  <NavBar
-    status={status}></NavBar>
-</nav>
-<aside 
+<div class="topbar">
+  <div class="brand-container">
+    <a href="#" class="brand-link"
+      on:click|preventDefault={() => {
+        link('/home');
+      }}>
+        <img src="/public/logo.png" alt="Logo" class="brand-image">
+        <span class="brand-text">Hieronymus</span>
+    </a>
+  </div>
+  <nav class="main-header navbar navbar-expand-lg">
+    <NavBar
+      status={status}></NavBar>
+  </nav>
+</div>
+<aside
   class="main-sidebar">
   <SideBar
     bind:mainCount={mainCount}
@@ -73,7 +84,7 @@ import OkModal from './common/ok-modal.svelte';
 
 import Router from './components/router.svelte';
 import BilingualText from './components/bilingual-text.svelte';
-import {currentPage, getStore} from '../javascripts/router.js';
+import {currentPage, getStore, link} from '../javascripts/router.js';
 import { loadDictionaries, languagePair } from '../javascripts/bilingual.js';
 import { getCompanyInfo } from '../../libs/utils.js';
 import ja from '../javascripts/locales/ja.json';

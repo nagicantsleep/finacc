@@ -11,6 +11,7 @@
   --sidebar-bg: #264653;
   --sidebar-text: #eeeeee;
   --sidebar-text-active: #fff;
+  --topbar-height: 56px;
   --bs-btn-disabled-bg: #469c92;
   --bs-btn-disabled-border-color: #469c92;
   --bs-link-color:    #008c8c;
@@ -150,9 +151,21 @@ tbody {
 input, optgroup, select, textarea {
 }
 .content-wrapper,
-.main-footer,
-.main-header {
+.main-footer {
     margin-left: 250px;
+}
+.topbar {
+  align-items: stretch;
+  display: flex;
+  flex-direction: row;
+  position: sticky;
+  top: 0;
+  z-index: 1039;
+}
+.topbar .main-header {
+  flex: 1 1 auto;
+  margin-left: 0;
+  min-width: 0;
 }
 .main-header {
   background-color: var(--header-bg-color);
@@ -163,7 +176,7 @@ input, optgroup, select, textarea {
   float: none;
   left: 0;
   position: fixed;
-  top: 0;
+  top: var(--topbar-height);
   width: 250px;
   z-index: 1038;
 }
@@ -175,7 +188,7 @@ input, optgroup, select, textarea {
     width: inherit;
 }
 .main-sidebar .sidebar {
-  height: calc(100vh - (calc(3.5rem + 0px)));
+  height: calc(100vh - var(--topbar-height));
 }
 .sidebar {
   overflow-x: hidden;
@@ -268,28 +281,24 @@ tr.over td {
 // compatibility for AdminLTE
 
 .brand-container {
-  display: grid;
-  grid-template-areas: "brand-link pushmenu";
-  justify-content: space-between;
-  font-size: 1.25rem;
-  transition: width .3s ease-in-out;
-  padding: 0.8125rem 0.5rem;
-  white-space: nowrap;
-  overflow: hidden;
-  //background-color:  #b0d9d9;
+  align-items: center;
   background-color: var(--header-bg-color);
+  display: flex;
+  flex: 0 0 250px;
   font-size: 1.25rem;
-  padding: 0.8125rem 0.5rem;
-  white-space: nowrap;
   overflow: hidden;
+  padding: 0.5rem 0.5rem;
+  transition: width .3s ease-in-out;
+  white-space: nowrap;
+  width: 250px;
   .pushmenu {
     color: var(--body-color);
   }
   .brand-link {
-    //color: var(--body-color);
+    align-items: center;
     color: #fff;
+    display: flex;
     .brand-image {
-      float: left;
       line-height: .8;
       margin-left: 0.8rem;
       margin-right: 0.5rem;
