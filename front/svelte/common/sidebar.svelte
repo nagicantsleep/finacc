@@ -1,12 +1,3 @@
-<div class="brand-container">
-  <a href="#" class="brand-link"
-    on:click|preventDefault={() => {
-      link('/home');
-    }}>
-      <img src="/public/logo.png" alt="Logo" class="brand-image">
-      <span class="brand-text">Hieronymus</span>
-  </a>
-</div>
 <div class="sidebar">
 	<nav class="mt-2">
     <ul class="nav nav-pills nav-sidebar flex-column">
