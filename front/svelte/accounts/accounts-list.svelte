@@ -18,14 +18,14 @@
     {#each lines as line}
     <tr>
       <td>
-        {line.majorName}
+        {#if line.majorName}<span class="bi-pair"><span class="bi-primary">{line.majorName}</span>{#if line.majorNameVi}<span class="bi-sep"> / </span><span class="bi-secondary">{line.majorNameVi}</span>{/if}</span>{/if}
       </td>
       <td>
-        {line.middleName}
+        {#if line.middleName}<span class="bi-pair"><span class="bi-primary">{line.middleName}</span>{#if line.middleNameVi}<span class="bi-sep"> / </span><span class="bi-secondary">{line.middleNameVi}</span>{/if}</span>{/if}
       </td>
       <td>
         {#if (line.minorName != '')}
-        {line.minorName}
+        <span class="bi-pair"><span class="bi-primary">{line.minorName}</span>{#if line.minorNameVi}<span class="bi-sep"> / </span><span class="bi-secondary">{line.minorNameVi}</span>{/if}</span>
         {/if}
       </td>
       <td>
@@ -34,7 +34,7 @@
           on:click={() => {
             editAccount(line.code);
           }}>
-          {line.accountName}
+          <span class="bi-pair"><span class="bi-primary">{line.accountName}</span>{#if line.accountNameVi}<span class="bi-sep"> / </span><span class="bi-secondary">{line.accountNameVi}</span>{/if}</span>
         </button>
         {:else}
         <button type="button" class="btn btn-primary btn-sm"
@@ -57,7 +57,7 @@
           on:click={() => {
             editSubAccount(line.code, line.subCode);
           }}>
-          {line.subAccountName}
+          <span class="bi-pair"><span class="bi-primary">{line.subAccountName}</span>{#if line.subAccountNameVi}<span class="bi-sep"> / </span><span class="bi-secondary">{line.subAccountNameVi}</span>{/if}</span>
         </button>
         {:else}
         <button type="button" class="btn btn-primary btn-sm"
@@ -92,6 +92,18 @@
 <style>
 th {
 	text-align: center;
+}
+.bi-pair {
+	display: inline;
+}
+.bi-primary {
+	font-weight: 600;
+}
+.bi-secondary {
+	font-size: 0.85em;
+}
+.bi-sep {
+	opacity: 0.5;
 }
 </style>
 

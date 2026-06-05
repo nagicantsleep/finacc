@@ -44,6 +44,7 @@ import {parseParams, buildParam} from '../../javascripts/params.js';
 import { currentPage } from '../../javascripts/router.js';
 
 import BilingualText from '../components/bilingual-text.svelte';
+import { languagePair } from '../../javascripts/bilingual.js';
 export let status;
 
 let accounts;
@@ -66,18 +67,24 @@ const ready = () => {
     };
     if ( last_account.major_name != account.major_name ) {
       new_line.majorName = account.major_name;
+      new_line.majorNameVi = account.major_nameVi || '';
     } else {
       new_line.majorName = '';
+      new_line.majorNameVi = '';
     }
     if ( last_account.middle_name != account.middle_name ) {
       new_line.middleName = account.middle_name;
+      new_line.middleNameVi = account.middle_nameVi || '';
     } else {
       new_line.middleName = '';
+      new_line.middleNameVi = '';
     }
     if ( last_account.minor_name != account.minor_name ) {
       new_line.minorName = account.minor_name;
+      new_line.minorNameVi = account.minor_nameVi || '';
     } else {
       new_line.minorName = '';
+      new_line.minorNameVi = '';
     }
     if		(( new_line.major_name != '') ||
          ( new_line.middle_name != '' ) ||
@@ -90,7 +97,9 @@ const ready = () => {
         middleName: '',
         minorName: '',
         accountName: account.name,
+        accountNameVi: account.nameVi || '',
         subAccountName: '',
+        subAccountNameVi: '',
         taxClass: ( account.subAccounts && account.subAccounts.length > 0 ) ? 0 : account.taxClass,
         key: account.key ? account.key : '',
         debit: account.debit ? numeric(account.debit) : 0,
@@ -107,7 +116,9 @@ const ready = () => {
             middleName: '',
             minorName: '',
             accountName: '',
+            accountNameVi: '',
             subAccountName: sub.name,
+            subAccountNameVi: sub.nameVi || '',
             taxClass: sub.taxClass,
             key: sub.key,
             debit: sub.debit ? numeric(sub.debit) : 0,
@@ -125,7 +136,8 @@ const ready = () => {
 
 
 const	updateAccounts = () => {
-  axios.get(`/api/accounts4/${status.fy.term}`).then((result) => {
+  const lp = encodeURIComponent(JSON.stringify($languagePair));
+  axios.get(`/api/accounts4/${status.fy.term}?languagePair=${lp}`).then((result) => {
     accounts = result.data;
     //console.log('accounts', accounts);
     setAccounts(accounts);
