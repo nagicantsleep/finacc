@@ -1,59 +1,61 @@
 <div class="list">
-  <div class="page-title d-flex justify-content-between">
-    <h1><BilingualText key="voucher_list" /></h1>
-    <button type="button" class="btn btn-primary"
-  	  on:click={() => {
-    	  openVoucher(null);
-  	  }}
-		  id="voucher-info"><BilingualText key="voucher_entry_space" /><i class="bi bi-pencil-square"></i>
-    </button>
-  </div>
-  <ul class="page-subtitle nav me-auto">
-    {#each dates as date}
+  <div class="list-header d-flex flex-column gap-2">
+    <div class="page-title d-flex justify-content-between align-items-center flex-wrap gap-2">
+      <h1 class="page-title-bilingual mb-0"><BilingualText key="voucher_list" inline={true} /></h1>
+      <button type="button" class="btn btn-primary btn-bilingual flex-shrink-0"
+    	  on:click={() => {
+      	  openVoucher(null);
+    	  }}
+  		  id="voucher-info"><BilingualText key="voucher_entry_space" inline={true} /><i class="bi bi-pencil-square"></i>
+      </button>
+    </div>
+    <ul class="page-subtitle nav me-auto flex-wrap mb-0">
+      {#each dates as date}
+        <li class="nav-item">
+          {#if ( status.params && (date.ym == status.params.get('month')) )}
+          <button type="button" class="btn btn-primary month-btn disabled me-2"
+            on:click={() => {
+              dispatch('update', {
+                month: `${date.year}-${date.month}`
+              });
+            }}>
+            <BilingualText key={`month_${date.month}`} stacked={true} />
+          </button>
+          {:else}
+          <button type="button" class="btn btn-outline-primary month-btn me-2"
+            on:click={() => {
+              dispatch('update', {
+                month: `${date.year}-${date.month}`
+              });
+            }}>
+            <BilingualText key={`month_${date.month}`} stacked={true} />
+          </button>
+          {/if}
+        </li>
+      {/each}
       <li class="nav-item">
-        {#if ( status.params && (date.ym == status.params.get('month')) )}
-        <button type="button" class="btn btn-primary disabled me-2"
+        {#if ( !status.params || !status.params.get('month') )}
+        <button type="button" class="btn btn-primary month-btn disabled me-2"
           on:click={() => {
-            dispatch('update', {
-              month: `${date.year}-${date.month}`
+            dispatch('update' ,{
+              month: undefined
             });
           }}>
-          {date.month}&nbsp;{$bi('month_label')}
+          <BilingualText key="all" stacked={true} />
         </button>
         {:else}
-        <button type="button" class="btn btn-outline-primary me-2"
+        <button type="button" class="btn btn-outline-primary month-btn me-2"
           on:click={() => {
             dispatch('update', {
-              month: `${date.year}-${date.month}`
+              month: undefined
             });
           }}>
-          {date.month}&nbsp;{$bi('month_label')}
+          <BilingualText key="all" stacked={true} />
         </button>
         {/if}
       </li>
-    {/each}
-    <li class="nav-item">
-      {#if ( !status.params || !status.params.get('month') )}
-      <button type="button" class="btn btn-primary disabled me-2"
-        on:click={() => {
-          dispatch('update' ,{
-            month: undefined
-          });
-        }}>
-      ALL
-      </button>
-      {:else}
-      <button type="button" class="btn btn-outline-primary me-2"
-        on:click={() => {
-          dispatch('update', {
-            month: undefined
-          });
-        }}>
-        ALL
-      </button>
-      {/if}
-    </li>
-  </ul>
+    </ul>
+  </div>
   <div class="full-height-2 fontsize-12pt">
     <table class="table table-bordered">
       <thead class="table-light">
@@ -91,10 +93,10 @@
           <td>
           </td>
           <td>
-            <input type="text" class="number" placeholder={$bi('lower_limit')} size="12" maxlength="13"
+            <input type="text" class="number" placeholder={$bi('lower_limit')} size="18" maxlength="13"
                 bind:value={lowerAmount}
                 on:keypress={changeAmount} />
-            <input type="text" class="number" placeholder={$bi('upper_limit')} size="12" maxlength="13"
+            <input type="text" class="number" placeholder={$bi('upper_limit')} size="18" maxlength="13"
                 bind:value={upperAmount}
                 on:keypress={changeAmount} />
           </td>
@@ -209,6 +211,26 @@
 .rect-image {
   width:40px;
   clip:rect(0,40px,40px,0);
+}
+.month-btn {
+  min-height: 56px;
+  line-height: 1.2;
+  white-space: normal;
+  padding: 0.25rem 0.5rem;
+}
+.btn-bilingual {
+  min-height: 56px;
+  line-height: 1.2;
+  white-space: normal;
+  padding: 0.25rem 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.page-title-bilingual {
+  display: inline-flex;
+  align-items: center;
+  line-height: 1.3;
 }
 </style>
 
