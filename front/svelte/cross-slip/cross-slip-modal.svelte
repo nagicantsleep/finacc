@@ -1,4 +1,4 @@
-<div class="modal" id={ id ? id : "cross-slip-modal"} tabindex="-1" data-bs-backdrop="static">
+<div class="modal" id={ id ? id : "cross-slip-modal"} tabindex="-1">
   <div class="modal-dialog modal-xl">
     <div class="modal-content">
       <div class="modal-header">
@@ -123,19 +123,26 @@ export let popUp;
 export let id;
 
 let modal;
+let modalEl;
+let disposed = false;
 let vouchers;
 let ok = true;
 let errorMessages = [];
 let taxRules = [];
 
-const clean_popup = () => {
+// Single teardown path. Triggered by Bootstrap's `hidden.bs.modal`,
+// which fires for BOTH the X/Save buttons (via modal.hide()) and a
+// backdrop click — so clicking outside the form now disposes it
+// cleanly and keeps `popUp` in sync with the parent.
+const teardown = () => {
+  if (disposed) return;
+  disposed = true;
   dispatch('close');
   popUp = false;
-  modal.hide();
-  modal.dispose();
   vouchers = undefined;
   errorMessages = [];
   ok = true;
+  modal.dispose();
 }
 const onDragStart = (event) => {
   event.dataTransfer.dropEffect = 'link';
@@ -156,7 +163,9 @@ onMount(async () => {
   const result = await axios.get(`/api/tax-rule?type=active&date=${date}`);
   taxRules = result.data.values;
   console.log(taxRules);
-  modal = new Modal(document.getElementById('cross-slip-modal'));
+  modalEl = document.getElementById(id ? id : 'cross-slip-modal');
+  modalEl.addEventListener('hidden.bs.modal', teardown);
+  modal = new Modal(modalEl);
   modal.show();
 });
 beforeUpdate(() => {
@@ -244,7 +253,7 @@ const save = (event) => {
 };
 
 const close_ = (event) => {
-  clean_popup();
+  modal.hide();
 };
 
 const delete_ = (event) => {
@@ -258,7 +267,7 @@ const delete_ = (event) => {
         no: slip.no
       }
     }).then((result) => {
-      clean_popup();
+      modal.hide();
     });
   } catch(e) {
     console.log(e);
