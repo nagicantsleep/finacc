@@ -237,14 +237,16 @@
 /* (A.1) Issue #180: dark header band (matches btn-secondary navy
    `#264653` used by the voucher/save buttons). Light text reads on
    dark background; secondary bilingual line inherits white at lower
-   opacity via the global rule above. */
-:global(.crossslip .table-dark-header) {
-  background-color: var(--bs-secondary, #264653);
-  color: #fff;
+   opacity via the global rule above. !important is needed because
+   Bootstrap's `.table > :not(caption) > * > *` rule (specificity
+   0,0,3,0) and `.table-bordered` win over our scoped selectors
+   (0,0,2,0). Scoped to .crossslip so the override cannot leak. */
+:global(.crossslip .table-dark-header),
+:global(.crossslip .table-dark-header) th {
+  background-color: var(--bs-secondary, #264653) !important;
+  color: #fff !important;
 }
-:global(.crossslip .table-dark-header th) {
-  background-color: var(--bs-secondary, #264653);
-  color: #fff;
+:global(.crossslip .table-dark-header) th {
   border-bottom-color: rgba(255, 255, 255, 0.25);
 }
 
