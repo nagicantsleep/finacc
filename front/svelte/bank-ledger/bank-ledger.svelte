@@ -1,28 +1,28 @@
 <div class="list">
   <div class="page-title d-flex justify-content-between">
-    <h1>銀行元帳</h1>
+    <h1 class="page-title-bilingual"><BilingualText key="bank_ledger" inline={true} /></h1>
   </div>
   <ul class="page-subtitle d-flex justify-content-between">
     <div class="nav">
     <li class="nav-item dropdown">
       <button type="button"
-        class="btn nav-link dropdown-toggle"
+        class="btn nav-link dropdown-toggle account-dropdown-toggle"
         style="background-color:var(--bs-primary);color:white;"
-        rolw="button" data-bs-toggle="dropdown" aria-expanded="false">
+        role="button" data-bs-toggle="dropdown" aria-expanded="false">
         {#if accountCode}
-        {BANK_ACCOUNTS.find((el) => el[0] == accountCode)[1]}
+        <BilingualText key={BANK_ACCOUNTS.find((el) => el[0] == accountCode)[1]} inline={true} />
         {:else}
-        科目
+        <BilingualText key="account" inline={true} />
         {/if}
       </button>
       <ul class="dropdown-menu" aria-labelledby="field">
         {#each BANK_ACCOUNTS as account}
         <li>
-          <button type="button" class="btn btn-link dropdown-item"
+          <button type="button" class="btn btn-link dropdown-item account-dropdown-item"
             on:click={() => {
               openAccount(account[0])}
             }>
-            {account[1]}
+            <BilingualText key={account[1]} inline={true} />
           </button>
         </li>
         {/each}
@@ -35,14 +35,14 @@
           on:click|preventDefault={() => {
             openBank(bank.subAccountCode);
           }}>
-          {bank.name}
+          <BilingualText primary={bank.name} secondary={bank.nameVi} inline={true} />
         </button>
         {:else}
         <button type="button" class="btn btn-outline-info"
           on:click|preventDefault={() => {
             openBank(bank.subAccountCode);
           }}>
-          {bank.name}
+          <BilingualText primary={bank.name} secondary={bank.nameVi} inline={true} />
         </button>
         {/if}
       </li>
@@ -50,8 +50,8 @@
     </div>
     <div>
     	<button type="button" class="btn btn-primary" id="open-cross-slip"
-    		on:click={openSlip}>
-        伝票入力&nbsp;<i class="bi bi-pencil-square"></i>
+        on:click={openSlip}>
+        <BilingualText key="voucher_entry" inline />&nbsp;<i class="bi bi-pencil-square"></i>
       </button>
     </div>
   </ul>
@@ -60,22 +60,22 @@
       <thead class="table-light">
         <tr>
           <th scope="col" colspan="2">
-            日付 / 伝番
+            <BilingualText key="date_voucher_no" />
           </th>
           <th scope="col" style="width: 150px;">
-            相手勘定科目<br/>相手補助科目
+            <BilingualText key="counter_account" /><br/><BilingualText key="counter_sub_account" />
           </th>
           <th scope="col" style="width: 300px;">
-            適用<br/>補助科目
+            <BilingualText key="application" /><br/><BilingualText key="sub_account" />
           </th>
           <th scope="col" style="width: 100px;">
-            支払金額
+            <BilingualText key="payment_amount" />
           </th>
           <th scope="col" style="width: 100px;">
-            預り金額
+            <BilingualText key="deposit_amount" />
           </th>
           <th scope="col" style="width: 100px;">
-            残高
+            <BilingualText key="balance" />
           </th>
         </tr>
       </thead>
@@ -161,6 +161,37 @@
 {/if}
   
 <style>
+/* Bilingual H1 + buttons need more height than the global
+   `.page-title { height: 50px }` to avoid the H1 overflowing
+   into the `.page-subtitle` row (which contains the account
+   dropdown — see issue #147). */
+.page-title {
+  height: auto;
+  min-height: 50px;
+  flex-wrap: wrap;
+  row-gap: 0.25rem;
+}
+.page-title-bilingual {
+  display: inline-flex;
+  align-items: center;
+  line-height: 1.3;
+  margin: 4px 0;
+}
+.account-dropdown-toggle,
+.account-dropdown-item {
+  min-height: 44px;
+  line-height: 1.2;
+  white-space: normal;
+  padding: 0.25rem 0.6rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.account-dropdown-item {
+  width: 100%;
+  text-align: left;
+  text-decoration: none;
+}
 </style>
 
 <script>
@@ -169,6 +200,8 @@ import {onMount, afterUpdate} from 'svelte';
 import {ledgerLines} from '../../../libs/ledger';
 import {setAccounts} from '../../javascripts/cross-slip';
 import CrossSlipModal from '../cross-slip/cross-slip-modal.svelte';
+import BilingualText from '../components/bilingual-text.svelte';
+import {languagePair} from '../../javascripts/bilingual.js';
 import {DateString} from '../../../libs/utils.js';
 import {currentPage} from '../../javascripts/router.js';
 
@@ -188,10 +221,10 @@ let popUp;
 $: checkPage($currentPage);
 
 const BANK_ACCOUNTS = [
-  [ '1010000',	'当座預金' ],
-  [ '1010010',	'普通預金' ],
-  [ '1010020',	'定期預金' ],
-  [ '1010030',	'定期積立' ]
+  [ '1010000',	'bank_checking_dep' ],
+  [ '1010010',	'bank_savings_dep' ],
+  [ '1010020',	'bank_time_dep' ],
+  [ '1010030',	'bank_fixed_dep' ]
 ];
 
 const link = (href) => {
@@ -242,9 +275,18 @@ afterUpdate(() => {
   }
 })
 
+const lpQuery = () => {
+  const pair = $languagePair;
+  return `?languagePair=${encodeURIComponent(JSON.stringify(pair))}`;
+}
+
+$: if ($languagePair && accountCode) {
+  updateAccount();
+}
+
 const updateAccount = () => {
   if	( accountCode )	{
-    axios.get(`/api/account/${accountCode}`).then((result) => {
+    axios.get(`/api/account/${accountCode}${lpQuery()}`).then((result) => {
       bank_list = result.data;
     });
   } else {

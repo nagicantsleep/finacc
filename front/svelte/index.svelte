@@ -4,11 +4,22 @@
 {:else if ( getStore(currentPage) === '/signup' ) }
 <SignUp></SignUp>
 {:else}
-<nav class="main-header navbar navbar-expand-lg">
-  <NavBar
-    status={status}></NavBar>
-</nav>
-<aside 
+<div class="topbar">
+  <div class="brand-container">
+    <a href="#" class="brand-link"
+      on:click|preventDefault={() => {
+        link('/home');
+      }}>
+        <img src="/public/logo.png" alt="Logo" class="brand-image">
+        <span class="brand-text">Hieronymus</span>
+    </a>
+  </div>
+  <nav class="main-header navbar navbar-expand-lg">
+    <NavBar
+      status={status}></NavBar>
+  </nav>
+</div>
+<aside
   class="main-sidebar">
   <SideBar
     bind:mainCount={mainCount}
@@ -72,8 +83,15 @@ import Task from './task/task.svelte';
 import OkModal from './common/ok-modal.svelte';
 
 import Router from './components/router.svelte';
-import {currentPage, getStore} from '../javascripts/router.js';
+import BilingualText from './components/bilingual-text.svelte';
+import {currentPage, getStore, link} from '../javascripts/router.js';
+import { loadDictionaries, languagePair } from '../javascripts/bilingual.js';
 import { getCompanyInfo } from '../../libs/utils.js';
+import ja from '../javascripts/locales/ja.json';
+import vi from '../javascripts/locales/vi.json';
+import en from '../javascripts/locales/en.json';
+
+loadDictionaries({ ja, vi, en });
 
 export let term;
 
@@ -176,6 +194,17 @@ onMount(async () => {
   console.log('index onMount');
   status.pathname = location.pathname;
   // currentPage.set(location.pathname);
+
+  // Fetch language pair preference from server
+  try {
+    const langRes = await axios.get('/api/user/language-pair');
+    if (langRes.data && langRes.data.languagePair) {
+      languagePair.set(langRes.data.languagePair);
+    }
+  } catch (e) {
+    console.log('language-pair fetch failed, using default', e);
+  }
+
   const res = await axios.get('/api/user');
   status.user = res.data.user;
   status.company = await getCompanyInfo();

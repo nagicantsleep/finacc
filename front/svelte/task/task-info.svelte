@@ -1,17 +1,17 @@
 <input type="hidden" id="id" bind:value={task.id}>
 <div class="container-fluid">
   <div class="row mb-3">
-    <label for="issueDate" class="col-1 col-form-label">発生日</label>
+    <label for="issueDate" class="col-1 col-form-label"><BilingualText key="occurrence_date" /></label>
     <div class="col-2">
       <input type="date" class="form-control" id="issueDate"
         bind:value={task.issueDate}>
     </div>
-    <label for="deliveryLimit" class="col-1 col-form-label">納期</label>
+    <label for="deliveryLimit" class="col-1 col-form-label"><BilingualText key="delivery_limit" /></label>
     <div class="col-2">
       <input type="date" class="form-control" id="deliveryLimit"
         bind:value={task.deliveryLimit}>
     </div>
-    <label for="endedAt" class="col-1 col-form-label">終了日</label>
+    <label for="endedAt" class="col-1 col-form-label"><BilingualText key="project_end" /></label>
     <div class="col-2">
       <input type="date" class="form-control" id="endedAt"
         bind:value={task.endedAt}>
@@ -19,7 +19,7 @@
   </div>
   <div class="row mb-3">
     <div class="col-1">
-      <label class="col-form-label">相手先</label>
+      <label class="col-form-label"><BilingualText key="counterparty" /></label>
       {#if ( task.companyId && task.id)}
       {#if (companyEditting)}
       <a href="#" on:click|preventDefault={() => {
@@ -56,20 +56,18 @@
       <button type="button" class="btn btn-warning"
       	on:click={() => {
           task.companyId = null;
-        }}>
-      	変更
-    	</button>
+        }}><BilingualText key="change" /></button>
   		{/if}
     </div>
   </div>
   <div class="row mb-3">
-    <label for="subject" class="col-1 col-form-label">件名</label>
+    <label for="subject" class="col-1 col-form-label"><BilingualText key="task_subject" /></label>
     <div class="col-7">
       <input type="text" class="form-control" id="subject"
         bind:value={task.subject} />
     </div>
     <div class="col-4">
-      <label for="handler" class="col-form-label">担当</label>
+      <label for="handler" class="col-form-label"><BilingualText key="person_in_charge" /></label>
       <select id="handler" class="form-control" style="display:inline;margin:0 10px;width:200px;"
         bind:value={task.handledBy}>
         {#each users as user}
@@ -80,7 +78,7 @@
   </div>
   <div class="row mb-3">
     <div class="col-1">
-      <label class="col-form-label">見積</label>
+      <label class="col-form-label"><BilingualText key="estimate" /></label>
       {#if (task.id)}
       {#if (viewDetail)}
       <a href="#" on:click|preventDefault={() => {
@@ -111,13 +109,13 @@
       </div>
       <div class="row mb-3">
         <div class="label" style="width:100px;">
-				  <span>金額</span>
+				  <span><BilingualText key="amount" /></span>
         </div>
         <div class="disabled">
       	  <span>{task.amount ? formatMoney(numeric(task.amount)): '0'}</span>
         </div>
         <div class="label" style="width:100px;">
-				  <span>消費税</span>
+				  <span><BilingualText key="tax" /></span>
         </div>
         <div class="disabled">
       	  <span>{task.tax ? formatMoney(numeric(task.tax)): '0'}</span>
@@ -127,13 +125,13 @@
     {:else}
     <div class="col-11">
       <div class="label" style="width:100px;">
-				<span>金額</span>
+				<span><BilingualText key="amount" /></span>
       </div>
       <div class="disabled">
       	<span>{task.amount ? formatMoney(numeric(task.amount)): '0'}</span>
       </div>
       <div class="label" style="width:100px;">
-				<span>消費税</span>
+				<span><BilingualText key="tax" /></span>
       </div>
       <div class="disabled">
       	<span>{task.tax ? formatMoney(numeric(task.tax)): '0'}</span>
@@ -143,7 +141,7 @@
   </div>
   <div class="row mb-3">
     <div class="col-1">
-      <label for="description" class="col-form-label">備考</label>
+      <label for="description" class="col-form-label"><BilingualText key="remarks" /></label>
       {#if ( documentEditting )}
       <a href="#" on:click|preventDefault={() => {
         documentEditting = false
@@ -183,7 +181,7 @@
   </div>
   <div class="row mb-3">
     <div class="col-1">
-      ファイル
+      <BilingualText key="file" />
       {#if ( viewFiles )}
       <a href="#" on:click|preventDefault={() => {
         viewFiles = false;
@@ -208,7 +206,7 @@
   </div>
   <div class="row mb-3">
     <div class="col-1">
-      取引
+      <BilingualText key="transaction_label" />
       {#if ( viewTransaction )}
       <a href="#" on:click|preventDefault={() => {
         viewTransaction = false;
@@ -228,12 +226,8 @@
       <table class="table table-bordered">
         <thead class="table-light">
           <tr>
-            <th scope="col" style="width: 100px;">
-              種別
-            </th>
-            <th scope="col" style="width: 100px;">
-              発生日
-              <a href=""
+            <th scope="col" style="width: 100px;"><BilingualText key="kind" /></th>
+            <th scope="col" style="width: 100px;"><BilingualText key="occurrence_date" /><a href=""
               	on:click|preventDefault={() => {
                 if	( transactionOrder === 'asc' )	{
 									transactionOrder = 'desc';
@@ -250,15 +244,9 @@
                 {/if}
               </a>
             </th>
-            <th scope="col" style="">
-              件名
-            </th>
-            <th scope="col" style="width: 100px;">
-              担当
-            </th>
-            <th scope="col" style="width: 100px;">
-              金額
-            </th>
+            <th scope="col" style=""><BilingualText key="task_subject" /></th>
+            <th scope="col" style="width: 100px;"><BilingualText key="person_in_charge" /></th>
+            <th scope="col" style="width: 100px;"><BilingualText key="amount" /></th>
           </tr>
         </thead>
 				<tbody>
@@ -294,25 +282,19 @@
               transactionParams.delete('kind');
               transactionParams.set('voucher','true');
               transactions = null;
-          	}}>
-          	請求回収
-        	</button>
+          	}}><BilingualText key="billing" /></button>
         	<button type="button" class="btn btn-info"
 	        	on:click={() => {
               transactionParams.delete('kind');
               transactionParams.set('voucher', 'false');
               transactions = null;
-        	  }}>
-          	業務関係
-        	</button>
+        	  }}><BilingualText key="business_relations" /></button>
 	        <button type="button" class="btn btn-info"
   	      	on:click={() => {
               transactionParams.delete('voucher');
               transactionParams.delete('kind');
               transactions = null;
-	        	}}>
-  	      全て
-    	    </button>
+	        	}}><BilingualText key="all" /></button>
       		<select class="form-select" style="display:inline;width:150px;"
         		bind:value={kind}
           	on:change={() => {
@@ -355,6 +337,7 @@ import CompanySelect from '../components/company-select.svelte';
 import Document from '../components/document.svelte';
 import DocumentFiles from '../components/document-files.svelte';
 import TaskDetails from '../transaction/transaction-details.svelte';
+import BilingualText from '../components/bilingual-text.svelte';
 const dispatch = createEventDispatcher();
 
 export let task;

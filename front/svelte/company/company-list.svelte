@@ -1,35 +1,24 @@
-<div class="page-title d-flex justify-content-between">
-  <h1>取引先台帳</h1>
-  <button type="button" class="btn btn-primary"
-    on:click={() => {
-      openCompany(null);
-    }}>取引先入力&nbsp;<i class="bi bi-pencil-square"></i></button>
-</div>
-<div class="full-height-1 fontsize-12pt">
-  <table class="table table-bordered">
+<div class="list">
+  <div class="page-title d-flex justify-content-between align-items-center flex-wrap">
+    <h1 class="page-title-bilingual mb-0"><BilingualText key="company_ledger" inline={true} /></h1>
+    <button type="button" class="btn btn-primary btn-bilingual flex-shrink-0"
+      on:click={() => {
+        openCompany(null);
+      }}><BilingualText key="company_entry_space" inline={true} /><i class="bi bi-pencil-square"></i></button>
+  </div>
+  <div class="full-height-1 fontsize-12pt">
+    <table class="table table-bordered">
     <thead class="table-light">
       <tr>
-        <th scope="col" style="width: 200px;">
-          名前
-        </th>
-        <th scope="col" style="width: 150px;">
-          種別
-        </th>
-        <th scope="col" style="width: 100px;">
-          郵便番号
-        </th>
-        <th scope="col">
-          住所
-        </th>
-        <th scope="col" style="width: 120px;">
-          電話番号
-        </th>
+        <th scope="col" style="width: 200px;"><BilingualText key="name" /></th>
+        <th scope="col" style="width: 150px;"><BilingualText key="kind" /></th>
+        <th scope="col" style="width: 100px;"><BilingualText key="zip_code" /></th>
+        <th scope="col"><BilingualText key="address" /></th>
+        <th scope="col" style="width: 120px;"><BilingualText key="tel" /></th>
         <th scope="col" style="width: 100px;">
           E-mail
         </th>
-        <th scope="col" style="width: 100px;">
-          担当者名
-        </th>
+        <th scope="col" style="width: 100px;"><BilingualText key="charge_name" /></th>
       </tr>
     </thead>
     <tbody>
@@ -44,7 +33,7 @@
               link(`${location.pathname}?${param}`);
             }}
             value={status.params ? parseInt(status.params.get('kind')) : -1}>
-            <option value={-1}>全て</option>
+            <option value={-1}><BilingualText key="all" /></option>
             {#each companyClasses as ent}
             <option value={ent.id}>{ent.name}</option>
             {/each}
@@ -65,7 +54,7 @@
           </button>
         </td>
         <td>
-          {line.companyClass ? line.companyClass.name : 'その他'}
+          {line.companyClass ? line.companyClass.name : $bi('other_class')}
         </td>
         <td>
           {line.zip}
@@ -87,10 +76,28 @@
       {/each}
     </tbody>
   </table>
+  </div>
 </div>
 <style>
 th {
   text-align: center;
+}
+.page-title-bilingual {
+  display: inline-flex;
+  align-items: center;
+  line-height: 1.3;
+}
+.btn-bilingual {
+  min-height: 56px;
+  line-height: 1.2;
+  white-space: normal;
+  padding: 0.25rem 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.page-title {
+  margin-bottom: 1rem;
 }
 </style>
 
@@ -101,6 +108,8 @@ const dispatch = createEventDispatcher();
 import { buildParam, parseParams } from '../../javascripts/params';
 import { link } from '../../javascripts/router.js';
 
+import BilingualText from '../components/bilingual-text.svelte';
+import { bi } from '../../javascripts/bilingual.js';
 export let status;
 export let companies;
 

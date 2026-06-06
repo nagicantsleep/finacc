@@ -1,3 +1,4 @@
+@charset "UTF-8";
 :root {
   --bs-body-bg: #f4f4f4;
   --bs-body-color: #333;
@@ -10,6 +11,7 @@
   --sidebar-bg: #264653;
   --sidebar-text: #eeeeee;
   --sidebar-text-active: #fff;
+  --topbar-height: 56px;
   --bs-btn-disabled-bg: #469c92;
   --bs-btn-disabled-border-color: #469c92;
   --bs-link-color: #008c8c;
@@ -32,10 +34,11 @@
   background-color: #fff;
   border-radius: 0.3rem;
 }
-.table > :not(caption) > * > * {
+.table > :not(caption) > * > td {
   background-color: #fff;
 }
-.table th {
+.table > :not(caption) > th,
+.table > :not(caption) > * > th {
   background-color: #264653;
   color: #fff;
 }
@@ -44,11 +47,58 @@
   color: var(--bs-table-color) !important;
 }
 
+/* BilingualText — secondary line tracks its parent's text color via
+   `inherit` + reduced opacity. This keeps it subordinate yet legible on
+   ANY surface: dark text on light backgrounds, light text on dark
+   surfaces (sidebar, table th, colored buttons). No per-surface overrides
+   needed — the secondary line always matches whatever color the parent
+   element uses. */
+.bilingual-secondary,
+.bilingual-sep {
+  color: inherit;
+  opacity: 0.7;
+}
+.table > :not(caption) > th .bilingual-secondary,
+.table > :not(caption) > th .bilingual-sep,
+.table > :not(caption) > * > th .bilingual-secondary,
+.table > :not(caption) > * > th .bilingual-sep {
+  color: #b8c5c9;
+  opacity: 1;
+}
+
+/* User menu avatar — circular placeholder showing first letter of user name.
+   Sits inside the navbar user menu trigger next to the name. */
+.user-menu-toggle {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.user-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: var(--bs-primary);
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.95rem;
+  line-height: 1;
+  user-select: none;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.15);
+}
+
+.user-menu-toggle:hover .user-avatar,
+.user-menu-toggle:focus .user-avatar {
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.3);
+}
+
 .card {
   background-color: #fff;
   border-radius: 0.3rem;
-  -webkit-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .nav-pills .nav-link.active {
@@ -92,7 +142,7 @@ body {
 }
 
 .change-list {
-  height: calc(100vh - 960px);
+  max-height: calc(100vh - 480px);
   overflow-y: auto;
 }
 
@@ -122,9 +172,23 @@ tbody {
 }
 
 .content-wrapper,
-.main-footer,
-.main-header {
+.main-footer {
   margin-left: 250px;
+}
+
+.topbar {
+  align-items: stretch;
+  display: flex;
+  flex-direction: row;
+  position: sticky;
+  top: 0;
+  z-index: 1039;
+}
+
+.topbar .main-header {
+  flex: 1 1 auto;
+  margin-left: 0;
+  min-width: 0;
 }
 
 .main-header {
@@ -137,7 +201,7 @@ tbody {
   float: none;
   left: 0;
   position: fixed;
-  top: 0;
+  top: var(--topbar-height);
   width: 250px;
   z-index: 1038;
 }
@@ -151,7 +215,7 @@ tbody {
 }
 
 .main-sidebar .sidebar {
-  height: calc(100vh - (3.5rem + 0px));
+  height: calc(100vh - var(--topbar-height));
 }
 
 .sidebar {
@@ -172,17 +236,17 @@ tbody {
 }
 
 ul.nav {
-  display: -webkit-box;
-  display: -ms-flexbox;
   display: flex;
-  -ms-flex-wrap: wrap;
-      flex-wrap: wrap;
+  flex-wrap: wrap;
   padding-left: 0;
   list-style: none;
 }
 
 .page-title {
-  height: 50px;
+  min-height: 50px;
+  height: auto;
+  flex-wrap: wrap;
+  row-gap: 0.25rem;
 }
 .page-title h1 {
   font-size: 1.75rem;
@@ -251,31 +315,26 @@ tr.over td {
 }
 
 .brand-container {
-  display: grid;
-  grid-template-areas: "brand-link pushmenu";
-  -webkit-box-pack: justify;
-      -ms-flex-pack: justify;
-          justify-content: space-between;
-  font-size: 1.25rem;
-  -webkit-transition: width 0.3s ease-in-out;
-  transition: width 0.3s ease-in-out;
-  padding: 0.8125rem 0.5rem;
-  white-space: nowrap;
-  overflow: hidden;
+  align-items: center;
   background-color: var(--header-bg-color);
+  display: flex;
+  flex: 0 0 250px;
   font-size: 1.25rem;
-  padding: 0.8125rem 0.5rem;
-  white-space: nowrap;
   overflow: hidden;
+  padding: 0.5rem 0.5rem;
+  transition: width 0.3s ease-in-out;
+  white-space: nowrap;
+  width: 250px;
 }
 .brand-container .pushmenu {
   color: var(--body-color);
 }
 .brand-container .brand-link {
+  align-items: center;
   color: #fff;
+  display: flex;
 }
 .brand-container .brand-link .brand-image {
-  float: left;
   line-height: 0.8;
   margin-left: 0.8rem;
   margin-right: 0.5rem;
@@ -304,21 +363,12 @@ tr.over td {
 .login-page,
 .register-page,
 .setup-page {
-  -webkit-box-align: center;
-      -ms-flex-align: center;
-          align-items: center;
+  align-items: center;
   background-color: #e9ecef;
-  display: -webkit-box;
-  display: -ms-flexbox;
   display: flex;
-  -webkit-box-orient: vertical;
-  -webkit-box-direction: normal;
-      -ms-flex-direction: column;
-          flex-direction: column;
+  flex-direction: column;
   height: 100vh;
-  -webkit-box-pack: center;
-      -ms-flex-pack: center;
-          justify-content: center;
+  justify-content: center;
 }
 
 .login-box,
@@ -436,17 +486,11 @@ a.link {
   min-height: 40px;
   padding: 0px;
   height: 100%;
-  -webkit-box-sizing: border-box;
-          box-sizing: border-box;
+  box-sizing: border-box;
   border-radius: 5px;
   overflow-y: hidden !important;
-  display: -webkit-box;
-  display: -ms-flexbox;
   display: flex;
-  -webkit-box-orient: vertical;
-  -webkit-box-direction: normal;
-      -ms-flex-direction: column;
-          flex-direction: column;
+  flex-direction: column;
 }
 
 .menu-header {
@@ -462,21 +506,14 @@ a.link {
 .menu {
   width: 100%;
   height: 100%;
-  display: -webkit-box;
-  display: -ms-flexbox;
   display: flex;
-  -webkit-box-orient: vertical;
-  -webkit-box-direction: normal;
-      -ms-flex-direction: column;
-          flex-direction: column;
+  flex-direction: column;
   background-color: var(--bs-card-bg);
   border-top: 1px solid var(--bs-border-color);
 }
 .menu .header {
   height: 40px;
-  -webkit-box-flex: 0;
-      -ms-flex: 0 0 auto;
-          flex: 0 0 auto;
+  flex: 0 0 auto;
   margin: 10px 10px;
 }
 .menu .text {
@@ -485,14 +522,11 @@ a.link {
   padding: 5px 15px;
 }
 .menu .body {
-  -webkit-box-flex: 1;
-      -ms-flex: 1 1 auto;
-          flex: 1 1 auto;
+  flex: 1 1 auto;
   overflow-y: auto;
   overflow-x: hidden;
   padding: 0 0 20px 0;
-  -webkit-box-sizing: border-box;
-          box-sizing: border-box;
+  box-sizing: border-box;
 }
 .menu .body .description,
 .menu .body form {
@@ -507,9 +541,7 @@ a.link {
 }
 .menu .footer {
   height: 40px;
-  -webkit-box-flex: 0;
-      -ms-flex: 0 0 auto;
-          flex: 0 0 auto;
+  flex: 0 0 auto;
   margin: -10px 10px 10px 10px;
 }
 .menu .list-group-item:first-child {

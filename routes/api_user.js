@@ -333,8 +333,28 @@ export default {
           } else {
             req.session.user = user.user;
 
+            // First-login default: seed the user's language preference from the
+            // pair they picked on the outer (login) page, but only if they have
+            // none yet. Never overrides an existing preference.
             try {
-              // Fetch all active tenant memberships
+              const picked = req.body.languagePair;
+              if (picked && picked.primary && picked.secondary &&
+                  ['ja', 'vi', 'en'].includes(picked.primary) &&
+                  ['ja', 'vi', 'en'].includes(picked.secondary) &&
+                  picked.primary !== picked.secondary) {
+                const dbUser = await models.User.findByPk(user.user.id);
+                if (dbUser && !dbUser.languagePair) {
+                  dbUser.languagePair = { primary: picked.primary, secondary: picked.secondary };
+                  await dbUser.save();
+                  req.session.languagePair = dbUser.languagePair;
+                }
+              }
+            } catch (lpErr) {
+              // Non-fatal: language seeding must not block login.
+              console.log('login languagePair seed error', lpErr);
+            }
+
+            try {
               const memberships = await models.TenantMember.findAll({
                 where: { 
                   userId: user.user.id, 
@@ -692,6 +712,58 @@ export default {
     } catch (err) {
       console.error('logoff error', err);
       res.json({ result: 'NG', message: 'ログオフに失敗しました。' });
+    }
+  },
+  languagePair: async (req, res, next) => {
+    if (!req.session || !req.session.user) {
+      return res.status(401).json({ result: 'NG', message: '認証されていません。' });
+    }
+
+    try {
+      const systemDefault = { primary: 'ja', secondary: 'vi' };
+
+      // Language preference is user-level and tenant-independent.
+      const user = await models.User.findByPk(req.session.user.id);
+      if (user && user.languagePair) {
+        req.session.languagePair = user.languagePair;
+        return res.json({ result: 'OK', languagePair: user.languagePair, source: 'user' });
+      }
+
+      // System fallback (user has no preference yet).
+      req.session.languagePair = systemDefault;
+      return res.json({ result: 'OK', languagePair: systemDefault, source: 'system' });
+    } catch (err) {
+      console.error('languagePair error', err);
+      res.status(500).json({ result: 'NG', message: '言語設定の取得に失敗しました。' });
+    }
+  },
+  updateLanguagePair: async (req, res, next) => {
+    if (!req.session || !req.session.user) {
+      return res.status(401).json({ result: 'NG', message: '認証されていません。' });
+    }
+
+    const { primary, secondary } = req.body;
+    if (!primary || !secondary || !['ja', 'vi', 'en'].includes(primary) || !['ja', 'vi', 'en'].includes(secondary)) {
+      return res.status(400).json({ result: 'NG', message: '無効な言語ペアです。' });
+    }
+    if (primary === secondary) {
+      return res.status(400).json({ result: 'NG', message: 'primary と secondary は異なる言語を指定してください。' });
+    }
+
+    try {
+      const user = await models.User.findByPk(req.session.user.id);
+      if (!user) {
+        return res.status(404).json({ result: 'NG', message: 'ユーザーが見つかりません。' });
+      }
+
+      user.languagePair = { primary, secondary };
+      await user.save();
+
+      req.session.languagePair = user.languagePair;
+      res.json({ result: 'OK', languagePair: user.languagePair });
+    } catch (err) {
+      console.error('updateLanguagePair error', err);
+      res.status(500).json({ result: 'NG', message: '言語設定の更新に失敗しました。' });
     }
   },
   selectTenant: async (req, res, next) => {

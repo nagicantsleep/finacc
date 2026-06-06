@@ -10,6 +10,7 @@
 <script>
   import axios from 'axios';
   import {onMount} from 'svelte';
+  import BilingualText from '../components/bilingual-text.svelte';
 
   let version = "";
 

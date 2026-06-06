@@ -5,12 +5,12 @@
     </div>
     <div class="card">
       <div class="card-body login-card-body">
-        <p class="fs-4 text-center">ログイン先を選択</p>
+        <p class="fs-4 text-center"><BilingualText key="select_login" /></p>
         {#if message}
           <p class="text-{msg_type} text-center">{message}</p>
         {/if}
         <p class="text-muted text-center small mb-3">
-          {userName}さん、アクセスする組織を選択してください。
+          {$bi('tenant_select_greeting', { userName })}
         </p>
         
         {#if isSubmitting}
@@ -31,10 +31,10 @@
                   <div class="tenant-name">{tenant.tenantName}</div>
                   <div class="tenant-badges">
                     {#if tenant.isOwner}
-                      <span class="badge bg-primary">オーナー</span>
+                      <span class="badge bg-primary"><BilingualText key="owner" /></span>
                     {/if}
                     {#if tenant.isDefault}
-                      <span class="badge bg-secondary">デフォルト</span>
+                      <span class="badge bg-secondary"><BilingualText key="default_label" /></span>
                     {/if}
                   </div>
                 </div>
@@ -46,9 +46,7 @@
           </div>
           
           <div class="text-center mt-3">
-            <a on:click|preventDefault={logout} href="#" class="text-muted small">
-              ログアウト
-            </a>
+            <a on:click|preventDefault={logout} href="#" class="text-muted small"><BilingualText key="logout" /></a>
           </div>
         {/if}
       </div>
@@ -59,6 +57,8 @@
 <script>
 import axios from 'axios';
 
+import BilingualText from '../components/bilingual-text.svelte';
+import { bi } from '../../javascripts/bilingual.js';
 let userName = '';
 let tenants = [];
 let selectedTenantId = null;
@@ -74,7 +74,7 @@ async function fetchTenants() {
       userName = response.data.userName;
       tenants = response.data.tenants;
     } else {
-      message = response.data.message || 'テナントの取得に失敗しました。';
+      message = response.data.message || $bi('tenant_fetch_failed');
       msg_type = 'danger';
     }
   } catch (err) {
@@ -83,7 +83,7 @@ async function fetchTenants() {
       // Not logged in
       window.location = '/login';
     } else {
-      message = 'テナントの取得に失敗しました。';
+      message = $bi('tenant_fetch_failed');
       msg_type = 'danger';
     }
   }
@@ -102,14 +102,14 @@ function selectTenant(tenant) {
       if (response.data.result === 'OK') {
         window.location = response.data.redirectTo || '/home';
       } else {
-        message = response.data.message || 'テナントの選択に失敗しました。';
+        message = response.data.message || $bi('tenant_select_fail');
         msg_type = 'danger';
         isSubmitting = false;
       }
     })
     .catch((err) => {
       console.error('select tenant error', err);
-      message = err.response?.data?.message || 'テナントの選択に失敗しました。';
+      message = err.response?.data?.message || $bi('tenant_select_fail');
       msg_type = 'danger';
       isSubmitting = false;
     });

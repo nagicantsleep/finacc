@@ -1,5 +1,5 @@
 <svelte:head>
-  <title>請求書::Hieronymus</title>
+  <title>{$bi('invoice_title')}</title>
   <meta http-equiv="Content-Language" content="ja" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="/public/bootstrap-icons/font/bootstrap-icons.css">
@@ -13,21 +13,21 @@
       <p>〒{transaction.zip || ''}</p>
       <p>{transaction.address1 || ''}</p>
       <p>{transaction.address2 || ''}</p>
-      <p>{transaction.companyName || ''} 御中</p>
+      <p>{transaction.companyName || ''} {$bi('company_honorific')}</p>
     </div>
     <div class="">
       <div class="title-info">
         <div class="title-line">
-          <h1>請 求 書</h1>
+          <h1><BilingualText key="invoice_form" /></h1>
           <div style="margin-left:20px;margin-top:10px;font-size:14px;">
             <span>No. {transaction.no}</span>
           </div>
         </div>
         <p>
-          発行日:&nbsp;
-          {date.getFullYear()}年
-          {date.getMonth() + 1}月
-          {date.getDate()}日
+          {$bi('issue_date')}:&nbsp;
+          {date.getFullYear()}{$bi('year_num')}
+          {date.getMonth() + 1}{$bi('month_num')}
+          {date.getDate()}{$bi('day')}
         </p>
       </div>
       <div class="company-info">
@@ -54,7 +54,7 @@
         <p class="homepage">{company.url}</p>
         {/if}
         <p class="handler">
-          担当: &nbsp;
+          {$bi('person_in_charge')}: &nbsp;
           {#if transaction.handleUser.memberships && transaction.handleUser.memberships[0]?.tradingName}
           {transaction.handleUser.memberships[0].tradingName}
           {:else}
@@ -62,7 +62,7 @@
           {/if}
         </p>
         <p class="account">
-          [振込先]
+          [{$bi('bank_transfer_destination')}]
           {company.bankName}
           {company.bankBranchName}
           {BANK_ACCOUNT_TYPE.find((bank) => bank[0] === company.accountType)}
@@ -73,13 +73,11 @@
   </header>
 	<main>
   	<div class="salutation">
-    	<p>毎度ありがとうございます。</p>
-    	<p>下記のとおり御請求申し上げます。</p>
+    	<p><BilingualText key="thank_you" /></p>
+    	<p><BilingualText key="invoice_intro" /></p>
   	</div>
   	<div class="total-amount">
-	    <div class="title">
-  	    合計金額
-    	</div>
+	    <div class="title"><BilingualText key="total_amount" /></div>
 	    <div class="amount">
         {formatMoney(transaction.amount)}
 	    </div>
@@ -92,6 +90,8 @@
 import Details from '../components/details.svelte';
 import {BANK_ACCOUNT_TYPE, formatMoney} from '../../../../libs/utils.js';
 
+import BilingualText from '../../components/bilingual-text.svelte';
+import { bi } from '../../../javascripts/bilingual.js';
 export let transaction;
 export let company;
    

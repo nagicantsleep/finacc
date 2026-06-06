@@ -16,6 +16,9 @@ export default {
 					['term', 'ASC']
 				]
 			});
+			if (!d) {
+				return res.status(404).json({ error: `No fiscal year found for tenant ${tenantId}` });
+			}
 			term = d.term;
 		}
 
@@ -25,6 +28,9 @@ export default {
 				accountCode: account
 			}
 		});
+		if (!account_rec) {
+			return res.status(404).json({ error: `Account not found: ${account}` });
+		}
 		if ( sub_account ) {
 			let sub_account_rec = await models.SubAccount.findOne({
 				where: {
@@ -33,17 +39,18 @@ export default {
 					subAccountCode: sub_account,
 				}
 			});
-			if	( sub_account_rec )	{
-				remaining = await models.SubAccountRemaining.findOne({
-					where: {
-						[Op.and]: {
-							tenantId,
-							term: term,
-							subAccountId: sub_account_rec.id
-						}
-					}
-				});
+			if	( !sub_account_rec )	{
+				return res.status(404).json({ error: `Sub-account not found: ${account}/${sub_account}` });
 			}
+			remaining = await models.SubAccountRemaining.findOne({
+				where: {
+					[Op.and]: {
+						tenantId,
+						term: term,
+						subAccountId: sub_account_rec.id
+					}
+				}
+			});
 		} else {
 			remaining = await models.AccountRemaining.findOne({
 				where: {

@@ -5,7 +5,7 @@
       id="field_{index}"
       rolw="button"
       data-bs-toggle="dropdown" aria-expanded="false">
-      {field.title}
+      <BilingualText key={field.titleKey} inline={true} />
     </button>
     <ul class="dropdown-menu" aria-labelledby="field_{index}">
       {#each field.accounts as account}
@@ -13,7 +13,7 @@
         <button type="button" class="dropdown-item btn btn-link"
           on:click={() => {
             select(account.code);
-          }}>{account.name}</button>
+          }}><BilingualText primary={account.name} secondary={account.nameVi} inline={true} /></button>
       </li>
       {/each}
     </ul>
@@ -22,6 +22,7 @@
 </ul>
 <script>
 import {createEventDispatcher} from 'svelte';
+import BilingualText from './bilingual-text.svelte';
 
 const dispatch = createEventDispatcher();
 

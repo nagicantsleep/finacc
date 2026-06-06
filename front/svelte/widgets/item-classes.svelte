@@ -3,12 +3,13 @@
   columns={[
     { type: "id", name: 'id'},
     { type: "order", name: 'displayOrder'},
-    { type: "text", name: 'name', title: "種別名", align: "left"},
-    { type: "checkbox", name: 'product', title: "商品", width: "50px"},
-    { type: "checkbox", name: 'inventoryManagement', title: "在庫管理", width: "100px"}
+    { type: "text", name: 'name', title: "item_class", align: "left"},
+    { type: "checkbox", name: 'product', title: "product", width: "50px"},
+    { type: "checkbox", name: 'inventoryManagement', title: "inventory_management", width: "100px"}
 ]}></TableMaintenance>
 <script>
 import TableMaintenance from './table-maintenance.svelte';
+import BilingualText from '../components/bilingual-text.svelte';
 
 export let status;
 </script>

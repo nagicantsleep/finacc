@@ -1,11 +1,13 @@
 import models from '../models/index.js';
 const Op = models.Sequelize.Op;
 import Accounts from '../libs/accounts.js';
+import { enrichBilingual, shapeAccountBilingual } from '../libs/bilingual-helper.js';
 
 export default {
   get: async (req, res, next) => {
     const tenantId = req.currentTenantId;
     let account_code = req.params.code;
+    const lp = req.query.languagePair ? JSON.parse(req.query.languagePair) : req.session?.languagePair;
 
     let account = await models.Account.findOne({
       where: {
@@ -20,7 +22,16 @@ export default {
         required: false
       }],
     });
-    res.json(account);
+    if (!account) {
+      return res.status(404).json({ error: `Account not found: ${account_code}` });
+    }
+    if (lp) {
+      await enrichBilingual('Account', [account], lp);
+      if (account.subAccounts?.length) {
+        await enrichBilingual('SubAccount', account.subAccounts, lp);
+      }
+    }
+    res.json(shapeAccountBilingual(account, lp));
   },
   get_class: (req, res, next) => {
     const tenantId = req.currentTenantId;
@@ -30,8 +41,11 @@ export default {
         tenantId,
         id: id
       }
-    }).then((data) => {
-      console.log({data});
+    }).then(async (data) => {
+      if (data) {
+        const lp = req.query.languagePair ? JSON.parse(req.query.languagePair) : req.session?.languagePair;
+        if (lp) await enrichBilingual('AccountClass', [data], lp);
+      }
       res.json(data);
     });
   },
@@ -69,6 +83,9 @@ export default {
         accountCode: req.body.code
       }
     });
+    if (!account) {
+      return res.status(404).json({ error: `Account not found: ${req.body.code}` });
+    }
     account.key = req.body.key;
     account.name = req.body.name;
     account.taxClass = req.body.tax_class;
@@ -98,22 +115,26 @@ export default {
     });
   },
   all: (req, res, next) => {
-    Accounts.all(req.currentTenantId).then((lines) => {
+    const lp = req.query.languagePair ? JSON.parse(req.query.languagePair) : req.session?.languagePair;
+    Accounts.all(req.currentTenantId, lp).then((lines) => {
       res.json(lines);
     });
   },
   all2: async (req, res, next) => {
-    Accounts.all2(req.currentTenantId, req.params.term).then((lines) => {
+    const lp = req.query.languagePair ? JSON.parse(req.query.languagePair) : req.session?.languagePair;
+    Accounts.all2(req.currentTenantId, req.params.term, lp).then((lines) => {
       res.json(lines);
     });
   },
   all3: async (req, res, next) => {
-    Accounts.all3(req.currentTenantId, req.params.term).then((lines) => {
+    const lp = req.query.languagePair ? JSON.parse(req.query.languagePair) : req.session?.languagePair;
+    Accounts.all3(req.currentTenantId, req.params.term, lp).then((lines) => {
       res.json(lines);
     });
   },
   all4: async (req, res, next) => {
-    Accounts.all4(req.currentTenantId, req.params.term).then((lines) => {
+    const lp = req.query.languagePair ? JSON.parse(req.query.languagePair) : req.session?.languagePair;
+    Accounts.all4(req.currentTenantId, req.params.term, lp).then((lines) => {
       res.json(lines);
     });
   }

@@ -11,7 +11,7 @@
   {networth}
   ></FinancialStatement>
 {:else}
-  <p>読み込み中...</p>
+  <p><BilingualText key="loading" /></p>
 {/if}
 <script>
 import { onMount } from 'svelte';
@@ -20,10 +20,12 @@ import initializeFinancialStatement from '../../../../libs/init-financial-statem
 
 import FinancialStatement from './financial-statement.svelte';
 
+import BilingualText from '../../components/bilingual-text.svelte';
+import { bi } from '../../../javascripts/bilingual.js';
 export let term;
 
 const formatMonth = (date) => {
-  return `${date.year}年${date.month}月`;
+  return `${date.year}${$bi('year_num')}${date.month}${$bi('month_label')}`;
 };
 
 let fy;

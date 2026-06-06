@@ -3,24 +3,24 @@
     <PageHeader
       {company}
       {fy}
-      title="貸借対照表"
+      titleKey="balance_sheet"
       ></PageHeader>
     <div class="page-body">
       <table class="table-report">
         <thead>
           <tr>
             <th colspan="2">
-              資産の部
+              <BilingualText key="assets_section" />
             </th>
             <th colspan="2">
-              負債の部
+              <BilingualText key="liabilities_section" />
             </th>
           </tr>
           <tr>
-            <th>科目</th>
-            <th>金額</th>
-            <th>科目</th>
-            <th>金額</th>
+            <th><BilingualText key="account" /></th>
+            <th><BilingualText key="amount" /></th>
+            <th><BilingualText key="account" /></th>
+            <th><BilingualText key="amount" /></th>
           </tr>
         </thead>
         <tbody>
@@ -30,9 +30,9 @@
           </tr>
           {/each}
           <tr class="total">
-            <td>資産合計</td>
+            <td><BilingualText key="total_assets" /></td>
             <td class="number">{formatMoney(asset)}</td>
-            <td>負債・純資産合計</td>
+            <td><BilingualText key="total_liabilities_networth" /></td>
             <td class="number">{formatMoney(liabilities + networth)}</td>
           </tr>
         </tbody>
@@ -43,6 +43,7 @@
 <script>
 import {formatMoney} from '../../../../libs/utils.js';
 import PageHeader from '../components/page-header.svelte';
+import BilingualText from '../../components/bilingual-text.svelte';
 
 export let fy;
 export let company;

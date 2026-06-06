@@ -1,6 +1,6 @@
 <div class="entry">
   <div class="page-title d-flex justify-content-between">
-    <h1>役職員情報</h1>
+    <h1><BilingualText key="member_info" /></h1>
   </div> 
   <div class="full-height fontsize-12pt">
     <div class="content">
@@ -14,15 +14,15 @@
       </div>
       <div class="footer">
         <button type="button" class="btn btn-secondary" disabled={disabled}
-          on:click={back}>もどる</button>
+          on:click={back}><BilingualText key="back" /></button>
         {#if ( member && member.id && member.id > 0 )}
         <button type="button" class="btn btn-danger" disabled={disabled}
           on:click={deleteMember}
-          id="delete-button">削除</button>
+          id="delete-button"><BilingualText key="delete" /></button>
         {/if}
         <button type="button" class="btn btn-primary" disabled={disabled}
           on:click={save}
-          id="save-button">保存</button>
+          id="save-button"><BilingualText key="save" /></button>
       </div>
     </div>
   </div>
@@ -36,6 +36,7 @@
 <script>
 import axios from 'axios';
 import {onMount, beforeUpdate, afterUpdate, createEventDispatcher} from 'svelte';
+import {get} from 'svelte/store';
 const dispatch = createEventDispatcher();
 import {numeric, formatDate} from '../../../libs/utils.js';
 import MemberInfo from './member-info.svelte';
@@ -44,6 +45,8 @@ import OkModal from '../common/ok-modal.svelte';
 import {currentMember, getStore} from '../../javascripts/current-record.js';
 import { link } from '../../javascripts/router.js';
 
+import {bi} from '../../javascripts/bilingual.js';
+import BilingualText from '../components/bilingual-text.svelte';
 export  let member;
 export  let classes;
 export  let users;
@@ -57,21 +60,21 @@ let description;
 
 const deleteMember = (event) => {
   console.log('deleteMember', member);
-  title = '役職員の削除';
+  title = get(bi)('member_delete_title');
   description = `
 <table style="font-size:12px;">
   <tbody>
     <tr>
-			<td>名前</td><td>${member.tradingName}</td>
+			<td>${get(bi)('name_label')}</td><td>${member.tradingName}</td>
 		</tr>
     <tr>
-			<td>戸籍名</td><td>${member.legalName}</td>
+			<td>${get(bi)('legal_name_label')}</td><td>${member.legalName}</td>
 		</tr>
     <tr>
-			<td>役職</td><td>${member.memberClass.title}</td>
+			<td>${get(bi)('job_title_label')}</td><td>${member.memberClass.title}</td>
 		</tr>
     <tr>
-			<td>誕生日</td><td>${member.birthDate ? formatDate(member.birthDate) : ''}</td>
+			<td>${get(bi)('birthday_label')}</td><td>${member.birthDate ? formatDate(member.birthDate) : ''}</td>
     </tr>
   </tbody>
 `;
@@ -121,7 +124,7 @@ const save = () => {
     member.memberClassId = 0;
   }
   if  ( !member.memberClassId || member.memberClassId < 1 )  {
-    errorMessages.push('種別を入力してください');
+    errorMessages.push(get(bi)('member_class_required'));
   }
   console.log('input', member);
   if  ( errorMessages.length === 0 )  {
@@ -142,11 +145,11 @@ const save = () => {
           link(`/member/entry/${member.id}`);
         }
       } else {
-        errorMessages.push('保存できませんでした。');
+        errorMessages.push(get(bi)('error_save_failed'));
       }
     }).catch((e) => {
       console.log(e);
-      errorMessages.push('保存できませんでした。');
+      errorMessages.push(get(bi)('save_failed'));
       // can't save
       //	TODO alert
     });

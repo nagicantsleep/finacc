@@ -11,9 +11,9 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-danger"
-          on:click={() => { Answer(true)}} >はい</button>
+          on:click={() => { Answer(true)}} ><BilingualText key="yes" /></button>
         <button type="button" class="btn btn-primary"
-          on:click={() => { Answer(false)}}>いいえ</button>
+          on:click={() => { Answer(false)}}><BilingualText key="no" /></button>
       </div>
     </div>
   </div>
@@ -22,6 +22,7 @@
 <script>
 import {onMount, beforeUpdate, afterUpdate, createEventDispatcher} from 'svelte';
 import Modal from 'bootstrap/js/dist/modal';
+import BilingualText from '../components/bilingual-text.svelte';
 const dispatch = createEventDispatcher();
 
 export let title;

@@ -4,9 +4,7 @@
   	bind:value={menu.title}>
   <div>
     <div class="dropdown" style="display: inline;">
-      <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-        ウィジェットを追加
-      </button>
+      <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false"><BilingualText key="add_widget" /></button>
       <ul class="dropdown-menu">
         {#each componentList as entry}
         {#if (entry.title)}
@@ -23,18 +21,16 @@
         {/each}
       </ul>
     </div>
-    <button class="btn btn-success" on:click={save}>
-      配置を保存
-    </button>
+    <button class="btn btn-success" on:click={save}><BilingualText key="save_layout" /></button>
     <button class="btn link" on:click={() => {
       isEditMode = !isEditMode;
-    }}><i class="bi bi-check"></i>実行モードへ</button>
+    }}><i class="bi bi-check"></i><BilingualText key="run_mode" /></button>
   </div>
   {:else}
   <h1>{menu?.title}</h1>
   <button class="btn link" on:click={() => {
     isEditMode = !isEditMode;
-  }}><i class="bi bi-pencil"></i>編集モードへ</button>
+  }}><i class="bi bi-pencil"></i><BilingualText key="edit_mode" /></button>
 	{/if}
 </div>
 <Menu
@@ -55,6 +51,7 @@ import {eventBus as tableBus} from '../../javascripts/table-maintenance.js';
 import menuBus from '../../javascripts/event-bus.js';
 import {componentList} from '../../javascripts/widget-list.js';
 
+import BilingualText from '../components/bilingual-text.svelte';
 export let status;
 export let toast;
 

@@ -2,24 +2,12 @@
   <table class="table table-bordered journal">
     <thead class="table-light">
       <tr>
-        <th scope="col" colspan="2">
-          日付 / 伝番
-        </th>
-        <th scope="col" style="width: 100px;">
-          借方金額
-        </th>
-        <th scope="col" style="width: 150px;">
-          借方科目<br/>補助科目
-        </th>
-        <th scope="col">
-          適用
-        </th>
-        <th scope="col" style="width: 150px;">
-          貸方科目<br/>補助科目
-        </th>
-        <th scope="col" style="width: 100px;">
-          貸方金額
-        </th>
+        <th scope="col" colspan="2"><BilingualText key="date_voucher_no" /></th>
+        <th scope="col" style="width: 100px;"><BilingualText key="debit_amount" /></th>
+        <th scope="col" style="width: 150px;"><BilingualText key="debit_account" /><br/><BilingualText key="sub_account" /></th>
+        <th scope="col"><BilingualText key="application" /></th>
+        <th scope="col" style="width: 150px;"><BilingualText key="credit_account" /><br/><BilingualText key="sub_account" /></th>
+        <th scope="col" style="width: 100px;"><BilingualText key="credit_amount" /></th>
       </tr>
     </thead>
     <tbody>
@@ -124,9 +112,7 @@
         </td>
         <td>
         </td>
-        <td>
-          合計
-        </td>
+        <td><BilingualText key="total" /></td>
         <td>
         </td>
         <td class="number">
@@ -155,6 +141,7 @@
 
 <script>
 import {onMount, beforeUpdate, afterUpdate, createEventDispatcher} from 'svelte';
+import BilingualText from '../components/bilingual-text.svelte';
 const dispatch = createEventDispatcher();
 
 export	let	lines;

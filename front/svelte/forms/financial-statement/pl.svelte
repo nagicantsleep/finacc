@@ -3,18 +3,14 @@
     <PageHeader
       {company}
       {fy}
-      title="損益計算書"
+      titleKey="income_statement"
       ></PageHeader>
     <div class="page-body">
       <table class="table-report">
         <thead>
           <tr>
-            <th colspan="2">
-              科目
-            </th>
-            <th colspan="2">
-              金額
-            </th>
+            <th colspan="2"><BilingualText key="account" /></th>
+            <th colspan="2"><BilingualText key="amount" /></th>
           </tr>
         </thead>
         <tbody>
@@ -48,6 +44,7 @@
 import {formatMoney} from '../../../../libs/utils.js';
 import PageHeader from '../components/page-header.svelte';
 
+import BilingualText from '../../components/bilingual-text.svelte';
 export let fy;
 export let company;
 export let plOut;

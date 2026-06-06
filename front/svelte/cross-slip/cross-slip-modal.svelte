@@ -1,15 +1,15 @@
-<div class="modal" id={ id ? id : "cross-slip-modal"} tabindex="-1" data-bs-backdrop="static">
+<div class="modal" id={ id ? id : "cross-slip-modal"} tabindex="-1">
   <div class="modal-dialog modal-xl">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="modalLabel">仕訳明細入力</h5>
+        <h5 class="modal-title" id="modalLabel"><BilingualText key="journal_detail_entry" /></h5>
         <button type="button" class="btn-close" id="close-button" area-label="Close"
           on:click={close_}></button>
       </div>
       <div class="modal-body">
         {#if !ok }
         <div class="border rounded border-danger mb-2 ms-2 me-2 p-3">
-          <h5 class="fs-5 text-danger"><i class="bi bi-exclamation-triangle-fill"></i>&nbsp;エラー</h5>
+          <h5 class="fs-5 text-danger"><i class="bi bi-exclamation-triangle-fill"></i>&nbsp;<BilingualText key="error" inline /></h5>
           <ul>
             {#each errorMessages as errorMessage}
               <li class="text-danger">{errorMessage}</li>
@@ -26,21 +26,23 @@
         {#if (vouchers)}
         <table class="table table-striped table-bordered">
           <thead class="table-light">
-            <th style="width:20px;">
+            <tr>
+              <th scope="col" style="width:20px;">
 
-            </th>
-            <th style="width:100px;">
-              種別
-            </th>
-            <th style="width:200px;">
-              相手先
-            </th>
-            <th style="width:100px;">
-              金額
-            </th>
-            <th>
-              説明
-            </th>
+              </th>
+              <th scope="col" style="width:100px;">
+                <BilingualText key="kind" />
+              </th>
+              <th scope="col" style="width:200px;">
+                <BilingualText key="counterparty" />
+              </th>
+              <th scope="col" style="width:100px;">
+                <BilingualText key="amount" />
+              </th>
+              <th scope="col">
+                <BilingualText key="description" />
+              </th>
+            </tr>
           </thead>
           <tbody>
             {#each vouchers as line}
@@ -78,18 +80,18 @@
              (( status.user.accounting ) ||
               ( slip.createdBy == status.user.id )))) }
           <button type="button" class="btn btn-secondary"
-          	on:click={openVouchers}>証票</button>
+          	on:click={openVouchers}><BilingualText key="voucher_evidence" /></button>
           {/if}
           {#if ( slip && slip.no > 0) }
           {#if ( status.user.approvable )}
             {#if ( slip.approvedAt )}
             <button type="button" class="btn btn-warning" id="disapprove-button"
-              on:click={disapprove}>不承認</button>
+              on:click={disapprove}><BilingualText key="disapprove" /></button>
             {:else}
             <button type="button" class="btn btn-warning" id="approve-button"
-              on:click={approve}>承認</button>
+              on:click={approve}><BilingualText key="approve" /></button>
             <button type="button" class="btn btn-danger" id="delete-button"
-              on:click={delete_}>削除</button>
+              on:click={delete_}><BilingualText key="delete" /></button>
             {/if}
           {/if}
         {/if}
@@ -98,7 +100,7 @@
              (( status.user.accounting ) ||
               ( slip.createdBy == status.user.id ))))}
           <button type="button" class="btn btn-primary" id="save-button"
-            on:click={save}>Save</button>
+            on:click={save}><BilingualText key="save" /></button>
         {/if}
       </div>
     </div>
@@ -112,6 +114,8 @@ import Modal from 'bootstrap/js/dist/modal';
 import {onMount, beforeUpdate, afterUpdate, createEventDispatcher} from 'svelte';
 const dispatch = createEventDispatcher();
 import CrossSlip from './cross-slip.svelte';
+import BilingualText from '../components/bilingual-text.svelte';
+import { bi } from '../../javascripts/bilingual.js';
 
 
 export let accounts;
@@ -121,19 +125,26 @@ export let popUp;
 export let id;
 
 let modal;
+let modalEl;
+let disposed = false;
 let vouchers;
 let ok = true;
 let errorMessages = [];
 let taxRules = [];
 
-const clean_popup = () => {
+// Single teardown path. Triggered by Bootstrap's `hidden.bs.modal`,
+// which fires for BOTH the X/Save buttons (via modal.hide()) and a
+// backdrop click — so clicking outside the form now disposes it
+// cleanly and keeps `popUp` in sync with the parent.
+const teardown = () => {
+  if (disposed) return;
+  disposed = true;
   dispatch('close');
   popUp = false;
-  modal.hide();
-  modal.dispose();
   vouchers = undefined;
   errorMessages = [];
   ok = true;
+  modal.dispose();
 }
 const onDragStart = (event) => {
   event.dataTransfer.dropEffect = 'link';
@@ -154,7 +165,9 @@ onMount(async () => {
   const result = await axios.get(`/api/tax-rule?type=active&date=${date}`);
   taxRules = result.data.values;
   console.log(taxRules);
-  modal = new Modal(document.getElementById('cross-slip-modal'));
+  modalEl = document.getElementById(id ? id : 'cross-slip-modal');
+  modalEl.addEventListener('hidden.bs.modal', teardown);
+  modal = new Modal(modalEl);
   modal.show();
 });
 beforeUpdate(() => {
@@ -197,27 +210,27 @@ const save = (event) => {
       if (( !slip.lines[i].debitAccount ) &&
           ( slip.lines[i].debitAmount != 0 ) )	{
         ok = false;
-        errorMessages.push(`${i+1}行目 : 借方科目に未登録の勘定科目が入力されています。`);
+        errorMessages.push(`${i+1}{$bi('row_label')} : {$bi('error_debit_unregistered')}`);
       }
       if  (( !slip.lines[i].debitAccount ) &&
            ( slip.lines[i].debitAmount != 0 ))  {
         ok = false;
-        errorMessages.push(`${i+1}行目 : 借方科目が未入力です。`);
+        errorMessages.push(`${i+1}{$bi('row_label')} : {$bi('error_debit_missing')}`);
       }
       if  (( !slip.lines[i].creditAccount ) &&
            ( slip.lines[i].creditAmount != 0 ))	{
         ok = false;
-        errorMessages.push(`${i+1}行目 : 貸方科目が未入力です。`);
+        errorMessages.push(`${i+1}{$bi('row_label')} : {$bi('error_credit_missing')}`);
       }
     }
     if	( sums.debit != sums.credit )	{
       ok = false;
-      errorMessages.push("借方の金額と貸方の合計金額が不一致です。");
+      errorMessages.push($bi('error_debit_credit_mismatch'));
     }
   } else {
     ok = false;
     slip.day = tempDay;
-    errorMessages.push("日付が正しくありません。");
+    errorMessages.push($bi('error_invalid_date'));
   }
   if	( ok )	{
     console.log("保存直前のslipオブジェクト:", JSON.stringify(slip, null, 2));
@@ -242,7 +255,7 @@ const save = (event) => {
 };
 
 const close_ = (event) => {
-  clean_popup();
+  modal.hide();
 };
 
 const delete_ = (event) => {
@@ -256,7 +269,7 @@ const delete_ = (event) => {
         no: slip.no
       }
     }).then((result) => {
-      clean_popup();
+      modal.hide();
     });
   } catch(e) {
     console.log(e);

@@ -1,12 +1,3 @@
-<div class="brand-container">
-  <a href="#" class="brand-link"
-    on:click|preventDefault={() => {
-      link('/home');
-    }}>
-      <img src="/public/logo.png" alt="Logo" class="brand-image">
-      <span class="brand-text">Hieronymus</span>
-  </a>
-</div>
 <div class="sidebar">
 	<nav class="mt-2">
     <ul class="nav nav-pills nav-sidebar flex-column">
@@ -14,8 +5,8 @@
         <div class="d-flex align-items-center justify-content-between" style="width:240px;">
           <!-- svelte-ignore a11y-missing-attribute -->
           <a class="nav-link">
-					  <i class="bi bi-menu-button-wide me-1"></i>
-            メニュー
+						<i class="bi bi-menu-button-wide me-1"></i>
+            <BilingualText key="menu" />
           </a>
           {#if ( isMenuEditMode)}
           <div>
@@ -58,7 +49,7 @@
               on:click|preventDefault={() => {
                 link(`/menu/${entry.id}`);
               }}>
-              <Icon class="nav-icon{ isMenuEditMode ? ' drag-handle' : ''}" 
+              <Icon class="nav-icon{ isMenuEditMode ? ' drag-handle' : ''}"
                 icon="bi:circle"></Icon>
 							{entry.title}
             </a>
@@ -81,54 +72,74 @@
     <ul class="nav nav-pills nav-sidebar flex-column">
       {#each menu as entry}
       {#if ( entry.title && ( !entry.authority || entry.authority(status.user, status.company) )) }
-			<li class="nav-item">
-			  <a class={ $currentPage && $currentPage.match(entry.match) ? 'nav-link active': 'nav-link'}
-          draggable="true"
-          data-type={entry.name}
-          on:dragstart={startDrag}
-          on:click|preventDefault={() => {
-            link(entry.href(status));
-          }}
-          href="#">
-          {#if ( entry.icon )}
-          {#if ( entry.icon.name)}
-          <Icon class="nav-icon me-1" icon={entry.icon.name}></Icon>
-          {:else}
-          <img src={entry.icon.src} class="icon-img">
-          {/if}
-          {:else}
-          <Icon class="nav-icon" icon="bi:circle"></Icon>
-          {/if}
-          {entry.title}
-        </a>
-        {#if ( entry.submenu && ( status.pathname.match(entry.match) ) )}
-        <ul>
-          {#each entry.submenu as subentry}
-          <li class="nav-item">
-            <a class={ $currentPage && $currentPage.match(subentry.match) ? 'nav-link active': 'nav-link'}
-              draggable="true"
-              data-type={entry.name}
-              on:dragstart={startDrag}
-              on:click|preventDefault={() => {
-                link(subentry.href(status));
-              }}
-              href="#">
-              {#if subentry.icon}
-              {#if ( subentry.icon.name)}
-              <Icon class="nav-icon" icon={subentry.icon.name}></Icon>
-              {:else}
-              <img src={subentry.icon.src} class="icon-img">
-              {/if}
-              {:else}
-              <Icon class="nav-icon" icon="fa6-solid:circle"></Icon>
-              {/if}
-              {subentry.title}
-            </a>
-          </li>
-          {/each}
-        </ul>
+		<li class="nav-item">
+		  <a class={ $currentPage && $currentPage.match(entry.match) ? 'nav-link active': 'nav-link'}
+        draggable="true"
+        data-type={entry.name}
+        on:dragstart={startDrag}
+        on:click|preventDefault={() => {
+          link(entry.href(status));
+        }}
+        href="#">
+        <span class="sidebar-row">
+          <span class="sidebar-row__icon">
+        {#if ( entry.icon )}
+        {#if ( entry.icon.name)}
+        <Icon class="nav-icon me-1" icon={entry.icon.name}></Icon>
+        {:else}
+        <img src={entry.icon.src} class="icon-img">
         {/if}
-			</li>
+        {:else}
+        <Icon class="nav-icon" icon="bi:circle"></Icon>
+        {/if}
+          </span>
+          <span class="sidebar-row__text">
+        {#if MODULE_I18N[entry.name]}
+          <BilingualText key={MODULE_I18N[entry.name]} />
+        {:else}
+          {entry.title}
+        {/if}
+          </span>
+        </span>
+      </a>
+      {#if ( entry.submenu && ( status.pathname.match(entry.match) ) )}
+      <ul>
+        {#each entry.submenu as subentry}
+        <li class="nav-item">
+          <a class={ $currentPage && $currentPage.match(subentry.match) ? 'nav-link active': 'nav-link'}
+            draggable="true"
+            data-type={entry.name}
+            on:dragstart={startDrag}
+            on:click|preventDefault={() => {
+              link(subentry.href(status));
+            }}
+            href="#">
+            <span class="sidebar-row">
+              <span class="sidebar-row__icon">
+            {#if subentry.icon}
+            {#if ( subentry.icon.name)}
+            <Icon class="nav-icon" icon={subentry.icon.name}></Icon>
+            {:else}
+            <img src={subentry.icon.src} class="icon-img">
+            {/if}
+            {:else}
+            <Icon class="nav-icon" icon="fa6-solid:circle"></Icon>
+            {/if}
+              </span>
+              <span class="sidebar-row__text">
+            {#if SUBMENU_I18N[subentry.title]}
+              <BilingualText key={SUBMENU_I18N[subentry.title]} />
+            {:else}
+              {subentry.title}
+            {/if}
+              </span>
+            </span>
+          </a>
+        </li>
+        {/each}
+      </ul>
+      {/if}
+		</li>
       {/if}
       {/each}
     </ul>
@@ -140,6 +151,25 @@
 .icon {
   margin-right: 0.5rem;
 }
+
+/* Sidebar row layout: 1 row, 2 columns.
+   Col 1: icon. Col 2: 2 stacked lines (BilingualText renders primary on top,
+   secondary below). Both columns are vertically centered. */
+.sidebar-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.4rem;
+}
+.sidebar-row__icon {
+  flex: 0 0 auto;
+  display: inline-flex;
+}
+.sidebar-row__text {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: inline-flex;
+}
 </style>
 <script>
 import axios from 'axios';
@@ -147,6 +177,8 @@ import {onMount, afterUpdate, createEventDispatcher, tick} from 'svelte';
 import menu from '../../../config/module-list.js';
 import Sortable from 'sortablejs';
 import Icon from '@iconify/svelte';
+import BilingualText from '../components/bilingual-text.svelte';
+import { bi } from '../../javascripts/bilingual.js';
 import eventBus from '../../javascripts/event-bus.js';
 import {currentMenu, getStore} from '../../javascripts/current-record.js'
 import { currentPage, link } from '../../javascripts/router.js';
@@ -157,6 +189,36 @@ export let mainCount;
 let menuItems;
 let isMenuEditMode = false;
 let menuTemplates = [];
+
+// Map config/module-list.js entry.name -> i18n key for the menu title.
+// Falls back to entry.title (hardcoded JA) if the name has no mapping.
+const MODULE_I18N = {
+  'menu': 'menu',
+  'journal': 'journal',
+  'ledger': 'ledger',
+  'bank-ledger': 'bank_ledger',
+  'trial-balance': 'trial_balance',
+  'changes': 'changes',
+  'voucher': 'voucher_info',
+  'accounts': 'account_management2',
+  'company': 'company_management',
+  'project': 'project_management',
+  'task': 'task_management',
+  'transaction': 'transaction_document',
+  'item': 'item_management',
+  'member': 'member_management',
+  'home': 'home'
+};
+
+// Map submenu hardcoded JA title -> i18n key
+const SUBMENU_I18N = {
+  '設定': 'settings',
+  '集計用ラベル管理': 'label_management',
+  'プロジェクト集計': 'project_summary',
+  '品目管理': 'item_management',
+  '取引先管理': 'company_management',
+  'プロジェクト管理': 'project_management'
+};
 
 const newMenu = (template) => {
   currentMenu.set({
@@ -171,8 +233,8 @@ let deleteEntry;
 const deleteMenu = (entry) => {
   deleteEntry = entry;
   eventBus.emit('okModal', {
-    title:'メニューの削除',
-    description: `メニュー「${entry.title}」を削除します<br/>よろしいですか？`,
+    title: $bi('menu_delete'),
+    description: `メニュー「${entry.title}」` + $bi('menu_delete_confirm'),
     reply: 'deleteMenu'
   });
 }

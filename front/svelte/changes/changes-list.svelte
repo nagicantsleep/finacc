@@ -1,15 +1,9 @@
 <table class="table table-bordered">
   <thead class="table-light">
     <tr>
-      <th scope="col" colspan="2">
-        年月
-      </th>
-      <th scope="col">
-        金額
-      </th>
-      <th scope="col">
-        累計
-      </th>
+      <th scope="col" colspan="2"><BilingualText key="year_month" /></th>
+      <th scope="col"><BilingualText key="amount" /></th>
+      <th scope="col"><BilingualText key="cumulative" /></th>
     </tr>
   </thead>
   <tbody>
@@ -25,9 +19,7 @@
         {line.month}
       </td>
       {:else}
-      <td style="text-align:center;" colspan="2">
-        繰越金額
-      </td>
+      <td style="text-align:center;" colspan="2"><BilingualText key="carry_forward_amount" /></td>
       {/if}
       <td class="number">
         {#if line.month}
@@ -50,6 +42,7 @@
 
 <script>
 import {onMount, beforeUpdate, afterUpdate, createEventDispatcher} from 'svelte';
+import BilingualText from '../components/bilingual-text.svelte';
 const dispatch = createEventDispatcher();
 
 export	let lines = [];

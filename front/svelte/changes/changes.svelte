@@ -1,8 +1,8 @@
-<div class="page-title d-flex justify-content-between align-items-center mt-2">
+<div class="page-title d-flex justify-content-between align-items-center">
   <div class="d-flex align-items-center">
-    <h1>推移表</h1>
+    <h1 class="page-title-bilingual mb-0"><BilingualText key="changes" inline={true} /></h1>
     {#if account}
-      <h2 class="ms-3 mb-0 fs-4">{account.name}</h2>
+      <h2 class="ms-3 mb-0 fs-4"><BilingualText primary={account.name} secondary={account.nameVi} inline={true} /></h2>
     {/if}
   </div>
 </div>
@@ -28,55 +28,57 @@
       <button type="button"
         on:click={() => {
           link(`/ledger/${accountCode}/${subAccountCode}`)
-        }} class="btn btn-info">
-      補助元帳を見る
-    </button>
+        }} class="btn btn-info"><BilingualText key="view_sub_ledger" /></button>
     {:else}
     <button type="button"
       on:click={() => {
         link(`/ledger/${accountCode}`);
-      }} class="btn btn-info">
-      元帳を見る
-    </button>
+      }} class="btn btn-info"><BilingualText key="view_general_ledger" /></button>
     {/if}
     <label>
       <input type="checkbox" bind:checked={allYears}
-        on:change={termChange}>
-      全年度
-    </label>
+        on:change={termChange}><BilingualText key="all_fiscal_years" /></label>
     {#if allYears}
     <label>
       <input type="checkbox" bind:checked={sameMonth}
-        on:change={termChange}>
-      前年同月比較
-    </label>
+        on:change={termChange}><BilingualText key="yoy_comparison" /></label>
     {/if}
     </div>
   </div>
 {/if}
-{#if (lines.length > 0)}
+{#if chartData && chartData.datasets && chartData.datasets.length > 0}
 <div class="d-flex justify-content-between">
   <div></div>
   <div>
     <label>
       <input type="checkbox" bind:checked={Amount} disabled={sameMonth}
-        on:change={() => { updateChart() }}>
-      金額
-    </label>
+        on:change={() => { updateChart() }}><BilingualText key="amount" /></label>
     <label>
       <input type="checkbox" bind:checked={Balance} disabled={sameMonth}
-        on:change={() => {updateChart() }}>
-      累計
-    </label>
+        on:change={() => {updateChart() }}><BilingualText key="cumulative" /></label>
   </div>
 </div>
-<Line data={chartData} options={{}}/>
+<div class="chart-area">
+  <Line data={chartData} options={{maintainAspectRatio: false}}/>
+</div>
 {/if}
 <div class="change-list">
   <ChangesList
     lines={lines}/>
 </div>
 <style>
+.page-title-bilingual {
+  display: inline-flex;
+  align-items: center;
+  line-height: 1.3;
+}
+.page-title {
+  margin-top: 0.75rem;
+  margin-bottom: 1rem;
+}
+.chart-area {
+  max-height: 400px;
+}
 </style>
 
 <script>
@@ -92,6 +94,9 @@ import {dc, numeric} from '../../../libs/parse_account_code.js';
 import {setAccounts, findAccount, findSubAccountByCode} from '../../javascripts/cross-slip';
 import parse_account_code from '../../../libs/parse_account_code';
 import {currentPage, link} from '../../javascripts/router.js';
+import BilingualText from '../components/bilingual-text.svelte';
+import { bi, languagePair } from '../../javascripts/bilingual.js';
+import { get } from 'svelte/store';
 
 import {
     Chart as ChartJS,
@@ -130,22 +135,22 @@ let subAccountCode;
 
 let fields = [
   {
-    title: '資産',
+    titleKey: 'chart_assets',
     accounts: []
   },{
-    title: '負債',
+    titleKey: 'chart_liabilities',
     accounts: []
   },{
-    title: '純資産',
+    titleKey: 'chart_net_assets',
     accounts: []
   },{
-    title: '売上高',
+    titleKey: 'chart_revenue',
     accounts: []
   },{
-    title: '売上原価',
+    titleKey: 'chart_cost_of_sales',
     accounts: []
   },{
-    title: '営業外',
+    titleKey: 'chart_non_operating',
     accounts: []
   }
 ];
@@ -184,6 +189,15 @@ const accountSelect = (code) => {
   link(href);
 }
 
+const lpQuery = () => {
+  const pair = get(languagePair);
+  return `?languagePair=${encodeURIComponent(JSON.stringify(pair))}`;
+}
+
+$: if ($languagePair && accountCode) {
+  changeAccount(false);
+}
+
 const termChange = () => {
   console.log({allYears})
   if ( sameMonth )	{
@@ -194,7 +208,7 @@ const termChange = () => {
 
 const changeAccount = (update) => {
   if (!accountCode) return;
-  axios.get(`/api/account/${accountCode}`).then((result) => {
+  axios.get(`/api/account/${accountCode}${lpQuery()}`).then((result) => {
     account = result.data;
     console.log('account', account);
     remaining = {};
@@ -374,7 +388,7 @@ const updateChart = () => {
       if	( i % 12 === 1 )	{
         index += 1;
         chartData.datasets[index] = {
-          label: `${line.year}度`,
+          label: `${line.year}${bi('fy_degree_suffix')}`,
           fill: false,
           borderColor: colors[index],
           data: []
@@ -390,7 +404,7 @@ const updateChart = () => {
     index = 0;
     if	( Amount )	{
       chartData.datasets[index] = {
-        label: '金額',
+        label: bi('amount_label'),
         fill: false,
         borderColor: colors[index],
         data: []
@@ -403,7 +417,7 @@ const updateChart = () => {
     }
     if	( Balance )	{
       chartData.datasets[index] =  {
-        label: '累計',
+        label: bi('cumulative_label'),
         fill: false,
         borderColor: colors[index],
         data: []

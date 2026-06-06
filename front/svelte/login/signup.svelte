@@ -5,7 +5,10 @@
     </div>
     <div class="card">
       <div class="card-body login-card-body">
-        <p class="fs-4 text-center">サインアップ</p>
+        <div class="d-flex justify-content-end mb-2">
+          <LanguagePairSelector save={false} />
+        </div>
+        <p class="fs-4 text-center"><BilingualText key="signup_heading" /></p>
         
         {#if successMessage}
           <div class="alert alert-success text-center" role="alert">
@@ -18,53 +21,53 @@
           {/if}
           
           <fieldset class="mb-3">
-            <legend class="fieldset-legend">ログイン情報 <span class="text-danger">*</span></legend>
+            <legend class="fieldset-legend"><BilingualText key="login_info" inline /> <span class="text-danger">*</span></legend>
             
             <div class="mb-3">
-              <label for="user_name">ユーザー名 <span class="text-danger">*</span></label>
+              <label for="user_name"><BilingualText key="username" inline /> <span class="text-danger">*</span></label>
               <input 
                 type="text" 
                 id="user_name"
                 bind:value={user_name}
                 class="form-control"
                 class:is-invalid={errors.user_name}
-                placeholder="ユーザー名（半角英数字）"
+                placeholder={$bi('username_hint')}
                 autocomplete="username"
                 disabled={isSubmitting}
               >
-              <small class="form-text text-muted">半角英数字、4〜20文字</small>
+              <small class="form-text text-muted"><BilingualText key="password_hint" /></small>
               {#if errors.user_name}
                 <div class="invalid-feedback">{errors.user_name}</div>
               {/if}
             </div>
             
             <div class="mb-3">
-              <label for="password">パスワード <span class="text-danger">*</span></label>
+              <label for="password"><BilingualText key="password" inline /> <span class="text-danger">*</span></label>
               <input 
                 type="password" 
                 id="password"
                 bind:value={password}
                 class="form-control"
                 class:is-invalid={errors.password}
-                placeholder="パスワード"
+                placeholder={$bi('password_placeholder')}
                 autocomplete="new-password"
                 disabled={isSubmitting}
               >
-              <small class="form-text text-muted">8文字以上</small>
+              <small class="form-text text-muted"><BilingualText key="password_length" /></small>
               {#if errors.password}
                 <div class="invalid-feedback">{errors.password}</div>
               {/if}
             </div>
             
             <div class="mb-3">
-              <label for="confirmPassword">パスワード（確認） <span class="text-danger">*</span></label>
+              <label for="confirmPassword"><BilingualText key="password_confirm" inline /> <span class="text-danger">*</span></label>
               <input 
                 type="password" 
                 id="confirmPassword"
                 bind:value={confirmPassword}
                 class="form-control"
                 class:is-invalid={errors.confirmPassword}
-                placeholder="パスワード（確認）"
+                placeholder={$bi('password_confirm')}
                 autocomplete="new-password"
                 disabled={isSubmitting}
               >
@@ -75,17 +78,17 @@
           </fieldset>
           
           <fieldset class="mb-3">
-            <legend class="fieldset-legend">基本情報 <span class="text-danger">*</span></legend>
+            <legend class="fieldset-legend"><BilingualText key="basic_info" inline /> <span class="text-danger">*</span></legend>
             
             <div class="mb-3">
-              <label for="legalName">氏名 <span class="text-danger">*</span></label>
+              <label for="legalName"><BilingualText key="member_name" inline /> <span class="text-danger">*</span></label>
               <input 
                 type="text" 
                 id="legalName"
                 bind:value={legalName}
                 class="form-control"
                 class:is-invalid={errors.legalName}
-                placeholder="山田 太郎"
+                placeholder={$bi('name_placeholder')}
                 autocomplete="name"
                 disabled={isSubmitting}
               >
@@ -95,20 +98,20 @@
             </div>
             
             <div class="mb-3">
-              <label for="legalRuby">氏名（フリガナ）</label>
+              <label for="legalRuby"><BilingualText key="full_name_ruby" /></label>
               <input 
                 type="text" 
                 id="legalRuby"
                 bind:value={legalRuby}
                 class="form-control"
-                placeholder="ヤマダ タロウ"
+                placeholder={$bi('furigana_placeholder')}
                 autocomplete="off"
                 disabled={isSubmitting}
               >
             </div>
             
             <div class="mb-3">
-              <label for="email">メールアドレス <span class="text-danger">*</span></label>
+              <label for="email"><BilingualText key="email" inline /> <span class="text-danger">*</span></label>
               <input 
                 type="email" 
                 id="email"
@@ -126,7 +129,7 @@
             
             <div class="row mb-3">
               <div class="col-6">
-                <label for="birthDate">生年月日</label>
+                <label for="birthDate"><BilingualText key="birth_date" /></label>
                 <input 
                   type="date" 
                   id="birthDate"
@@ -137,7 +140,7 @@
                 >
               </div>
               <div class="col-6">
-                <label for="legalSex">性別</label>
+                <label for="legalSex"><BilingualText key="gender" /></label>
                 <select 
                   id="legalSex"
                   bind:value={legalSex}
@@ -145,16 +148,16 @@
                   autocomplete="sex"
                   disabled={isSubmitting}
                 >
-                  <option value="">選択してください</option>
-                  <option value="1">男性</option>
-                  <option value="2">女性</option>
-                  <option value="9">その他</option>
+                  <option value="">{selectPleaseText}</option>
+                  <option value="1">{genderMaleText}</option>
+                  <option value="2">{genderFemaleText}</option>
+                  <option value="9">{genderOtherText}</option>
                 </select>
               </div>
             </div>
             
             <div class="mb-3">
-              <label for="telNo">電話番号</label>
+              <label for="telNo"><BilingualText key="tel" /></label>
               <input 
                 type="tel" 
                 id="telNo"
@@ -167,7 +170,7 @@
             </div>
             
             <div class="mb-3">
-              <label for="zip">郵便番号</label>
+              <label for="zip"><BilingualText key="zip_code" /></label>
               <input 
                 type="text" 
                 id="zip"
@@ -180,26 +183,26 @@
             </div>
             
             <div class="mb-3">
-              <label for="address1">住所1</label>
+              <label for="address1"><BilingualText key="address1" /></label>
               <input 
                 type="text" 
                 id="address1"
                 bind:value={address1}
                 class="form-control"
-                placeholder="東京都渋谷区..."
+                placeholder={$bi('address_placeholder')}
                 autocomplete="address-line1"
                 disabled={isSubmitting}
               >
             </div>
             
             <div class="mb-3">
-              <label for="address2">住所2（建物名等）</label>
+              <label for="address2"><BilingualText key="address2" /></label>
               <input 
                 type="text" 
                 id="address2"
                 bind:value={address2}
                 class="form-control"
-                placeholder="○○ビル 101号室"
+                placeholder={$bi('address2_placeholder')}
                 autocomplete="address-line2"
                 disabled={isSubmitting}
               >
@@ -217,9 +220,9 @@
                 {#if isSubmitting}
                   <span class="spinner-border spinner-border-sm me-2"></span>
                 {/if}
-                登録
+                <BilingualText key="register" />
               </button>
-              <a on:click|preventDefault={change} href="#" class="text-center">ログインはこちら</a>
+              <a on:click|preventDefault={change} href="#" class="text-center"><BilingualText key="login_here" /></a>
             </div>
           </div>
         {/if}
@@ -231,7 +234,18 @@
 <script>
 import axios from 'axios';
 import {onMount} from 'svelte';
+import {get} from 'svelte/store';
 import { link } from '../../javascripts/router.js';
+import BilingualText from '../components/bilingual-text.svelte';
+import { bi, _b } from '../../javascripts/bilingual.js';
+import LanguagePairSelector from '../widgets/language-pair-selector.svelte';
+
+// Option text can't host a component; build "primary / secondary" strings reactively.
+$: biFn = $bi;
+$: selectPleaseText = $bi('select_please');
+$: genderMaleText = $bi('gender_male');
+$: genderFemaleText = $bi('gender_female');
+$: genderOtherText = $bi('gender_other');
 
 // Login credentials
 let user_name = '';
@@ -285,39 +299,39 @@ function validateForm() {
   let isValid = true;
   
   if (!user_name || user_name.trim().length === 0) {
-    errors.user_name = 'ユーザー名を入力してください。';
+    errors.user_name = get(bi)('signup_error_username_required');
     isValid = false;
   } else if (!/^[a-zA-Z0-9_]+$/.test(user_name)) {
-    errors.user_name = 'ユーザー名は半角英数字とアンダースコアのみ使用できます。';
+    errors.user_name = get(bi)('signup_error_username_invalid');
     isValid = false;
   } else if (user_name.length < 4 || user_name.length > 20) {
-    errors.user_name = 'ユーザー名は4〜20文字で入力してください。';
+    errors.user_name = get(bi)('signup_error_username_length');
     isValid = false;
   }
-  
+
   if (!password || password.length === 0) {
-    errors.password = 'パスワードを入力してください。';
+    errors.password = get(bi)('signup_error_password_required');
     isValid = false;
   } else if (password.length < 8) {
-    errors.password = 'パスワードは8文字以上で入力してください。';
+    errors.password = get(bi)('signup_error_password_length');
     isValid = false;
   }
-  
+
   if (password !== confirmPassword) {
-    errors.confirmPassword = 'パスワードが一致していません。';
+    errors.confirmPassword = get(bi)('signup_error_password_mismatch');
     isValid = false;
   }
-  
+
   if (!legalName || legalName.trim().length === 0) {
-    errors.legalName = '氏名を入力してください。';
+    errors.legalName = get(bi)('signup_error_name_required');
     isValid = false;
   }
-  
+
   if (!email || email.trim().length === 0) {
-    errors.email = 'メールアドレスを入力してください。';
+    errors.email = get(bi)('signup_error_email_required');
     isValid = false;
   } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    errors.email = '有効なメールアドレスを入力してください。';
+    errors.email = get(bi)('signup_error_email_invalid');
     isValid = false;
   }
   
@@ -334,7 +348,7 @@ const SignUp = async () => {
   
   if (!validateForm()) {
     msg_type = 'danger';
-    message = '入力内容を確認してください。';
+    message = get(bi)('signup_validation_prompt');
     return;
   }
   
@@ -373,18 +387,18 @@ const SignUp = async () => {
     const response = await axios.post('/api/user/signup', payload);
     
     if (response.data.result === 'OK') {
-      successMessage = '登録が完了しました。ログインページへ移動します...';
+      successMessage = get(bi)('signup_register_success');
       setTimeout(() => {
         link('/login');
       }, 2000);
     } else {
-      message = response.data.message || '登録に失敗しました。';
+      message = response.data.message || get(bi)('signup_register_fail');
       msg_type = 'danger';
       isSubmitting = false;
     }
   } catch (err) {
     console.error('signup error', err);
-    message = err.response?.data?.message || 'エラーが発生しました。';
+    message = err.response?.data?.message || get(bi)('login_error_occurred');
     msg_type = 'danger';
     isSubmitting = false;
   }

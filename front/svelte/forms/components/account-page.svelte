@@ -5,30 +5,18 @@
       {company}
       {fy}
       title={title}
-      left_item="科目一覧"
+      left_item={$bi('chart_of_accounts')}
     ></PageHeader>
     <div class="page-body">
       <table class="table">
         <thead>
           <tr>
-            <th style="width: 70px;">
-              科目コード
-            </th>
-            <th>
-              勘定科目
-            </th>
-            <th style="width: 50px;">
-              税区分
-            </th>
-            <th style="width: 120px;">
-              借方
-            </th>
-            <th style="width: 120px;">
-              貸方
-            </th>
-            <th style="width: 120px;">
-              残高
-            </th>
+            <th style="width: 70px;"><BilingualText key="account_code" /></th>
+            <th><BilingualText key="chart_of_accounts" /></th>
+            <th style="width: 50px;"><BilingualText key="tax_type" /></th>
+            <th style="width: 120px;"><BilingualText key="debit" /></th>
+            <th style="width: 120px;"><BilingualText key="credit" /></th>
+            <th style="width: 120px;"><BilingualText key="balance" /></th>
           </tr>
         </thead>
         <tbody>
@@ -64,6 +52,8 @@
 import PageHeader from '../components/page-header.svelte';
 import {formatMoney, taxClass} from '../../../../libs/utils.js';
 
+import BilingualText from '../../components/bilingual-text.svelte';
+import { bi } from '../../../javascripts/bilingual.js';
 export let company;
 export let fy;
 export let title;

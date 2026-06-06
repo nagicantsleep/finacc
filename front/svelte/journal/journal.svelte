@@ -1,37 +1,38 @@
 <div class="list">
   <div class="page-title d-flex justify-content-between">
-  	<h1>仕訳日記帳</h1>
-  	<a href="/forms/explanatory_journal/{status.fy.term}?format=pdf" download="仕訳日記帳-{today}.pdf" class="btn btn-primary">
-    	仕訳日記帳をダウンロード&nbsp;<i class="bi bi-download"></i>
+  	<h1 class="page-title-bilingual"><BilingualText key="journal" inline={true} /></h1>
+  	<a href="/forms/explanatory_journal/{status.fy.term}?format=pdf" download="仕訳日記帳-{today}.pdf" class="btn btn-primary btn-bilingual"><BilingualText key="download_journal" inline={true} /><i class="bi bi-download"></i>
   	</a>
 	</div>
 	<ul class="page-subtitle nav">
   	{#each dates as date}
     	<li class="nav-item">
       	{#if (date.month == month)}
-      	<button type="button" class="btn btn-primary disabled me-2"
+      	<button type="button" class="btn btn-primary month-btn disabled me-2"
         	on:click={() => {
           	openMonth(date.year, date.month)
         	}}>
-        	{date.month}月
+        	<BilingualText key={`month_${date.month}`} stacked={true} />
       	</button>
       	{:else}
-      	<button type="button" class="btn btn-outline-primary me-2"
+      	<button type="button" class="btn btn-outline-primary month-btn me-2"
       		on:click={() => {
         		openMonth(date.year, date.month)
       		}}>
-        	{date.month}月
+        	<BilingualText key={`month_${date.month}`} stacked={true} />
       	</button>
       	{/if}
     	</li>
   	{/each}
 	</ul>
 	<div class="page-subtitle d-flex justify-content-between">
-  	<h2>{year}年 {month}月</h2>
+  	<h2 class="d-flex align-items-center gap-3">
+  		<BilingualText primary={year} secondary={$bi('year_label')} inline={true} />
+  		<BilingualText key={`month_${month}`} inline={true} />
+  	</h2>
   	<div>
-    	<button type="button" class="btn btn-primary" id="open-cross-slip"
-    		on:click={openSlip}>
-        仕訳明細入力&nbsp;<i class="bi bi-pencil-square"></i>
+    	<button type="button" class="btn btn-primary btn-bilingual" id="open-cross-slip"
+    		on:click={openSlip}><BilingualText key="journal_detail_entry_space" inline={true} /><i class="bi bi-pencil-square"></i>
       </button>
   	</div>
 	</div>
@@ -53,6 +54,29 @@
 {/key}
 {/if}
 <style>
+.page-title {
+  margin-bottom: 1rem;
+}
+.month-btn {
+  min-height: 56px;
+  line-height: 1.2;
+  white-space: normal;
+  padding: 0.25rem 0.5rem;
+}
+.btn-bilingual {
+  min-height: 56px;
+  line-height: 1.2;
+  white-space: normal;
+  padding: 0.25rem 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.page-title-bilingual {
+  display: inline-flex;
+  align-items: center;
+  line-height: 1.3;
+}
 </style>
 
   <script>
@@ -65,6 +89,8 @@ import CrossSlipModal from '../cross-slip/cross-slip-modal.svelte';
 import {setAccounts, findAccount, findSubAccountByCode} from '../../javascripts/cross-slip';
 import {numeric, dateStr} from '../../../libs/utils.js';
 import {currentPage} from '../../javascripts/router.js';
+import BilingualText from '../components/bilingual-text.svelte';
+import { bi } from '../../javascripts/bilingual.js';
 export let status;
 
 let year;

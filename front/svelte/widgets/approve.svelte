@@ -4,7 +4,7 @@
     <div class="row">
     	<ul class="list-group">
         <li class="list-group-item">
-          件数: {count}
+          <BilingualText key="count_label" />: {count}
         </li>
       </ul>
     </div>
@@ -12,17 +12,13 @@
 		  <table class="table table-bordered">
         <thead class="table-light">
           <th colspan="2">
-            日付 / 伝番
+            <BilingualText key="voucher_info" />
           </th>
           <th style="width: 100px;">
-            作成者
+            <BilingualText key="username" />
           </th>
-          <th style="width: 100px;">
-            更新者
-          </th>
-          <th>
-            適用
-          </th>
+          <th style="width: 100px;"><BilingualText key="updated_by" /></th>
+          <th><BilingualText key="application" /></th>
         </thead>
         <tbody>
           {#each slips as slip}
@@ -49,7 +45,7 @@
             </td>
           </tr>
           {/each}
-        </tbody>              
+        </tbody>
       </table>
     </div>
   </div>
@@ -76,6 +72,7 @@ const dispatch = createEventDispatcher();
 import CrossSlipModal from '../cross-slip/cross-slip-modal.svelte';
 import {setAccounts} from '../../javascripts/cross-slip';
 import { v4 as uuidv4 } from "uuid";
+import BilingualText from '../components/bilingual-text.svelte';
 
 export let status;
 export let toast;

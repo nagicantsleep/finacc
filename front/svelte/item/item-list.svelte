@@ -1,36 +1,23 @@
-<div class="page-title d-flex justify-content-between">
-  <h1>品目一覧</h1>
-  <button type="button" class="btn btn-primary"
-    on:click={() => {
-      openItem(null);
-    }}
-    id="item-info">品目入力&nbsp;<i class="bi bi-pencil-square"></i></button>
-</div>
-<div class="full-height-1 fontsize-12pt">
-  <table class="table table-bordered">
+<div class="list">
+  <div class="page-title d-flex justify-content-between align-items-center flex-wrap">
+    <h1 class="page-title-bilingual mb-0"><BilingualText key="item_list" inline={true} /></h1>
+    <button type="button" class="btn btn-primary btn-bilingual flex-shrink-0"
+      on:click={() => {
+        openItem(null);
+      }}
+      id="item-info"><BilingualText key="item_entry_space" inline={true} /><i class="bi bi-pencil-square"></i></button>
+  </div>
+  <div class="full-height-1 fontsize-12pt">
+    <table class="table table-bordered">
     <thead class="table-light">
       <tr>
-        <th scope="col" style="width: 150px;">
-          クラス
-        </th>
-        <th scope="col" style="width: 150px;">
-          検索キー
-        </th>
-        <th scope="col" style="width: 150px;">
-          サムネイル
-        </th>
-        <th scope="col" style="width: 150px;">
-          商品名 / 公的コード
-        </th>
-        <th scope="col">
-          規格
-        </th>
-        <th scope="col" style="width: 80px;">
-          単位
-        </th>
-        <th scope="col" style="width: 110px;">
-          単価
-        </th>
+        <th scope="col" style="width: 150px;"><BilingualText key="class_name" /></th>
+        <th scope="col" style="width: 150px;"><BilingualText key="search_key" /></th>
+        <th scope="col" style="width: 150px;"><BilingualText key="thumbnail" /></th>
+        <th scope="col" style="width: 150px;"><BilingualText key="product_name_public_code" /></th>
+        <th scope="col"><BilingualText key="specification" /></th>
+        <th scope="col" style="width: 80px;"><BilingualText key="unit" /></th>
+        <th scope="col" style="width: 110px;"><BilingualText key="unit_price" /></th>
       </tr>
       <tr>
         <th style="padding:5px;">
@@ -42,7 +29,7 @@
               }
             }
             bind:value={itemClassId}>
-            <option value="-1">全て</option>
+            <option value="-1"><BilingualText key="all" /></option>
             {#each itemClasses as line}
             <option value={line.id}>{line.name}</option>
             {/each}
@@ -110,7 +97,28 @@
       {/each}
     </tbody>
   </table>
+  </div>
 </div>
+
+<style>
+.page-title-bilingual {
+  display: inline-flex;
+  align-items: center;
+  line-height: 1.3;
+}
+.btn-bilingual {
+  min-height: 56px;
+  line-height: 1.2;
+  white-space: normal;
+  padding: 0.25rem 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.page-title {
+  margin-bottom: 1rem;
+}
+</style>
 
 <script>
 import axios from 'axios';
@@ -120,6 +128,7 @@ const dispatch = createEventDispatcher();
 import {parseParams, buildParam} from '../../javascripts/params.js';
 import {link, currentPage, getStore} from '../../javascripts/router.js';
 
+import BilingualText from '../components/bilingual-text.svelte';
 export	let	items;
 export  let status;
 

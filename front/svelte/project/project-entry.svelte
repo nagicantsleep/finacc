@@ -1,17 +1,17 @@
 <div class="page-title">
-  <h1>プロジェクト情報</h1>
+  <h1><BilingualText key="project_info" /></h1>
 </div>
 
 <div class="row justify-content-center">
   <div class="col-md-10">
     <div class="mb-3 row">
-      <label for="projectName" class="col-sm-2 col-form-label">プロジェクト名</label>
+      <label for="projectName" class="col-sm-2 col-form-label"><BilingualText key="project_name" /></label>
       <div class="col-sm-10">
         <input type="text" class="form-control" id="projectName" bind:value={project.name}>
       </div>
     </div>
     <div class="mb-3 row">
-      <label for="projectCode" class="col-sm-2 col-form-label">コード</label>
+      <label for="projectCode" class="col-sm-2 col-form-label"><BilingualText key="project_code" /></label>
       <div class="col-sm-10">
         <input type="text" class="form-control" id="projectCode" bind:value={project.code}>
       </div>
@@ -19,7 +19,7 @@
     <div class="row">
       <div class="col-md-6">
         <div class="mb-3 row">
-          <label for="startDate" class="col-sm-4 col-form-label">開始日</label>
+          <label for="startDate" class="col-sm-4 col-form-label"><BilingualText key="project_start" /></label>
           <div class="col-sm-8">
             <input type="date" class="form-control" id="startDate" bind:value={project.startDate}>
           </div>
@@ -27,7 +27,7 @@
       </div>
       <div class="col-md-6">
         <div class="mb-3 row">
-          <label for="endDate" class="col-sm-4 col-form-label">終了日</label>
+          <label for="endDate" class="col-sm-4 col-form-label"><BilingualText key="project_end" /></label>
           <div class="col-sm-8">
             <input type="date" class="form-control" id="endDate" bind:value={project.endDate}>
           </div>
@@ -39,11 +39,11 @@
 
 
 <div class="mt-4">
-  <button type="button" class="btn btn-danger" on:click={remove} disabled={!project.id}>削除</button>
-  <button type="button" class="btn btn-secondary" on:click={() => history.back()}>もどる</button>
-  <button type="button" class="btn btn-info" on:click={openLabelSettings} disabled={!project.id}>集計設定</button>
-  <button type="button" class="btn btn-info" on:click={openSummary} disabled={!project.id}>集計表示</button>
-  <button type="button" class="btn btn-primary" on:click={save}>保存</button>
+  <button type="button" class="btn btn-danger" on:click={remove} disabled={!project.id}><BilingualText key="delete" /></button>
+  <button type="button" class="btn btn-secondary" on:click={() => history.back()}><BilingualText key="back" /></button>
+  <button type="button" class="btn btn-info" on:click={openLabelSettings} disabled={!project.id}><BilingualText key="summary_settings" /></button>
+  <button type="button" class="btn btn-info" on:click={openSummary} disabled={!project.id}><BilingualText key="summary_view" /></button>
+  <button type="button" class="btn btn-primary" on:click={save}><BilingualText key="save" /></button>
 </div>
 
 <script>
@@ -51,6 +51,8 @@
   import { createEventDispatcher } from 'svelte';
   import { link } from '../../javascripts/router.js';
   import { currentProject } from '../../javascripts/current-record.js';
+  import BilingualText from '../components/bilingual-text.svelte';
+  import { bi } from '../../javascripts/bilingual.js';
 
   const dispatch = createEventDispatcher();
 
@@ -67,15 +69,15 @@
       project = response.data;
       currentProject.set(project);
       dispatch('close');
-      history.back(); // 保存後に戻る
+      history.back();
     } catch (err) {
       console.error("プロジェクトの保存に失敗しました:", err);
-      alert('エラー: プロジェクトの保存に失敗しました。');
+      alert($bi('error_save_project'));
     }
   };
 
   const remove = async () => {
-    if (!project.id || !confirm(`プロジェクト「${project.name}」を削除します。よろしいですか？`)) {
+    if (!project.id || !confirm($bi('confirm_delete_project'))) {
       return;
     }
     try {
@@ -84,7 +86,7 @@
       history.back(); // 削除後に戻る
     } catch (err) {
       console.error("プロジェクトの削除に失敗しました:", err);
-      alert('エラー: プロジェクトの削除に失敗しました。');
+      alert($bi('error_delete_project'));
     }
   };
 

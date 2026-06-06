@@ -4,10 +4,10 @@
   on:drop={onDrop}
   on:dragover={onDragOver}>
   <div class="row">
-    <label for="type" class="col-2 col-form-label">種別</label>
+    <label for="type" class="col-2 col-form-label"><BilingualText key="kind" /></label>
     <div class="col-sm-3">
       <select class="form-select" id="type" bind:value={voucher.voucherClassId}>
-        <option value={-1}> -- 未設定 --</option>
+        <option value={-1}><BilingualText key="not_set_dash" /></option>
         {#each voucherClasses as voucherClass}
         <option value={voucherClass.id}>{voucherClass.name}</option>
         {/each}
@@ -15,7 +15,7 @@
     </div>
   </div>
   <div class="row mt-3">
-    <label for="issueDate" class="col-2 col-form-label">発生日</label>
+    <label for="issueDate" class="col-2 col-form-label"><BilingualText key="occurrence_date" /></label>
     <div class="col-sm-3">
       <input type="date" class="form-control" id="issueDate"
         bind:value={voucher.issueDate}
@@ -36,13 +36,13 @@
     </div>
   </div>
   <div class="row mt-3">
-    <label for="paymentDate" class="col-2 col-form-label">支払日</label>
+    <label for="paymentDate" class="col-2 col-form-label"><BilingualText key="payment_date" /></label>
     <div class="col-sm-3">
       <input type="date" class="form-control" id="paymentDate" bind:value={voucher.paymentDate}>
     </div>
   </div>
   <div class="row mt-3">
-    <label for="zip" class="col-2 col-form-label">相手先</label>
+    <label for="zip" class="col-2 col-form-label"><BilingualText key="counterparty" /></label>
     <div class="col-10">
       <CompanySelect
         on:startregister
@@ -53,7 +53,7 @@
     </div>
   </div>
   <div class="row mt-3">
-    <label for="amount" class="col-2 col-form-label">金額</label>
+    <label for="amount" class="col-2 col-form-label"><BilingualText key="amount" /></label>
     <div class="col-sm-4">
       <input type="text" class="form-control number" id="amount"
         on:focusout={focusout}
@@ -62,11 +62,11 @@
     </div>
   </div>
   <div class="row mt-3">
-    <label for="taxClass" class="col-2 col-form-label">消費税</label>
+    <label for="taxClass" class="col-2 col-form-label"><BilingualText key="tax" /></label>
     <div class="col-sm-2">
       <select class="form-control" id="taxClass"
         bind:value={voucher.taxRuleId}>
-        <option value={null}> -- 未選択 --</option>
+        <option value={null}><BilingualText key="unselected" /></option>
         {#each taxRules as ent}
         <option value={ent.id}>{ent.label}</option>
         {/each}
@@ -77,26 +77,24 @@
     </div>
   </div>
   <div class="row mt-3">
-    <label for="key" class="col-2 col-form-label">インボイス番号</label>
+    <label for="key" class="col-2 col-form-label"><BilingualText key="invoice_number" /></label>
     <div class="col-sm-3">
       <input type="text" class="form-control" id="key" bind:value={voucher.invoiceNo}>
     </div>
   </div>
   <div class="row mt-3">
-    <label for="description" class="col-2 col-form-label">備考</label>
+    <label for="description" class="col-2 col-form-label"><BilingualText key="remarks" /></label>
     <div class="col-10">
       <textarea class="form-control" id="description"
         bind:value={voucher.description} />
     </div>
   </div>
   <div class="row mt-3">
-    <label class="col-2 col-form-label">ファイル</label>
+    <label class="col-2 col-form-label"><BilingualText key="file" /></label>
     <div class="col-10">
         <div class="file">
           {#if ( !files || files.length === 0 )}
-            <div class="mt-3 p-3">
-              アップロードされたファイルはありません。
-            </div>
+            <div class="mt-3 p-3"><BilingualText key="no_files_uploaded" /></div>
           {:else}
           {#each files as file}
           <div class="file-item">
@@ -148,6 +146,7 @@ import {onMount, beforeUpdate, afterUpdate, createEventDispatcher} from 'svelte'
 const dispatch = createEventDispatcher();
 import CompanySelect from '../components/company-select.svelte';
 
+import BilingualText from '../components/bilingual-text.svelte';
 export	let	voucher;
 export  let status;
 export	let	files;

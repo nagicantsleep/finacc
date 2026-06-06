@@ -1,8 +1,7 @@
 <div class="container-fluid">
   <div class="page-title d-flex justify-content-between">
-  	<h1>集計用ラベル管理</h1>
-    <button type="button" class="btn btn-primary" on:click={openNewModal}>
-      新規作成&nbsp;<i class="bi bi-pencil-square"></i>
+  	<h1><BilingualText key="label_management" /></h1>
+    <button type="button" class="btn btn-primary" on:click={openNewModal}><BilingualText key="create_new_space" /><i class="bi bi-pencil-square"></i>
     </button>
 	</div>
 
@@ -12,10 +11,10 @@
       <table class="table table-hover">
         <thead class="table-light">
           <tr>
-            <th>名前</th>
-            <th>説明</th>
-            <th>関連プロジェクト数</th>
-            <th>関連勘定科目数</th>
+            <th><BilingualText key="name" /></th>
+            <th><BilingualText key="description" /></th>
+            <th><BilingualText key="related_projects" /></th>
+            <th><BilingualText key="related_accounts" /></th>
             <th></th>
           </tr>
         </thead>
@@ -27,8 +26,8 @@
               <td class="number">{label.projects.length}</td>
               <td class="number">{label.accounts.length}</td>
               <td>
-                <button type="button" class="btn btn-sm btn-secondary" on:click|stopPropagation={() => openEditModal(label)}>編集</button>
-                <button type="button" class="btn btn-sm btn-danger" on:click|stopPropagation={() => deleteLabel(label)}>削除</button>
+                <button type="button" class="btn btn-sm btn-secondary" on:click|stopPropagation={() => openEditModal(label)}><BilingualText key="edit" /></button>
+                <button type="button" class="btn btn-sm btn-danger" on:click|stopPropagation={() => deleteLabel(label)}><BilingualText key="delete" /></button>
               </td>
             </tr>
           {/each}
@@ -39,22 +38,22 @@
     <!-- 右カラム: 勘定科目一覧 -->
     <div class="col-md-6">
       {#if $selectedLabel}
-        <h4>「{$selectedLabel.name}」の勘定科目</h4>
+        <h4>「{$selectedLabel.name}」<BilingualText key="label_accounts_of" /></h4>
 
         <!-- 選択済み科目リスト -->
-        <h5>選択済み ({selectedAccounts.length}件)</h5>
+        <h5><BilingualText key="label_accounts_selected" /> ({selectedAccounts.length}件)</h5>
         <div class="selected-list border p-2 mb-3" style="height: 150px; overflow-y: auto;">
           {#each selectedAccounts as account}
             {#if account}
-              <div>{account.code} - {account.name} ({account.summaryType === 'debit' ? '借方' : '貸方'}集計)</div>
+              <div>{account.code} - {account.name} ({account.summaryType === 'debit' ? $bi('debit') : $bi('credit')}{$bi('aggregation_suffix')})</div>
             {/if}
           {:else}
-            <p class="text-muted">勘定科目が選択されていません。</p>
+            <p class="text-muted"><BilingualText key="no_account_selected" /></p>
           {/each}
         </div>
 
         <!-- 全科目チェックボックスリスト -->
-        <h5>全科目から選択</h5>
+        <h5><BilingualText key="select_from_all" /></h5>
         <div class="account-list border p-3" style="height: 250px; overflow-y: auto;">
           {#each displayableAccounts as item}
             {#if item.type === 'major'}
@@ -79,14 +78,14 @@
                         value="debit" 
                         checked={summaryType === 'debit'} 
                         on:change={() => setSummaryType(account.code, 'debit')}>
-                      <label class="form-check-label" for={`debit-${account.code}`}>借方</label>
+                      <label class="form-check-label" for={`debit-${account.code}`}><BilingualText key="debit" /></label>
                     </div>
                     <div class="form-check form-check-inline">
                       <input class="form-check-input" type="radio" name={`summaryType-${account.code}`} id={`credit-${account.code}`} 
                         value="credit" 
                         checked={summaryType === 'credit'} 
                         on:change={() => setSummaryType(account.code, 'credit')}>
-                      <label class="form-check-label" for={`credit-${account.code}`}>貸方</label>
+                      <label class="form-check-label" for={`credit-${account.code}`}><BilingualText key="credit" /></label>
                     </div>
                   </div>
                 {/if}
@@ -96,7 +95,7 @@
         </div>
 
         <div class="mt-3 text-end">
-          <button class="btn btn-primary" on:click={saveLabelAccounts}>勘定科目を保存</button>
+          <button class="btn btn-primary" on:click={saveLabelAccounts}><BilingualText key="save_account" /></button>
         </div>
       {/if}
     </div>
@@ -108,23 +107,23 @@
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="labelModalLabel">{editingLabel ? (editingLabel.id ? '集計用ラベル編集' : '集計用ラベル作成') : ''}</h5>
+        <h5 class="modal-title" id="labelModalLabel">{editingLabel ? (editingLabel.id ? $bi('label_edit_title') : $bi('label_create_title')) : ''}</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       {#if editingLabel}
       <div class="modal-body">
         <div class="mb-3">
-          <label for="labelName" class="form-label">名前</label>
+          <label for="labelName" class="form-label"><BilingualText key="name" /></label>
           <input type="text" class="form-control" id="labelName" bind:value={editingLabel.name}>
         </div>
         <div class="mb-3">
-          <label for="labelDescription" class="form-label">説明</label>
+          <label for="labelDescription" class="form-label"><BilingualText key="description" /></label>
           <textarea class="form-control" id="labelDescription" rows="3" bind:value={editingLabel.description}></textarea>
         </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">キャンセル</button>
-        <button type="button" class="btn btn-primary" on:click={saveLabel}>保存</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><BilingualText key="cancel_jp" /></button>
+        <button type="button" class="btn btn-primary" on:click={saveLabel}><BilingualText key="save" /></button>
       </div>
       {/if}
     </div>
@@ -155,6 +154,8 @@
   import OkModal from '../common/ok-modal.svelte';
   import { dc } from '../../../libs/parse_account_code.js';
 
+import { bi } from '../../javascripts/bilingual.js';
+import BilingualText from '../components/bilingual-text.svelte';
   export let status;
 
   let labels = [];
@@ -283,10 +284,10 @@
         accounts: selectedLabelAccounts
       });
       await fetchLabels();
-      alert('勘定科目の紐付けを保存しました。');
+      alert($bi('label_accounts_saved'));
     } catch (err) {
       console.error("勘定科目の紐付け保存に失敗しました:", err);
-      alert('エラー: 勘定科目の紐付け保存に失敗しました。');
+      alert($bi('label_accounts_save_failed'));
     }
   };
 
@@ -306,7 +307,7 @@
 
   const saveLabel = async () => {
     if (!editingLabel || !editingLabel.name) {
-      alert('名前は必須です。');
+      alert($bi('label_name_required'));
       return;
     }
     try {
@@ -320,14 +321,14 @@
       await fetchLabels();
     } catch (err) {
       console.error("ラベルの保存に失敗しました:", err);
-      alert('エラー: 保存に失敗しました。');
+      alert($bi('error_prefix') + $bi('label_accounts_save_failed'));
     }
   };
 
   const deleteLabel = (label) => {
     targetLabel = label;
-    deleteModalTitle = `「${label.name}」の削除`;
-    deleteModalDescription = `このラベルを削除してもよろしいですか？関連するプロジェクトの集計設定からも解除されます。`;
+    deleteModalTitle = $bi('delete') + '「' + label.name + '」';
+    deleteModalDescription = $bi('label_delete_confirm');
     deleteModal.show();
   };
 
@@ -341,7 +342,7 @@
         selectedLabelAccounts = [];
       } catch (err) {
         console.error("ラベルの削除に失敗しました:", err);
-        alert('エラー: 削除に失敗しました。');
+        alert('エラー: ' + $bi('label_delete_failed'));
       }
     }
   };

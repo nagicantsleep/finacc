@@ -115,6 +115,14 @@ export default (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: true,
       comment: '電話'
+    },
+
+    // Bilingual display preference (user-level, tenant-independent)
+    languagePair: {
+      type: DataTypes.JSONB,
+      allowNull: true,
+      defaultValue: null,
+      comment: 'User-level language pair preference. Null = system default {ja,vi}. e.g. {"primary":"ja","secondary":"vi"}'
     }
   }, {
     sequelize,

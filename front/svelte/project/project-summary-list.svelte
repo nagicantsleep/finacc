@@ -1,7 +1,7 @@
 <table class="table table-bordered table-sm">
   <thead class="table-light">
     <tr>
-      <th scope="col" class="text-center">月</th>
+      <th scope="col" class="text-center"><BilingualText key="month" /></th>
       {#each header as col}
         <th scope="col" class="text-center">{col.name}</th>
       {/each}
@@ -20,6 +20,7 @@
 </table>
 
 <script>
+  import BilingualText from '../components/bilingual-text.svelte';
   export let header = [];
   export let body = [];
 </script>

@@ -3,41 +3,42 @@
   </ul>
   <span class="havbar-text">
     {#if ( status.fy.startDate && status.fy.endDate )}
-    第{status.fy.term}期
-    ({status.fy.startDate.getFullYear()}年
-    ({wareki(status.fy.startDate)})
-        {status.fy.startDate.getMonth()+1}月
-        {status.fy.startDate.getDate()}日
-    〜
-    {status.fy.endDate.getFullYear()}年
-    ({wareki(status.fy.endDate)})
-        {status.fy.endDate.getMonth()+1}月
-        {status.fy.endDate.getDate()}日)
+    {#if fiscalHeader.primary === fiscalHeader.secondary}
+      {fiscalHeader.primary}
     {:else}
-    <span class="text-danger fw-bold"><i class="bi bi-exclamation-diamond-fill"></i>&nbsp; 会計年度を選択してください</span>
+      {fiscalHeader.primary} / {fiscalHeader.secondary}
+    {/if}
+    {:else}
+    <span class="text-danger fw-bold"><i class="bi bi-exclamation-diamond-fill"></i><BilingualText key="select_fiscal_year" /></span>
     {/if}
   </span>
-  <ul class="navbar-nav ms-auto">
+  <ul class="navbar-nav ms-auto align-items-center">
+    <li class="nav-item">
+      <LanguagePairSelector />
+    </li>
     <li class="nav-item dropdown">
-      <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" id="user_menu"
+      <a href="#" class="nav-link dropdown-toggle user-menu-toggle" data-bs-toggle="dropdown" id="user_menu"
           role="button" aria-expanded="false">
-        <span class="d-none d-md-inline">{status.user.name}</span>
+        <span
+          class="user-avatar"
+          aria-hidden="true"
+          title={status.user.name}
+        >{(status.user.name || '?').trim().charAt(0).toUpperCase()}</span>
+        <span class="d-none d-md-inline user-menu-name">{status.user.name}</span>
       </a>
       <ul class="dropdown-menu dropdown-menu-end"
           aria-labelledby="user_menu">
         <li>
           <a href="#" class="dropdown-item" on:click|preventDefault={openProfile}>
-            <i class="bi bi-person-circle me-1"></i>プロフィール
-          </a>
+            <i class="bi bi-person-circle me-1"></i><BilingualText key="profile" stacked={false} /></a>
         </li>
         <li>
           <a href="#" class="dropdown-item" on:click|preventDefault={openTenantCreate}>
-            <i class="bi bi-building-add me-1"></i>テナント作成
-          </a>
+            <i class="bi bi-building-add me-1"></i><BilingualText key="create_tenant" stacked={false} /></a>
         </li>
         <li>
           <a href="#" class="dropdown-item" on:click|preventDefault={switchTenantFromApp}>
-            <i class="bi bi-arrow-left-right me-1"></i>テナント切替
+            <i class="bi bi-arrow-left-right me-1"></i><BilingualText key="nav_tenant_switch" stacked={false} />
             {#if switchingTenant}
               <span class="spinner-border spinner-border-sm ms-2" role="status" aria-hidden="true"></span>
             {/if}
@@ -46,7 +47,7 @@
         <li><hr class="dropdown-divider"></li>
         <li>
           <a href="/logout" class="dropdown-item">
-            <i class="bi bi-power me-1"></i>Sign out
+            <i class="bi bi-power me-1"></i><BilingualText key="nav_sign_out" stacked={false} />
           </a>
         </li>
       </ul>
@@ -58,14 +59,22 @@
 
 <script>
 import axios from 'axios';
-import {wareki} from '../../../libs/utils';
+import {formatFiscalHeader} from '../../../libs/utils';
 import ProfileModal from './profile-modal.svelte';
+import LanguagePairSelector from '../widgets/language-pair-selector.svelte';
 
+import BilingualText from '../components/bilingual-text.svelte';
+import { bi, languagePair } from '../../javascripts/bilingual.js';
 export let status;
 
 let profileModal;
 let switchingTenant = false;
 let creatingTenant = false;
+
+$: fiscalHeader = {
+  primary: formatFiscalHeader(status.fy, $languagePair?.primary || 'ja'),
+  secondary: formatFiscalHeader(status.fy, $languagePair?.secondary || 'vi')
+};
 
 const openProfile = () => profileModal?.show();
 
@@ -78,12 +87,12 @@ const openTenantCreate = async () => {
     return;
   }
 
-  const name = window.prompt('テナント名を入力してください。');
+  const name = window.prompt($bi('nav_tenant_name_prompt'));
   if (!name?.trim()) {
     return;
   }
 
-  const slug = window.prompt('スラッグを入力してください。空欄なら自動生成します。') || '';
+  const slug = window.prompt($bi('nav_tenant_slug_prompt')) || '';
   creatingTenant = true;
   try {
     const res = await axios.post('/api/tenant', {
@@ -91,12 +100,12 @@ const openTenantCreate = async () => {
       slug: slug.trim() || undefined
     });
     if (res.data.result !== 'OK') {
-      window.alert(res.data.message || 'テナントの作成に失敗しました。');
+      window.alert(res.data.message || $bi('nav_tenant_create_fail'));
       return;
     }
     window.location.reload();
   } catch (err) {
-    window.alert(err.response?.data?.message || 'テナントの作成に失敗しました。');
+    window.alert(err.response?.data?.message || $bi('nav_tenant_create_fail'));
   } finally {
     creatingTenant = false;
   }

@@ -1,53 +1,31 @@
 <table class="table table-bordered">
   <thead class="table-light">
     <tr>
-      <th scope="col" style="width: 120px;">
-        大分類
-      </th>
-      <th scope="col" style="width: 120px;">
-        中分類
-      </th>
-      <th scope="col" style="width: 140px;">
-        小分類
-      </th>
-      <th scope="col">
-        勘定科目
-      </th>
-      <th scope="col" style="width: 80px;">
-        科目<br/>コード
-      </th>
-      <th scope="col" style="width: 120px;">
-        補助科目
-      </th>
-      <th scope="col" style="width: 50px;">
-        課税区分
-      </th>
-      <th scope="col" style="width: 60px;">
-        検索キー
-      </th>
-      <th scope="col" style="width: 100px;">
-        借方金額
-      </th>
-      <th scope="col" style="width: 100px;">
-        貸方金額
-      </th>
-      <th scope="col" style="width: 100px;">
-        残高
-      </th>
+      <th scope="col" style="width: 120px;"><BilingualText key="major_class" /></th>
+      <th scope="col" style="width: 120px;"><BilingualText key="middle_class" /></th>
+      <th scope="col" style="width: 140px;"><BilingualText key="minor_class" /></th>
+      <th scope="col"><BilingualText key="chart_of_accounts" /></th>
+      <th scope="col" style="width: 80px;"><BilingualText key="account" /><br/><BilingualText key="code" /></th>
+      <th scope="col" style="width: 120px;"><BilingualText key="sub_account" /></th>
+      <th scope="col" style="width: 50px;"><BilingualText key="tax_category" /></th>
+      <th scope="col" style="width: 60px;"><BilingualText key="search_key" /></th>
+      <th scope="col" style="width: 100px;"><BilingualText key="debit_amount" /></th>
+      <th scope="col" style="width: 100px;"><BilingualText key="credit_amount" /></th>
+      <th scope="col" style="width: 100px;"><BilingualText key="balance" /></th>
     </tr>
   </thead>
   <tbody>
     {#each lines as line}
     <tr>
       <td>
-        {line.majorName}
+        {#if line.majorName}<span class="bi-pair"><span class="bi-primary">{line.majorName}</span>{#if line.majorNameVi}<span class="bi-sep"> / </span><span class="bi-secondary">{line.majorNameVi}</span>{/if}</span>{/if}
       </td>
       <td>
-        {line.middleName}
+        {#if line.middleName}<span class="bi-pair"><span class="bi-primary">{line.middleName}</span>{#if line.middleNameVi}<span class="bi-sep"> / </span><span class="bi-secondary">{line.middleNameVi}</span>{/if}</span>{/if}
       </td>
       <td>
         {#if (line.minorName != '')}
-        {line.minorName}
+        <span class="bi-pair"><span class="bi-primary">{line.minorName}</span>{#if line.minorNameVi}<span class="bi-sep"> / </span><span class="bi-secondary">{line.minorNameVi}</span>{/if}</span>
         {/if}
       </td>
       <td>
@@ -56,7 +34,7 @@
           on:click={() => {
             editAccount(line.code);
           }}>
-          {line.accountName}
+          <span class="bi-pair"><span class="bi-primary">{line.accountName}</span>{#if line.accountNameVi}<span class="bi-sep"> / </span><span class="bi-secondary">{line.accountNameVi}</span>{/if}</span>
         </button>
         {:else}
         <button type="button" class="btn btn-primary btn-sm"
@@ -79,7 +57,7 @@
           on:click={() => {
             editSubAccount(line.code, line.subCode);
           }}>
-          {line.subAccountName}
+          <span class="bi-pair"><span class="bi-primary">{line.subAccountName}</span>{#if line.subAccountNameVi}<span class="bi-sep"> / </span><span class="bi-secondary">{line.subAccountNameVi}</span>{/if}</span>
         </button>
         {:else}
         <button type="button" class="btn btn-primary btn-sm"
@@ -115,6 +93,18 @@
 th {
 	text-align: center;
 }
+.bi-pair {
+	display: inline;
+}
+.bi-primary {
+	font-weight: 600;
+}
+.bi-secondary {
+	font-size: 0.85em;
+}
+.bi-sep {
+	opacity: 0.5;
+}
 </style>
 
 <script>
@@ -123,6 +113,7 @@ import {onMount, beforeUpdate, afterUpdate, createEventDispatcher} from 'svelte'
 const dispatch = createEventDispatcher();
 import {taxClass} from '../../../libs/utils.js';
 
+import BilingualText from '../components/bilingual-text.svelte';
 export	let	status;
 export	let	lines;
 export	let	accounts;

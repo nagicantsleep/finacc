@@ -1,18 +1,14 @@
 <div class="menu">
   <div class="header">
     <button class="btn btn-primary" on:click|preventDefault={backup}>
-      バックアップ
+      <BilingualText key="backup" />
     </button>
   </div>
   <div class="body">
     <table class="table table-bordered">
       <thead class="table-light">
-        <th>
-          取得日時
-        </th>
-        <th>
-          処理
-        </th>
+        <th><BilingualText key="retrieved_at" /></th>
+        <th><BilingualText key="process" /></th>
       </thead>
       <tbody>
         {#each files as file, i}
@@ -22,17 +18,17 @@
           </td>
           <td style="text-align:center;">
             {#if (i == 0) }
-            <btton class="btn btn-success" on:click|preventDefault={() => restore(i)}>
-              復元
-            </btton>
+            <button class="btn btn-success" on:click|preventDefault={() => restore(i)}>
+              <BilingualText key="restore" />
+            </button>
             {:else}
-            <btton class="btn btn-warning" on:click|preventDefault={() => restore(i)}>
-              復元
-            </btton>
+            <button class="btn btn-warning" on:click|preventDefault={() => restore(i)}>
+              <BilingualText key="restore" />
+            </button>
             {/if}
-            <btton class="btn btn-danger" on:click|preventDefault={() => remove(i)}>
-              削除
-            </btton>
+            <button class="btn btn-danger" on:click|preventDefault={() => remove(i)}>
+              <BilingualText key="delete" />
+            </button>
           </td>
         </tr>
         {/each}
@@ -52,6 +48,8 @@ import axios from 'axios';
 import {onMount, beforeUpdate} from 'svelte';
 import eventBus from '../../javascripts/event-bus.js';
 import OkModal from '../common/ok-modal.svelte';
+import BilingualText from '../components/bilingual-text.svelte';
+import { _b } from '../../javascripts/bilingual.js';
 
 export let toast;
 export let status;
@@ -65,30 +63,44 @@ let restoreFile;
 let removeFile;
 
 const fileName = (file) => {
-  return  `${file.getFullYear()}年${file.getMonth()+1}月${file.getDate()}日${file.toLocaleTimeString()}`
+  return  `${file.getFullYear()}${_b('year_num').primary}${file.getMonth()+1}${_b('month_num').primary}${file.getDate()}${_b('day').primary}${file.toLocaleTimeString()}`
 }
 
 const remove = (i) => {
   console.log('remove');
   removeFile = files[i];
+  const takenOn = _b('taken_on');
+  const tStr = `${takenOn.primary} / ${takenOn.secondary}`;
   if  ( i > 0 ) {
-    description = `${fileName(removeFile)}に取得した<br />${i}世代前のバックアップを削除します。<br />よろしいですか？`;
+    const genBefore = _b('gen_backup_before');
+    const gbStr = `${genBefore.primary} / ${genBefore.secondary}`;
+    description = `${fileName(removeFile)}${tStr}<br />${i}${gbStr}`;
   } else {
-    description = `${fileName(removeFile)}に取得した<br />バックアップを削除します。<br />よろしいですか？`;
+    const bDelSimple = _b('backup_delete_simple');
+    const bdsStr = `${bDelSimple.primary} / ${bDelSimple.secondary}`;
+    description = `${fileName(removeFile)}${tStr}<br />${bdsStr}`;
   }
-  title = 'バックアップの削除';
+  const _bResult = _b('backup_delete_title');
+  title = `${_bResult.primary} / ${_bResult.secondary}`;
   operation = doRemove;
   modal.show();
 }
 const restore = (i) => {
   console.log('restore');
   restoreFile = files[i];
+  const takenOn = _b('taken_on');
+  const tStr = `${takenOn.primary} / ${takenOn.secondary}`;
   if  ( i > 0 ) {
-    description = `${fileName(restoreFile)}に取得した<br />${i}世代前のバックアップから復元します。<br />よろしいですか？`;
+    const genRestoreBefore = _b('gen_backup_restore_before');
+    const grbStr = `${genRestoreBefore.primary} / ${genRestoreBefore.secondary}`;
+    description = `${fileName(restoreFile)}${tStr}<br />${i}${grbStr}`;
   } else {
-    description = `${fileName(restoreFile)}に取得した<br />バックアップから復元します。<br />よろしいですか？`;
+    const bRestoreSimple = _b('backup_restore_simple');
+    const brsStr = `${bRestoreSimple.primary} / ${bRestoreSimple.secondary}`;
+    description = `${fileName(restoreFile)}${tStr}<br />${brsStr}`;
   }
-  title = 'バックアップの復元';
+  const _bResult2 = _b('backup_restore_title');
+  title = `${_bResult2.primary} / ${_bResult2.secondary}`;
   operation = doRestore;
   modal.show();
 }
@@ -96,7 +108,8 @@ const doRestore = (ev) => {
   console.log(ev.detail);
   if  ( ev.detail ) {
     console.log('Yes');
-    toast.show('バックアップ', '復元開始しました');
+    const restoreStarted = _b('restore_started');
+    toast.show(`${restoreStarted.primary} / ${restoreStarted.secondary}`, '');
     axios.post('/api/admin/restore', {
       date: restoreFile
     }).then((result) => {
@@ -104,7 +117,8 @@ const doRestore = (ev) => {
       if  ( data.code === 0 ) {
         window.location = '/home';
         toast.remove();
-        toast.show('バックアップ', '復元完了しました');
+        const restoreCompleted = _b('restore_completed');
+        toast.show(`${restoreCompleted.primary} / ${restoreCompleted.secondary}`, '');
       }
     })
   }
@@ -114,17 +128,20 @@ const doRemove = (ev) => {
   if  ( ev.detail ) {
     console.log('Yes');
     axios.delete(`/api/admin/backup/${removeFile.toJSON()}`).then(() => {
-      toast.show('バックアップ', 'バックアップ削除しました')
+      const backupDeleted = _b('backup_deleted_msg');
+      toast.show(`${backupDeleted.primary} / ${backupDeleted.secondary}`, '')
       files = undefined;
     })
   }
 }
 
 const backup = () => {
-  toast.show('バックアップ', 'バックアップ開始しました')
+  const backupStarted = _b('backup_started');
+  toast.show(`${backupStarted.primary} / ${backupStarted.secondary}`, '')
   axios.post('/api/admin/backup').then(() => {
     toast.remove();
-    toast.show('バックアップ', 'バックアップ終了しました')
+    const backupEnded = _b('backup_ended');
+    toast.show(`${backupEnded.primary} / ${backupEnded.secondary}`, '')
     files = undefined;
   })
 }

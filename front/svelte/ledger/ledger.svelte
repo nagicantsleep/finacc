@@ -1,7 +1,6 @@
 <div class="page-title d-flex justify-content-between">
-  <h1>元帳</h1>
-  <a href="/forms/general_ledger/{status.fy.term}?format=pdf" download="総勘定元帳-{today}.pdf" class="btn btn-primary">
-    総勘定元帳をダウンロード&nbsp;<i class="bi bi-download"></i>
+  <h1 class="page-title-bilingual"><BilingualText key="ledger" inline={true} /></h1>
+  <a href="/forms/general_ledger/{status.fy.term}?format=pdf" download="{$bi('form_print_gl')}-{today}.pdf" class="btn btn-primary btn-bilingual"><BilingualText key="download_general_ledger" inline={true} /><i class="bi bi-download"></i>
   </a>
 </div>
 <AccountSelect
@@ -17,25 +16,23 @@
       	code: account.accountCode
     	})
     }}>
-    { account ? account.name : ''}
+    <BilingualText primary={account.name} secondary={account.nameVi} inline={true} />
   </button>
   {/if}
   <div>
     {#if (account)}
-    <button type="button" class="btn btn-info"
+    <button type="button" class="btn btn-info btn-bilingual"
       on:click={() => {
         if (subAccountCode) {
           link(`/changes/${status.fy.term}/${accountCode}/${subAccountCode}`)
         } else {
           link(`/changes/${status.fy.term}/${accountCode}`)
         }
-      }}>
-      推移表を見る
-    </button>
+      }}><BilingualText key="view_trends" inline={true} /></button>
     {/if}
-    <button type="button" class="btn btn-primary" id="open-cross-slip"
+    <button type="button" class="btn btn-primary btn-bilingual" id="open-cross-slip"
     	on:click={openSlip}>
-      伝票入力&nbsp;<i class="bi bi-pencil-square"></i>
+      <BilingualText key="voucher_entry" inline={true} /><i class="bi bi-pencil-square"></i>
     </button>
   </div>
 </nav>
@@ -52,15 +49,12 @@
       {/key}
     </div>
     <div class="col-4" style="text-align:right;">
-      <button type="button" class="btn btn-info"
+      <button type="button" class="btn btn-info btn-bilingual"
         on:click={() => {
           link(`/changes/${status.fy.term}/${accountCode}/${subAccountCode}`)
         }}
-        disabled={!subAccountCode}>
-      	推移表を見る
-    	</button>
-      <a href="/forms/subsidiary_ledger/{status.fy.term}?format=pdf" download="補助元帳-{today}.pdf" class="btn btn-primary">
-          補助元帳をダウンロード&nbsp;<i class="bi bi-download"></i>
+        disabled={!subAccountCode}><BilingualText key="view_trends" inline={true} /></button>
+      <a href="/forms/subsidiary_ledger/{status.fy.term}?format=pdf" download="{$bi('form_print_sl')}-{today}.pdf" class="btn btn-primary btn-bilingual"><BilingualText key="download_sub_ledger" inline={true} /><i class="bi bi-download"></i>
       </a>
     </div>
   </div>
@@ -89,10 +83,32 @@
 {/key}
 {/if}
 
+<style>
+.btn-bilingual {
+  min-height: 56px;
+  line-height: 1.2;
+  white-space: normal;
+  padding: 0.25rem 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.page-title-bilingual {
+  display: inline-flex;
+  align-items: center;
+  line-height: 1.3;
+}
+.page-title {
+  margin-top: 0.75rem;
+  margin-bottom: 1rem;
+}
+</style>
+
 <script>
 
 import axios from 'axios';
 import {onMount, beforeUpdate, afterUpdate, createEventDispatcher} from 'svelte';
+import {get} from 'svelte/store';
 import LedgerList from './ledger-list.svelte';
 import CrossSlipModal from '../cross-slip/cross-slip-modal.svelte';
 import {ledgerLines} from '../../../libs/ledger';
@@ -102,6 +118,8 @@ import {setAccounts} from '../../javascripts/cross-slip';
 import parse_account_code from '../../../libs/parse_account_code';
 import {currentPage, link} from '../../javascripts/router.js';
 
+import {bi, languagePair} from '../../javascripts/bilingual.js';
+import BilingualText from '../components/bilingual-text.svelte';
 export let status;
 
 let modalCount = 0;
@@ -120,22 +138,22 @@ let sums;
 let lines;
 let fields = [
   {
-    title: '資産',
+    titleKey: 'chart_assets',
     accounts: []
   },{
-    title: '負債',
+    titleKey: 'chart_liabilities',
     accounts: []
   },{
-    title: '純資産',
+    titleKey: 'chart_net_assets',
     accounts: []
   },{
-    title: '売上高',
+    titleKey: 'chart_revenue',
     accounts: []
   },{
-    title: '売上原価',
+    titleKey: 'chart_cost_of_sales',
     accounts: []
   },{
-    title: '営業外',
+    titleKey: 'chart_non_operating',
     accounts: []
   }
 ];
@@ -145,6 +163,16 @@ let subAccountCode;
 
 const _link = (event) => {
   link(event.detail);
+}
+
+// Build `?languagePair=<json>` suffix so backend can enrich via enrichBilingual
+const lpQuery = () => {
+  const pair = $languagePair;
+  return `?languagePair=${encodeURIComponent(JSON.stringify(pair))}`;
+}
+
+$: if ($languagePair && accountCode) {
+  update(false);
 }
 
 const accountSelect = (code) => {
@@ -160,7 +188,7 @@ const accountSelect = (code) => {
 }
 
 const update = async (list) => {
-  let result = await axios.get(`/api/account/${accountCode}`);
+  let result = await axios.get(`/api/account/${accountCode}${lpQuery()}`);
   account = result.data;
   console.log('update', account);
   //console.log('account', account);
@@ -189,7 +217,7 @@ const checkPage = () => {
 }
 
 onMount(() => {
-  axios.get(`/api/accounts`).then((res) => {
+  axios.get(`/api/accounts${lpQuery()}`).then((res) => {
     accounts = res.data;
     setAccounts(accounts);
     for ( let i = 0; i < accounts.length; i ++ ) {
@@ -250,9 +278,9 @@ const updateList = () => {
   let pr;
   if ( subAccountCode ) {
     console.log('sub');
-    pr = axios.get(`/api/ledger/${status.fy.term}/${accountCode}/${subAccountCode}`);
+    pr = axios.get(`/api/ledger/${status.fy.term}/${accountCode}/${subAccountCode}${lpQuery()}`);
   } else {
-    pr = axios.get(`/api/ledger/${status.fy.term}/${accountCode}`);
+    pr = axios.get(`/api/ledger/${status.fy.term}/${accountCode}${lpQuery()}`);
   }
   details = [];
   pr.then((result) => {

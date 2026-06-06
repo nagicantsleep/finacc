@@ -5,15 +5,18 @@
     </div>
     <div class="card">
       <div class="card-body login-card-body">
-        <p class="fs-4 text-center ">ログイン</p>
+        <div class="d-flex justify-content-end mb-2">
+          <LanguagePairSelector save={false} />
+        </div>
+        <p class="fs-4 text-center "><BilingualText key="login" /></p>
         <p class="text-{msg_type} text-center">{message}</p>
         <div class="mb-3">
-          <label for="user_input">ユーザー名</label>
-          <input type="text" bind:value={user_name} class="form-control" placeholder="ユーザー名">
+          <label for="user_input"><BilingualText key="username" /></label>
+          <input type="text" bind:value={user_name} class="form-control" placeholder={$bi('user_name_placeholder')}>
         </div>
         <div class="mb-3">
-          <label for="password_input">パスワード</label>
-          <input type="password" bind:value={password} class="form-control" placeholder="パスワード">
+          <label for="password_input"><BilingualText key="password" /></label>
+          <input type="password" bind:value={password} class="form-control" placeholder={$bi('password_placeholder')}>
         </div>
         <div class="row d-flex justify-content-center">
           <div class="col-lg-8 col-4 d-grid">
@@ -23,9 +26,9 @@
               {#if isSubmitting}
                 <span class="spinner-border spinner-border-sm me-2"></span>
               {/if}
-              ログイン
+              <BilingualText key="login" />
             </button>
-            <a on:click|preventDefault={change} href="#" class="text-center">アカウント登録はこちら</a>
+            <a on:click|preventDefault={change} href="#" class="text-center"><BilingualText key="signup_link" /></a>
           </div>
         </div>
       </div>
@@ -35,6 +38,10 @@
 <script>
 import {onMount, beforeUpdate, afterUpdate, createEventDispatcher} from 'svelte';
 import axios from 'axios';
+import BilingualText from '../components/bilingual-text.svelte';
+import { bi, languagePair } from '../../javascripts/bilingual.js';
+import { get } from 'svelte/store';
+import LanguagePairSelector from '../widgets/language-pair-selector.svelte';
 export let current;
 
 let user_name = '';
@@ -57,20 +64,21 @@ onMount(() => {
 const Login = async () => {
   if (!user_name || !password) {
     msg_type = 'danger';
-    message = 'ユーザー名またはパスワードが入力されていません。';
+    message = $bi('error_login_required');
     return;
   }
-  
+
   isSubmitting = true;
-  
+
   try {
     const response = await axios.post('/api/user/login', {
       user_name,
-      password
+      password,
+      languagePair: get(languagePair)
     });
-    
+
     console.log('result', response.data);
-    
+
     if (response.data.result === 'OK') {
       if (response.data.requiresTenantSelection) {
         window.location = '/logon';
@@ -79,12 +87,12 @@ const Login = async () => {
       }
     } else {
       msg_type = 'danger';
-      message = response.data.message || 'ユーザー名またはパスワードが違います。';
+      message = response.data.message || $bi('login_user_pw_wrong');
       isSubmitting = false;
     }
   } catch (err) {
     console.error('login error', err);
-    message = 'エラーが発生しました。';
+    message = $bi('login_error_occurred');
     msg_type = 'danger';
     isSubmitting = false;
   }

@@ -1,5 +1,5 @@
 <FrontCover
-  title="残高試算表"
+  titleKey="trial_balance"
   {company}
   {fy}
   ></FrontCover>
@@ -7,24 +7,24 @@
 <Print
   {company}
   {fy}
-  title="残高試算表"
-  sub_title= "貸借対照表 資産の部"
+  titleKey="trial_balance"
+  sub_title_key="bs_assets"
   pages={assetPages}></Print>
 {/if}
 {#if liabilitiesAndCapitalPages}
 <Print
   {company}
   {fy}
-  title="残高試算表"
-  sub_title="貸借対照表 負債・資本の部"
+  titleKey="trial_balance"
+  sub_title_key="bs_liabilities"
   pages={liabilitiesAndCapitalPages}></Print>
 {/if}
 {#if incomeStatementPages}
 <Print
   {company}
   {fy}
-  title="残高試算表"
-  sub_title="損益計算書"
+  titleKey="trial_balance"
+  sub_title_key="income_statement"
   pages={incomeStatementPages}></Print>
 {/if}
 <script>

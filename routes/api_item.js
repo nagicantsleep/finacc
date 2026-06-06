@@ -1,4 +1,5 @@
 import models from '../models/index.js';
+import { enrichBilingual } from '../libs/bilingual-helper.js';
 import fs from 'fs';
 const Op = models.Sequelize.Op;
 import Mime from 'mime';
@@ -202,24 +203,29 @@ export default {
       });
     }
   },
-  classesGet: (req, res, next) => {
+  classesGet: async (req, res, next) => {
     res.set('Access-Control-Allow-Origin', '*');
     const tenantId = req.currentTenantId;
-    models.ItemClass.findAll({
-      where: { tenantId },
-      order: [
-        [ 'displayOrder', 'asc']
-      ]
-    }).then((result) => {
+    try {
+      let result = await models.ItemClass.findAll({
+        where: { tenantId },
+        order: [
+          [ 'displayOrder', 'asc']
+        ]
+      });
+      const lp = req.query.languagePair ? JSON.parse(req.query.languagePair) : req.session?.languagePair;
+      if (lp) {
+        result = await enrichBilingual('ItemClass', result, lp);
+      }
       res.json({
         values: result
-      })
-    }).catch((e) => {
+      });
+    } catch (e) {
       console.log(e);
       res.json({
         code: -1
       });
-    })
+    }
   },
   classesPut: async (req, res, next) => {
     res.set('Access-Control-Allow-Origin', '*');

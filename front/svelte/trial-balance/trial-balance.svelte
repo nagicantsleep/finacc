@@ -1,45 +1,40 @@
 {#key $currentPage}
 <div class="list">
   <div class="page-title d-flex justify-content-between">
-  	<h1>残高試算表</h1>
+  	<h1 class="page-title-bilingual"><BilingualText key="trial_balance" inline={true} /></h1>
   	<a href="/forms/trial_balance/{status.fy.term}?format=pdf"
-      download="残高試算表.pdf" class="btn btn-primary">
-    	残高試算表をダウンロード&nbsp;<i class="bi bi-download"></i>
+      download="{$bi('trial_balance')}.pdf" class="btn btn-primary btn-bilingual"><BilingualText key="download_trial_balance" inline={true} /><i class="bi bi-download"></i>
   	</a>
 	</div>
 	<ul class="page-subtitle nav me-auto">
   	<li class="nav-item">
     	{#if ( !status.month  )}
-    	<button type="button" class="btn btn-primary disabled me-2"
+    	<button type="button" class="btn btn-primary month-btn disabled me-2"
       	on:click={() => {
           openMonth("");
-        }}>
-      	年度
-    	</button>
+        }}><BilingualText key="fiscal_year" stacked={true} /></button>
     	{:else}
-    	<button type="button" class="btn btn-outline-primary me-2"
+    	<button type="button" class="btn btn-outline-primary month-btn me-2"
       	on:click={() => {
         	openMonth("");
-      	}}>
-      	年度
-    	</button>
+      	}}><BilingualText key="fiscal_year" stacked={true} /></button>
     	{/if}
   	</li>
   	{#each dates as date}
   	<li class="nav-item">
     	{#if (date.ym == status.month)}
-    	<button type="button" class="btn btn-primary disabled me-2"
+    	<button type="button" class="btn btn-primary month-btn disabled me-2"
       	on:click={() => {
           openMonth(`${date.year}-${date.month}`);
         }}>
-  	    {date.month}&nbsp;月
+  	    <BilingualText key={`month_${date.month}`} stacked={true} />
     	</button>
 	    {:else}
-  	  <button type="button" class="btn btn-outline-primary me-2"
+  	  <button type="button" class="btn btn-outline-primary month-btn me-2"
       on:click={() => {
         openMonth(`${date.year}-${date.month}`);
       }}>
-      {date.month}&nbsp;月
+      <BilingualText key={`month_${date.month}`} stacked={true} />
   	  </button>
     	{/if}
 	  </li>
@@ -54,6 +49,32 @@
 </div>
 {/key}
 
+<style>
+.page-title {
+  margin-bottom: 1rem;
+}
+.month-btn {
+  min-height: 56px;
+  line-height: 1.2;
+  white-space: normal;
+  padding: 0.25rem 0.5rem;
+}
+.btn-bilingual {
+  min-height: 56px;
+  line-height: 1.2;
+  white-space: normal;
+  padding: 0.25rem 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.page-title-bilingual {
+  display: inline-flex;
+  align-items: center;
+  line-height: 1.3;
+}
+</style>
+
 <script>
 import axios from 'axios';
 import {onMount} from 'svelte';
@@ -62,6 +83,8 @@ import {numeric} from '../../../libs/utils.js';
 import {dc} from '../../../libs/parse_account_code';
 import {currentPage, link} from '../../javascripts/router.js';
 
+import BilingualText from '../components/bilingual-text.svelte';
+import { bi, languagePair } from '../../javascripts/bilingual.js';
 export let status;
 export let alert;
 export let alert_level;
@@ -91,6 +114,11 @@ const openMonth = (month) => {
   link(href);
 }
 
+const lpQuery = () => {
+  const pair = $languagePair;
+  return `?languagePair=${encodeURIComponent(JSON.stringify(pair))}`;
+}
+
 const updateLines = async () => {
   // status.fy.term が未設定の場合はAPIを呼ばない
   if (!status || !status.fy || !status.fy.term) {
@@ -100,9 +128,9 @@ const updateLines = async () => {
   let _lines = [];
   let url;
   if  ( status.month ) {
-    url = `/api/trial-balance/${status.month}`;
+    url = `/api/trial-balance/${status.month}${lpQuery()}`;
   } else {
-    url = `/api/trial-balance`;
+    url = `/api/trial-balance${lpQuery()}`;
   }
   const result = await axios.get(url);
   let data = result.data;
@@ -114,6 +142,7 @@ const updateLines = async () => {
     if	( account.code.length > 7 ) continue;
     let new_line = {
       name: account.name,
+      nameVi: account.nameVi || '',
       pickup: numeric(account.pickup),
       debit: numeric(account.debit),
       credit: numeric(account.credit),
@@ -127,12 +156,16 @@ const updateLines = async () => {
 
     if ( last_account.middle_name != account.middle_name ) {
       _lines.push({
-        name: `【${account.middle_name}】`
+        name: `【${account.middle_name}】`,
+        middle_name: account.middle_name,
+        middle_nameVi: account.middle_nameVi || ''
       });
     }
     if ( last_account.minor_name != account.minor_name ) {
       _lines.push({
-        name: account.minor_name
+        name: account.minor_name,
+        minor_name: account.minor_name,
+        minor_nameVi: account.minor_nameVi || ''
       });
     }
     if	(( new_line.pickup != 0 ) ||

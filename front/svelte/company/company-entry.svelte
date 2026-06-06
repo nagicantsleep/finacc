@@ -1,44 +1,3 @@
-<div class="entry">
-  <div class="page-title d-flex justify-content-between">
-    <h1>法人等基本情報</h1>
-  </div> 
-  <div class="row full-height fontsize-12pt">
-    <div class="content">
-      <div class="body">
-        {#if !ok }
-        <div class="border rounded border-danger mb-3 ms-2 me-2 p-3">
-          <h5 class="fs-5 text-danger"><i class="bi bi-exclamation-triangle-fill"></i>&nbsp;エラー</h5>
-          <ul>
-          {#each errorMessages as errorMessage}
-            <li class="text-danger">{errorMessage}</li>
-          {/each}
-          </ul>
-        </div>
-        {/if}
-        <CompanyInfo
-        	bind:status={status}
-        	bind:company={company}></CompanyInfo>
-      </div>
-      <div class="footer">
-        <button type="button" class="btn btn-secondary"
-          on:click={back}>もどる</button>
-        {#if (!inline && company && company.id && company.id > 0)}
-        <button type="button" class="btn btn-danger"
-          on:click={delete_}>削除</button>
-        {/if}
-        <button type="button" class="btn btn-primary"
-          on:click={save}>保存</button>
-      </div>
-    </div>
-  </div>
-</div>
-<OkModal
-  bind:this={modal}
-  title={title}
-  description={description}
-  on:answer={doDelete}
-  ></OkModal>
-
 <script>
 import axios from 'axios';
 import {onMount, beforeUpdate, afterUpdate, createEventDispatcher} from 'svelte';
@@ -47,6 +6,8 @@ import {currentCompany, getStore} from '../../javascripts/current-record.js'
 
 import CompanyInfo from './company-info.svelte';
 import OkModal from '../common/ok-modal.svelte';
+import BilingualText from '../components/bilingual-text.svelte';
+import { bi } from '../../javascripts/bilingual.js';
 
 export let status;
 export let company;
@@ -69,27 +30,27 @@ const create_company = async (company) => {
 const update_company = async (company) => {
   console.log('save_company', company);
   let result = await axios.put('/api/company', company);
-     
+
   console.log(result);
   return  (result);
 }
 
 const delete_company = async (company) => {
-  title = '顧客情報の削除';
+  title = $bi('company_delete_title');
   description = `
 <table style="font-size:12px;">
   <tbody>
     <tr>
-      <td>名前</td><td>${company.name}</td>
+      <td>${$bi('name')}</td><td>${company.name}</td>
     </tr>
     <tr>
-      <td>種別</td><td>${company.companyClass?.name}</td>
+      <td>${$bi('kind')}</td><td>${company.companyClass?.name}</td>
     </tr>
     <tr>
-      <td>住所</td><td>${company.address1}<br>${company.address2}</td>
+      <td>${$bi('address')}</td><td>${company.address1}<br>${company.address2}</td>
     </tr>
     <tr>
-      <td>担当者</td><td>${company.chargeName}</td>
+      <td>${$bi('person_in_charge')}</td><td>${company.chargeName}</td>
     </tr>
   </tbody>
 </table>
@@ -113,27 +74,27 @@ const validateForm = () => {
   errorMessages = [];
   if ( company.name === undefined ){
     ok = false;
-    errorMessages.push("名前が未入力です。");
+    errorMessages.push($bi('error_name_required'));
   }
   if ( company.name !== undefined && company.name.trim().length === 0 ){
     ok = false;
-    errorMessages.push("名前が未入力です。");
+    errorMessages.push($bi('error_name_required'));
   }
   if ( company.ruby === undefined ){
     ok = false;
-    errorMessages.push("フリガナが未入力です。");
+    errorMessages.push($bi('error_furigana_required'));
   }
   if ( company.ruby !== undefined && company.ruby.trim().length === 0 ){
     ok = false;
-    errorMessages.push("フリガナが未入力です。");
+    errorMessages.push($bi('error_furigana_required'));
   }
   if ( company.key === undefined ){
     ok = false;
-    errorMessages.push("呼び出しキーが未入力です。");
+    errorMessages.push($bi('error_key_required'));
   }
   if ( company.key !== undefined && company.key.trim().length === 0 ){
     ok = false;
-    errorMessages.push("呼び出しキーが未入力です。");
+    errorMessages.push($bi('error_key_required'));
   }
   errorMessages = errorMessages;
   return ok;
@@ -227,3 +188,44 @@ const delete_ = (event) => {
   }
 }
 </script>
+
+<div class="entry">
+  <div class="page-title d-flex justify-content-between">
+    <h1><BilingualText key="company_info_register" /></h1>
+  </div>
+  <div class="row full-height fontsize-12pt">
+    <div class="content">
+      <div class="body">
+        {#if !ok }
+        <div class="border rounded border-danger mb-3 ms-2 me-2 p-3">
+          <h5 class="fs-5 text-danger"><i class="bi bi-exclamation-triangle-fill"></i>&nbsp;<BilingualText key="error" /></h5>
+          <ul>
+          {#each errorMessages as errorMessage}
+            <li class="text-danger">{errorMessage}</li>
+          {/each}
+          </ul>
+        </div>
+        {/if}
+        <CompanyInfo
+        	bind:status={status}
+        	bind:company={company}></CompanyInfo>
+      </div>
+      <div class="footer">
+        <button type="button" class="btn btn-secondary"
+          on:click={back}><BilingualText key="back" /></button>
+        {#if (!inline && company && company.id && company.id > 0)}
+        <button type="button" class="btn btn-danger"
+          on:click={delete_}><BilingualText key="delete" /></button>
+        {/if}
+        <button type="button" class="btn btn-primary"
+          on:click={save}><BilingualText key="save" /></button>
+      </div>
+    </div>
+  </div>
+</div>
+<OkModal
+  bind:this={modal}
+  title={title}
+  description={description}
+  on:answer={doDelete}
+  ></OkModal>

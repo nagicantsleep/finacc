@@ -2,17 +2,21 @@ import models from '../models/index.js';
 const Op = models.Sequelize.Op;
 import {make_klass} from  './parse_account_code.js';
 import * as utils from './utils.js';
+import { enrichBilingual } from './bilingual-helper.js';
 
 export default class {
   static accounts;
 
-  static async  all (tenantId) {
+  static async  all (tenantId, languagePair) {
     let accounts = await models.Account.findAll({
       where: { tenantId },
       order: [
         ['accountCode']
-      ], 
+      ],
     });
+    if (languagePair) {
+      await enrichBilingual('Account', accounts, languagePair);
+    }
     let lines = [];
     const company = await utils.getCompanyInfo(tenantId);
     if  ( company.showIntercompanyAsSundries )  {
@@ -35,11 +39,15 @@ export default class {
             ['subAccountCode']
           ]
         });
+        if (languagePair) {
+          await enrichBilingual('SubAccount', subs, languagePair);
+        }
         for ( let j = 0; j < subs.length; j ++ ) {
           let sub = subs[j];
           sub_lines.push({
             key: sub.key,
             name: sub.name,
+            nameVi: sub.getDataValue('nameVi') || '',
             code: sub.subAccountCode,
             taxClass: sub.taxClass
           });
@@ -47,6 +55,7 @@ export default class {
         lines.push({
           key: acc.key,
           name: acc.name,
+          nameVi: acc.getDataValue('nameVi') || '',
           code: acc.accountCode,
           taxClass: acc.taxClass,
           subAccounts: sub_lines
@@ -55,6 +64,7 @@ export default class {
         lines.push({
           key: acc.key,
           name: acc.name,
+          nameVi: acc.getDataValue('nameVi') || '',
           code: acc.accountCode,
           taxClass: acc.taxClass
         });
@@ -63,7 +73,7 @@ export default class {
     this.accounts = lines;
     return (lines);
   }
-  static async all2 (tenantId, term) {
+  static async all2 (tenantId, term, languagePair) {
     let accounts = await models.Account.findAll({
       where: { tenantId },
       order: [
@@ -78,6 +88,13 @@ export default class {
         as: 'accountClass'
       }]
     });
+    if (languagePair) {
+      await enrichBilingual('Account', accounts, languagePair);
+      const allSubs = accounts.flatMap(a => a.subAccounts || []);
+      if (allSubs.length > 0) {
+        await enrichBilingual('SubAccount', allSubs, languagePair);
+      }
+    }
     let lines = [];
     for ( let i = 0; i < accounts.length; i ++ ) {
       let acc = accounts[i];
@@ -98,6 +115,7 @@ export default class {
             id: suba.id,
             key: suba.key,
             name: suba.name,
+            nameVi: suba.getDataValue('nameVi') || '',
             code: suba.subAccountCode,
             taxClass: suba.taxClass,
             debit: rem ? rem.debit : 0,
@@ -121,6 +139,7 @@ export default class {
           minor_name: acc.accountClass.minor,
           key: acc.key,
           name: acc.name,
+          nameVi: acc.getDataValue('nameVi') || '',
           code: acc.accountCode,
           taxClass: acc.taxClass,
           subAccounts: sub_lines,
@@ -145,6 +164,7 @@ export default class {
           minor_name: acc.accountClass.minor,
           key: acc.key,
           name: acc.name,
+          nameVi: acc.getDataValue('nameVi') || '',
           code: acc.accountCode,
           taxClass: acc.taxClass,
           debit: rem ? rem.debit : 0,
@@ -156,7 +176,7 @@ export default class {
     this.accounts = lines;
     return (lines);
   }
-  static async all3(tenantId, term) {
+  static async all3(tenantId, term, languagePair) {
     // 1. 残高取得関数
     const getRemaining = async (model, key, field) => {
       const rem = await model.findOne({
@@ -174,7 +194,7 @@ export default class {
         balance: rem?.balance || 0
       };
     };
-    
+
     // 2. データ取得
     const accountClasses = await models.AccountClass.findAll({
       where: { tenantId },
@@ -202,48 +222,66 @@ export default class {
         }
       ]
     });
-    
+
+    // Enrich all accounts, sub-accounts, and account classes in one pass
+    if (languagePair) {
+      await enrichBilingual('AccountClass', accountClasses, languagePair);
+      const allAccs = accountClasses.flatMap(acl => acl.accounts || []);
+      if (allAccs.length > 0) {
+        await enrichBilingual('Account', allAccs, languagePair);
+        const allSubs = allAccs.flatMap(a => a.subAccounts || []);
+        if (allSubs.length > 0) {
+          await enrichBilingual('SubAccount', allSubs, languagePair);
+        }
+      }
+    }
+
     // 3. 出力作成
     const lines = [];
-    
+
     for (const acl of accountClasses) {
       const klassInfo = {
         major_name: acl.major,
         middle_name: acl.middle,
         minor_name: acl.minor,
+        major_nameVi: acl.getDataValue('majorVi') || '',
+        middle_nameVi: acl.getDataValue('middleVi') || '',
+        minor_nameVi: acl.getDataValue('minorVi') || '',
         acl_id: acl.id,
         acl_code: make_klass(acl.field, acl.adding)
       };
-    
+
       if (!acl.accounts || acl.accounts.length === 0) {
         lines.push(klassInfo);
         continue;
       }
-    
+
       for (const acc of acl.accounts) {
         const accRem = await getRemaining(models.AccountRemaining, acc.id, 'accountId');
-    
+
         if (acc.subAccounts && acc.subAccounts.length > 0) {
           const sub_lines = [];
-    
+
           for (const suba of acc.subAccounts) {
             const subRem = await getRemaining(models.SubAccountRemaining, suba.id, 'subAccountId');
-    
+
             sub_lines.push({
               id: suba.id,
               key: suba.key,
               name: suba.name,
+              nameVi: suba.getDataValue('nameVi') || '',
               code: suba.subAccountCode,
               taxClass: suba.taxClass,
               ...subRem
             });
           }
-    
+
           lines.push({
             ...klassInfo,
             id: acc.id,
             key: acc.key,
             name: acc.name,
+            nameVi: acc.getDataValue('nameVi') || '',
             code: acc.accountCode,
             taxClass: acc.taxClass,
             subAccounts: sub_lines,
@@ -255,6 +293,7 @@ export default class {
             id: acc.id,
             key: acc.key,
             name: acc.name,
+            nameVi: acc.getDataValue('nameVi') || '',
             code: acc.accountCode,
             taxClass: acc.taxClass,
             ...accRem
@@ -262,12 +301,12 @@ export default class {
         }
       }
     }
-    
+
     this.accounts = lines;
     return lines;
   }
     
-  static async all4(tenantId, term)	{   //  科目管理画面で使っている
+  static async all4(tenantId, term, languagePair)	{   //  科目管理画面で使っている
   let accountClasses = await models.AccountClass.findAll({
   where: { tenantId },
   include: [
@@ -289,6 +328,17 @@ export default class {
         ['accounts', 'subAccounts', 'subAccountCode', 'ASC']
   ],
   });
+  if (languagePair) {
+    await enrichBilingual('AccountClass', accountClasses, languagePair);
+    const allAccs = accountClasses.flatMap(acl => acl.accounts || []);
+    if (allAccs.length > 0) {
+      await enrichBilingual('Account', allAccs, languagePair);
+      const allSubs = allAccs.flatMap(a => a.subAccounts || []);
+      if (allSubs.length > 0) {
+        await enrichBilingual('SubAccount', allSubs, languagePair);
+      }
+    }
+  }
   let	lines = [];
   for	( let i = 0; i < accountClasses.length ; i ++ )	{
   let acl = accountClasses[i];
@@ -297,6 +347,9 @@ export default class {
   major_name: acl.major,
   middle_name: acl.middle,
   minor_name: acl.minor,
+  major_nameVi: acl.getDataValue('majorVi') || '',
+  middle_nameVi: acl.getDataValue('middleVi') || '',
+  minor_nameVi: acl.getDataValue('minorVi') || '',
   acl_id: acl.id,
   acl_code: make_klass(acl.field, acl.adding)
   });
@@ -320,6 +373,7 @@ export default class {
   id: suba.id,
   key: suba.key,
   name: suba.name,
+  nameVi: suba.getDataValue('nameVi') || '',
   code: suba.subAccountCode,
   taxClass: suba.taxClass,
   debit: rem ? rem.debit : 0,
@@ -341,10 +395,14 @@ export default class {
   major_name: acl.major,
   middle_name: acl.middle,
   minor_name: acl.minor,
+  major_nameVi: acl.getDataValue('majorVi') || '',
+  middle_nameVi: acl.getDataValue('middleVi') || '',
+  minor_nameVi: acl.getDataValue('minorVi') || '',
   acl_id: acl.id,
   acl_code: make_klass(acl.field, acl.adding),
   key: acc.key,
   name: acc.name,
+  nameVi: acc.getDataValue('nameVi') || '',
   code: acc.accountCode,
   taxClass: acc.taxClass,
   subAccounts: sub_lines,
@@ -367,10 +425,14 @@ export default class {
   major_name: acl.major,
   middle_name: acl.middle,
   minor_name: acl.minor,
+  major_nameVi: acl.getDataValue('majorVi') || '',
+  middle_nameVi: acl.getDataValue('middleVi') || '',
+  minor_nameVi: acl.getDataValue('minorVi') || '',
   acl_id: acl.id,
   acl_code: make_klass(acl.field, acl.adding),
   key: acc.key,
   name: acc.name,
+  nameVi: acc.getDataValue('nameVi') || '',
   code: acc.accountCode,
   taxClass: acc.taxClass,
   debit: rem ? rem.debit : 0,

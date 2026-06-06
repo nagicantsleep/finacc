@@ -6,7 +6,7 @@
   {ledgerPages}
   ></GeneralLedger>
 {:else}
-<p>読み込み中...</p>
+<p><BilingualText key="loading" /></p>
 {/if}
 
 <script>
@@ -15,6 +15,7 @@ import GeneralLedger from './general-ledger.svelte';
 import myCompany from '../../../../libs/my-company.js';
 import initializeGeneralLedger from '../../../../libs/init-general-ledger.js';
 
+import BilingualText from '../../components/bilingual-text.svelte';
 export let term;
 
 let fy;

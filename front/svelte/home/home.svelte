@@ -4,16 +4,12 @@
     <button type="button" class="btn btn-warning"
       on:click={() => {
         link(`/company/new?kind=1`);
-      }}>
-      自社情報の登録
-    </button>
+      }}><BilingualText key="company_info_register" /></button>
     {:else}
     <button type="button" class="btn btn-primary"
       on:click={() => {
         link(`/company/entry/${company.id}`);
-      }}>
-      自社情報の確認
-    </button>
+      }}><BilingualText key="company_info_confirm" /></button>
     {/if}
   </div>
 </div>
@@ -51,35 +47,31 @@
   {#if ( status.user.administrable) }
   <div class="col-4" style="padding:10px;">
     <TableMaintenance
-      title={'取引先種別'}
+      title={$bi('company_class')}
       endpoint={'/api/company/kinds'}
       bind:minimize={companyMinimize}
       columns={[
   { type: "id", name: 'id'},
   { type: "order", name: 'displayOrder'},
-  { type: "text", name: 'name', title: "種別名", align: "left"},
-  { type: "checkbox", name: 'isClient', title: "顧客", width: "50px"}
+  { type: "text", name: 'name', title: $bi('company_class_name'), align: "left"},
+  { type: "checkbox", name: 'isClient', title: $bi('customer'), width: "50px"}
 ]}></TableMaintenance>
   </div>
   <div class="col-8" style="padding:10px;">
     <TableMaintenance
-      title={'取引文書種別'}
+      title={$bi('transaction_kind')}
       endpoint={'/api/transaction/kinds'}
       bind:minimize={transactionMinimize}
       columns={[
   { type: "id", name: 'id'},
   { type: "order", name: 'displayOrder'},
-  { type: "text", name: 'label', title: "文書種別名", align: "left"},
-  { type: "checkbox", name: 'hasDetails', title: "明細有無", width: "100px"},
-  { type: "dropdown", name: 'hasDocument', title: "書類有無", width: "100px",
-    source:[
-      [0, 'なし'],
-      [1, '任意'],
-      [2, '必須'],
-    ]
+  { type: "text", name: 'label', title: $bi('home_col_doc_type_name'), align: "left"},
+  { type: "checkbox", name: 'hasDetails', title: $bi('has_details'), width: "100px"},
+  { type: "dropdown", name: 'hasDocument', title: $bi('home_col_doc_present'), width: "100px",
+    source: transactionDocSource
   },
-  { type: "checkbox", name: 'forCustomer', title: "顧客用", width: "70px"},
-  { type: "dropdown", name: 'bookId', title: '作成証憑', width: '200px',
+  { type: "checkbox", name: 'forCustomer', title: $bi('home_col_for_client'), width: "70px"},
+  { type: "dropdown", name: 'bookId', title: $bi('home_col_created_voucher'), width: '200px',
     func: getClasses
   }
 ]}></TableMaintenance>
@@ -90,20 +82,16 @@
   {#if ( status.user.administrable) }
   <div class="col-6" style="padding:10px;">
     <TableMaintenance
-      title={'証憑種別'}
+      title={$bi('voucher_class')}
       endpoint={'/api/voucher/classes'}
       bind:minimize={voucherMinimize}
       columns={[
   { type: "id", name: 'id'},
   { type: "order", name: 'displayOrder'},
-  { type: "text", name: 'name', title: "種別名", align: "left"},
-  { type: "checkbox", name: 'send', title: "差出", width: "50px"},
-  { type: "dropdown", name: 'form', title: "プログラム名", width: "150px",
-  	source: [
-      [ 'invoice', '請求書' ],
-    	[ 'receipt', '領収書' ],
-      [ 'estimate', '見積書']
-    ]
+  { type: "text", name: 'name', title: $bi('company_class_name'), align: "left"},
+  { type: "checkbox", name: 'send', title: $bi('home_col_send'), width: "50px"},
+  { type: "dropdown", name: 'form', title: $bi('program_name'), width: "150px",
+  	source: voucherFormSource
   }
 ]}></TableMaintenance>
   </div>
@@ -111,15 +99,15 @@
   {#if ( status.user.administrable) }
   <div class="col-6" style="padding:10px;">
     <TableMaintenance
-      title={'品目種別'}
+      title={$bi('item_class')}
       endpoint={'/api/item/classes'}
       bind:minimize={itemMinimize}
       columns={[
   { type: "id", name: 'id'},
   { type: "order", name: 'displayOrder'},
-  { type: "text", name: 'name', title: "種別名", align: "left"},
-  { type: "checkbox", name: 'product', title: "商品", width: "50px"},
-  { type: "checkbox", name: 'inventoryManagement', title: "在庫管理", width: "100px"}
+  { type: "text", name: 'name', title: $bi('item_class_name'), align: "left"},
+  { type: "checkbox", name: 'product', title: $bi('home_col_product'), width: "50px"},
+  { type: "checkbox", name: 'inventoryManagement', title: $bi('inventory_management'), width: "100px"}
 ]}></TableMaintenance>
   </div>
   {/if}
@@ -128,29 +116,24 @@
   {#if ( status.user.administrable) }
   <div class="col-6" style="padding:10px;">
     <TableMaintenance
-      title={'消費税区分'}
+      title={$bi('home_tax_rule')}
       endpoint={'/api/tax-rule'}
       bind:minimize={taxRuleMinimize}
       columns={[
   { type: "id", name: 'id'},
   { type: "order", name: 'displayOrder'},
-  { type: "text", name: 'label', title: "ラベル", align: "left"},
-  { type: "dropdown", name: 'taxClass', title: "方式", width: "80px",
-  	source: [
-      [ 0, '非課税' ],
-    	[ 1, '内税' ],
-      [ 2, '外税'],
-      [ 9, '別計算']
-    ]
+  { type: "text", name: 'label', title: $bi('home_col_label'), align: "left"},
+  { type: "dropdown", name: 'taxClass', title: $bi('home_col_tax_method'), width: "80px",
+  	source: taxMethodSource
   },
-  { type: "numeric", name: 'rate', title: "税率", width: "50px"},
-  { type: "date", name: 'startDate', title: "開始日", width: "110px"},
-  { type: "date", name: 'endDate', title: "終了日", width: "110px"}
+  { type: "numeric", name: 'rate', title: $bi('home_col_tax_rate'), width: "50px"},
+  { type: "date", name: 'startDate', title: $bi('home_col_start_date'), width: "110px"},
+  { type: "date", name: 'endDate', title: $bi('home_col_end_date'), width: "110px"}
 ]}></TableMaintenance>
   </div>
   <div class="col-6" style="padding:10px;">
     <SystemSettings
-      title={'システム設定'}
+      title={$bi('system_settings')}
       bind:minimize={systemSettingsMinimize}
       bind:toast={toast}
     />
@@ -159,6 +142,7 @@
 </div>
 <script>
 import { onMount, beforeUpdate } from "svelte";
+import { get } from 'svelte/store';
 
 import  FormPrint from './form-print.svelte';
 import  SelectTerm from './term.svelte';
@@ -168,6 +152,8 @@ import SystemSettings from './system-settings.svelte';
 import TableMaintenance from '../components/table-maintenance.svelte';
 import axios from 'axios';
 
+import { bi } from '../../javascripts/bilingual.js';
+import BilingualText from '../components/bilingual-text.svelte';
 export	let	status;
 export  let toast;
 export  let alert;
@@ -181,6 +167,23 @@ let taxRuleMinimize = true;
 let systemSettingsMinimize = true;
 let company;
 
+$: transactionDocSource = [
+  [0, $bi('none_opt')],
+  [1, $bi('optional')],
+  [2, $bi('required')],
+];
+$: voucherFormSource = [
+  ['invoice', $bi('invoice_form_label')],
+  ['receipt', $bi('receipt_form_label')],
+  ['estimate', $bi('estimate_form_label')]
+];
+$: taxMethodSource = [
+  [0, $bi('home_tax_exempt')],
+  [1, $bi('home_tax_inner')],
+  [2, $bi('home_tax_outer')],
+  [9, $bi('home_tax_separate')]
+];
+
 const link = (href) => {
   let pathes = href.split('/');
   status.current = pathes[1];
@@ -192,7 +195,7 @@ beforeUpdate(() => {
   console.log(status);
   if  (( !status.fy ) ||
        ( !status.fy.term )) {
-    alert = '期を選択してください。';
+    alert = get(bi)('sidebar_select_term');
     alert_level = 'danger';
   }
 })
@@ -207,13 +210,13 @@ onMount(() => {
     if  ( companies.length > 0 )  {
       company = companies[0];
     } else {
-      alert = '自社の情報が登録されていません。登録してください。';
+      alert = get(bi)('sidebar_no_company');
       alert_level = 'danger';
     }
     console.log({company});
     if  (( !status.fy ) ||
          ( !status.fy.term )) {
-      alert = '期を選択してください。';
+      alert = get(bi)('sidebar_select_term');
       alert_level = 'danger';
     }
   })

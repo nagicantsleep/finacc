@@ -3,7 +3,7 @@ const Op = models.Sequelize.Op;
 import Accounts from './accounts.js';
 import {numeric, dc} from './parse_account_code.js';
 
-export default async (tenantId, term, endDate, options) => {
+export default async (tenantId, term, endDate, options, languagePair) => {
   let lines = [];
   let index = [];
 
@@ -14,7 +14,7 @@ export default async (tenantId, term, endDate, options) => {
     }
   });
 
-  let accounts = await Accounts.all3(tenantId, term);
+  let accounts = await Accounts.all3(tenantId, term, languagePair);
   for ( let i = 0; i < accounts.length; i += 1)   {
     let acc = accounts[i];
     let balance = numeric(acc.balance);     //  don't forget!!!
@@ -29,8 +29,12 @@ export default async (tenantId, term, endDate, options) => {
       major_name: acc.major_name,
       middle_name: acc.middle_name,
       minor_name: acc.minor_name,
+      major_nameVi: acc.major_nameVi || '',
+      middle_nameVi: acc.middle_nameVi || '',
+      minor_nameVi: acc.minor_nameVi || '',
       acl_code: acc.acl_code,
       name: acc.name,
+      nameVi: acc.nameVi || '',
       code: acc.code,
       pickup: balance,
       debit: 0,
