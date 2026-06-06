@@ -26,21 +26,23 @@
         {#if (vouchers)}
         <table class="table table-striped table-bordered">
           <thead class="table-light">
-            <th style="width:20px;">
+            <tr>
+              <th scope="col" style="width:20px;">
 
-            </th>
-            <th style="width:100px;">
-              <BilingualText key="kind" />
-            </th>
-            <th style="width:200px;">
-              <BilingualText key="counterparty" />
-            </th>
-            <th style="width:100px;">
-              <BilingualText key="amount" />
-            </th>
-            <th>
-              <BilingualText key="description" />
-            </th>
+              </th>
+              <th scope="col" style="width:100px;">
+                <BilingualText key="kind" />
+              </th>
+              <th scope="col" style="width:200px;">
+                <BilingualText key="counterparty" />
+              </th>
+              <th scope="col" style="width:100px;">
+                <BilingualText key="amount" />
+              </th>
+              <th scope="col">
+                <BilingualText key="description" />
+              </th>
+            </tr>
           </thead>
           <tbody>
             {#each vouchers as line}

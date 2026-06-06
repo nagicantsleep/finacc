@@ -41,13 +41,15 @@
   <div class="row">
     <table class="table table-striped table-bordered">
       <thead class="table-light">
-        <th class="col-account"><BilingualText key="debit_account" /></th>
-        <th class="col-amount"><BilingualText key="amount" /></th>
-        <th><BilingualText key="application" /></th>
-        <th class="col-account"><BilingualText key="credit_account" /></th>
-        <th class="col-amount"><BilingualText key="amount" /></th>
-        <th class="col-action">
-        </th>
+        <tr>
+          <th scope="col" class="col-account"><BilingualText key="debit_account" /></th>
+          <th scope="col" class="col-amount"><BilingualText key="amount" /></th>
+          <th scope="col"><BilingualText key="application" /></th>
+          <th scope="col" class="col-account"><BilingualText key="credit_account" /></th>
+          <th scope="col" class="col-amount"><BilingualText key="amount" /></th>
+          <th scope="col" class="col-action">
+          </th>
+        </tr>
       </thead>
       <tbody id="cross-slip">
         {#if slip}
