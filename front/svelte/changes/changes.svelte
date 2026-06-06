@@ -2,7 +2,7 @@
   <div class="d-flex align-items-center">
     <h1 class="page-title-bilingual mb-0"><BilingualText key="changes" inline={true} /></h1>
     {#if account}
-      <h2 class="ms-3 mb-0 fs-4">{account.name}</h2>
+      <h2 class="ms-3 mb-0 fs-4"><BilingualText primary={account.name} secondary={account.nameVi} inline={true} /></h2>
     {/if}
   </div>
 </div>
@@ -95,7 +95,7 @@ import {setAccounts, findAccount, findSubAccountByCode} from '../../javascripts/
 import parse_account_code from '../../../libs/parse_account_code';
 import {currentPage, link} from '../../javascripts/router.js';
 import BilingualText from '../components/bilingual-text.svelte';
-import { bi } from '../../javascripts/bilingual.js';
+import { bi, languagePair } from '../../javascripts/bilingual.js';
 import { get } from 'svelte/store';
 
 import {
@@ -189,6 +189,15 @@ const accountSelect = (code) => {
   link(href);
 }
 
+const lpQuery = () => {
+  const pair = get(languagePair);
+  return `?languagePair=${encodeURIComponent(JSON.stringify(pair))}`;
+}
+
+$: if ($languagePair && accountCode) {
+  changeAccount(false);
+}
+
 const termChange = () => {
   console.log({allYears})
   if ( sameMonth )	{
@@ -199,7 +208,7 @@ const termChange = () => {
 
 const changeAccount = (update) => {
   if (!accountCode) return;
-  axios.get(`/api/account/${accountCode}`).then((result) => {
+  axios.get(`/api/account/${accountCode}${lpQuery()}`).then((result) => {
     account = result.data;
     console.log('account', account);
     remaining = {};

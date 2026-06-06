@@ -35,14 +35,14 @@
           on:click|preventDefault={() => {
             openBank(bank.subAccountCode);
           }}>
-          {bank.name}
+          <BilingualText primary={bank.name} secondary={bank.nameVi} inline={true} />
         </button>
         {:else}
         <button type="button" class="btn btn-outline-info"
           on:click|preventDefault={() => {
             openBank(bank.subAccountCode);
           }}>
-          {bank.name}
+          <BilingualText primary={bank.name} secondary={bank.nameVi} inline={true} />
         </button>
         {/if}
       </li>
@@ -201,6 +201,7 @@ import {ledgerLines} from '../../../libs/ledger';
 import {setAccounts} from '../../javascripts/cross-slip';
 import CrossSlipModal from '../cross-slip/cross-slip-modal.svelte';
 import BilingualText from '../components/bilingual-text.svelte';
+import {languagePair} from '../../javascripts/bilingual.js';
 import {DateString} from '../../../libs/utils.js';
 import {currentPage} from '../../javascripts/router.js';
 
@@ -274,9 +275,18 @@ afterUpdate(() => {
   }
 })
 
+const lpQuery = () => {
+  const pair = $languagePair;
+  return `?languagePair=${encodeURIComponent(JSON.stringify(pair))}`;
+}
+
+$: if ($languagePair && accountCode) {
+  updateAccount();
+}
+
 const updateAccount = () => {
   if	( accountCode )	{
-    axios.get(`/api/account/${accountCode}`).then((result) => {
+    axios.get(`/api/account/${accountCode}${lpQuery()}`).then((result) => {
       bank_list = result.data;
     });
   } else {
