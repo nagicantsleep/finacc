@@ -36,10 +36,15 @@
   &>:not(caption)>*>td  {
       background-color: #fff;
   }
-  // Specificity (0,1,2) beats Bootstrap's `.table>:not(caption)>*>*` (0,1,1)
-  // so the dark teal header holds even when <thead class="table-light"> (#184).
-  table.table th,
-  th {
+  // Match Bootstrap's own cell selector structure (`.table>:not(caption)>*>*`)
+  // but target `th` instead of the trailing `*`. Specificity (0,1,2) beats
+  // Bootstrap's (0,1,1) so the dark teal header holds even when
+  // <thead class="table-light"> — which would otherwise set --bs-table-bg to
+  // #f8f9fa and show white "boxes" with black text inside the dark teal row
+  // (#184).
+  // Direct `th` in thead/tbody (legacy markup) and `tr > th` (valid markup).
+  &>:not(caption)>th,
+  &>:not(caption)>*>th {
     background-color: #264653;
     color: #fff;
   }
@@ -59,6 +64,16 @@
 .bilingual-sep {
   color: inherit;
   opacity: 0.7;
+}
+/* On the dark teal table header, the secondary language line needs a
+   muted shade that is darker than the primary white but still legible
+   on the dark background — matches the reference style (#184). */
+.table > :not(caption) > th .bilingual-secondary,
+.table > :not(caption) > th .bilingual-sep,
+.table > :not(caption) > * > th .bilingual-secondary,
+.table > :not(caption) > * > th .bilingual-sep {
+  color: #b8c5c9;
+  opacity: 1;
 }
 
 /* User menu avatar — circular placeholder showing first letter of user name.

@@ -37,8 +37,8 @@
 .table > :not(caption) > * > td {
   background-color: #fff;
 }
-table.table th,
-.table th {
+.table > :not(caption) > th,
+.table > :not(caption) > * > th {
   background-color: #264653;
   color: #fff;
 }
@@ -57,6 +57,13 @@ table.table th,
 .bilingual-sep {
   color: inherit;
   opacity: 0.7;
+}
+.table > :not(caption) > th .bilingual-secondary,
+.table > :not(caption) > th .bilingual-sep,
+.table > :not(caption) > * > th .bilingual-secondary,
+.table > :not(caption) > * > th .bilingual-sep {
+  color: #b8c5c9;
+  opacity: 1;
 }
 
 /* User menu avatar — circular placeholder showing first letter of user name.
