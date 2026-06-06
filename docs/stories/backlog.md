@@ -10,4 +10,5 @@ the work is selected or when a product decision needs a durable place to land.
 
 | Epic | Description | Status |
 | --- | --- | --- |
-| TBD | Add candidate epics after spec intake | unsliced |
+| bilingual-foundation (#89) | Simultaneous bilingual display (Việt–Nhật): Translations DB, locales, BilingualText, preference API, UI migration | **completed** — merged to `main` via PR #190 (2026-06-06); 41 issues closed |
+| TBD | Next initiative after spec intake | unsliced |
