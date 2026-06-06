@@ -10,7 +10,7 @@
   </div>
   <div class="col-6" style="padding:10px;">
     <SystemSettings
-      title="system_settings"
+      title={$bi('system_settings')}
       bind:minimize={systemSettingsMinimize}
       bind:toast={toast}
     />
@@ -19,36 +19,32 @@
 <div class="row">
   <div class="col-4" style="padding:10px;">
     <TableMaintenance
-      title="company_class"
+      title={$bi('company_class')}
       endpoint={'/api/company/kinds'}
       bind:minimize={companyMinimize}
       columns={[
         { type: "id", name: 'id'},
         { type: "order", name: 'displayOrder'},
-        { type: "text", name: 'name', title: "company_class_name", align: "left"},
-        { type: "checkbox", name: 'isClient', title: "customer", width: "50px"}
+        { type: "text", name: 'name', title: $bi('company_class_name'), align: "left"},
+        { type: "checkbox", name: 'isClient', title: $bi('customer'), width: "50px"}
       ]}>
     </TableMaintenance>
   </div>
   <div class="col-8" style="padding:10px;">
     <TableMaintenance
-      title="transaction_kind"
+      title={$bi('transaction_kind')}
       endpoint={'/api/transaction/kinds'}
       bind:minimize={transactionMinimize}
       columns={[
         { type: "id", name: 'id'},
         { type: "order", name: 'displayOrder'},
-        { type: "text", name: 'label', title: "document", align: "left"},
-        { type: "checkbox", name: 'hasDetails', title: "detail", width: "100px"},
-        { type: "dropdown", name: 'hasDocument', title: "file", width: "100px",
-          source:[
-            [0, $bi('home_opt_none')],
-            [1, $bi('home_opt_optional')],
-            [2, $bi('home_opt_required')],
-          ]
+        { type: "text", name: 'label', title: $bi('home_col_doc_type_name'), align: "left"},
+        { type: "checkbox", name: 'hasDetails', title: $bi('has_details'), width: "100px"},
+        { type: "dropdown", name: 'hasDocument', title: $bi('home_col_doc_present'), width: "100px",
+          source: transactionDocSource
         },
-        { type: "checkbox", name: 'forCustomer', title: "customer", width: "70px"},
-        { type: "dropdown", name: 'bookId', title: "voucher_class", width: '200px',
+        { type: "checkbox", name: 'forCustomer', title: $bi('home_col_for_client'), width: "70px"},
+        { type: "dropdown", name: 'bookId', title: $bi('home_col_created_voucher'), width: '200px',
           func: getClasses
         }
       ]}>
@@ -58,35 +54,31 @@
 <div class="row">
   <div class="col-6" style="padding:10px;">
     <TableMaintenance
-      title="voucher_class"
+      title={$bi('voucher_class')}
       endpoint={'/api/voucher/classes'}
       bind:minimize={voucherMinimize}
       columns={[
         { type: "id", name: 'id'},
         { type: "order", name: 'displayOrder'},
-        { type: "text", name: 'name', title: "company_class_name", align: "left"},
-        { type: "checkbox", name: 'send', title: "send", width: "50px"},
-        { type: "dropdown", name: 'form', title: "kind", width: "150px",
-          source: [
-            [ 'invoice', $bi('invoice_form_label') ],
-            [ 'receipt', $bi('receipt_form_label') ],
-            [ 'estimate', $bi('estimate_form_label')]
-          ]
+        { type: "text", name: 'name', title: $bi('company_class_name'), align: "left"},
+        { type: "checkbox", name: 'send', title: $bi('home_col_send'), width: "50px"},
+        { type: "dropdown", name: 'form', title: $bi('program_name'), width: "150px",
+          source: voucherFormSource
         }
       ]}>
     </TableMaintenance>
   </div>
   <div class="col-6" style="padding:10px;">
     <TableMaintenance
-      title="item_class"
+      title={$bi('item_class')}
       endpoint={'/api/item/classes'}
       bind:minimize={itemMinimize}
       columns={[
         { type: "id", name: 'id'},
         { type: "order", name: 'displayOrder'},
-        { type: "text", name: 'name', title: "item_class_name", align: "left"},
-        { type: "checkbox", name: 'product', title: "product", width: "50px"},
-        { type: "checkbox", name: 'inventoryManagement', title: "inventory_management", width: "100px"}
+        { type: "text", name: 'name', title: $bi('item_class_name'), align: "left"},
+        { type: "checkbox", name: 'product', title: $bi('home_col_product'), width: "50px"},
+        { type: "checkbox", name: 'inventoryManagement', title: $bi('inventory_management'), width: "100px"}
       ]}>
     </TableMaintenance>
   </div>
@@ -94,24 +86,19 @@
 <div class="row">
   <div class="col-6" style="padding:10px;">
     <TableMaintenance
-      title="tax"
+      title={$bi('home_tax_rule')}
       endpoint={'/api/tax-rule'}
       bind:minimize={taxRuleMinimize}
       columns={[
         { type: "id", name: 'id'},
         { type: "order", name: 'displayOrder'},
-        { type: "text", name: 'label', title: "item_name", align: "left"},
-        { type: "dropdown", name: 'taxClass', title: "account_class", width: "80px",
-          source: [
-            [ 0, $bi('home_tax_exempt') ],
-            [ 1, $bi('home_tax_inner') ],
-            [ 2, $bi('home_tax_outer')],
-            [ 9, $bi('home_tax_separate')]
-          ]
+        { type: "text", name: 'label', title: $bi('home_col_label'), align: "left"},
+        { type: "dropdown", name: 'taxClass', title: $bi('home_col_tax_method'), width: "80px",
+          source: taxMethodSource
         },
-        { type: "numeric", name: 'rate', title: "tax", width: "50px"},
-        { type: "date", name: 'startDate', title: "start_date", width: "110px"},
-        { type: "date", name: 'endDate', title: "end_date", width: "110px"}
+        { type: "numeric", name: 'rate', title: $bi('home_col_tax_rate'), width: "50px"},
+        { type: "date", name: 'startDate', title: $bi('home_col_start_date'), width: "110px"},
+        { type: "date", name: 'endDate', title: $bi('home_col_end_date'), width: "110px"}
       ]}>
     </TableMaintenance>
   </div>
@@ -136,6 +123,23 @@ let voucherMinimize = true;
 let itemMinimize = true;
 let taxRuleMinimize = true;
 let systemSettingsMinimize = true;
+
+$: transactionDocSource = [
+  [0, $bi('none_opt')],
+  [1, $bi('optional')],
+  [2, $bi('required')],
+];
+$: voucherFormSource = [
+  ['invoice', $bi('invoice_form_label')],
+  ['receipt', $bi('receipt_form_label')],
+  ['estimate', $bi('estimate_form_label')]
+];
+$: taxMethodSource = [
+  [0, $bi('home_tax_exempt')],
+  [1, $bi('home_tax_inner')],
+  [2, $bi('home_tax_outer')],
+  [9, $bi('home_tax_separate')]
+];
 
 const getClasses = async () => {
   let result = await axios.get('/api/voucher/classes');
