@@ -81,4 +81,48 @@ export async function enrichBilingual(tableName, records, languagePair) {
   return records;
 }
 
-export default { enrichBilingual, TRANSLATION_MAP };
+/**
+ * Capitalize language code for enriched field suffix (e.g. 'vi' -> 'Vi').
+ * @param {string|undefined} language
+ * @returns {string}
+ */
+export function secondaryFieldSuffix(language) {
+  return language ? language.charAt(0).toUpperCase() + language.slice(1) : '';
+}
+
+/**
+ * Read enriched secondary name from a Sequelize instance.
+ * @param {object} rec
+ * @param {{ secondary?: string }|null|undefined} languagePair
+ * @returns {string}
+ */
+export function getEnrichedName(rec, languagePair) {
+  const suffix = secondaryFieldSuffix(languagePair?.secondary);
+  if (!suffix) return '';
+  const getter = rec.getDataValue;
+  return (typeof getter === 'function' ? getter.call(rec, `name${suffix}`) : rec[`name${suffix}`]) || '';
+}
+
+/**
+ * Shape Account + SubAccounts JSON with stable nameVi for the wire format.
+ * @param {object} account - Sequelize Account instance with subAccounts
+ * @param {{ secondary?: string }|null|undefined} languagePair
+ * @returns {object}
+ */
+export function shapeAccountBilingual(account, languagePair) {
+  const json = account.toJSON();
+  json.nameVi = getEnrichedName(account, languagePair);
+  json.subAccounts = (account.subAccounts || []).map((sub) => ({
+    ...sub.toJSON(),
+    nameVi: getEnrichedName(sub, languagePair),
+  }));
+  return json;
+}
+
+export default {
+  enrichBilingual,
+  TRANSLATION_MAP,
+  secondaryFieldSuffix,
+  getEnrichedName,
+  shapeAccountBilingual
+};

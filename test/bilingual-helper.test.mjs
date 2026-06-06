@@ -11,7 +11,13 @@ import { strict as assert } from 'node:assert';
 import bilingualHelper from '../libs/bilingual-helper.js';
 import mockModels from '../models/index.js';
 
-const { enrichBilingual, TRANSLATION_MAP } = bilingualHelper;
+const {
+  enrichBilingual,
+  TRANSLATION_MAP,
+  secondaryFieldSuffix,
+  getEnrichedName,
+  shapeAccountBilingual
+} = bilingualHelper;
 
 
 // ---------------------------------------------------------------------------
@@ -232,5 +238,96 @@ describe('enrichBilingual — enrichment', function () {
       assert.strictEqual(records[0].middle, 'B', 'original middle unchanged');
       assert.strictEqual(records[0].minor, 'C', 'original minor unchanged');
     });
+  });
+});
+
+// ---------------------------------------------------------------------------
+// secondaryFieldSuffix / getEnrichedName / shapeAccountBilingual
+// ---------------------------------------------------------------------------
+
+describe('secondaryFieldSuffix', function () {
+
+  it('capitalizes language code', function () {
+    assert.strictEqual(secondaryFieldSuffix('vi'), 'Vi');
+    assert.strictEqual(secondaryFieldSuffix('en'), 'En');
+  });
+
+  it('returns empty string for falsy input', function () {
+    assert.strictEqual(secondaryFieldSuffix(undefined), '');
+    assert.strictEqual(secondaryFieldSuffix(''), '');
+  });
+});
+
+describe('getEnrichedName', function () {
+
+  it('reads nameVi when secondary is vi', function () {
+    const rec = mockRecord({ name: '預り金', nameVi: 'Tiền giữ hộ' });
+    assert.strictEqual(getEnrichedName(rec, { primary: 'ja', secondary: 'vi' }), 'Tiền giữ hộ');
+  });
+
+  it('reads nameEn when secondary is en', function () {
+    const rec = mockRecord({ name: '預り金', nameEn: 'Deposits received' });
+    assert.strictEqual(getEnrichedName(rec, { primary: 'ja', secondary: 'en' }), 'Deposits received');
+  });
+
+  it('returns empty string when no enriched field exists', function () {
+    const rec = mockRecord({ name: '預り金' });
+    assert.strictEqual(getEnrichedName(rec, { primary: 'ja', secondary: 'vi' }), '');
+  });
+});
+
+describe('shapeAccountBilingual', function () {
+
+  function mockAccountInstance(props, subAccounts = []) {
+    const data = { ...props, subAccounts };
+    return new Proxy(data, {
+      get(target, prop) {
+        if (prop === 'setDataValue') return (key, value) => { target[key] = value; };
+        if (prop === 'toJSON') return () => {
+          const { subAccounts: subs, ...rest } = target;
+          return { ...rest };
+        };
+        if (prop === 'getDataValue') return (key) => target[key];
+        return target[prop];
+      },
+      set(target, prop, value) {
+        target[prop] = value;
+        return true;
+      },
+      has(target, prop) { return prop in target; },
+      ownKeys(target) { return Reflect.ownKeys(target); },
+      getOwnPropertyDescriptor(target, prop) {
+        return Object.getOwnPropertyDescriptor(target, prop);
+      },
+    });
+  }
+
+  function mockSubInstance(props) {
+    return mockRecord(props);
+  }
+
+  it('maps account and sub-account enriched names to nameVi', function () {
+    const subs = [
+      mockSubInstance({ id: 1, name: '源泉所得税', nameVi: 'Thuế TNCN khấu trừ tại nguồn', subAccountCode: 1 }),
+      mockSubInstance({ id: 2, name: '住民税', nameVi: 'Thuế cư trú', subAccountCode: 2 }),
+    ];
+    const account = mockAccountInstance(
+      { id: 10, name: '預り金', nameVi: 'Tiền giữ hộ', accountCode: '2010000' },
+      subs
+    );
+
+    const shaped = shapeAccountBilingual(account, { primary: 'ja', secondary: 'vi' });
+
+    assert.strictEqual(shaped.name, '預り金');
+    assert.strictEqual(shaped.nameVi, 'Tiền giữ hộ');
+    assert.strictEqual(shaped.subAccounts.length, 2);
+    assert.strictEqual(shaped.subAccounts[0].nameVi, 'Thuế TNCN khấu trừ tại nguồn');
+    assert.strictEqual(shaped.subAccounts[1].nameVi, 'Thuế cư trú');
+  });
+
+  it('returns empty nameVi when languagePair has no secondary', function () {
+    const account = mockAccountInstance({ name: '預り金', accountCode: '2010000' }, []);
+    const shaped = shapeAccountBilingual(account, { primary: 'ja' });
+    assert.strictEqual(shaped.nameVi, '');
   });
 });

@@ -1,12 +1,13 @@
 import models from '../models/index.js';
 const Op = models.Sequelize.Op;
 import Accounts from '../libs/accounts.js';
-import { enrichBilingual } from '../libs/bilingual-helper.js';
+import { enrichBilingual, shapeAccountBilingual } from '../libs/bilingual-helper.js';
 
 export default {
   get: async (req, res, next) => {
     const tenantId = req.currentTenantId;
     let account_code = req.params.code;
+    const lp = req.query.languagePair ? JSON.parse(req.query.languagePair) : req.session?.languagePair;
 
     let account = await models.Account.findOne({
       where: {
@@ -24,7 +25,13 @@ export default {
     if (!account) {
       return res.status(404).json({ error: `Account not found: ${account_code}` });
     }
-    res.json(account);
+    if (lp) {
+      await enrichBilingual('Account', [account], lp);
+      if (account.subAccounts?.length) {
+        await enrichBilingual('SubAccount', account.subAccounts, lp);
+      }
+    }
+    res.json(shapeAccountBilingual(account, lp));
   },
   get_class: (req, res, next) => {
     const tenantId = req.currentTenantId;

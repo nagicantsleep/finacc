@@ -16,7 +16,7 @@
       	code: account.accountCode
     	})
     }}>
-    { account ? account.name : ''}
+    <BilingualText primary={account.name} secondary={account.nameVi} inline={true} />
   </button>
   {/if}
   <div>
@@ -169,6 +169,10 @@ const _link = (event) => {
 const lpQuery = () => {
   const pair = $languagePair;
   return `?languagePair=${encodeURIComponent(JSON.stringify(pair))}`;
+}
+
+$: if ($languagePair && accountCode) {
+  update(false);
 }
 
 const accountSelect = (code) => {
