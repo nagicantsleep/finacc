@@ -32,6 +32,13 @@ import { simulatedTrialBalance } from '../libs/simulation/trial-balance.js';
 import { comparisonReport } from '../libs/simulation/comparison.js';
 import { buildScenarioExport } from '../libs/simulation/export.js';
 import {
+  listAssumptions,
+  createAssumption,
+  getAssumption,
+  updateAssumption,
+  deleteAssumption,
+} from '../libs/simulation/assumption-service.js';
+import {
   hasSimulationPermission,
   canAccessScenario,
 } from '../libs/auth/permissions.js';
@@ -371,6 +378,96 @@ router.get('/simulation/scenarios/:id/export', async (req, res, next) => {
     res.set('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     res.set('Content-Disposition', `attachment; filename="${out.fileName}"`);
     res.send(Buffer.from(out.buffer));
+  } catch (err) { next(err); }
+});
+
+// --- Assumptions (E3.2) -------------------------------------------------
+
+router.get('/simulation/scenarios/:id/assumptions', async (req, res, next) => {
+  try {
+    const tenantId = req.currentTenantId;
+    const actor = getActor(req);
+    if (!canView(actor)) return forbidden(res, 'requires simulation:view');
+    const scenarioId = parseInt(req.params.id, 10);
+    if (Number.isNaN(scenarioId)) return badRequest(res, 'invalid id');
+    const result = await listAssumptions(tenantId, scenarioId);
+    if (result.code === 404) return notFound(res, result.error);
+    if (result.error) return badRequest(res, result.error);
+    res.json({ result: 'OK', assumptions: result.assumptions });
+  } catch (err) { next(err); }
+});
+
+router.post('/simulation/scenarios/:id/assumptions', async (req, res, next) => {
+  try {
+    const tenantId = req.currentTenantId;
+    const actor = getActor(req);
+    if (!canCreate(actor)) return forbidden(res, 'requires simulation:create');
+    const scenarioId = parseInt(req.params.id, 10);
+    if (Number.isNaN(scenarioId)) return badRequest(res, 'invalid id');
+    const result = await createAssumption(tenantId, scenarioId, req.body || {});
+    if (result.code === 404) return notFound(res, result.error);
+    if (result.code === 409) return conflict(res, result.error);
+    if (result.error) return badRequest(res, result.error);
+    await audit({
+      tenantId, actorId: actor.id, action: 'simulation:assumption:create',
+      entityType: 'SimulationAssumption', entityId: result.assumption.id,
+      extra: { scenarioId, type: result.assumption.type },
+    });
+    res.status(201).json({ result: 'OK', assumption: result.assumption });
+  } catch (err) { next(err); }
+});
+
+router.get('/simulation/scenarios/:id/assumptions/:aid', async (req, res, next) => {
+  try {
+    const tenantId = req.currentTenantId;
+    const actor = getActor(req);
+    if (!canView(actor)) return forbidden(res, 'requires simulation:view');
+    const scenarioId = parseInt(req.params.id, 10);
+    const assumptionId = parseInt(req.params.aid, 10);
+    if (Number.isNaN(scenarioId) || Number.isNaN(assumptionId)) return badRequest(res, 'invalid id');
+    const result = await getAssumption(tenantId, scenarioId, assumptionId);
+    if (result.code === 404) return notFound(res, result.error);
+    res.json({ result: 'OK', assumption: result.assumption });
+  } catch (err) { next(err); }
+});
+
+router.patch('/simulation/scenarios/:id/assumptions/:aid', async (req, res, next) => {
+  try {
+    const tenantId = req.currentTenantId;
+    const actor = getActor(req);
+    if (!canCreate(actor)) return forbidden(res, 'requires simulation:create');
+    const scenarioId = parseInt(req.params.id, 10);
+    const assumptionId = parseInt(req.params.aid, 10);
+    if (Number.isNaN(scenarioId) || Number.isNaN(assumptionId)) return badRequest(res, 'invalid id');
+    const result = await updateAssumption(tenantId, scenarioId, assumptionId, req.body || {});
+    if (result.code === 404) return notFound(res, result.error);
+    if (result.code === 409) return conflict(res, result.error);
+    if (result.error) return badRequest(res, result.error);
+    await audit({
+      tenantId, actorId: actor.id, action: 'simulation:assumption:update',
+      entityType: 'SimulationAssumption', entityId: assumptionId,
+      diff: req.body || {}, extra: { scenarioId },
+    });
+    res.json({ result: 'OK', assumption: result.assumption });
+  } catch (err) { next(err); }
+});
+
+router.delete('/simulation/scenarios/:id/assumptions/:aid', async (req, res, next) => {
+  try {
+    const tenantId = req.currentTenantId;
+    const actor = getActor(req);
+    if (!canCreate(actor)) return forbidden(res, 'requires simulation:create');
+    const scenarioId = parseInt(req.params.id, 10);
+    const assumptionId = parseInt(req.params.aid, 10);
+    if (Number.isNaN(scenarioId) || Number.isNaN(assumptionId)) return badRequest(res, 'invalid id');
+    const result = await deleteAssumption(tenantId, scenarioId, assumptionId);
+    if (result.code === 404) return notFound(res, result.error);
+    if (result.code === 409) return conflict(res, result.error);
+    await audit({
+      tenantId, actorId: actor.id, action: 'simulation:assumption:delete',
+      entityType: 'SimulationAssumption', entityId: assumptionId, extra: { scenarioId },
+    });
+    res.json({ result: 'OK' });
   } catch (err) { next(err); }
 });
 
