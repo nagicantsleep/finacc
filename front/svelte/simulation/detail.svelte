@@ -192,6 +192,12 @@
   </div>
 </div>
 {/if}
+<LifecycleModals
+  kind={modalKind}
+  scenario={scenario}
+  entryCount={entries.length}
+  on:confirm={confirmModal}
+  on:cancel={cancelModal} />
 {/key}
 
 <script>
@@ -202,6 +208,7 @@
   import BilingualText from '../components/bilingual-text.svelte';
   import TrialBalanceList from '../reports/trial-balance-list.svelte';
   import ComparisonTab from './components/comparison-tab.svelte';
+  import LifecycleModals from './components/lifecycle-modals.svelte';
 
   export let toast = undefined;
   export let status = undefined;
@@ -386,29 +393,35 @@
     }
   };
 
-  // --- lifecycle actions (inline confirm; modal versions in #238/E2.10) ---
-  const doLock = async () => {
-    if (!window.confirm('ロックしますか? 以後、仕訳の編集はできません。 / Khóa kịch bản? Sau khi khóa không sửa được bút toán.')) return;
-    await postAction('lock');
+  // --- lifecycle actions (modal-driven; #238/E2.10) ---
+  let modalKind = null; // 'lock' | 'clone' | 'unlock' | null
+
+  const doLock = () => { modalKind = 'lock'; };
+  const doClone = () => { modalKind = 'clone'; };
+  const doUnlock = () => { modalKind = 'unlock'; };
+  const cancelModal = () => { modalKind = null; };
+
+  const confirmModal = async (event) => {
+    const detail = event.detail || {};
+    const kind = modalKind;
+    modalKind = null;
+    if (kind === 'lock') {
+      await postAction('lock');
+    } else if (kind === 'unlock') {
+      await postAction('unlock', { reason: detail.reason });
+    } else if (kind === 'clone') {
+      try {
+        const res = await axios.post(`/api/simulation/scenarios/${scenarioId}/clone`, { name: detail.name });
+        if (res.data.scenario && res.data.scenario.id) link(`/simulation/scenarios/${res.data.scenario.id}`);
+      } catch (e) {
+        if (toast) toast.show(e.response?.data?.message || 'clone failed');
+      }
+    }
   };
+
   const doArchive = async () => {
     if (!window.confirm('アーカイブしますか? / Lưu trữ kịch bản?')) return;
     await postAction('archive');
-  };
-  const doUnlock = async () => {
-    const reason = window.prompt('ロック解除の理由 / Lý do mở khóa:');
-    if (!reason) return;
-    await postAction('unlock', { reason });
-  };
-  const doClone = async () => {
-    const name = window.prompt('複製先の名称 / Tên bản sao:', scenario ? `${scenario.name} (copy)` : '');
-    if (!name) return;
-    try {
-      const res = await axios.post(`/api/simulation/scenarios/${scenarioId}/clone`, { name });
-      if (res.data.scenario && res.data.scenario.id) link(`/simulation/scenarios/${res.data.scenario.id}`);
-    } catch (e) {
-      if (toast) toast.show(e.response?.data?.message || 'clone failed');
-    }
   };
   const postAction = async (action, body = {}) => {
     try {
