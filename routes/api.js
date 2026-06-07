@@ -31,6 +31,7 @@ import projectSummary from './api-project-summary.js';
 
 import cross_slip from './api_cross_slip.js';
 import cross_slip_detail from './api_cross_slip_detail.js';
+import simulation from './api_simulation.js';
 
 const pkg = JSON.parse(fs.readFileSync('package.json', 'utf-8'));
 const VERSION = pkg.version;
@@ -88,6 +89,8 @@ router.get('/ledger/:term/:account/:sub_account', is_authenticated, requireTenan
 
 router.get('/closing/:term/confirm', is_authenticated, requireTenant, closingApi.confirm);
 router.post('/closing/:term', is_authenticated, requireTenant, closingApi.post)
+
+router.use('/simulation', simulation);
 
 router.get('/changes/:term/:account', is_authenticated, requireTenant, changes.get);
 router.get('/changes/:term/:account/:sub_account', is_authenticated, requireTenant, changes.get);

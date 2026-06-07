@@ -14,8 +14,6 @@
 import { strict as assert } from 'node:assert';
 import models from '../../models/index.js';
 
-const sequelize = models.sequelize;
-
 describe('Simulation — E2.1 models + migrations', function () {
   this.timeout(30000);
 
@@ -98,7 +96,6 @@ describe('Simulation — E2.1 models + migrations', function () {
       if (scenario) await scenario.destroy().catch(() => {});
       if (user) await user.destroy().catch(() => {});
       if (tenant) await tenant.destroy().catch(() => {});
-      await sequelize.close();
     });
 
     it('saves and reads back a Scenario + Entry', async function () {
