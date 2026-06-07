@@ -141,6 +141,12 @@
         canEdit={canEdit}
         canRegenerate={!!(status && status.user && (status.user.administrable || status.user.accounting))}
         {toast} />
+
+    {:else if activeTab === 'pl'}
+      <PlChart scenarioId={scenarioId} />
+
+    {:else if activeTab === 'cash'}
+      <CashChart scenarioId={scenarioId} />
     {/if}
   </div>
   {:else if loading}
@@ -221,6 +227,8 @@
   import ComparisonTab from './components/comparison-tab.svelte';
   import LifecycleModals from './components/lifecycle-modals.svelte';
   import AssumptionsTab from './components/assumptions-tab.svelte';
+  import PlChart from './components/pl-chart.svelte';
+  import CashChart from './components/cash-chart.svelte';
 
   export let toast = undefined;
   export let status = undefined;
@@ -237,6 +245,8 @@
     { value: 'tb', ja: '試算表', vi: 'Bảng cân đối' },
     { value: 'comparison', ja: '比較', vi: 'So sánh' },
     { value: 'assumptions', ja: '前提条件', vi: 'Giả định' },
+    { value: 'pl', ja: '損益', vi: 'Lãi/Lỗ' },
+    { value: 'cash', ja: '資金', vi: 'Dòng tiền' },
   ];
 
   // TB tab
