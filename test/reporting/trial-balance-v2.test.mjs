@@ -131,6 +131,7 @@ const makeDeps = (overrides = {}) => {
         }
         return [];
       },
+      count: async () => 0,
     },
     CrossSlipDetail: {},
     FiscalYear: {

@@ -36,6 +36,7 @@
       <tr class:tb-subtotal={l.type === 'subtotal'}
           class:tb-parent={l.type === 'parent'}
           class:tb-clickable={l.type !== 'subtotal'}
+          class:tb-warning-row={(l.warningCodes || []).some((c) => c === 'TB-W005')}
           class={indentClass(l)}
           on:click={() => onRowClick(l)}>
         <td class="tb-col-code">
@@ -150,4 +151,6 @@
   .tb-code-text { font-family: monospace; }
   .tb-clickable { cursor: pointer; }
   .tb-clickable:hover { background: #f0f6ff; }
+  .tb-warning-row { background: #fde7e7; }
+  .tb-warning-row:hover { background: #fbd0d0; }
 </style>
