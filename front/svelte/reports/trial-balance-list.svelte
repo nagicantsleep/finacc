@@ -14,6 +14,7 @@
   Props:
     lines          array of v2 lines (already through withAccountParents + applyExpandCollapse)
     expanded       Set<accountCode> of accounts that are currently expanded
+    languageMode   'ja' | 'vi' | 'ja-vi' | 'vi-ja'  — drives name rendering
     onToggle       (code) => void       — fired when the user clicks [+/-]
     onRowClick     (line) => void       — fired when a data row is clicked (parent | account | subAccount)
 -->
@@ -58,16 +59,20 @@
         </td>
         <td class="tb-col-name">
           {#if l.type === 'subtotal'}
-            <strong>{l.name || ''}</strong>
+            {@const dn = pickDisplayName({ name: l.name, nameVi: null, code: l.code }, languageMode)}
+            <strong>{dn.primary}</strong>
           {:else if l.type === 'parent'}
-            <strong>{l.name || ''}</strong>
-            {#if l.nameVi}<span class="tb-name-vi"> / {l.nameVi}</span>{/if}
+            {@const dn = pickDisplayName({ name: l.name, nameVi: l.nameVi, code: l.code }, languageMode)}
+            <strong>{dn.primary}</strong>
+            {#if dn.secondary}<span class="tb-name-vi"> / {dn.secondary}</span>{/if}
           {:else if l.subAccountId != null}
-            <span class="tb-sub-name">└ {l.subName || ''}</span>
-            {#if l.subNameVi}<span class="tb-sub-name-vi"> / {l.subNameVi}</span>{/if}
+            {@const dn = pickDisplayName({ name: l.subName, nameVi: l.subNameVi, code: `${l.code}-${l.subCode}` }, languageMode)}
+            <span class="tb-sub-name">└ {dn.primary}</span>
+            {#if dn.secondary}<span class="tb-sub-name-vi"> / {dn.secondary}</span>{/if}
           {:else}
-            {l.name || ''}
-            {#if l.nameVi}<span class="tb-name-vi"> / {l.nameVi}</span>{/if}
+            {@const dn = pickDisplayName({ name: l.name, nameVi: l.nameVi, code: l.code }, languageMode)}
+            {dn.primary}
+            {#if dn.secondary}<span class="tb-name-vi"> / {dn.secondary}</span>{/if}
           {/if}
         </td>
         <td class="tb-col-num">{formatNum(l.openingDebit)}</td>
@@ -89,9 +94,11 @@
 
 <script>
   import { indentClass as _indentClass } from '../../../libs/reporting/tb-hierarchy.js';
+  import { pickDisplayName } from '../../../libs/reporting/tb-language.js';
 
   export let lines = [];
   export let expanded = new Set();
+  export let languageMode = 'ja-vi';
   export let onToggle = () => {};
   export let onRowClick = () => {};
 
