@@ -244,3 +244,162 @@ function addDays(dateStr, days) {
   const day = String(d.getDate()).padStart(2, '0');
   return `${y}-${m}-${day}`;
 }
+
+/**
+ * Generate simulation entries from an expense_fixed assumption.
+ *
+ * amountType semantics:
+ *   fixed            — .amount each month
+ *   percent_of_sales — .percentOf * salesPerMonth
+ *   headcount        — 1 assumption → 2 entries per month (salary + insurance)
+ *
+ * Headcount: salary entry = count × salaryPerMonth
+ *            insurance entry = count × salaryPerMonth × insurancePct / 100
+ *
+ * Payment timing shifts the cash entry by .paymentTimingDays days.
+ *
+ * @param {object}   assumption
+ * @param {object}   scenario
+ * @param {number[]} salesPerMonth — monthly sales (needed for percent_of_sales type)
+ * @returns {object[]} entries
+ */
+export function generateExpenseFixedEntries(assumption, scenario, salesPerMonth = []) {
+  const p = assumption.parameters;
+  const { expenseAccount, counterAccount, amountType } = p;
+  const timingDays = p.paymentTimingDays || 0;
+
+  const startDate = maxDate(assumption.startMonth, scenario.simPeriodFrom);
+  const endDate = minDate(assumption.endMonth || scenario.simPeriodTo, scenario.simPeriodTo);
+
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+  const baseY = start.getFullYear();
+  const baseM = start.getMonth() + 1;
+
+  let totalMonths =
+    (end.getFullYear() - baseY) * 12 + (end.getMonth() + 1) - baseM + 1;
+  if (totalMonths < 0) return [];
+
+  const entries = [];
+
+  for (let i = 0; i < totalMonths; i++) {
+    let y = baseY, m = baseM + i;
+    while (m > 12) { m -= 12; y++; }
+    const dateStr = toDateStr(y, m, 1);
+    if (dateStr < startDate || dateStr > endDate) continue;
+
+    let amount;
+    switch (amountType) {
+      case 'fixed':
+        amount = p.amount || 0;
+        break;
+      case 'percent_of_sales':
+        amount = Math.round((salesPerMonth[i] || 0) * (p.percentOfValue || 0) / 100);
+        break;
+      case 'headcount':
+        if (p.headcount) {
+          const h = p.headcount;
+          const salaryAmount = Math.round(h.count * h.salaryPerMonth);
+          const insuranceAmount = Math.round(salaryAmount * h.insurancePct / 100);
+
+          // Salary accrual
+          entries.push({
+            date: dateStr,
+            debitAccount: h.salaryAccount,
+            debitSubAccount: null,
+            debitAmount: salaryAmount,
+            creditAccount: counterAccount,
+            creditSubAccount: null,
+            creditAmount: salaryAmount,
+            taxRuleId: p.taxRuleId || null,
+            projectId: p.projectId || null,
+            labelId: null,
+            memo: `${assumption.name} (salary ${dateStr})`,
+            sourceType: 'formula',
+          });
+
+          // Insurance accrual
+          entries.push({
+            date: dateStr,
+            debitAccount: h.insuranceAccount,
+            debitSubAccount: null,
+            debitAmount: insuranceAmount,
+            creditAccount: counterAccount,
+            creditSubAccount: null,
+            creditAmount: insuranceAmount,
+            taxRuleId: p.taxRuleId || null,
+            projectId: p.projectId || null,
+            labelId: null,
+            memo: `${assumption.name} (insurance ${dateStr})`,
+            sourceType: 'formula',
+          });
+
+          // Cash payment (both salary + insurance) with timing offset
+          const totalOut = salaryAmount + insuranceAmount;
+          if (timingDays > 0) {
+            const payDate = addDays(dateStr, timingDays);
+            if (payDate >= startDate && payDate <= endDate) {
+              entries.push({
+                date: payDate,
+                debitAccount: counterAccount,
+                debitSubAccount: null,
+                debitAmount: totalOut,
+                creditAccount: '1000', // cash
+                creditSubAccount: null,
+                creditAmount: totalOut,
+                taxRuleId: null,
+                projectId: null,
+                labelId: null,
+                memo: `${assumption.name} (payment ${payDate})`,
+                sourceType: 'formula',
+              });
+            }
+          }
+        }
+        continue; // headcount handles all entries for this month
+      default:
+        amount = 0;
+    }
+
+    if (!amount || amount <= 0) continue;
+
+    // Accrual entry
+    entries.push({
+      date: dateStr,
+      debitAccount: expenseAccount,
+      debitSubAccount: null,
+      debitAmount: amount,
+      creditAccount: counterAccount,
+      creditSubAccount: null,
+      creditAmount: amount,
+      taxRuleId: p.taxRuleId || null,
+      projectId: p.projectId || null,
+      labelId: null,
+      memo: `${assumption.name} (expense ${dateStr})`,
+      sourceType: 'formula',
+    });
+
+    // Cash payment with timing offset
+    if (timingDays > 0) {
+      const payDate = addDays(dateStr, timingDays);
+      if (payDate >= startDate && payDate <= endDate) {
+        entries.push({
+          date: payDate,
+          debitAccount: counterAccount,
+          debitSubAccount: null,
+          debitAmount: amount,
+          creditAccount: '1000', // cash
+          creditSubAccount: null,
+          creditAmount: amount,
+          taxRuleId: null,
+          projectId: null,
+          labelId: null,
+          memo: `${assumption.name} (payment ${payDate})`,
+          sourceType: 'formula',
+        });
+      }
+    }
+  }
+
+  return entries;
+}
