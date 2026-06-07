@@ -70,6 +70,8 @@ import Journal from './journal/journal.svelte';
 import Ledger from './ledger/ledger.svelte';
 import BankLedger from './bank-ledger/bank-ledger.svelte';
 import ReportsTrialBalance from './reports/trial-balance.svelte';
+import SimulationScenarios from './simulation/scenarios.svelte';
+import SimulationDetail from './simulation/detail.svelte';
 import Changes from './changes/changes.svelte';
 import Voucher from './voucher/voucher.svelte';
 import Accounts from './accounts/accounts.svelte';
@@ -128,6 +130,14 @@ const routes = [
   {
     match: /^\/reports\/trial-balance/,
     component: ReportsTrialBalance
+  },
+  {
+    match: /^\/simulation\/scenarios\/\d+/,
+    component: SimulationDetail
+  },
+  {
+    match: /^\/simulation/,
+    component: SimulationScenarios
   },
   {
     match: /^\/changes/,
