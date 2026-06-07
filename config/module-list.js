@@ -1,5 +1,12 @@
 export default [
   {
+    name: 'closing',
+    title: '決算',
+    match: /^\/closing/,
+    authority: (user) => {
+      return ( user.administrable );
+    },
+  }, {
     name: 'menu',
     match: /^\/menu/,
   }, {

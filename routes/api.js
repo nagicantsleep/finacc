@@ -3,7 +3,7 @@ const router = express.Router();
 import fs from 'fs';
 import {is_authenticated} from '../libs/user.js';
 import {requireTenant} from '../libs/tenant.js';
-import closing from '../forms/closing.js';
+import closingApi from './api_closing.js';
 
 import journal from './api_journal.js';
 import ledger from './api_ledger.js';
@@ -86,16 +86,8 @@ router.get('/journal/:year/:month', is_authenticated, requireTenant, journal.get
 router.get('/ledger/:term/:account', is_authenticated, requireTenant, ledger.get);
 router.get('/ledger/:term/:account/:sub_account', is_authenticated, requireTenant, ledger.get);
 
-router.post('/closing/:term', is_authenticated, requireTenant, (req, res, next) => {
-  if (( req.session.user.accounting ) ||
-      ( req.session.user.fiscalBrowsing )) {
-    closing(req.currentTenantId, parseInt(req.params.term)).then(() => {
-      res.json({ code: 0});
-    }).catch(next)
-  } else {
-    res.json({ code: -10});
-  }
-})
+router.get('/closing/:term/confirm', is_authenticated, requireTenant, closingApi.confirm);
+router.post('/closing/:term', is_authenticated, requireTenant, closingApi.post)
 
 router.get('/changes/:term/:account', is_authenticated, requireTenant, changes.get);
 router.get('/changes/:term/:account/:sub_account', is_authenticated, requireTenant, changes.get);

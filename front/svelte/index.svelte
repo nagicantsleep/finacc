@@ -80,6 +80,7 @@ import Transaction from './transaction/transaction.svelte';
 import Item from './item/item.svelte';
 import Member from './member/member.svelte';
 import Task from './task/task.svelte';
+import ClosingConfirm from './closing/closing-confirm.svelte';
 import OkModal from './common/ok-modal.svelte';
 
 import Router from './components/router.svelte';
@@ -96,6 +97,10 @@ loadDictionaries({ ja, vi, en });
 export let term;
 
 const routes = [
+  {
+    match: /^\/closing/,
+    component: ClosingConfirm
+  },
   {
     match: /^\/menu/,
     component: Menu

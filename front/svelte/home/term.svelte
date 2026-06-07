@@ -43,7 +43,7 @@
             </td>
             <td>
               {#if ( status.user && status.user.administrable )}
-              <a class="btn btn-danger closing" href="/closing/{line.term}"><BilingualText key="carry_forward" /></a>
+              <a class="btn btn-danger closing" href="/closing/{line.term}/confirm"><BilingualText key="carry_forward" /></a>
               {/if}
             </td>
           </tr>
