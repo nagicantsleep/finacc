@@ -29,6 +29,7 @@ import {
   deleteEntry,
 } from '../libs/simulation/entry-validator.js';
 import { simulatedTrialBalance } from '../libs/simulation/trial-balance.js';
+import { comparisonReport } from '../libs/simulation/comparison.js';
 
 const router = express.Router();
 
@@ -301,6 +302,29 @@ router.get('/simulation/scenarios/:id/trial-balance', async (req, res, next) => 
     if (err.status) return res.status(err.status).json({ result: 'NG', message: err.message });
     next(err);
   }
+});
+
+router.get('/simulation/scenarios/:id/comparison', async (req, res, next) => {
+  try {
+    const tenantId = req.currentTenantId;
+    const scenarioId = parseInt(req.params.id, 10);
+    if (Number.isNaN(scenarioId)) return badRequest(res, 'invalid id');
+    const params = {
+      reportType: req.query.reportType,
+      month: req.query.month,
+      accountClassIds: req.query.accountClassIds
+        ? String(req.query.accountClassIds).split(',').map((s) => parseInt(s, 10))
+        : [],
+      hideZero: req.query.hideZero === 'true',
+      languagePair: req.query.languagePair ? JSON.parse(req.query.languagePair) : null,
+    };
+    const out = await comparisonReport(tenantId, scenarioId, params);
+    if (out.error) {
+      if (out.code === 404) return notFound(res, out.error);
+      return badRequest(res, out.error);
+    }
+    res.json({ result: 'OK', ...out.result });
+  } catch (err) { next(err); }
 });
 
 export default router;
