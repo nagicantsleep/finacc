@@ -53,6 +53,18 @@
         <BilingualText primary="ロック解除" secondary="Mở khóa" inline={true} />
       </button>
     {/if}
+    <div class="dropdown">
+      <button class="btn btn-sm btn-outline-success dropdown-toggle" type="button" on:click={() => showExport = !showExport}>
+        <BilingualText primary="Excel出力" secondary="Xuất Excel" inline={true} />
+      </button>
+      {#if showExport}
+        <div class="sim-export-menu">
+          <button class="dropdown-item" on:click={() => exportXlsx('trial-balance')}>試算表 / Bảng cân đối</button>
+          <button class="dropdown-item" on:click={() => exportXlsx('comparison')}>比較 / So sánh</button>
+          <button class="dropdown-item" on:click={() => exportXlsx('full')}>全部 / Đầy đủ (3 sheets)</button>
+        </div>
+      {/if}
+    </div>
   </div>
 
   <ul class="nav nav-tabs sim-tabs" role="tablist">
@@ -434,6 +446,12 @@
   };
 
   const back = () => link('/simulation/scenarios');
+
+  let showExport = false;
+  const exportXlsx = (type) => {
+    showExport = false;
+    window.open(`/api/simulation/scenarios/${scenarioId}/export?type=${type}`, '_blank');
+  };
 </script>
 
 <style>
@@ -454,6 +472,14 @@
   .sim-up { color: #0a7d28; }
   .sim-down { color: #c00000; }
   .sim-placeholder { padding: 2rem; text-align: center; display: flex; gap: 0.5rem; justify-content: center; align-items: center; }
+  .dropdown { position: relative; display: inline-block; }
+  .sim-export-menu {
+    position: absolute; right: 0; top: 100%; z-index: 1000;
+    background: #fff; border: 1px solid #ddd; border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15); min-width: 12rem; padding: 0.25rem 0;
+  }
+  .sim-export-menu .dropdown-item { display: block; width: 100%; text-align: left; padding: 0.35rem 1rem; background: none; border: none; font-size: 0.85rem; cursor: pointer; }
+  .sim-export-menu .dropdown-item:hover { background: #f0f6ff; }
   .sim-form-label { font-size: 0.8rem; margin-bottom: 0.1rem; }
 
   .sim-modal-backdrop {
