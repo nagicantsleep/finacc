@@ -1,6 +1,9 @@
 import trial_balance from '../libs/trial_balance.js';
 import models from '../models/index.js';
 import { trialBalanceV2 } from '../libs/reporting/trial-balance-v2.js';
+import { buildSubtotals } from '../libs/reporting/tb-subtotal.js';
+import { withAccountParents } from '../libs/reporting/tb-hierarchy.js';
+import { buildXlsxBuffer, fileNameFor } from '../libs/reporting/tb-export.js';
 
 const parseBool = (v, dflt = false) => {
   if (v == null) return dflt;
@@ -63,6 +66,65 @@ export default {
           models,
         );
         return res.json(out);
+      }
+
+      // Branch: ?format=xlsx → Excel export (E1.7). Same v2 contract, but
+      // the response is application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+      // with a Content-Disposition file name.
+      if (req.query.format === 'xlsx') {
+        let term;
+        const param = req.params.param;
+        let ym;
+        if (param) {
+          const params = param.split('-');
+          if (params[1]) {
+            ym = params;
+            if (!req.session || !req.session.term) {
+              return res.status(401).json({ error: 'Unauthorized: term not set in session.' });
+            }
+            term = req.session.term;
+          } else {
+            term = parseInt(params[0], 10);
+          }
+        } else {
+          if (!req.session || !req.session.term) {
+            return res.status(401).json({ error: 'Unauthorized: term not set in session.' });
+          }
+          term = req.session.term;
+        }
+        const month = req.query.month || (ym ? `${ym[0]}-${String(ym[1]).padStart(2, '0')}` : null);
+        const reportType = req.query.reportType || 'balance';
+        const accountClassIds = parseCsv(req.query.accountClassIds);
+        const hideZero = parseBool(req.query.hideZero);
+        const includeUnapproved = parseBool(req.query.includeUnapproved, false);
+        const lp = req.query.languagePair ? JSON.parse(req.query.languagePair) : req.session?.languagePair;
+
+        const v2 = await trialBalanceV2(
+          {
+            tenantId, term, reportType, month,
+            accountClassIds, hideZero, includeUnapproved,
+            languagePair: lp,
+          },
+          models,
+        );
+        // Insert subtotals + parent rows so the sheet renders the 3-level
+        // hierarchy the user sees in the UI.
+        v2.lines = withAccountParents(buildSubtotals(v2.lines || []));
+
+        // Resolve tenantCode for the file name. Tenant model uses `name`
+        // (not `code`); sanitize for filesystem-safe filename.
+        const tenant = await models.Tenant.findOne({ where: { id: tenantId } });
+        const tenantCode = (tenant?.name || `tenant${tenantId}`).replace(/[^A-Za-z0-9_-]/g, '_');
+        const buf = await buildXlsxBuffer(v2, { tenantCode });
+        res.setHeader(
+          'Content-Type',
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        );
+        res.setHeader(
+          'Content-Disposition',
+          `attachment; filename="${fileNameFor({ tenantCode, term, when: new Date() })}"`
+        );
+        return res.send(Buffer.from(buf));
       }
 
       // Legacy path (no version param, or version=1).
