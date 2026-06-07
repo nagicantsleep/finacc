@@ -120,41 +120,7 @@
       {/if}
 
     {:else if activeTab === 'comparison'}
-      {#if cmpLoading}<p class="text-muted">...</p>
-      {:else if cmpError}<p class="text-danger">{cmpError}</p>
-      {:else}
-        <table class="table table-bordered table-sm sim-cmp-table">
-          <thead class="table-light">
-            <tr>
-              <th>科目 / Mã</th>
-              <th>名称 / Tên</th>
-              <th class="sim-num">実績 / Thực tế</th>
-              <th class="sim-num">調整 / Điều chỉnh</th>
-              <th class="sim-num">予測 / Mô phỏng</th>
-              <th class="sim-num">差異 / Chênh lệch</th>
-              <th class="sim-num">差異% / %</th>
-            </tr>
-          </thead>
-          <tbody>
-            {#each cmpLines as l (l.code + ':' + (l.subCode || ''))}
-              <tr>
-                <td class="sim-code">{l.code}{#if l.subCode}-{l.subCode}{/if}</td>
-                <td>{l.name || ''}</td>
-                <td class="sim-num">{fmtNum(l.actual.endingBalance)}</td>
-                <td class="sim-num">{fmtNum(l.adjustment.endingBalance)}</td>
-                <td class="sim-num">{fmtNum(l.simulated.endingBalance)}</td>
-                <td class="sim-num" class:sim-up={l.difference > 0} class:sim-down={l.difference < 0}>
-                  {fmtNum(l.difference)}
-                </td>
-                <td class="sim-num">{l.differencePct == null ? '—' : l.differencePct.toFixed(1) + '%'}</td>
-              </tr>
-            {/each}
-            {#if cmpLines.length === 0}
-              <tr><td colspan="7" class="text-center text-muted py-3">データなし / Không có dữ liệu</td></tr>
-            {/if}
-          </tbody>
-        </table>
-      {/if}
+      <ComparisonTab scenarioId={scenarioId} reportType="combined" />
 
     {:else if activeTab === 'assumptions'}
       <div class="sim-placeholder text-muted">
@@ -235,6 +201,7 @@
   import { withAccountParents } from '../../../libs/reporting/tb-hierarchy.js';
   import BilingualText from '../components/bilingual-text.svelte';
   import TrialBalanceList from '../reports/trial-balance-list.svelte';
+  import ComparisonTab from './components/comparison-tab.svelte';
 
   export let toast = undefined;
   export let status = undefined;
@@ -260,11 +227,7 @@
   let tbError = null;
   let tbLoaded = false;
 
-  // Comparison tab
-  let cmpLines = [];
-  let cmpLoading = false;
-  let cmpError = null;
-  let cmpLoaded = false;
+  // Comparison tab is self-managed by ComparisonTab (#237/E2.9).
 
   // Entry form
   let showEntryForm = false;
@@ -284,7 +247,6 @@
   $: if ($currentPage && $currentPage !== lastFetched && scenarioId != null) {
     lastFetched = $currentPage;
     tbLoaded = false;
-    cmpLoaded = false;
     fetchScenario();
     fetchEntries();
   }
@@ -336,22 +298,9 @@
     } finally { tbLoading = false; }
   };
 
-  const fetchCmp = async () => {
-    if (scenarioId == null) return;
-    cmpLoading = true; cmpError = null;
-    try {
-      const res = await axios.get(`/api/simulation/scenarios/${scenarioId}/comparison?reportType=combined`);
-      cmpLines = res.data.lines || [];
-      cmpLoaded = true;
-    } catch (e) {
-      cmpError = e.response?.data?.message || e.message || 'fetch failed';
-    } finally { cmpLoading = false; }
-  };
-
   const selectTab = (v) => {
     activeTab = v;
     if (v === 'tb' && !tbLoaded) fetchTb();
-    if (v === 'comparison' && !cmpLoaded) fetchCmp();
   };
 
   const toggleTbAccount = (code) => {
@@ -418,7 +367,7 @@
         await axios.post(`/api/simulation/scenarios/${scenarioId}/entries`, payload);
       }
       showEntryForm = false;
-      tbLoaded = false; cmpLoaded = false;
+      tbLoaded = false;
       await fetchEntries();
       if (toast) toast.show('保存しました / Đã lưu');
     } catch (e) {
@@ -430,7 +379,7 @@
     if (!window.confirm('削除しますか? / Xóa bút toán này?')) return;
     try {
       await axios.delete(`/api/simulation/scenarios/${scenarioId}/entries/${e.id}`);
-      tbLoaded = false; cmpLoaded = false;
+      tbLoaded = false;
       await fetchEntries();
     } catch (err) {
       if (toast) toast.show(err.response?.data?.message || 'delete failed');
