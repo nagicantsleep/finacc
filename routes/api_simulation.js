@@ -35,6 +35,7 @@ import {
   hasSimulationPermission,
   canAccessScenario,
 } from '../libs/auth/permissions.js';
+import { audit } from '../libs/audit.js';
 
 const router = express.Router();
 
@@ -94,11 +95,11 @@ router.post('/simulation/scenarios', async (req, res, next) => {
     }
     const result = await createScenario(tenantId, actor.id, req.body || {});
     if (result.error) return badRequest(res, result.error);
-    await models.AuditEvent.create({
+    await audit({
       tenantId,
       actorId: actor.id,
       action: 'simulation:scenario:create',
-      payload: { entityType: 'SimulationScenario', entityId: result.id, name: result.name },
+      entityType: 'SimulationScenario', entityId: result.id, extra: { name: result.name },
     });
     res.status(201).json({ result: 'OK', scenario: result });
   } catch (err) { next(err); }
@@ -131,11 +132,11 @@ router.patch('/simulation/scenarios/:id', async (req, res, next) => {
     if (result.code === 404) return notFound(res);
     if (result.code === 409) return conflict(res, result.error);
     if (result.error) return badRequest(res, result.error);
-    await models.AuditEvent.create({
+    await audit({
       tenantId,
       actorId: actor.id,
       action: 'simulation:scenario:update',
-      payload: { entityType: 'SimulationScenario', entityId: id, diff: req.body || {} },
+      entityType: 'SimulationScenario', entityId: id, diff: req.body || {},
     });
     res.json({ result: 'OK', scenario: result.scenario });
   } catch (err) { next(err); }
@@ -151,9 +152,9 @@ router.post('/simulation/scenarios/:id/lock', async (req, res, next) => {
     const result = await lockScenario(tenantId, actor.id, id);
     if (result.code === 404) return notFound(res);
     if (result.code === 409) return conflict(res, result.error);
-    await models.AuditEvent.create({
+    await audit({
       tenantId, actorId: actor.id, action: 'simulation:scenario:lock',
-      payload: { entityType: 'SimulationScenario', entityId: id },
+      entityType: 'SimulationScenario', entityId: id,
     });
     res.json({ result: 'OK', scenario: result.scenario });
   } catch (err) { next(err); }
@@ -170,9 +171,9 @@ router.post('/simulation/scenarios/:id/unlock', async (req, res, next) => {
     if (result.code === 404) return notFound(res);
     if (result.code === 409) return conflict(res, result.error);
     if (result.code === 400) return badRequest(res, result.error);
-    await models.AuditEvent.create({
+    await audit({
       tenantId, actorId: actor.id, action: 'simulation:scenario:unlock',
-      payload: { entityType: 'SimulationScenario', entityId: id, reason: result.reason },
+      entityType: 'SimulationScenario', entityId: id, reason: result.reason,
     });
     res.json({ result: 'OK', scenario: result.scenario });
   } catch (err) { next(err); }
@@ -187,9 +188,9 @@ router.post('/simulation/scenarios/:id/archive', async (req, res, next) => {
     if (Number.isNaN(id)) return badRequest(res, 'invalid id');
     const result = await archiveScenario(tenantId, id);
     if (result.code === 404) return notFound(res);
-    await models.AuditEvent.create({
+    await audit({
       tenantId, actorId: actor.id, action: 'simulation:scenario:archive',
-      payload: { entityType: 'SimulationScenario', entityId: id },
+      entityType: 'SimulationScenario', entityId: id,
     });
     res.json({ result: 'OK', scenario: result.scenario });
   } catch (err) { next(err); }
@@ -206,9 +207,10 @@ router.post('/simulation/scenarios/:id/clone', async (req, res, next) => {
     const result = await cloneScenario(tenantId, actor.id, id, newName);
     if (result.code === 404) return notFound(res);
     if (result.error) return badRequest(res, result.error);
-    await models.AuditEvent.create({
+    await audit({
       tenantId, actorId: actor.id, action: 'simulation:scenario:clone',
-      payload: { entityType: 'SimulationScenario', sourceId: id, newId: result.scenario.id, entryCount: result.entryCount },
+      entityType: 'SimulationScenario', entityId: result.scenario.id,
+      extra: { sourceId: id, entryCount: result.entryCount },
     });
     res.status(201).json({ result: 'OK', scenario: result.scenario, entryCount: result.entryCount });
   } catch (err) { next(err); }
@@ -242,9 +244,9 @@ router.post('/simulation/scenarios/:id/entries', async (req, res, next) => {
     if (result.code === 404) return notFound(res, result.error);
     if (result.code === 409) return conflict(res, result.error);
     if (result.error) return badRequest(res, result.error);
-    await models.AuditEvent.create({
+    await audit({
       tenantId, actorId: actor.id, action: 'simulation:entry:create',
-      payload: { entityType: 'SimulationEntry', entityId: result.id, scenarioId },
+      entityType: 'SimulationEntry', entityId: result.id, extra: { scenarioId },
     });
     res.status(201).json({ result: 'OK', entry: result });
   } catch (err) { next(err); }
@@ -262,9 +264,9 @@ router.patch('/simulation/scenarios/:id/entries/:eid', async (req, res, next) =>
     if (result.code === 404) return notFound(res, result.error);
     if (result.code === 409) return conflict(res, result.error);
     if (result.error) return badRequest(res, result.error);
-    await models.AuditEvent.create({
+    await audit({
       tenantId, actorId: actor.id, action: 'simulation:entry:update',
-      payload: { entityType: 'SimulationEntry', entityId: entryId, scenarioId, diff: req.body || {} },
+      entityType: 'SimulationEntry', entityId: entryId, diff: req.body || {}, extra: { scenarioId },
     });
     res.json({ result: 'OK', entry: result.entry });
   } catch (err) { next(err); }
@@ -281,9 +283,9 @@ router.delete('/simulation/scenarios/:id/entries/:eid', async (req, res, next) =
     const result = await deleteEntry(tenantId, scenarioId, entryId);
     if (result.code === 404) return notFound(res, result.error);
     if (result.code === 409) return conflict(res, result.error);
-    await models.AuditEvent.create({
+    await audit({
       tenantId, actorId: actor.id, action: 'simulation:entry:delete',
-      payload: { entityType: 'SimulationEntry', entityId: entryId, scenarioId },
+      entityType: 'SimulationEntry', entityId: entryId, extra: { scenarioId },
     });
     res.json({ result: 'OK' });
   } catch (err) { next(err); }
@@ -362,9 +364,9 @@ router.get('/simulation/scenarios/:id/export', async (req, res, next) => {
       if (out.code === 404) return notFound(res, out.error);
       return badRequest(res, out.error);
     }
-    await models.AuditEvent.create({
+    await audit({
       tenantId, actorId: actor.id, action: 'simulation:scenario:export',
-      payload: { entityType: 'SimulationScenario', entityId: scenarioId, type },
+      entityType: 'SimulationScenario', entityId: scenarioId, extra: { type },
     });
     res.set('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     res.set('Content-Disposition', `attachment; filename="${out.fileName}"`);
