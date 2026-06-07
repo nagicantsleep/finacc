@@ -65,6 +65,18 @@ export default [
     icon: { name: 'bi-table' },
     description: `新しい試算表画面 (3 report types, hierarchy, drill-down, export).`
   }, {
+    name: 'simulation',
+    title: 'シミュレーション',
+    match: /^\/simulation/,
+    href: (status) => {
+      return	(`/simulation/scenarios`);
+    },
+    authority: (user) => {
+      return ( user.accounting || user.fiscalBrowsing );
+    },
+    icon: { name: 'bi-graph-up-arrow' },
+    description: `仮想仕訳でシナリオを作成し、シミュレーション試算表と実績比較を表示します (正式な会計報告ではありません)。`
+  }, {
     name: 'changes',
     title: '推移表',
     match: /^\/changes/,
