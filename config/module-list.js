@@ -65,6 +65,18 @@ export default [
     icon: { name: 'bi-table' },
     description: `残高試算表が確認できます。`
   }, {
+    name: 'reports/trial-balance',
+    title: '試算表 v2',
+    match: /^\/reports\/trial-balance/,
+    href: (status) => {
+      return	(`/reports/trial-balance/balance`);
+    },
+    authority: (user) => {
+      return ( user.accounting || user.fiscalBrowsing );
+    },
+    icon: { name: 'bi-table' },
+    description: `新しい試算表画面 (3 report types, hierarchy, drill-down, export).`
+  }, {
     name: 'changes',
     title: '推移表',
     match: /^\/changes/,
