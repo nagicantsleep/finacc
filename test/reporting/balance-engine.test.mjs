@@ -85,10 +85,10 @@ const APPROVED = { approvedAt: new Date('2026-06-01') };
 // ---------------------------------------------------------------------------
 
 describe('lineKey', () => {
-  it('uses sub: prefix for sub-account lines', () => {
-    assert.equal(lineKey(1, 100), 'sub:100');
+  it('uses sub:<accId>:<subCode> for sub-account lines', () => {
+    assert.equal(lineKey(2, 1), 'sub:2:1');
   });
-  it('uses acc: prefix for account-level lines', () => {
+  it('uses acc:<accId> for account-level lines', () => {
     assert.equal(lineKey(1, null), 'acc:1');
   });
 });
@@ -143,7 +143,6 @@ describe('aggregateMovements', () => {
   const accMap = new Map([
     ['1110000', 1],
     ['3010000', 2],
-    ['3010000', 2],
     ['5040000', 3],
     ['6010000', 4],
     ['7010000', 5],
@@ -197,25 +196,25 @@ describe('aggregateMovements', () => {
     assert.equal(out.get('acc:1').debit, 1099);
   });
 
-  it('routes sub-account detail to sub: line key', () => {
+  it('routes sub-account detail to sub:<accId>:<subCode> line key', () => {
     const out = new Map();
-    const subSet = new Set([100]);
+    const subKeys = new Set(['2:1']); // account 2 (3010000), sub code 1
     aggregateMovements(
       [
-        { creditAccount: '3010000', creditSubAccount: 100, creditAmount: 50, ...APPROVED },
-        { debitAccount: '3010000', debitSubAccount: 100, debitAmount: 70, ...APPROVED },
+        { creditAccount: '3010000', creditSubAccount: 1, creditAmount: 50, ...APPROVED },
+        { debitAccount: '3010000', debitSubAccount: 1, debitAmount: 70, ...APPROVED },
       ],
-      accMap, subSet, out, {}
+      accMap, subKeys, out, {}
     );
-    assert.deepEqual(out.get('sub:100'), { debit: 70, credit: 50 });
+    assert.deepEqual(out.get('sub:2:1'), { debit: 70, credit: 50 });
   });
 
-  it('skips detail whose subAccountId is not in master set', () => {
+  it('skips detail whose sub-account code is not in master set', () => {
     const out = new Map();
-    const subSet = new Set([100]);
+    const subKeys = new Set(['2:1']);
     aggregateMovements(
       [{ debitAccount: '3010000', debitSubAccount: 999, debitAmount: 50, ...APPROVED }],
-      accMap, subSet, out, {}
+      accMap, subKeys, out, {}
     );
     assert.equal(out.size, 0, 'orphan sub-account detail ignored');
   });
@@ -427,8 +426,8 @@ describe('balanceEngine — integration', () => {
         entrySources: [{
           name: 'actual',
           fetch: async () => [
-            { creditAccount: '3010000', creditSubAccount: 100, creditAmount: 30, ...APPROVED },
-            { debitAccount: '3010000', debitSubAccount: 101, debitAmount: 40, ...APPROVED },
+            { creditAccount: '3010000', creditSubAccount: 1, creditAmount: 30, ...APPROVED },
+            { debitAccount: '3010000', debitSubAccount: 2, debitAmount: 40, ...APPROVED },
           ],
         }],
       },
@@ -438,8 +437,8 @@ describe('balanceEngine — integration', () => {
     const sub101 = result.lines.find((l) => l.subAccountId === 101);
     const parentTotal = sub100.endingBalance + sub101.endingBalance;
     // Parent 3010000 is C-nature per existing dc(); both subs inherit C-nature.
-    // sub100: opening 200 + 0 + 30 = 230 (C: opening - debit + credit)
-    // sub101: opening 300 - 40 + 0 = 260
+    // sub100 (code 1): opening 200 + 0 + 30 = 230 (C: opening - debit + credit)
+    // sub101 (code 2): opening 300 - 40 + 0 = 260
     assert.equal(sub100.endingBalance, 230);
     assert.equal(sub101.endingBalance, 260);
     assert.equal(parentTotal, 490, 'sub-account lines sum to parent effective total');
@@ -494,8 +493,8 @@ describe('balanceEngine — integration', () => {
         entrySources: [{
           name: 'actual',
           fetch: async () => [
-            { creditAccount: '3010000', creditSubAccount: 100, creditAmount: 30, ...APPROVED },
-            { debitAccount: '3010000', debitSubAccount: 101, debitAmount: 40, ...APPROVED },
+            { creditAccount: '3010000', creditSubAccount: 1, creditAmount: 30, ...APPROVED },
+            { debitAccount: '3010000', debitSubAccount: 2, debitAmount: 40, ...APPROVED },
           ],
         }],
       },
