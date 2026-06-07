@@ -22,6 +22,11 @@
  */
 import { enrichBilingual as defaultEnrichBilingual } from '../bilingual-helper.js';
 import { balanceEngine } from './balance-engine.js';
+import {
+  runWarningRules,
+  splitBannerAndLine,
+  applyLineWarningCodes,
+} from './warning-rules.js';
 
 /**
  * Build a CrossSlipDetail-shaped entry source for [startDate, endDate).
@@ -246,6 +251,13 @@ export async function trialBalanceV2(params, deps) {
     { openingDebit: 0, openingCredit: 0, movementDebit: 0, movementCredit: 0, endingDebit: 0, endingCredit: 0 }
   );
 
+  // Warnings (E1.6). Banner messages go on meta.warnings; per-line codes
+  // get stamped onto each line's warningCodes. The v2 contract already
+  // declared warningCodes[]; this is where it actually gets populated.
+  const messages = await runWarningRules({ lines, meta: { tenantId, term, totals }, deps });
+  const { banners, byLineKey } = splitBannerAndLine(messages);
+  lines = applyLineWarningCodes(lines, byLineKey);
+
   return {
     version: 2,
     meta: {
@@ -258,7 +270,7 @@ export async function trialBalanceV2(params, deps) {
         ? Object.keys(languagePair).sort().join('+')
         : 'ja',
       generatedAt: new Date(),
-      warnings: [], // populated by E1.6 warning-rules
+      warnings: banners,
       totals,
       filters: {
         accountClassIds: Array.from(classIdFilter),

@@ -80,6 +80,28 @@
     </div>
   </div>
 
+  {#if warnings && warnings.length > 0}
+    <div class="tb-warnings mt-2">
+      {#each warnings as w (w.code + JSON.stringify(w.detail || {}))}
+        <div class="alert tb-warning tb-warning-{w.severity}" role="alert">
+          <strong>[{w.code}]</strong>
+          <span class="tb-warning-title">{w.title} / {w.titleVi}</span>
+          {#if w.detail}
+            <span class="tb-warning-detail">
+              {#if w.code === 'TB-W001'}
+                D={formatInt(w.detail.movementDebit)} · C={formatInt(w.detail.movementCredit)} · diff={formatInt(w.detail.diff)}
+              {:else if w.code === 'TB-W002'}
+                {w.detail.count} unapproved slip(s) in this term
+              {:else if w.detail.error}
+                {w.detail.error}
+              {/if}
+            </span>
+          {/if}
+        </div>
+      {/each}
+    </div>
+  {/if}
+
   <div class="row body-height">
     <TrialBalanceList
       lines={visibleLines}
@@ -121,6 +143,7 @@
   let monthInput = '';
   let rawLines = [];        // lines from buildSubtotals
   let withParents = [];     // rawLines + synthetic parents
+  let warnings = [];
   let meta = null;
   let loading = false;
   let error = null;
@@ -208,6 +231,7 @@
       const url = `/api/trial-balance?${params.toString()}`;
       const r = await axios.get(url);
       meta = r.data.meta;
+      warnings = r.data.meta?.warnings || [];
       const sub = buildSubtotals(r.data.lines || []);
       rawLines = sub;
       withParents = withAccountParents(sub);
@@ -221,6 +245,7 @@
       rawLines = [];
       withParents = [];
       meta = null;
+      warnings = [];
     } finally {
       loading = false;
     }
@@ -279,4 +304,10 @@
   .tb-tab { min-width: 9rem; }
   .tb-period-label { font-weight: 500; }
   .tb-meta { font-size: 0.85rem; }
+  .tb-warnings .tb-warning { padding: 0.4rem 0.75rem; margin-bottom: 0.4rem; font-size: 0.85rem; }
+  .tb-warning-critical { background: #f8d7da; border-color: #f5c2c7; color: #842029; }
+  .tb-warning-high { background: #fff3cd; border-color: #ffecb5; color: #664d03; }
+  .tb-warning-medium { background: #ffe5b4; border-color: #ffd09b; color: #7a4f01; }
+  .tb-warning-title { margin-left: 0.5rem; }
+  .tb-warning-detail { margin-left: 0.5rem; font-family: monospace; }
 </style>
