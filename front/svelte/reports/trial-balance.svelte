@@ -16,6 +16,11 @@
       <span class="tb-v2-badge">v2</span>
     </h1>
     <div>
+      <button type="button" class="btn btn-primary btn-bilingual me-2"
+        on:click={downloadExcel} disabled={loading || !status?.fy?.term}>
+        <BilingualText primary="Excel出力" secondary="Xuất Excel" inline={true} />
+        <i class="bi bi-download"></i>
+      </button>
       <a class="btn btn-outline-secondary btn-bilingual" href="/trial-balance">
         <BilingualText primary="旧画面" secondary="(Legacy)" inline={true} />
       </a>
@@ -286,6 +291,25 @@
   const formatInt = (n) => {
     if (n == null) return '';
     return Number(n).toLocaleString('en-US');
+  };
+
+  const downloadExcel = async () => {
+    if (!status || !status.fy || !status.fy.term) return;
+    const params = new URLSearchParams();
+    params.set('version', '2');
+    params.set('reportType', reportType);
+    params.set('format', 'xlsx');
+    if (monthInput) params.set('month', monthInput);
+    const lp = $languagePair;
+    if (lp) params.set('languagePair', JSON.stringify(lp));
+    const url = `/api/trial-balance?${params.toString()}`;
+    // Let the browser handle the download via a hidden link.
+    const a = document.createElement('a');
+    a.href = url;
+    a.rel = 'noopener';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
   };
 </script>
 
