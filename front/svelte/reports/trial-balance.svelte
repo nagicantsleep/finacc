@@ -21,9 +21,6 @@
         <BilingualText primary="Excel出力" secondary="Xuất Excel" inline={true} />
         <i class="bi bi-download"></i>
       </button>
-      <a class="btn btn-outline-secondary btn-bilingual" href="/trial-balance">
-        <BilingualText primary="旧画面" secondary="(Legacy)" inline={true} />
-      </a>
     </div>
   </div>
 

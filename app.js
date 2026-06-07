@@ -121,6 +121,15 @@ const voucherFile = (req, res, next) => {
 
 app.use('/', homeRouter);
 
+// E1.10: legacy /trial-balance → /reports/trial-balance redirect.
+// Must come BEFORE the screen() fallback so the match regex sees it first.
+app.get(/^\/trial-balance(\/.*)?$/, is_authenticated, requireTenant, (req, res) => {
+  const sub = req.params[0] || '';
+  // Preserve any query string the user passed.
+  const qs = req.originalUrl.includes('?') ? req.originalUrl.slice(req.originalUrl.indexOf('?')) : '';
+  res.redirect(302, `/reports/trial-balance${sub}${qs}`);
+});
+
 app.get('/voucher/file/:id', is_authenticated, requireTenant, voucherFile);
 app.use('/forms', is_authenticated, requireTenant, formsRouter);
 app.use('/api', apiRouter);
