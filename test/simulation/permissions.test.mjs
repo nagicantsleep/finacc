@@ -20,7 +20,7 @@ describe('Simulation — E2.12 permissions', function () {
   describe('1) capability → permission mapping', function () {
     it('admin has all permissions', function () {
       const p = simulationPermissions(admin);
-      for (const perm of ['simulation:view', 'simulation:create', 'simulation:lock', 'simulation:unlock', 'simulation:export']) {
+      for (const perm of ['simulation:view', 'simulation:create', 'simulation:lock', 'simulation:unlock', 'simulation:export', 'simulation:regenerate']) {
         assert.ok(p.has(perm), `admin missing ${perm}`);
       }
     });
@@ -29,6 +29,7 @@ describe('Simulation — E2.12 permissions', function () {
       assert.ok(hasSimulationPermission(accountant, 'simulation:create'));
       assert.ok(hasSimulationPermission(accountant, 'simulation:lock'));
       assert.ok(hasSimulationPermission(accountant, 'simulation:export'));
+      assert.ok(hasSimulationPermission(accountant, 'simulation:regenerate'));
       assert.equal(hasSimulationPermission(accountant, 'simulation:unlock'), false);
     });
     it('viewer (fiscalBrowsing) has only view + export', function () {
@@ -36,6 +37,7 @@ describe('Simulation — E2.12 permissions', function () {
       assert.ok(hasSimulationPermission(viewer, 'simulation:export'));
       assert.equal(hasSimulationPermission(viewer, 'simulation:create'), false);
       assert.equal(hasSimulationPermission(viewer, 'simulation:lock'), false);
+      assert.equal(hasSimulationPermission(viewer, 'simulation:regenerate'), false);
     });
     it('user with no capability has nothing', function () {
       assert.equal(simulationPermissions(nobody).size, 0);
