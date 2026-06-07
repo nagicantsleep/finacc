@@ -403,3 +403,67 @@ export function generateExpenseFixedEntries(assumption, scenario, salesPerMonth 
 
   return entries;
 }
+
+// ---------------------------------------------------------------------------
+// Preview (issue #267 — E3.6)
+// ---------------------------------------------------------------------------
+
+import models from '../../models/index.js';
+import { getScenario } from './scenario-service.js';
+
+/**
+ * Preview entries from ALL active assumptions in a scenario.
+ * Returns flat array of entry objects (not persisted).
+ */
+export async function previewAll(tenantId, scenarioId) {
+  const scenario = await getScenario(tenantId, scenarioId);
+  if (!scenario) return { error: 'scenario not found', code: 404 };
+
+  const assumptions = await models.SimulationAssumption.findAll({
+    where: { tenantId, scenarioId, status: 'active' },
+    order: [['id', 'ASC']],
+  });
+
+  if (!assumptions.length) return { entries: [], count: 0, assumptionCount: 0 };
+
+  const allEntries = [];
+
+  for (const a of assumptions) {
+    const entries = _generateEntriesForAssumption(a, scenario);
+    allEntries.push(...entries);
+  }
+
+  return { entries: allEntries, count: allEntries.length, assumptionCount: assumptions.length };
+}
+
+/**
+ * Preview entries from a SINGLE assumption.
+ */
+export async function previewAssumption(tenantId, scenarioId, assumptionId) {
+  const scenario = await getScenario(tenantId, scenarioId);
+  if (!scenario) return { error: 'scenario not found', code: 404 };
+
+  const assumption = await models.SimulationAssumption.findOne({
+    where: { id: assumptionId, tenantId, scenarioId },
+  });
+  if (!assumption) return { error: 'assumption not found', code: 404 };
+
+  const entries = _generateEntriesForAssumption(assumption, scenario);
+  return { entries, count: entries.length };
+}
+
+/**
+ * Internal: dispatch to the right generator by assumption.type.
+ */
+function _generateEntriesForAssumption(assumption, scenario) {
+  switch (assumption.type) {
+    case 'recurring':
+      return generateRecurringEntries(assumption, scenario);
+    case 'revenue_growth':
+      return generateRevenueGrowthEntries(assumption, scenario, []);
+    case 'expense_fixed':
+      return generateExpenseFixedEntries(assumption, scenario, []);
+    default:
+      return [];
+  }
+}

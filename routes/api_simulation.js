@@ -38,6 +38,7 @@ import {
   updateAssumption,
   deleteAssumption,
 } from '../libs/simulation/assumption-service.js';
+import { previewAssumption, previewAll } from '../libs/simulation/assumption-generator.js';
 import {
   hasSimulationPermission,
   canAccessScenario,
@@ -468,6 +469,35 @@ router.delete('/simulation/scenarios/:id/assumptions/:aid', async (req, res, nex
       entityType: 'SimulationAssumption', entityId: assumptionId, extra: { scenarioId },
     });
     res.json({ result: 'OK' });
+  } catch (err) { next(err); }
+});
+
+// --- Preview (E3.6) ----------------------------------------------------
+
+router.post('/simulation/scenarios/:id/assumptions/:aid/preview', async (req, res, next) => {
+  try {
+    const tenantId = req.currentTenantId;
+    const actor = getActor(req);
+    if (!canView(actor)) return forbidden(res, 'requires simulation:view');
+    const scenarioId = parseInt(req.params.id, 10);
+    const assumptionId = parseInt(req.params.aid, 10);
+    if (Number.isNaN(scenarioId) || Number.isNaN(assumptionId)) return badRequest(res, 'invalid id');
+    const result = await previewAssumption(tenantId, scenarioId, assumptionId);
+    if (result.code === 404) return notFound(res, result.error);
+    res.json({ result: 'OK', ...result });
+  } catch (err) { next(err); }
+});
+
+router.post('/simulation/scenarios/:id/preview-all', async (req, res, next) => {
+  try {
+    const tenantId = req.currentTenantId;
+    const actor = getActor(req);
+    if (!canView(actor)) return forbidden(res, 'requires simulation:view');
+    const scenarioId = parseInt(req.params.id, 10);
+    if (Number.isNaN(scenarioId)) return badRequest(res, 'invalid id');
+    const result = await previewAll(tenantId, scenarioId);
+    if (result.code === 404) return notFound(res, result.error);
+    res.json({ result: 'OK', ...result });
   } catch (err) { next(err); }
 });
 
