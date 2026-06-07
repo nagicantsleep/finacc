@@ -167,6 +167,8 @@
   "balance": "残高",
   "report_financial": "決算報告書",
   "report_trial_balance": "残高試算表",
+  "report_trial_balance_movement": "合計試算表",
+  "report_trial_balance_combined": "合計残高試算表",
   "report_pl": "損益計算書",
   "report_bs": "貸借対照表",
   "report_sga": "販売費一般管理費",
