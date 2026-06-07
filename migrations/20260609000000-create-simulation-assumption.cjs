@@ -14,8 +14,8 @@ module.exports = {
         type: Sequelize.INTEGER,
         allowNull: false,
         references: { model: 'Tenants', key: 'id' },
-        onUpdate: 'RESTRICT',
-        onDelete: 'CASCADE'
+        onUpdate: 'CASCADE',
+        onDelete: 'RESTRICT'
       },
       scenarioId: {
         type: Sequelize.INTEGER,
