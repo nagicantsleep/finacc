@@ -1,17 +1,8 @@
 <!--
-  Trial Balance v2 — Issue #209 (E1.3).
+  Trial Balance v2 — Issue #209 (E1.3) + #210 (E1.4).
 
-  New view /reports/trial-balance with three report-type tabs:
-    - balance    残高試算表       (default)
-    - movement   合計試算表
-    - combined   合計残高試算表
-
-  Phase-1 scope (E1.3):
-    - 3-tab nav, bilingual header
-    - Period selector (current FY + month picker — full filter in E1.8)
-    - Calls GET /api/trial-balance?version=2&reportType=...
-    - Renders flat lines with subtotal rows (via libs/reporting/tb-subtotal)
-    - Subtotal rows visually distinct; no expand/collapse (E1.4)
+  3 tabs (balance/movement/combined), bilingual header, period selector,
+  5-level hierarchy with per-account expand/collapse (E1.4).
 
   Out of scope: drill-down modal (E1.5), warnings banner (E1.6),
   export (E1.7), full filter UI (E1.8), bilingual mode selector (E1.9),
@@ -66,6 +57,16 @@
         <BilingualText primary="年度全体" secondary="Cả năm" inline={true} />
       </button>
     </div>
+    <div class="col-md-auto">
+      <button type="button" class="btn btn-sm btn-outline-secondary"
+        on:click={expandAll}>
+        <BilingualText primary="すべて展開" secondary="Mở rộng" inline={true} />
+      </button>
+      <button type="button" class="btn btn-sm btn-outline-secondary ms-1"
+        on:click={collapseAll}>
+        <BilingualText primary="すべて折りたたみ" secondary="Thu gọn" inline={true} />
+      </button>
+    </div>
     <div class="col-md-auto tb-meta" role="status">
       {#if loading}
         <span class="text-muted">...</span>
@@ -80,7 +81,10 @@
   </div>
 
   <div class="row body-height">
-    <TrialBalanceList lines={lines} />
+    <TrialBalanceList
+      lines={visibleLines}
+      {expanded}
+      onToggle={toggleAccount} />
   </div>
 </div>
 {/key}
@@ -92,6 +96,7 @@
   import BilingualText from '../components/bilingual-text.svelte';
   import TrialBalanceList from './trial-balance-list.svelte';
   import { buildSubtotals } from '../../../libs/reporting/tb-subtotal.js';
+  import { withAccountParents, applyExpandCollapse } from '../../../libs/reporting/tb-hierarchy.js';
 
   export let status;
 
@@ -103,19 +108,22 @@
 
   let reportType = 'balance';
   let monthInput = '';
-  let lines = [];
+  let rawLines = [];        // lines from buildSubtotals
+  let withParents = [];     // rawLines + synthetic parents
   let meta = null;
   let loading = false;
   let error = null;
   let lastFetched = '';
+  let expanded = new Set(); // account codes currently expanded
+
+  $: visibleLines = applyExpandCollapse(withParents, expanded);
 
   $: if ($currentPage && $currentPage !== lastFetched) {
     syncFromUrl();
     lastFetched = $currentPage;
     fetchData();
   }
-  $: if (status && status.fy && status.fy.term && lastFetched && !loading && lines.length === 0 && !error) {
-    // initial mount when status is ready
+  $: if (status && status.fy && status.fy.term && lastFetched && !loading && rawLines.length === 0 && !error) {
     fetchData();
   }
 
@@ -178,14 +186,39 @@
       const url = `/api/trial-balance?${params.toString()}`;
       const r = await axios.get(url);
       meta = r.data.meta;
-      lines = buildSubtotals(r.data.lines || []);
+      const sub = buildSubtotals(r.data.lines || []);
+      rawLines = sub;
+      withParents = withAccountParents(sub);
+      // Default expand: all account codes that appear as sub parents.
+      expanded = new Set(
+        sub.filter((l) => l.type === 'subAccount' && l.code)
+           .map((l) => l.code)
+      );
     } catch (e) {
       error = e?.response?.data?.error || e.message || 'fetch failed';
-      lines = [];
+      rawLines = [];
+      withParents = [];
       meta = null;
     } finally {
       loading = false;
     }
+  };
+
+  const toggleAccount = (code) => {
+    if (!code) return;
+    const next = new Set(expanded);
+    if (next.has(code)) next.delete(code); else next.add(code);
+    expanded = next;
+  };
+
+  const expandAll = () => {
+    expanded = new Set(
+      rawLines.filter((l) => l.type === 'subAccount' && l.code).map((l) => l.code)
+    );
+  };
+
+  const collapseAll = () => {
+    expanded = new Set();
   };
 
   const formatInt = (n) => {
