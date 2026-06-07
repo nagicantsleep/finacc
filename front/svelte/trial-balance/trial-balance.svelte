@@ -80,7 +80,6 @@ import axios from 'axios';
 import {onMount} from 'svelte';
 import TrialBalanceList from './trial-balance-list.svelte';
 import {numeric} from '../../../libs/utils.js';
-import {dc} from '../../../libs/parse_account_code';
 import {currentPage, link} from '../../javascripts/router.js';
 
 import BilingualText from '../components/bilingual-text.svelte';
@@ -146,14 +145,9 @@ const updateLines = async () => {
       pickup: numeric(account.pickup),
       debit: numeric(account.debit),
       credit: numeric(account.credit),
+      balance: numeric(account.balance),
       code: account.code
     };
-    if ( dc(account.code) == 'D' ) {
-      new_line.balance = new_line.pickup + new_line.debit - new_line.credit;
-    } else {
-      new_line.balance = new_line.pickup - new_line.debit + new_line.credit;
-    }
-
     if ( last_account.middle_name != account.middle_name ) {
       _lines.push({
         name: `【${account.middle_name}】`,
