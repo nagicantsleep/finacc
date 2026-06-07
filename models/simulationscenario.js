@@ -9,6 +9,12 @@ export default (sequelize, DataTypes) => {
         onDelete: 'cascade',
         onUpdate: 'cascade'
       });
+      this.hasMany(models.SimulationAssumption, {
+        foreignKey: 'scenarioId',
+        as: 'assumptions',
+        onDelete: 'cascade',
+        onUpdate: 'cascade'
+      });
       this.belongsTo(models.Tenant, {
         foreignKey: 'tenantId',
         as: 'tenant'

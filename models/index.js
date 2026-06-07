@@ -26,6 +26,7 @@ import SubAccount from './subaccount.js';
 import SubAccountRemaining from './subaccountremaining.js';
 import SimulationScenario from './simulationscenario.js';
 import SimulationEntry from './simulationentry.js';
+import SimulationAssumption from './simulationassumption.js';
 import Task from './task.js';
 import TaskDetail from './task-detail.js';
 import TaxRule from './tax-rule.js';
@@ -82,6 +83,7 @@ const models = {
   SubAccountRemaining: SubAccountRemaining(sequelize, DataTypes),
   SimulationScenario: SimulationScenario(sequelize, DataTypes),
   SimulationEntry: SimulationEntry(sequelize, DataTypes),
+  SimulationAssumption: SimulationAssumption(sequelize, DataTypes),
   Task: Task(sequelize, DataTypes),
   TaskDetail: TaskDetail(sequelize, DataTypes),
   TaxRule: TaxRule(sequelize, DataTypes),
