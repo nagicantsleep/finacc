@@ -135,13 +135,12 @@
       <ComparisonTab scenarioId={scenarioId} reportType="combined" />
 
     {:else if activeTab === 'assumptions'}
-      <div class="sim-placeholder text-muted">
-        <i class="bi bi-cone-striped"></i>
-        <BilingualText
-          primary="前提条件 (繰り返し仕訳・成長率・資金予測) は E3 で実装予定"
-          secondary="Giả định (bút toán định kỳ, tỷ lệ tăng trưởng, dự phóng tiền mặt) sẽ có ở E3"
-          inline={true} />
-      </div>
+      <AssumptionsTab
+        scenarioId={scenarioId}
+        scenarioStatus={scenario ? scenario.status : 'draft'}
+        canEdit={canEdit}
+        canRegenerate={!!(status && status.user && (status.user.administrable || status.user.accounting))}
+        {toast} />
     {/if}
   </div>
   {:else if loading}
@@ -221,6 +220,7 @@
   import TrialBalanceList from '../reports/trial-balance-list.svelte';
   import ComparisonTab from './components/comparison-tab.svelte';
   import LifecycleModals from './components/lifecycle-modals.svelte';
+  import AssumptionsTab from './components/assumptions-tab.svelte';
 
   export let toast = undefined;
   export let status = undefined;
