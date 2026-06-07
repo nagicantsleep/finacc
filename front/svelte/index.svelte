@@ -69,7 +69,7 @@ import Menu from './menu/menu.svelte';
 import Journal from './journal/journal.svelte';
 import Ledger from './ledger/ledger.svelte';
 import BankLedger from './bank-ledger/bank-ledger.svelte';
-import TrialBalance from './trial-balance/trial-balance.svelte';
+import ReportsTrialBalance from './reports/trial-balance.svelte';
 import Changes from './changes/changes.svelte';
 import Voucher from './voucher/voucher.svelte';
 import Accounts from './accounts/accounts.svelte';
@@ -126,8 +126,8 @@ const routes = [
     component: BankLedger
   },
   {
-    match: /^\/trial-balance/,
-    component: TrialBalance
+    match: /^\/reports\/trial-balance/,
+    component: ReportsTrialBalance
   },
   {
     match: /^\/changes/,

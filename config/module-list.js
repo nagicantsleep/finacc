@@ -53,17 +53,17 @@ export default [
 基本的には元帳画面と同じですが、預金通帳を模した表示となっています。<br/>
 主には会計データと預金通帳の整合を確認するためのものです。`
   }, {
-    name: 'trial-balance',
-    title: '残高試算表',
-    match: /^\/trial-balance/,
+    name: 'reports/trial-balance',
+    title: '試算表 v2',
+    match: /^\/reports\/trial-balance/,
     href: (status) => {
-      return	(`/trial-balance`);
+      return	(`/reports/trial-balance/balance`);
     },
     authority: (user) => {
       return ( user.accounting || user.fiscalBrowsing );
     },
     icon: { name: 'bi-table' },
-    description: `残高試算表が確認できます。`
+    description: `新しい試算表画面 (3 report types, hierarchy, drill-down, export).`
   }, {
     name: 'changes',
     title: '推移表',
