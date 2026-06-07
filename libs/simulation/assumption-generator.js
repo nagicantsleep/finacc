@@ -123,3 +123,124 @@ export function generateRecurringEntries(assumption, scenario) {
 
   return entries;
 }
+
+/**
+ * Generate simulation entries from a revenue_growth assumption.
+ *
+ * growthValue semantics by growthType:
+ *   percent  — base amount (month 1), compounded by .growthRate % each month
+ *   fixed    — base amount (month 1), + .increment each subsequent month
+ *   manual   — array of amounts per month
+ *   avg_last_3m — uses average of last 3 priorRevenues (growthValue ignored)
+ *   last_month  — uses last priorRevenue (growthValue ignored)
+ *
+ * @param {object}  assumption
+ * @param {object}  scenario
+ * @param {number[]} priorRevenues — previous months' revenue (needed for avg/prev based growth)
+ * @returns {object[]} entries
+ */
+export function generateRevenueGrowthEntries(assumption, scenario, priorRevenues = []) {
+  const p = assumption.parameters;
+  const { growthType, growthValue, revenueAccount, counterAccount } = p;
+  const timingDays = p.collectionTimingDays || 0;
+
+  const startDate = maxDate(assumption.startMonth, scenario.simPeriodFrom);
+  const endDate = minDate(assumption.endMonth || scenario.simPeriodTo, scenario.simPeriodTo);
+
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+  const baseY = start.getFullYear();
+  const baseM = start.getMonth() + 1;
+
+  let totalMonths =
+    (end.getFullYear() - baseY) * 12 + (end.getMonth() + 1) - baseM + 1;
+  if (totalMonths < 0) return [];
+
+  const entries = [];
+
+  for (let i = 0; i < totalMonths; i++) {
+    let y = baseY, m = baseM + i;
+    while (m > 12) { m -= 12; y++; }
+    const dateStr = toDateStr(y, m, 1);
+    if (dateStr < startDate || dateStr > endDate) continue;
+
+    let amount;
+    switch (growthType) {
+      case 'percent':
+        // growthValue = base; .growthRate = percentage per month
+        amount = growthValue * Math.pow(1 + (p.growthRate || 0) / 100, i);
+        amount = Math.round(amount);
+        break;
+      case 'fixed':
+        // growthValue = base; .increment = addition per month
+        amount = (growthValue || 0) + (p.increment || 0) * i;
+        break;
+      case 'manual':
+        amount = Array.isArray(growthValue) ? (growthValue[i] || 0) : 0;
+        break;
+      case 'avg_last_3m': {
+        const slice = priorRevenues.slice(-3);
+        amount = slice.length > 0
+          ? Math.round(slice.reduce((s, v) => s + v, 0) / slice.length)
+          : 0;
+        break;
+      }
+      case 'last_month':
+        amount = priorRevenues.length > 0 ? priorRevenues[priorRevenues.length - 1] : 0;
+        break;
+      default:
+        amount = growthValue || 0;
+    }
+
+    if (!amount || amount <= 0) continue;
+
+    // Accrual entry — revenue recognition on the month
+    entries.push({
+      date: dateStr,
+      debitAccount: counterAccount,
+      debitSubAccount: null,
+      debitAmount: amount,
+      creditAccount: revenueAccount,
+      creditSubAccount: null,
+      creditAmount: amount,
+      taxRuleId: p.taxRuleId || null,
+      projectId: p.projectId || null,
+      labelId: null,
+      memo: `${assumption.name} (revenue ${dateStr})`,
+      sourceType: 'formula',
+    });
+
+    // Cash collection entry with timing offset
+    if (timingDays > 0) {
+      const cashDate = addDays(dateStr, timingDays);
+      if (cashDate >= startDate && cashDate <= endDate) {
+        entries.push({
+          date: cashDate,
+          debitAccount: '1000',       // cash
+          debitSubAccount: null,
+          debitAmount: amount,
+          creditAccount: counterAccount,
+          creditSubAccount: null,
+          creditAmount: amount,
+          taxRuleId: null,
+          projectId: null,
+          labelId: null,
+          memo: `${assumption.name} (collection ${cashDate})`,
+          sourceType: 'formula',
+        });
+      }
+    }
+  }
+
+  return entries;
+}
+
+function addDays(dateStr, days) {
+  if (!days) return dateStr;
+  const d = new Date(dateStr);
+  d.setDate(d.getDate() + days);
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
