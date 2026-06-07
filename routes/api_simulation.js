@@ -40,6 +40,7 @@ import {
 } from '../libs/simulation/assumption-service.js';
 import { previewAssumption, previewAll, regenerate } from '../libs/simulation/assumption-generator.js';
 import { simulatedPL } from '../libs/simulation/pl-report.js';
+import { cashProjection } from '../libs/simulation/cash-projection.js';
 import {
   hasSimulationPermission,
   canAccessScenario,
@@ -498,6 +499,21 @@ router.post('/simulation/scenarios/:id/preview-all', async (req, res, next) => {
     const scenarioId = parseInt(req.params.id, 10);
     if (Number.isNaN(scenarioId)) return badRequest(res, 'invalid id');
     const result = await previewAll(tenantId, scenarioId);
+    if (result.code === 404) return notFound(res, result.error);
+    res.json({ result: 'OK', ...result });
+  } catch (err) { next(err); }
+});
+
+// --- Cash projection (E3.8) -----------------------------------------------
+
+router.get('/simulation/scenarios/:id/cash-flow', async (req, res, next) => {
+  try {
+    const tenantId = req.currentTenantId;
+    const actor = getActor(req);
+    if (!canView(actor)) return forbidden(res, 'requires simulation:view');
+    const scenarioId = parseInt(req.params.id, 10);
+    if (Number.isNaN(scenarioId)) return badRequest(res, 'invalid id');
+    const result = await cashProjection(tenantId, scenarioId, req.query.periodFrom, req.query.periodTo);
     if (result.code === 404) return notFound(res, result.error);
     res.json({ result: 'OK', ...result });
   } catch (err) { next(err); }
