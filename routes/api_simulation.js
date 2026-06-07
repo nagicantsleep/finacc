@@ -22,6 +22,12 @@ import {
   archiveScenario,
   cloneScenario,
 } from '../libs/simulation/scenario-service.js';
+import {
+  listEntries,
+  createEntry,
+  updateEntry,
+  deleteEntry,
+} from '../libs/simulation/entry-validator.js';
 
 const router = express.Router();
 
@@ -193,6 +199,78 @@ router.post('/simulation/scenarios/:id/clone', async (req, res, next) => {
       payload: { entityType: 'SimulationScenario', sourceId: id, newId: result.scenario.id, entryCount: result.entryCount },
     });
     res.status(201).json({ result: 'OK', scenario: result.scenario, entryCount: result.entryCount });
+  } catch (err) { next(err); }
+});
+
+// --- Virtual entries (E2.3) ----------------------------------------------
+
+router.get('/simulation/scenarios/:id/entries', async (req, res, next) => {
+  try {
+    const tenantId = req.currentTenantId;
+    const scenarioId = parseInt(req.params.id, 10);
+    if (Number.isNaN(scenarioId)) return badRequest(res, 'invalid scenario id');
+    const scenario = await getScenario(tenantId, scenarioId);
+    if (!scenario) return notFound(res, 'scenario not found');
+    const rows = await listEntries(tenantId, scenarioId);
+    res.json({ result: 'OK', entries: rows });
+  } catch (err) { next(err); }
+});
+
+router.post('/simulation/scenarios/:id/entries', async (req, res, next) => {
+  try {
+    const tenantId = req.currentTenantId;
+    const actor = getActor(req);
+    if (!isAdminOrAccountant(actor)) return forbidden(res, 'create requires admin or accountant role');
+    const scenarioId = parseInt(req.params.id, 10);
+    if (Number.isNaN(scenarioId)) return badRequest(res, 'invalid scenario id');
+    const result = await createEntry(tenantId, scenarioId, req.body || {});
+    if (result.code === 404) return notFound(res, result.error);
+    if (result.code === 409) return conflict(res, result.error);
+    if (result.error) return badRequest(res, result.error);
+    await models.AuditEvent.create({
+      tenantId, actorId: actor.id, action: 'simulation:entry:create',
+      payload: { entityType: 'SimulationEntry', entityId: result.id, scenarioId },
+    });
+    res.status(201).json({ result: 'OK', entry: result });
+  } catch (err) { next(err); }
+});
+
+router.patch('/simulation/scenarios/:id/entries/:eid', async (req, res, next) => {
+  try {
+    const tenantId = req.currentTenantId;
+    const actor = getActor(req);
+    if (!isAdminOrAccountant(actor)) return forbidden(res, 'update requires admin or accountant role');
+    const scenarioId = parseInt(req.params.id, 10);
+    const entryId = parseInt(req.params.eid, 10);
+    if (Number.isNaN(scenarioId) || Number.isNaN(entryId)) return badRequest(res, 'invalid id');
+    const result = await updateEntry(tenantId, scenarioId, entryId, req.body || {});
+    if (result.code === 404) return notFound(res, result.error);
+    if (result.code === 409) return conflict(res, result.error);
+    if (result.error) return badRequest(res, result.error);
+    await models.AuditEvent.create({
+      tenantId, actorId: actor.id, action: 'simulation:entry:update',
+      payload: { entityType: 'SimulationEntry', entityId: entryId, scenarioId, diff: req.body || {} },
+    });
+    res.json({ result: 'OK', entry: result.entry });
+  } catch (err) { next(err); }
+});
+
+router.delete('/simulation/scenarios/:id/entries/:eid', async (req, res, next) => {
+  try {
+    const tenantId = req.currentTenantId;
+    const actor = getActor(req);
+    if (!isAdminOrAccountant(actor)) return forbidden(res, 'delete requires admin or accountant role');
+    const scenarioId = parseInt(req.params.id, 10);
+    const entryId = parseInt(req.params.eid, 10);
+    if (Number.isNaN(scenarioId) || Number.isNaN(entryId)) return badRequest(res, 'invalid id');
+    const result = await deleteEntry(tenantId, scenarioId, entryId);
+    if (result.code === 404) return notFound(res, result.error);
+    if (result.code === 409) return conflict(res, result.error);
+    await models.AuditEvent.create({
+      tenantId, actorId: actor.id, action: 'simulation:entry:delete',
+      payload: { entityType: 'SimulationEntry', entityId: entryId, scenarioId },
+    });
+    res.json({ result: 'OK' });
   } catch (err) { next(err); }
 });
 
