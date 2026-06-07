@@ -31,6 +31,10 @@ import {
 import { simulatedTrialBalance } from '../libs/simulation/trial-balance.js';
 import { comparisonReport } from '../libs/simulation/comparison.js';
 import { buildScenarioExport } from '../libs/simulation/export.js';
+import {
+  hasSimulationPermission,
+  canAccessScenario,
+} from '../libs/auth/permissions.js';
 
 const router = express.Router();
 
@@ -56,18 +60,18 @@ function getActor(req) {
   return req.session && req.session.user ? req.session.user : null;
 }
 
-function isAdminOrAccountant(actor) {
-  if (!actor) return false;
-  return actor.administrable === true || actor.accounting === true;
-}
-
-function isAdmin(actor) {
-  return !!actor && actor.administrable === true;
-}
+// Permission helpers (E2.12): map to simulation:* capabilities.
+const canCreate = (actor) => hasSimulationPermission(actor, 'simulation:create');
+const canLock = (actor) => hasSimulationPermission(actor, 'simulation:lock');
+const canUnlock = (actor) => hasSimulationPermission(actor, 'simulation:unlock');
+const canView = (actor) => hasSimulationPermission(actor, 'simulation:view');
+const canExport = (actor) => hasSimulationPermission(actor, 'simulation:export');
 
 router.get('/simulation/scenarios', async (req, res, next) => {
   try {
     const tenantId = req.currentTenantId;
+    const actor = getActor(req);
+    if (!canView(actor)) return forbidden(res, 'requires simulation:view');
     const filters = {
       status: req.query.status,
       ownerId: req.query.ownerId ? parseInt(req.query.ownerId, 10) : undefined,
@@ -75,7 +79,9 @@ router.get('/simulation/scenarios', async (req, res, next) => {
       to: req.query.to,
     };
     const rows = await listScenarios(tenantId, filters);
-    res.json({ result: 'OK', scenarios: rows });
+    // Visibility: hide private scenarios the actor doesn't own (admin sees all).
+    const visible = rows.filter((s) => canAccessScenario(actor, s, 'simulation:view'));
+    res.json({ result: 'OK', scenarios: visible });
   } catch (err) { next(err); }
 });
 
@@ -83,7 +89,7 @@ router.post('/simulation/scenarios', async (req, res, next) => {
   try {
     const tenantId = req.currentTenantId;
     const actor = getActor(req);
-    if (!isAdminOrAccountant(actor)) {
+    if (!canCreate(actor)) {
       return forbidden(res, 'create requires admin or accountant role');
     }
     const result = await createScenario(tenantId, actor.id, req.body || {});
@@ -101,10 +107,13 @@ router.post('/simulation/scenarios', async (req, res, next) => {
 router.get('/simulation/scenarios/:id', async (req, res, next) => {
   try {
     const tenantId = req.currentTenantId;
+    const actor = getActor(req);
+    if (!canView(actor)) return forbidden(res, 'requires simulation:view');
     const id = parseInt(req.params.id, 10);
     if (Number.isNaN(id)) return badRequest(res, 'invalid id');
     const s = await getScenario(tenantId, id);
     if (!s) return notFound(res);
+    if (!canAccessScenario(actor, s, 'simulation:view')) return notFound(res);
     res.json({ result: 'OK', scenario: s });
   } catch (err) { next(err); }
 });
@@ -113,7 +122,7 @@ router.patch('/simulation/scenarios/:id', async (req, res, next) => {
   try {
     const tenantId = req.currentTenantId;
     const actor = getActor(req);
-    if (!isAdminOrAccountant(actor)) {
+    if (!canCreate(actor)) {
       return forbidden(res, 'update requires admin or accountant role');
     }
     const id = parseInt(req.params.id, 10);
@@ -136,7 +145,7 @@ router.post('/simulation/scenarios/:id/lock', async (req, res, next) => {
   try {
     const tenantId = req.currentTenantId;
     const actor = getActor(req);
-    if (!isAdminOrAccountant(actor)) return forbidden(res, 'lock requires admin or accountant role');
+    if (!canLock(actor)) return forbidden(res, 'requires simulation:lock');
     const id = parseInt(req.params.id, 10);
     if (Number.isNaN(id)) return badRequest(res, 'invalid id');
     const result = await lockScenario(tenantId, actor.id, id);
@@ -154,7 +163,7 @@ router.post('/simulation/scenarios/:id/unlock', async (req, res, next) => {
   try {
     const tenantId = req.currentTenantId;
     const actor = getActor(req);
-    if (!isAdmin(actor)) return forbidden(res, 'unlock requires admin role');
+    if (!canUnlock(actor)) return forbidden(res, 'requires simulation:unlock');
     const id = parseInt(req.params.id, 10);
     if (Number.isNaN(id)) return badRequest(res, 'invalid id');
     const result = await unlockScenario(tenantId, id, req.body && req.body.reason);
@@ -173,7 +182,7 @@ router.post('/simulation/scenarios/:id/archive', async (req, res, next) => {
   try {
     const tenantId = req.currentTenantId;
     const actor = getActor(req);
-    if (!isAdminOrAccountant(actor)) return forbidden(res, 'archive requires admin or accountant role');
+    if (!canLock(actor)) return forbidden(res, 'requires simulation:lock');
     const id = parseInt(req.params.id, 10);
     if (Number.isNaN(id)) return badRequest(res, 'invalid id');
     const result = await archiveScenario(tenantId, id);
@@ -190,7 +199,7 @@ router.post('/simulation/scenarios/:id/clone', async (req, res, next) => {
   try {
     const tenantId = req.currentTenantId;
     const actor = getActor(req);
-    if (!isAdminOrAccountant(actor)) return forbidden(res, 'clone requires admin or accountant role');
+    if (!canCreate(actor)) return forbidden(res, 'requires simulation:create');
     const id = parseInt(req.params.id, 10);
     if (Number.isNaN(id)) return badRequest(res, 'invalid id');
     const newName = req.body && req.body.name;
@@ -210,10 +219,13 @@ router.post('/simulation/scenarios/:id/clone', async (req, res, next) => {
 router.get('/simulation/scenarios/:id/entries', async (req, res, next) => {
   try {
     const tenantId = req.currentTenantId;
+    const actor = getActor(req);
+    if (!canView(actor)) return forbidden(res, 'requires simulation:view');
     const scenarioId = parseInt(req.params.id, 10);
     if (Number.isNaN(scenarioId)) return badRequest(res, 'invalid scenario id');
     const scenario = await getScenario(tenantId, scenarioId);
     if (!scenario) return notFound(res, 'scenario not found');
+    if (!canAccessScenario(actor, scenario, 'simulation:view')) return notFound(res, 'scenario not found');
     const rows = await listEntries(tenantId, scenarioId);
     res.json({ result: 'OK', entries: rows });
   } catch (err) { next(err); }
@@ -223,7 +235,7 @@ router.post('/simulation/scenarios/:id/entries', async (req, res, next) => {
   try {
     const tenantId = req.currentTenantId;
     const actor = getActor(req);
-    if (!isAdminOrAccountant(actor)) return forbidden(res, 'create requires admin or accountant role');
+    if (!canCreate(actor)) return forbidden(res, 'requires simulation:create');
     const scenarioId = parseInt(req.params.id, 10);
     if (Number.isNaN(scenarioId)) return badRequest(res, 'invalid scenario id');
     const result = await createEntry(tenantId, scenarioId, req.body || {});
@@ -242,7 +254,7 @@ router.patch('/simulation/scenarios/:id/entries/:eid', async (req, res, next) =>
   try {
     const tenantId = req.currentTenantId;
     const actor = getActor(req);
-    if (!isAdminOrAccountant(actor)) return forbidden(res, 'update requires admin or accountant role');
+    if (!canCreate(actor)) return forbidden(res, 'requires simulation:create');
     const scenarioId = parseInt(req.params.id, 10);
     const entryId = parseInt(req.params.eid, 10);
     if (Number.isNaN(scenarioId) || Number.isNaN(entryId)) return badRequest(res, 'invalid id');
@@ -262,7 +274,7 @@ router.delete('/simulation/scenarios/:id/entries/:eid', async (req, res, next) =
   try {
     const tenantId = req.currentTenantId;
     const actor = getActor(req);
-    if (!isAdminOrAccountant(actor)) return forbidden(res, 'delete requires admin or accountant role');
+    if (!canCreate(actor)) return forbidden(res, 'requires simulation:create');
     const scenarioId = parseInt(req.params.id, 10);
     const entryId = parseInt(req.params.eid, 10);
     if (Number.isNaN(scenarioId) || Number.isNaN(entryId)) return badRequest(res, 'invalid id');
@@ -282,6 +294,8 @@ router.delete('/simulation/scenarios/:id/entries/:eid', async (req, res, next) =
 router.get('/simulation/scenarios/:id/trial-balance', async (req, res, next) => {
   try {
     const tenantId = req.currentTenantId;
+    const actor = getActor(req);
+    if (!canView(actor)) return forbidden(res, 'requires simulation:view');
     const scenarioId = parseInt(req.params.id, 10);
     if (Number.isNaN(scenarioId)) return badRequest(res, 'invalid id');
     const params = {
@@ -308,6 +322,8 @@ router.get('/simulation/scenarios/:id/trial-balance', async (req, res, next) => 
 router.get('/simulation/scenarios/:id/comparison', async (req, res, next) => {
   try {
     const tenantId = req.currentTenantId;
+    const actor = getActor(req);
+    if (!canView(actor)) return forbidden(res, 'requires simulation:view');
     const scenarioId = parseInt(req.params.id, 10);
     if (Number.isNaN(scenarioId)) return badRequest(res, 'invalid id');
     const params = {
@@ -333,7 +349,7 @@ router.get('/simulation/scenarios/:id/export', async (req, res, next) => {
     const tenantId = req.currentTenantId;
     const actor = getActor(req);
     // Export requires at least view; accountant/admin/manager/tax can export.
-    if (!actor) return forbidden(res, 'export requires authentication');
+    if (!canExport(actor)) return forbidden(res, 'requires simulation:export');
     const scenarioId = parseInt(req.params.id, 10);
     if (Number.isNaN(scenarioId)) return badRequest(res, 'invalid id');
     const type = req.query.type || 'trial-balance';
