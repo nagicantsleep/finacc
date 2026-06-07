@@ -39,7 +39,7 @@ const   Closing = async (arg, carry, tenantId) => {
     let fy = arg[0];
     let nfy = arg[1];
     //console.log(fy);
-    let accounts = await Accounts.all3(fy.term);
+    let accounts = await Accounts.all3(tenantId, fy.term);
     for ( let i = 0; i < accounts.length; i ++ )    {
         let acc = accounts[i];
         if  ( acc.subAccounts ) {
@@ -152,9 +152,15 @@ const	net_income = (lines) => {
     return  (line);
 }
 
-export default async (term, tenantId) => {
+export default async (tenantId, term) => {
+    if (tenantId == null) {
+        throw new Error('closing: tenantId is required (multi-tenant guard)');
+    }
+    if (term == null) {
+        throw new Error('closing: term is required');
+    }
     let fy = await fiscalYear(term, tenantId);
-    let {lines} = await TrialBalance(term);
+    let {lines} = await TrialBalance(tenantId, term);
     let carry = net_income(lines);
     await Closing(fy, carry, tenantId);
 }

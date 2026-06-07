@@ -6,12 +6,12 @@ import models from '../models/index.js';
 const Op = models.Sequelize.Op;
 import closing from '../forms/closing.js';
 
-router.get('/closing/:term', is_authenticated,(req, res, next) => {
+router.get('/closing/:term', is_authenticated, requireTenant, (req, res, next) => {
   if (( req.session.user.accounting ) ||
       ( req.session.user.fiscalBrowsing )) {
-    closing(parseInt(req.params.term)).then(() => {
+    closing(req.currentTenantId, parseInt(req.params.term)).then(() => {
       res.redirect('/');
-    })
+    }).catch(next)
   } else {
     res.redirect('/home');
   }
