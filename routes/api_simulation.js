@@ -28,6 +28,7 @@ import {
   updateEntry,
   deleteEntry,
 } from '../libs/simulation/entry-validator.js';
+import { simulatedTrialBalance } from '../libs/simulation/trial-balance.js';
 
 const router = express.Router();
 
@@ -272,6 +273,34 @@ router.delete('/simulation/scenarios/:id/entries/:eid', async (req, res, next) =
     });
     res.json({ result: 'OK' });
   } catch (err) { next(err); }
+});
+
+// --- Simulated trial balance (E2.4) ---------------------------------------
+
+router.get('/simulation/scenarios/:id/trial-balance', async (req, res, next) => {
+  try {
+    const tenantId = req.currentTenantId;
+    const scenarioId = parseInt(req.params.id, 10);
+    if (Number.isNaN(scenarioId)) return badRequest(res, 'invalid id');
+    const params = {
+      reportType: req.query.reportType,
+      month: req.query.month,
+      accountClassIds: req.query.accountClassIds
+        ? String(req.query.accountClassIds).split(',').map((s) => parseInt(s, 10))
+        : [],
+      hideZero: req.query.hideZero === 'true',
+      languagePair: req.query.languagePair ? JSON.parse(req.query.languagePair) : null,
+    };
+    const out = await simulatedTrialBalance(tenantId, scenarioId, params);
+    if (out.error) {
+      if (out.code === 404) return notFound(res, out.error);
+      return badRequest(res, out.error);
+    }
+    res.json({ result: 'OK', ...out.result });
+  } catch (err) {
+    if (err.status) return res.status(err.status).json({ result: 'NG', message: err.message });
+    next(err);
+  }
 });
 
 export default router;

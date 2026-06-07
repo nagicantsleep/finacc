@@ -118,6 +118,7 @@ export async function trialBalanceV2(params, deps) {
     hideZero = false,
     includeUnapproved = false,
     languagePair = null,
+    entrySources = null,
   } = params || {};
 
   if (tenantId == null) {
@@ -137,12 +138,14 @@ export async function trialBalanceV2(params, deps) {
   // and detail fetch include the final day.
   const fetchEnd = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate() + 1);
 
+  const sources = entrySources || [actualEntrySource(deps, tenantId, startDate, fetchEnd)];
+
   const engineResult = await balanceEngine(
     {
       tenantId,
       term,
       period: { from: startDate, to: endDate },
-      entrySources: [actualEntrySource(deps, tenantId, startDate, fetchEnd)],
+      entrySources: sources,
       options: { subAccount: true, includeUnapproved },
     },
     deps,
@@ -272,6 +275,7 @@ export async function trialBalanceV2(params, deps) {
       generatedAt: new Date(),
       warnings: banners,
       totals,
+      entrySourceNames: sources.map((s) => s.name),
       filters: {
         accountClassIds: Array.from(classIdFilter),
         hideZero: !!hideZero,
