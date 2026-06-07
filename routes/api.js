@@ -90,7 +90,7 @@ router.get('/ledger/:term/:account/:sub_account', is_authenticated, requireTenan
 router.get('/closing/:term/confirm', is_authenticated, requireTenant, closingApi.confirm);
 router.post('/closing/:term', is_authenticated, requireTenant, closingApi.post)
 
-router.use('/simulation', simulation);
+router.use(simulation);
 
 router.get('/changes/:term/:account', is_authenticated, requireTenant, changes.get);
 router.get('/changes/:term/:account/:sub_account', is_authenticated, requireTenant, changes.get);
