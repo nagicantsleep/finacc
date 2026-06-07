@@ -10,6 +10,15 @@
 -->
 {#key $currentPage}
 <div class="container-fluid">
+  {#if mode === 'simulation'}
+    <div class="tb-sim-banner">
+      <i class="bi bi-exclamation-triangle-fill"></i>
+      <span>
+        SIMULATION - NOT OFFICIAL ACCOUNTING REPORT
+        {#if selectedScenario} · {selectedScenario.name} ({selectedScenario.status}){/if}
+      </span>
+    </div>
+  {/if}
   <div class="page-title d-flex justify-content-between mt-2">
     <h1 class="page-title-bilingual">
       <BilingualText key="trial_balance" inline={true} />
@@ -41,6 +50,27 @@
   </ul>
 
   <div class="row page-subtitle align-items-center mt-2">
+    <div class="col-md-auto">
+      <label class="tb-period-label">
+        <BilingualText primary="モード" secondary="Chế độ" inline={true} />:
+      </label>
+    </div>
+    <div class="col-md-auto">
+      <select class="form-select form-select-sm" bind:value={mode} on:change={onModeChange}>
+        <option value="actual">実績 / Thực tế</option>
+        <option value="simulation">シミュレーション / Mô phỏng</option>
+      </select>
+    </div>
+    {#if mode === 'simulation'}
+      <div class="col-md-auto">
+        <select class="form-select form-select-sm" bind:value={scenarioId} on:change={onScenarioChange}>
+          <option value="">-- シナリオ選択 / Chọn kịch bản --</option>
+          {#each scenarioOptions as s (s.id)}
+            <option value={s.id}>{s.name} ({s.status})</option>
+          {/each}
+        </select>
+      </div>
+    {/if}
     <div class="col-md-auto">
       <label class="tb-period-label">
         <BilingualText primary="期間" secondary="Kỳ" inline={true} />:
@@ -198,6 +228,10 @@
   ];
 
   let reportType = 'balance';
+  let mode = (typeof sessionStorage !== 'undefined' && sessionStorage.getItem('tb-mode')) || 'actual';
+  let scenarioId = (typeof sessionStorage !== 'undefined' && sessionStorage.getItem('tb-scenario')) || '';
+  let scenarioOptions = [];
+  $: selectedScenario = scenarioOptions.find((s) => String(s.id) === String(scenarioId)) || null;
   let monthInput = '';
   let hideZero = false;
   let accountClassFilter = new Set(); // empty = all; non-empty = keep only these
@@ -224,6 +258,10 @@
   })();
 
   $: visibleLines = applyExpandCollapse(withParents, expanded);
+
+  $: if (mode === 'simulation' && scenarioOptions.length === 0) {
+    fetchScenarios();
+  }
 
   $: if ($currentPage && $currentPage !== lastFetched) {
     syncFromUrl();
@@ -367,6 +405,10 @@
   })();
 
   const fetchData = async () => {
+    if (mode === 'simulation') {
+      await fetchSimulationData();
+      return;
+    }
     if (!status || !status.fy || !status.fy.term) return;
     loading = true;
     error = null;
@@ -418,6 +460,73 @@
     } finally {
       loading = false;
     }
+  };
+
+  const fetchScenarios = async () => {
+    try {
+      const r = await axios.get('/api/simulation/scenarios');
+      // Only draft/locked scenarios are selectable (no archived).
+      scenarioOptions = (r.data.scenarios || []).filter((s) => s.status !== 'archived');
+    } catch (e) {
+      scenarioOptions = [];
+    }
+  };
+
+  const fetchSimulationData = async () => {
+    if (!scenarioId) {
+      rawLines = []; withParents = []; meta = null; warnings = [];
+      return;
+    }
+    loading = true;
+    error = null;
+    try {
+      const params = new URLSearchParams();
+      params.set('reportType', reportType);
+      if (monthInput) params.set('month', monthInput);
+      if (hideZero) params.set('hideZero', 'true');
+      if (accountClassFilter.size > 0) {
+        params.set('accountClassIds', Array.from(accountClassFilter).join(','));
+      }
+      const lp = $languagePair;
+      if (lp) params.set('languagePair', JSON.stringify(lp));
+      const url = `/api/simulation/scenarios/${scenarioId}/trial-balance?${params.toString()}`;
+      const r = await axios.get(url);
+      meta = r.data.meta;
+      warnings = r.data.meta?.warnings || [];
+      const sub = buildSubtotals(r.data.lines || []);
+      rawLines = sub;
+      withParents = withAccountParents(sub);
+      const clsMap = new Map();
+      for (const l of r.data.lines || []) {
+        if (l.accountClassId != null && !clsMap.has(l.accountClassId)) {
+          clsMap.set(l.accountClassId, {
+            id: l.accountClassId, aclCode: l.aclCode || '', major: l.major || '', middle: l.middle || '',
+          });
+        }
+      }
+      availableClasses = Array.from(clsMap.values())
+        .sort((a, b) => String(a.aclCode).localeCompare(String(b.aclCode)));
+      expanded = new Set(sub.filter((l) => l.type === 'subAccount' && l.code).map((l) => l.code));
+    } catch (e) {
+      error = e?.response?.data?.message || e.message || 'fetch failed';
+      rawLines = []; withParents = []; meta = null; warnings = [];
+    } finally {
+      loading = false;
+    }
+  };
+
+  const onModeChange = () => {
+    if (typeof sessionStorage !== 'undefined') sessionStorage.setItem('tb-mode', mode);
+    if (mode === 'simulation') {
+      fetchScenarios().then(() => fetchData());
+    } else {
+      fetchData();
+    }
+  };
+
+  const onScenarioChange = () => {
+    if (typeof sessionStorage !== 'undefined') sessionStorage.setItem('tb-scenario', scenarioId || '');
+    fetchData();
   };
 
   const toggleAccount = (code) => {
@@ -478,6 +587,18 @@
 </script>
 
 <style>
+  .tb-sim-banner {
+    background: #fde7e7;
+    border: 1px solid #c00000;
+    color: #900;
+    padding: 0.4rem 0.8rem;
+    border-radius: 4px;
+    font-weight: 600;
+    margin-top: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
   .tb-v2-badge {
     display: inline-block;
     font-size: 0.7em;
