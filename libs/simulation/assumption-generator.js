@@ -467,3 +467,89 @@ function _generateEntriesForAssumption(assumption, scenario) {
       return [];
   }
 }
+
+// ---------------------------------------------------------------------------
+// Regenerate (issue #268 — E3.7)
+// ---------------------------------------------------------------------------
+
+import { createHash } from 'node:crypto';
+
+function hashParams(assumption) {
+  const key = JSON.stringify({
+    type: assumption.type,
+    name: assumption.name,
+    parameters: assumption.parameters,
+    startMonth: assumption.startMonth,
+    endMonth: assumption.endMonth,
+    status: assumption.status,
+  });
+  return createHash('sha256').update(key).digest('hex').slice(0, 64);
+}
+
+/**
+ * Regenerate all generated entries for a scenario.
+ *
+ * 1. Hash each active assumption; skip if hash unchanged.
+ * 2. Delete existing entries with sourceType IN ('recurring','formula').
+ * 3. Generate new entries from all active assumptions.
+ * 4. Bulk-insert.
+ * 5. Update each assumption's generatedCount + generatedHash.
+ *
+ * Returns { deletedCount, insertedCount, assumptionCount } for audit.
+ */
+export async function regenerate(tenantId, scenarioId) {
+  const scenario = await getScenario(tenantId, scenarioId);
+  if (!scenario) return { error: 'scenario not found', code: 404 };
+  if (scenario.status === 'locked') return { error: 'scenario is locked', code: 409 };
+
+  const assumptions = await models.SimulationAssumption.findAll({
+    where: { tenantId, scenarioId, status: 'active' },
+    order: [['id', 'ASC']],
+  });
+
+  // Phase 1: identify which assumptions have changed (hash differs)
+  const changed = [];
+  for (const a of assumptions) {
+    const h = hashParams(a);
+    if (h !== a.generatedHash) {
+      changed.push({ assumption: a, hash: h });
+    }
+  }
+
+  // Only delete if something changed — keep manual entries untouched
+  let deleted = 0;
+  if (changed.length > 0) {
+    deleted = await models.SimulationEntry.destroy({
+      where: {
+        tenantId,
+        scenarioId,
+        sourceType: { [models.Sequelize.Op.in]: ['recurring', 'formula'] },
+      },
+    });
+  }
+
+  let insertedCount = 0;
+
+  if (changed.length > 0) {
+    const allEntries = [];
+    for (const { assumption, hash } of changed) {
+      const gen = _generateEntriesForAssumption(assumption, scenario);
+      const count = gen.length;
+
+      for (const e of gen) {
+        e.tenantId = tenantId;
+        e.scenarioId = scenarioId;
+      }
+
+      allEntries.push(...gen);
+      await assumption.update({ generatedCount: count, generatedHash: hash });
+    }
+
+    if (allEntries.length > 0) {
+      await models.SimulationEntry.bulkCreate(allEntries);
+    }
+    insertedCount = allEntries.length;
+  }
+
+  return { deletedCount: deleted, insertedCount, assumptionCount: assumptions.length };
+}

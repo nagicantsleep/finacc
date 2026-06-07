@@ -38,7 +38,7 @@ import {
   updateAssumption,
   deleteAssumption,
 } from '../libs/simulation/assumption-service.js';
-import { previewAssumption, previewAll } from '../libs/simulation/assumption-generator.js';
+import { previewAssumption, previewAll, regenerate } from '../libs/simulation/assumption-generator.js';
 import {
   hasSimulationPermission,
   canAccessScenario,
@@ -75,6 +75,7 @@ const canLock = (actor) => hasSimulationPermission(actor, 'simulation:lock');
 const canUnlock = (actor) => hasSimulationPermission(actor, 'simulation:unlock');
 const canView = (actor) => hasSimulationPermission(actor, 'simulation:view');
 const canExport = (actor) => hasSimulationPermission(actor, 'simulation:export');
+const canRegenerate = (actor) => hasSimulationPermission(actor, 'simulation:regenerate');
 
 router.get('/simulation/scenarios', async (req, res, next) => {
   try {
@@ -497,6 +498,31 @@ router.post('/simulation/scenarios/:id/preview-all', async (req, res, next) => {
     if (Number.isNaN(scenarioId)) return badRequest(res, 'invalid id');
     const result = await previewAll(tenantId, scenarioId);
     if (result.code === 404) return notFound(res, result.error);
+    res.json({ result: 'OK', ...result });
+  } catch (err) { next(err); }
+});
+
+// --- Regenerate (E3.7) -------------------------------------------------
+
+router.post('/simulation/scenarios/:id/regenerate', async (req, res, next) => {
+  try {
+    const tenantId = req.currentTenantId;
+    const actor = getActor(req);
+    if (!canRegenerate(actor)) return forbidden(res, 'requires simulation:regenerate');
+    const scenarioId = parseInt(req.params.id, 10);
+    if (Number.isNaN(scenarioId)) return badRequest(res, 'invalid id');
+    const result = await regenerate(tenantId, scenarioId);
+    if (result.code === 404) return notFound(res, result.error);
+    if (result.code === 409) return conflict(res, result.error);
+    await audit({
+      tenantId, actorId: actor.id, action: 'simulation:regenerate',
+      entityType: 'SimulationScenario', entityId: scenarioId,
+      extra: {
+        deletedCount: result.deletedCount,
+        insertedCount: result.insertedCount,
+        assumptionCount: result.assumptionCount,
+      },
+    });
     res.json({ result: 'OK', ...result });
   } catch (err) { next(err); }
 });
