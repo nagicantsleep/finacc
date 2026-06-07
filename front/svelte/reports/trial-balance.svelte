@@ -165,6 +165,7 @@
     <TrialBalanceList
       lines={visibleLines}
       {expanded}
+      {languageMode}
       onToggle={toggleAccount}
       onRowClick={openDrillDown} />
   </div>
@@ -189,6 +190,7 @@
   import TrialBalanceDrillDown from './trial-balance-drilldown.svelte';
   import { buildSubtotals } from '../../../libs/reporting/tb-subtotal.js';
   import { withAccountParents, applyExpandCollapse } from '../../../libs/reporting/tb-hierarchy.js';
+  import { LANG_MODES, languagePairQuery } from '../../../libs/reporting/tb-language.js';
 
   export let status;
 
@@ -202,6 +204,7 @@
   let monthInput = '';
   let hideZero = false;
   let accountClassFilter = new Set(); // empty = all; non-empty = keep only these
+  let languageMode = 'ja-vi'; // ja | vi | ja-vi | vi-ja
   let rawLines = [];        // lines from buildSubtotals
   let withParents = [];     // rawLines + synthetic parents
   let warnings = [];
@@ -302,6 +305,7 @@
   const removeChip = (key) => {
     if (key === 'month') { monthInput = ''; }
     else if (key === 'hideZero') { hideZero = false; }
+    else if (key === 'lang') { languageMode = 'ja-vi'; }
     else if (key.startsWith('class:')) {
       const id = parseInt(key.slice('class:'.length), 10);
       accountClassFilter.delete(id);
@@ -311,10 +315,18 @@
     fetchData();
   };
 
+  const selectLangMode = (m) => {
+    if (!LANG_MODES.includes(m)) return;
+    languageMode = m;
+    pushUrl();
+    fetchData();
+  };
+
   $: activeFilterChips = (() => {
     const chips = [];
     if (monthInput) chips.push({ key: 'month', label: `month=${monthInput}` });
     if (hideZero) chips.push({ key: 'hideZero', label: 'hideZero' });
+    if (languageMode !== 'ja-vi') chips.push({ key: 'lang', label: `lang=${languageMode}` });
     for (const id of accountClassFilter) {
       const cls = availableClasses.find((c) => c.id === id);
       if (cls) chips.push({ key: `class:${id}`, label: `${cls.aclCode} ${cls.major}` });
@@ -331,6 +343,7 @@
     const qs = new URLSearchParams();
     if (hideZero) qs.set('hideZero', 'true');
     if (accountClassFilter.size > 0) qs.set('class', Array.from(accountClassFilter).join(','));
+    if (languageMode !== 'ja-vi') qs.set('lang', languageMode);
     const s = qs.toString();
     if (s) href += `?${s}`;
     if (href !== $currentPage) link(href);
@@ -347,6 +360,12 @@
       accountClassFilter = new Set(clsParam.split(',').map((s) => parseInt(s, 10)).filter((n) => Number.isFinite(n)));
     } else {
       accountClassFilter = new Set();
+    }
+    const langParam = params.get('lang');
+    if (langParam && LANG_MODES.includes(langParam)) {
+      languageMode = langParam;
+    } else if (!langParam) {
+      languageMode = 'ja-vi';
     }
   })();
 
@@ -496,6 +515,8 @@
     border: 0; background: transparent; color: #052c65; padding: 0; margin-left: 0.2rem;
     font-size: 1.1em; line-height: 1; cursor: pointer;
   }
+  .tb-lang-modes { display: flex; gap: 0.3rem; }
+  .tb-lang-mode { font-family: monospace; min-width: 4.5rem; }
   .tb-warnings .tb-warning { padding: 0.4rem 0.75rem; margin-bottom: 0.4rem; font-size: 0.85rem; }
   .tb-warning-critical { background: #f8d7da; border-color: #f5c2c7; color: #842029; }
   .tb-warning-high { background: #fff3cd; border-color: #ffecb5; color: #664d03; }
