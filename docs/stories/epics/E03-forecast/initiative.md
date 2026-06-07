@@ -3,7 +3,7 @@
 > Initiative notes. Shared artifact (committed). Mapped to git branch `epic/forecast` and GitHub label `epic:forecast`.
 
 Date: 2026-06-08
-Status: in-progress
+Status: completed
 Epic issue: #260 | Branch: epic/forecast | Harness intake: #35
 Lane: high-risk (sinh virtual entries hàng loạt tự động, cash projection, đụng độ probability cao với actual data)
 
