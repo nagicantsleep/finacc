@@ -63,6 +63,12 @@
       </button>
     </div>
     <div class="col-md-auto">
+      <label class="tb-hide-zero-label">
+        <input type="checkbox" bind:checked={hideZero} on:change={onFilterChange} />
+        <BilingualText primary="ゼロ非表示" secondary="Ẩn số 0" inline={true} />
+      </label>
+    </div>
+    <div class="col-md-auto">
       <button type="button" class="btn btn-sm btn-outline-secondary"
         on:click={expandAll}>
         <BilingualText primary="すべて展開" secondary="Mở rộng" inline={true} />
@@ -70,6 +76,12 @@
       <button type="button" class="btn btn-sm btn-outline-secondary ms-1"
         on:click={collapseAll}>
         <BilingualText primary="すべて折りたたみ" secondary="Thu gọn" inline={true} />
+      </button>
+    </div>
+    <div class="col-md-auto">
+      <button type="button" class="btn btn-sm btn-outline-danger"
+        on:click={resetAll}>
+        <BilingualText primary="フィルタをリセット" secondary="Đặt lại" inline={true} />
       </button>
     </div>
     <div class="col-md-auto tb-meta" role="status">
@@ -84,6 +96,48 @@
       {/if}
     </div>
   </div>
+
+  {#if availableClasses.length > 0}
+    <div class="row page-subtitle align-items-center mt-1">
+      <div class="col-md-auto">
+        <label class="tb-period-label">
+          <BilingualText primary="科目区分" secondary="Loại TK" inline={true} />:
+        </label>
+      </div>
+      <div class="col-md-auto tb-class-chips">
+        {#each availableClasses as cls (cls.id)}
+          <label class="tb-class-chip"
+            class:tb-class-chip-off={accountClassFilter.size > 0 && !accountClassFilter.has(cls.id)}>
+            <input type="checkbox"
+              checked={accountClassFilter.size === 0 || accountClassFilter.has(cls.id)}
+              on:change={() => toggleClass(cls.id)} />
+            <span class="tb-class-code">{cls.aclCode}</span>
+            <span class="tb-class-name">{cls.major} {#if cls.middle}/ {cls.middle}{/if}</span>
+          </label>
+        {/each}
+      </div>
+    </div>
+  {/if}
+
+  {#if activeFilterChips.length > 0}
+    <div class="row page-subtitle align-items-center mt-1">
+      <div class="col-md-auto">
+        <span class="tb-period-label">
+          <BilingualText primary="適用中" secondary="Đang áp dụng" inline={true} />:
+        </span>
+      </div>
+      <div class="col-md-auto tb-active-chips">
+        {#each activeFilterChips as c (c.key)}
+          <span class="tb-active-chip">
+            {c.label}
+            <button type="button" class="tb-active-chip-x"
+              aria-label="remove filter"
+              on:click={() => removeChip(c.key)}>×</button>
+          </span>
+        {/each}
+      </div>
+    </div>
+  {/if}
 
   {#if warnings && warnings.length > 0}
     <div class="tb-warnings mt-2">
@@ -146,10 +200,13 @@
 
   let reportType = 'balance';
   let monthInput = '';
+  let hideZero = false;
+  let accountClassFilter = new Set(); // empty = all; non-empty = keep only these
   let rawLines = [];        // lines from buildSubtotals
   let withParents = [];     // rawLines + synthetic parents
   let warnings = [];
   let meta = null;
+  let availableClasses = []; // [{ id, aclCode, major, middle }, ...]
   let loading = false;
   let error = null;
   let lastFetched = '';
@@ -213,14 +270,85 @@
     fetchData();
   };
 
+  const onFilterChange = () => {
+    pushUrl();
+    fetchData();
+  };
+
+  const toggleClass = (id) => {
+    // If filter is currently empty (all), clicking one makes filter = {that one}
+    // (i.e. isolate to this class). Clicking again removes it from the set.
+    if (accountClassFilter.size === 0) {
+      accountClassFilter = new Set([id]);
+    } else if (accountClassFilter.has(id)) {
+      accountClassFilter.delete(id);
+      accountClassFilter = new Set(accountClassFilter);
+    } else {
+      accountClassFilter.add(id);
+      accountClassFilter = new Set(accountClassFilter);
+    }
+    pushUrl();
+    fetchData();
+  };
+
+  const resetAll = () => {
+    monthInput = '';
+    hideZero = false;
+    accountClassFilter = new Set();
+    pushUrl();
+    fetchData();
+  };
+
+  const removeChip = (key) => {
+    if (key === 'month') { monthInput = ''; }
+    else if (key === 'hideZero') { hideZero = false; }
+    else if (key.startsWith('class:')) {
+      const id = parseInt(key.slice('class:'.length), 10);
+      accountClassFilter.delete(id);
+      accountClassFilter = new Set(accountClassFilter);
+    }
+    pushUrl();
+    fetchData();
+  };
+
+  $: activeFilterChips = (() => {
+    const chips = [];
+    if (monthInput) chips.push({ key: 'month', label: `month=${monthInput}` });
+    if (hideZero) chips.push({ key: 'hideZero', label: 'hideZero' });
+    for (const id of accountClassFilter) {
+      const cls = availableClasses.find((c) => c.id === id);
+      if (cls) chips.push({ key: `class:${id}`, label: `${cls.aclCode} ${cls.major}` });
+    }
+    return chips;
+  })();
+
   const pushUrl = () => {
     const base = '/reports/trial-balance';
     const parts = [];
     if (monthInput) parts.push(monthInput);
     parts.push(reportType);
-    const href = `${base}/${parts.join('/')}`;
+    let href = `${base}/${parts.join('/')}`;
+    const qs = new URLSearchParams();
+    if (hideZero) qs.set('hideZero', 'true');
+    if (accountClassFilter.size > 0) qs.set('class', Array.from(accountClassFilter).join(','));
+    const s = qs.toString();
+    if (s) href += `?${s}`;
     if (href !== $currentPage) link(href);
   };
+
+  $: syncFiltersFromUrl = (() => {
+    const path = $currentPage || '';
+    const qIdx = path.indexOf('?');
+    const qs = qIdx >= 0 ? path.slice(qIdx + 1) : '';
+    const params = new URLSearchParams(qs);
+    hideZero = params.get('hideZero') === 'true';
+    const clsParam = params.get('class');
+    if (clsParam) {
+      accountClassFilter = new Set(clsParam.split(',').map((s) => parseInt(s, 10)).filter((n) => Number.isFinite(n)));
+    } else {
+      accountClassFilter = new Set();
+    }
+  })();
 
   const fetchData = async () => {
     if (!status || !status.fy || !status.fy.term) return;
@@ -231,6 +359,10 @@
       params.set('version', '2');
       params.set('reportType', reportType);
       if (monthInput) params.set('month', monthInput);
+      if (hideZero) params.set('hideZero', 'true');
+      if (accountClassFilter.size > 0) {
+        params.set('accountClassIds', Array.from(accountClassFilter).join(','));
+      }
       const lp = $languagePair;
       if (lp) params.set('languagePair', JSON.stringify(lp));
       const url = `/api/trial-balance?${params.toString()}`;
@@ -240,7 +372,23 @@
       const sub = buildSubtotals(r.data.lines || []);
       rawLines = sub;
       withParents = withAccountParents(sub);
-      // Default expand: all account codes that appear as sub parents.
+      // Derive available account classes from the lines (used for the
+      // class-filter chip bar). Skip rows that lack class info (subtotals
+      // and parents without classId).
+      const clsMap = new Map();
+      for (const l of r.data.lines || []) {
+        if (l.accountClassId != null && !clsMap.has(l.accountClassId)) {
+          clsMap.set(l.accountClassId, {
+            id: l.accountClassId,
+            aclCode: l.aclCode || '',
+            major: l.major || '',
+            middle: l.middle || '',
+          });
+        }
+      }
+      availableClasses = Array.from(clsMap.values()).sort((a, b) =>
+        String(a.aclCode).localeCompare(String(b.aclCode))
+      );
       expanded = new Set(
         sub.filter((l) => l.type === 'subAccount' && l.code)
            .map((l) => l.code)
@@ -328,6 +476,26 @@
   .tb-tab { min-width: 9rem; }
   .tb-period-label { font-weight: 500; }
   .tb-meta { font-size: 0.85rem; }
+  .tb-hide-zero-label { font-size: 0.85rem; display: inline-flex; align-items: center; gap: 0.3rem; }
+  .tb-class-chips { display: flex; flex-wrap: wrap; gap: 0.3rem; }
+  .tb-class-chip {
+    display: inline-flex; align-items: center; gap: 0.3rem;
+    padding: 0.2rem 0.5rem; border: 1px solid #ccc; border-radius: 0.25rem;
+    font-size: 0.8rem; background: #fff; cursor: pointer;
+  }
+  .tb-class-chip-off { opacity: 0.4; }
+  .tb-class-code { font-family: monospace; font-weight: 600; }
+  .tb-class-name { color: #555; }
+  .tb-active-chips { display: flex; flex-wrap: wrap; gap: 0.3rem; }
+  .tb-active-chip {
+    display: inline-flex; align-items: center; gap: 0.3rem;
+    padding: 0.15rem 0.5rem; border-radius: 1rem; background: #cfe2ff; color: #052c65;
+    font-size: 0.8rem;
+  }
+  .tb-active-chip-x {
+    border: 0; background: transparent; color: #052c65; padding: 0; margin-left: 0.2rem;
+    font-size: 1.1em; line-height: 1; cursor: pointer;
+  }
   .tb-warnings .tb-warning { padding: 0.4rem 0.75rem; margin-bottom: 0.4rem; font-size: 0.85rem; }
   .tb-warning-critical { background: #f8d7da; border-color: #f5c2c7; color: #842029; }
   .tb-warning-high { background: #fff3cd; border-color: #ffecb5; color: #664d03; }
