@@ -30,6 +30,7 @@ import {
 } from '../libs/simulation/entry-validator.js';
 import { simulatedTrialBalance } from '../libs/simulation/trial-balance.js';
 import { comparisonReport } from '../libs/simulation/comparison.js';
+import { buildScenarioExport } from '../libs/simulation/export.js';
 
 const router = express.Router();
 
@@ -324,6 +325,34 @@ router.get('/simulation/scenarios/:id/comparison', async (req, res, next) => {
       return badRequest(res, out.error);
     }
     res.json({ result: 'OK', ...out.result });
+  } catch (err) { next(err); }
+});
+
+router.get('/simulation/scenarios/:id/export', async (req, res, next) => {
+  try {
+    const tenantId = req.currentTenantId;
+    const actor = getActor(req);
+    // Export requires at least view; accountant/admin/manager/tax can export.
+    if (!actor) return forbidden(res, 'export requires authentication');
+    const scenarioId = parseInt(req.params.id, 10);
+    if (Number.isNaN(scenarioId)) return badRequest(res, 'invalid id');
+    const type = req.query.type || 'trial-balance';
+    if (!['trial-balance', 'comparison', 'full'].includes(type)) {
+      return badRequest(res, 'type must be trial-balance|comparison|full');
+    }
+    const actorName = actor.legalName || actor.name || String(actor.id);
+    const out = await buildScenarioExport(tenantId, scenarioId, type, actorName);
+    if (out.error) {
+      if (out.code === 404) return notFound(res, out.error);
+      return badRequest(res, out.error);
+    }
+    await models.AuditEvent.create({
+      tenantId, actorId: actor.id, action: 'simulation:scenario:export',
+      payload: { entityType: 'SimulationScenario', entityId: scenarioId, type },
+    });
+    res.set('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.set('Content-Disposition', `attachment; filename="${out.fileName}"`);
+    res.send(Buffer.from(out.buffer));
   } catch (err) { next(err); }
 });
 
