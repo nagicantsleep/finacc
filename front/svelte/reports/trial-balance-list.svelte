@@ -14,7 +14,8 @@
   Props:
     lines          array of v2 lines (already through withAccountParents + applyExpandCollapse)
     expanded       Set<accountCode> of accounts that are currently expanded
-    onToggle       (code) => void  — fired when the user clicks [+/-]
+    onToggle       (code) => void       — fired when the user clicks [+/-]
+    onRowClick     (line) => void       — fired when a data row is clicked (parent | account | subAccount)
 -->
 <table class="table table-bordered table-sm tb-v2-table">
   <thead class="table-light">
@@ -34,7 +35,9 @@
     {#each lines as l (keyFor(l))}
       <tr class:tb-subtotal={l.type === 'subtotal'}
           class:tb-parent={l.type === 'parent'}
-          class={indentClass(l)}>
+          class:tb-clickable={l.type !== 'subtotal'}
+          class={indentClass(l)}
+          on:click={() => onRowClick(l)}>
         <td class="tb-col-code">
           {#if l.type === 'subtotal'}
             <span class="tb-subtotal-label">【{l.level}】</span>
@@ -89,6 +92,7 @@
   export let lines = [];
   export let expanded = new Set();
   export let onToggle = () => {};
+  export let onRowClick = () => {};
 
   const formatNum = (n) => {
     if (n == null) return '';
@@ -144,4 +148,6 @@
   }
   .tb-toggle:hover { color: #000; }
   .tb-code-text { font-family: monospace; }
+  .tb-clickable { cursor: pointer; }
+  .tb-clickable:hover { background: #f0f6ff; }
 </style>

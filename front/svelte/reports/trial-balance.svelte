@@ -84,9 +84,19 @@
     <TrialBalanceList
       lines={visibleLines}
       {expanded}
-      onToggle={toggleAccount} />
+      onToggle={toggleAccount}
+      onRowClick={openDrillDown} />
   </div>
 </div>
+
+<TrialBalanceDrillDown
+  bind:this={drilldown}
+  term={status?.fy?.term}
+  accountCode={drillAccount?.code}
+  subCode={drillAccount?.subCode}
+  accountName={drillAccount?.name}
+  from={periodBounds.from}
+  to={periodBounds.to} />
 {/key}
 
 <script>
@@ -95,6 +105,7 @@
   import { languagePair } from '../../javascripts/bilingual.js';
   import BilingualText from '../components/bilingual-text.svelte';
   import TrialBalanceList from './trial-balance-list.svelte';
+  import TrialBalanceDrillDown from './trial-balance-drilldown.svelte';
   import { buildSubtotals } from '../../../libs/reporting/tb-subtotal.js';
   import { withAccountParents, applyExpandCollapse } from '../../../libs/reporting/tb-hierarchy.js';
 
@@ -115,6 +126,17 @@
   let error = null;
   let lastFetched = '';
   let expanded = new Set(); // account codes currently expanded
+  let drilldown;
+  let drillAccount = null;  // { code, subCode, name } | null
+
+  $: periodBounds = (() => {
+    if (!status || !status.fy) return { from: null, to: null };
+    if (monthInput) {
+      const [y, m] = monthInput.split('-').map(Number);
+      return { from: new Date(y, m - 1, 1), to: new Date(y, m, 0) };
+    }
+    return { from: new Date(status.fy.startDate), to: new Date(status.fy.endDate) };
+  })();
 
   $: visibleLines = applyExpandCollapse(withParents, expanded);
 
@@ -219,6 +241,21 @@
 
   const collapseAll = () => {
     expanded = new Set();
+  };
+
+  const openDrillDown = (row) => {
+    if (!row) return;
+    if (row.type === 'subtotal') return;  // can't drill into subtotals
+    if (row.type === 'parent') {
+      drillAccount = { code: row.code, subCode: null, name: row.name };
+    } else if (row.type === 'subAccount') {
+      drillAccount = { code: row.code, subCode: row.subCode, name: row.subName || row.name };
+    } else if (row.type === 'account') {
+      drillAccount = { code: row.code, subCode: null, name: row.name };
+    } else {
+      return;
+    }
+    drilldown?.open();
   };
 
   const formatInt = (n) => {
