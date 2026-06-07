@@ -36,19 +36,19 @@ const accounts = [
 ];
 
 const accountRemaining = [
-  { accountId: 1, term: 0, debit: 100, credit: 0, balance: 100, tenantId: TENANT_A },
-  { accountId: 2, term: 0, debit: 0, credit: 0, balance: 0, tenantId: TENANT_A },
-  { accountId: 3, term: 0, debit: 50, credit: 50, balance: 0, tenantId: TENANT_A },
-  { accountId: 4, term: 0, debit: 999, credit: 0, balance: 999, tenantId: TENANT_A },
-  { accountId: 5, term: 0, debit: 0, credit: 123, balance: 123, tenantId: TENANT_A },
-  { accountId: 6, term: 0, debit: 0, credit: 0, balance: 0, tenantId: TENANT_A },
-  { subAccountId: 100, term: 0, debit: 0, credit: 200, balance: 200, tenantId: TENANT_A },
-  { subAccountId: 101, term: 0, debit: 300, credit: 0, balance: 300, tenantId: TENANT_A },
+  { accountId: 1, term: 1, debit: 100, credit: 0, balance: 100, tenantId: TENANT_A },
+  { accountId: 2, term: 1, debit: 0, credit: 0, balance: 0, tenantId: TENANT_A },
+  { accountId: 3, term: 1, debit: 50, credit: 50, balance: 0, tenantId: TENANT_A },
+  { accountId: 4, term: 1, debit: 999, credit: 0, balance: 999, tenantId: TENANT_A },
+  { accountId: 5, term: 1, debit: 0, credit: 123, balance: 123, tenantId: TENANT_A },
+  { accountId: 6, term: 1, debit: 0, credit: 0, balance: 0, tenantId: TENANT_A },
+  { subAccountId: 100, term: 1, debit: 0, credit: 200, balance: 200, tenantId: TENANT_A },
+  { subAccountId: 101, term: 1, debit: 300, credit: 0, balance: 300, tenantId: TENANT_A },
 ];
 
 const subAccountRemaining = [
-  { subAccountId: 100, term: 0, debit: 0, credit: 200, balance: 200, tenantId: TENANT_A },
-  { subAccountId: 101, term: 0, debit: 300, credit: 0, balance: 300, tenantId: TENANT_A },
+  { subAccountId: 100, term: 1, debit: 0, credit: 200, balance: 200, tenantId: TENANT_A },
+  { subAccountId: 101, term: 1, debit: 300, credit: 0, balance: 300, tenantId: TENANT_A },
 ];
 
 const makeDeps = (overrides = {}) => ({
@@ -443,5 +443,68 @@ describe('balanceEngine — integration', () => {
     assert.equal(sub100.endingBalance, 230);
     assert.equal(sub101.endingBalance, 260);
     assert.equal(parentTotal, 490, 'sub-account lines sum to parent effective total');
+  });
+
+  it('reads opening from AccountRemaining at the same term (no off-by-one)', async () => {
+    // accountRemaining for account 1 is stored at term 1 with balance 100.
+    const result = await balanceEngine(
+      { tenantId: TENANT_A, term: 1, entrySources: [] },
+      makeDeps()
+    );
+    const cash = result.lines.find((l) => l.code === '1110000');
+    assert.equal(cash.openingBalance, 100, 'opening read at term=1, not term-1');
+  });
+
+  it('normalizes accountCode field (Sequelize model uses accountCode, not code)', async () => {
+    const seqAccounts = [
+      { id: 1, accountCode: '1110000', tenantId: TENANT_A, subAccounts: [] },
+    ];
+    const deps = {
+      Account: { findAll: async () => seqAccounts },
+      SubAccount: {},
+      AccountRemaining: { findAll: async () => [
+        { accountId: 1, term: 1, debit: 0, credit: 0, balance: 500, tenantId: TENANT_A },
+      ]},
+      SubAccountRemaining: { findAll: async () => [] },
+    };
+    const result = await balanceEngine(
+      {
+        tenantId: TENANT_A,
+        term: 1,
+        entrySources: [{
+          name: 'actual',
+          fetch: async () => [{ debitAccount: '1110000', debitAmount: 50, ...APPROVED }],
+        }],
+      },
+      deps
+    );
+    assert.equal(result.lines.length, 1);
+    assert.equal(result.lines[0].code, '1110000');
+    assert.equal(result.lines[0].openingBalance, 500);
+    assert.equal(result.lines[0].movementDebit, 50);
+    assert.equal(result.lines[0].endingBalance, 550, 'D-nature: 500 + 50 - 0');
+  });
+
+  it('subAccount:false rolls sub-account movement up to the parent account line', async () => {
+    const result = await balanceEngine(
+      {
+        tenantId: TENANT_A,
+        term: 1,
+        options: { subAccount: false },
+        entrySources: [{
+          name: 'actual',
+          fetch: async () => [
+            { creditAccount: '3010000', creditSubAccount: 100, creditAmount: 30, ...APPROVED },
+            { debitAccount: '3010000', debitSubAccount: 101, debitAmount: 40, ...APPROVED },
+          ],
+        }],
+      },
+      makeDeps()
+    );
+    const parent = result.lines.find((l) => l.code === '3010000');
+    assert.equal(parent.subAccountId, null, 'one account-level line, no sub lines');
+    assert.equal(result.lines.filter((l) => l.code === '3010000').length, 1);
+    assert.equal(parent.movementCredit, 30, 'sub movements rolled into parent');
+    assert.equal(parent.movementDebit, 40);
   });
 });

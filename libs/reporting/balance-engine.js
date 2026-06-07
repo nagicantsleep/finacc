@@ -1,5 +1,7 @@
 import { dc, field, numeric } from '../parse_account_code.js';
 
+const codeOf = (acc) => (acc.accountCode != null ? acc.accountCode : acc.code);
+
 const lineKey = (accountId, subAccountId) =>
   subAccountId != null ? `sub:${subAccountId}` : `acc:${accountId}`;
 
@@ -24,29 +26,27 @@ const computeEnding = (code, openingBalance, movementDebit, movementCredit) => {
 };
 
 const aggregateMovements = (details, accountByCode, subAccountIdSet, movementByLineKey, opts) => {
-  const { includeUnapproved = false } = opts || {};
+  const { includeUnapproved = false, subAccount = true } = opts || {};
+  const route = (code, subRaw, d, amountField, side) => {
+    if (!code) return;
+    const accId = accountByCode.get(code);
+    if (accId == null) return;
+    const subId = subRaw || null;
+    let k;
+    if (subAccount && subId != null) {
+      if (!subAccountIdSet.has(subId)) return;
+      k = `sub:${subId}`;
+    } else {
+      k = `acc:${accId}`;
+    }
+    const cur = movementByLineKey.get(k) || { debit: 0, credit: 0 };
+    cur[side] += numeric(d[amountField]);
+    movementByLineKey.set(k, cur);
+  };
   for (const d of details || []) {
     if (!includeUnapproved && !d.approvedAt) continue;
-    if (d.debitAccount) {
-      const subId = d.debitSubAccount || null;
-      if (subId != null && !subAccountIdSet.has(subId)) continue;
-      const accId = accountByCode.get(d.debitAccount);
-      if (accId == null) continue;
-      const k = subId != null ? `sub:${subId}` : `acc:${accId}`;
-      const cur = movementByLineKey.get(k) || { debit: 0, credit: 0 };
-      cur.debit += numeric(d.debitAmount);
-      movementByLineKey.set(k, cur);
-    }
-    if (d.creditAccount) {
-      const subId = d.creditSubAccount || null;
-      if (subId != null && !subAccountIdSet.has(subId)) continue;
-      const accId = accountByCode.get(d.creditAccount);
-      if (accId == null) continue;
-      const k = subId != null ? `sub:${subId}` : `acc:${accId}`;
-      const cur = movementByLineKey.get(k) || { debit: 0, credit: 0 };
-      cur.credit += numeric(d.creditAmount);
-      movementByLineKey.set(k, cur);
-    }
+    route(d.debitAccount, d.debitSubAccount, d, 'debitAmount', 'debit');
+    route(d.creditAccount, d.creditSubAccount, d, 'creditAmount', 'credit');
   }
 };
 
@@ -55,14 +55,18 @@ const aggregateMovements = (details, accountByCode, subAccountIdSet, movementByL
  *
  * params:
  *   tenantId     - required
- *   term         - required, FiscalYear.term
- *   period       - optional { from, to } stored in meta
+ *   term         - required, FiscalYear.term. Opening is read from
+ *                  AccountRemaining/SubAccountRemaining AT THIS term (setup and
+ *                  closing both write a term's opening into that term's row).
+ *   period       - optional { from, to } stored in meta; the fetcher enforces it
  *   entrySources - array of { name, fetch } where fetch() resolves to detail rows
  *                  (CrossSlipDetail-like: debitAccount, debitSubAccount, debitAmount,
  *                   creditAccount, creditSubAccount, creditAmount, approvedAt)
  *   options:
  *     includeUnapproved - default false
- *     subAccount        - default true (emit one line per sub-account when subs exist)
+ *     subAccount        - default true. true → one line per sub-account when subs
+ *                         exist, movement keyed by sub. false → one line per
+ *                         account, sub-account movement rolled up to the parent.
  *     accountClassIds / projectIds / labelIds - filtering hints; fetcher enforces
  *
  * deps: { Account, SubAccount, AccountRemaining, SubAccountRemaining }
@@ -91,18 +95,17 @@ export async function balanceEngine(params, deps) {
     include: [{ model: deps.SubAccount, as: 'subAccounts' }],
   });
 
-  const priorTerm = term - 1;
   const accountRemaining = await deps.AccountRemaining.findAll({
-    where: { tenantId, term: priorTerm },
+    where: { tenantId, term },
   });
   const subAccountRemaining = await deps.SubAccountRemaining.findAll({
-    where: { tenantId, term: priorTerm },
+    where: { tenantId, term },
   });
 
   const accountByCode = new Map();
   const subAccountIdSet = new Set();
   for (const acc of accounts) {
-    accountByCode.set(acc.code, acc.id);
+    accountByCode.set(codeOf(acc), acc.id);
     if (acc.subAccounts) {
       for (const sub of acc.subAccounts) {
         subAccountIdSet.add(sub.id);
@@ -112,23 +115,22 @@ export async function balanceEngine(params, deps) {
 
   const lineDefs = [];
   for (const acc of accounts) {
+    const accCode = codeOf(acc);
     if (subAccount && acc.subAccounts && acc.subAccounts.length > 0) {
       for (const sub of acc.subAccounts) {
         lineDefs.push({
           accountId: acc.id,
-          accountCode: acc.code,
           subAccountId: sub.id,
           subCode: sub.subAccountCode,
-          code: acc.code,
+          code: accCode,
         });
       }
     } else {
       lineDefs.push({
         accountId: acc.id,
-        accountCode: acc.code,
         subAccountId: null,
         subCode: null,
-        code: acc.code,
+        code: accCode,
       });
     }
   }
@@ -141,7 +143,10 @@ export async function balanceEngine(params, deps) {
     }
     sourceNames.push(src.name);
     const details = await src.fetch();
-    aggregateMovements(details, accountByCode, subAccountIdSet, movementByLineKey, { includeUnapproved });
+    aggregateMovements(details, accountByCode, subAccountIdSet, movementByLineKey, {
+      includeUnapproved,
+      subAccount,
+    });
   }
 
   const lines = lineDefs.map((ld) => {
