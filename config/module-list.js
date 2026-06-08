@@ -3,6 +3,9 @@ export default [
     name: 'closing',
     title: '決算',
     match: /^\/closing/,
+    href: (status) => {
+      return (`/closing/${status.fy.term}/confirm`);
+    },
     authority: (user) => {
       return ( user.administrable );
     },
