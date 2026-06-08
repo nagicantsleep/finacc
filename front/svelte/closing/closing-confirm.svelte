@@ -104,7 +104,7 @@ const runClosing = async () => {
   try {
     const res = await axios.post(`/api/closing/${term}`, { plResetAcknowledged });
     if (res.data && res.data.code === 0) {
-      link(`/trial-balance?closed=${term}`);
+      link(`/reports/trial-balance?closed=${term}`);
     } else {
       submitError = res.data?.message || 'Closing failed.';
     }
