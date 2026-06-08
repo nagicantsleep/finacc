@@ -609,8 +609,9 @@
     margin-left: 0.4em;
     vertical-align: middle;
   }
-  .tb-tabs { margin-top: 0.5rem; }
-  .tb-tab { min-width: 9rem; }
+  .tb-tabs { margin-top: 0.5rem; border-bottom: 2px solid #dee2e6; }
+  .tb-tab { min-width: 9rem; color: #333; font-weight: 500; border: 1px solid transparent; border-bottom: none; background: #f8f9fa; }
+  .tb-tab.active { color: #000; font-weight: 600; background: #fff; border-color: #dee2e6 #dee2e6 #fff; }
   .tb-period-label { font-weight: 500; }
   .tb-meta { font-size: 0.85rem; }
   .tb-hide-zero-label { font-size: 0.85rem; display: inline-flex; align-items: center; gap: 0.3rem; }

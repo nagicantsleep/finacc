@@ -474,7 +474,9 @@
   .badge.sim-badge-draft { background: #6c757d; }
   .badge.sim-badge-locked { background: #0d6efd; }
   .badge.sim-badge-archived { background: #adb5bd; color: #333; }
-  .sim-tabs .sim-tab { font-size: 0.9rem; }
+  .sim-tabs { border-bottom: 2px solid #dee2e6; }
+  .sim-tab { font-size: 0.9rem; color: #333; font-weight: 500; background: #f8f9fa; border: 1px solid transparent; border-bottom: none; }
+  .sim-tab.active { color: #000; font-weight: 600; background: #fff; border-color: #dee2e6 #dee2e6 #fff; }
   .sim-entry-table, .sim-cmp-table { font-size: 0.9rem; }
   .sim-num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
   .sim-code { font-family: monospace; white-space: nowrap; }
