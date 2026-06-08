@@ -74,8 +74,9 @@
         </td>
         <td class="tb-col-name">
           {#if l.type === 'subtotal'}
-            {@const dn = pickDisplayName({ name: l.name, nameVi: null, code: l.code }, languageMode)}
+            {@const dn = pickDisplayName({ name: l.name, nameVi: l.nameVi, code: l.code }, languageMode)}
             <strong>{dn.primary}</strong>
+            {#if dn.secondary}<span class="tb-name-vi"> / {dn.secondary}</span>{/if}
           {:else if l.type === 'parent'}
             {@const dn = pickDisplayName({ name: l.name, nameVi: l.nameVi, code: l.code }, languageMode)}
             <strong>{dn.primary}</strong>
@@ -148,7 +149,7 @@
 <style>
   .tb-v2-table { font-size: 0.9rem; }
   .tb-col-num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
-  .tb-col-code { font-family: monospace; white-space: nowrap; width: 9rem; }
+  .tb-col-code { font-family: monospace; word-break: break-all; max-width: 11rem; min-width: 6rem; }
   .tb-col-name { min-width: 14rem; }
   .tb-col-balance { font-weight: 500; }
   .tb-balance-negative { color: #c00000; }
