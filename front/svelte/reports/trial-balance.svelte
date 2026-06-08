@@ -131,17 +131,25 @@
           <BilingualText primary="科目区分" secondary="Loại TK" inline={true} />:
         </label>
       </div>
-      <div class="col-md-auto tb-class-chips">
-        {#each availableClasses as cls (cls.id)}
-          <label class="tb-class-chip"
-            class:tb-class-chip-off={accountClassFilter.size > 0 && !accountClassFilter.has(cls.id)}>
-            <input type="checkbox"
-              checked={accountClassFilter.size === 0 || accountClassFilter.has(cls.id)}
-              on:change={() => toggleClass(cls.id)} />
-            <span class="tb-class-code">{cls.aclCode}</span>
-            <span class="tb-class-name">{cls.major} {#if cls.middle}/ {cls.middle}{/if}</span>
-          </label>
-        {/each}
+      <div class="col-md-auto tb-class-filter">
+        <select multiple class="form-select form-select-sm tb-class-select"
+          size="3"
+          on:change={onClassSelectChange}>
+          <option value="" selected={accountClassFilter.size === 0}>
+            <BilingualText primary="全て" secondary="Tất cả" inline={true} />
+          </option>
+          {#each availableClasses as cls (cls.id)}
+            <option value={cls.id} selected={accountClassFilter.has(cls.id)}>
+              {cls.aclCode} {cls.major}{#if cls.middle} / {cls.middle}{/if}
+            </option>
+          {/each}
+        </select>
+        {#if accountClassFilter.size > 0}
+          <button type="button" class="btn btn-sm btn-link p-0 ms-2"
+            on:click={() => { accountClassFilter = new Set(); pushUrl(); fetchData(); }}>
+            <BilingualText primary="クリア" secondary="Xóa" inline={true} />
+          </button>
+        {/if}
       </div>
     </div>
   {/if}
@@ -326,6 +334,14 @@
       accountClassFilter.add(id);
       accountClassFilter = new Set(accountClassFilter);
     }
+    pushUrl();
+    fetchData();
+  };
+
+  const onClassSelectChange = (event) => {
+    const selected = event.target.selectedOptions;
+    const ids = Array.from(selected).map((o) => parseInt(o.value, 10)).filter((n) => Number.isFinite(n));
+    accountClassFilter = new Set(ids);
     pushUrl();
     fetchData();
   };
@@ -616,15 +632,8 @@
   .tb-period-label { font-weight: 500; }
   .tb-meta { font-size: 0.85rem; }
   .tb-hide-zero-label { font-size: 0.85rem; display: inline-flex; align-items: center; gap: 0.3rem; }
-  .tb-class-chips { display: flex; flex-wrap: wrap; gap: 0.3rem; }
-  .tb-class-chip {
-    display: inline-flex; align-items: center; gap: 0.3rem;
-    padding: 0.2rem 0.5rem; border: 1px solid #ccc; border-radius: 0.25rem;
-    font-size: 0.8rem; background: #fff; cursor: pointer;
-  }
-  .tb-class-chip-off { opacity: 0.4; }
-  .tb-class-code { font-family: monospace; font-weight: 600; }
-  .tb-class-name { color: #555; }
+  .tb-class-filter { display: inline-flex; align-items: center; }
+  .tb-class-select { min-width: 22rem; max-width: 32rem; font-size: 0.8rem; }
   .tb-active-chips { display: flex; flex-wrap: wrap; gap: 0.3rem; }
   .tb-active-chip {
     display: inline-flex; align-items: center; gap: 0.3rem;
