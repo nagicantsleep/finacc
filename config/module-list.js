@@ -1,15 +1,5 @@
 export default [
   {
-    name: 'closing',
-    title: '決算',
-    match: /^\/closing/,
-    href: (status) => {
-      return (`/closing/${status.fy.term}/confirm`);
-    },
-    authority: (user) => {
-      return ( user.administrable );
-    },
-  }, {
     name: 'menu',
     match: /^\/menu/,
   }, {
@@ -55,6 +45,16 @@ export default [
     description: `
 基本的には元帳画面と同じですが、預金通帳を模した表示となっています。<br/>
 主には会計データと預金通帳の整合を確認するためのものです。`
+  }, {
+    name: 'closing',
+    title: '決算',
+    match: /^\/closing/,
+    href: (status) => {
+      return (`/closing/${status.fy.term}/confirm`);
+    },
+    authority: (user) => {
+      return ( user.administrable );
+    },
   }, {
     name: 'reports/trial-balance',
     title: '試算表 v2',
