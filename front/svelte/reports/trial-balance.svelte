@@ -155,6 +155,8 @@
             </div>
             <ul class="tb-class-popover-list">
               {#each availableClasses as cls (cls.id)}
+                {@const majorDn = pickClassName(cls, 'major', languageMode)}
+                {@const middleDn = pickClassName(cls, 'middle', languageMode)}
                 <li>
                   <label class="tb-class-option"
                     class:tb-class-option-on={accountClassFilter.has(cls.id)}>
@@ -162,7 +164,16 @@
                       checked={accountClassFilter.has(cls.id)}
                       on:change={() => toggleClass(cls.id)} />
                     <span class="tb-class-code">{cls.aclCode}</span>
-                    <span class="tb-class-name">{cls.major}{#if cls.middle} / {cls.middle}{/if}</span>
+                    <span class="tb-class-name">
+                      {majorDn.primary}{#if middleDn.primary} / {middleDn.primary}{/if}
+                      {#if languageMode === 'ja-vi' || languageMode === 'vi-ja'}
+                        {#if majorDn.secondary || middleDn.secondary}
+                          <span class="tb-class-name-vi">
+                            {majorDn.secondary}{#if middleDn.secondary} / {middleDn.secondary}{/if}
+                          </span>
+                        {/if}
+                      {/if}
+                    </span>
                   </label>
                 </li>
               {/each}
@@ -247,7 +258,7 @@
   import TrialBalanceDrillDown from './trial-balance-drilldown.svelte';
   import { buildSubtotals } from '../../../libs/reporting/tb-subtotal.js';
   import { withAccountParents, applyExpandCollapse } from '../../../libs/reporting/tb-hierarchy.js';
-  import { LANG_MODES, languagePairQuery } from '../../../libs/reporting/tb-language.js';
+  import { LANG_MODES, languagePairQuery, pickDisplayName } from '../../../libs/reporting/tb-language.js';
 
   export let status;
 
@@ -624,6 +635,14 @@
     document.body.removeChild(a);
   };
 
+  // Render a class name (major/middle) bilingual, given the line shape from
+  // availableClasses (which has major/majorVi/middle/middleVi but not name/nameVi).
+  const pickClassName = (cls, level, mode) => {
+    const ja = level === 'major' ? cls.major : cls.middle;
+    const vi = level === 'major' ? cls.majorVi : cls.middleVi;
+    return pickDisplayName({ name: ja, nameVi: vi, code: '' }, mode);
+  };
+
   // Svelte action: invoke `handler` when a click occurs outside the bound node.
   function clickOutside(node, handler) {
     const onClick = (e) => {
@@ -690,18 +709,25 @@
   .tb-class-option-on { background: #e7f1ff; font-weight: 500; }
   .tb-class-code { font-family: monospace; font-weight: 600; min-width: 3.5rem; }
   .tb-class-name { color: #555; }
+  .tb-class-name-vi { color: #777; font-size: 0.8em; margin-left: 0.4em; }
+  /* Fill remaining viewport height with the table so the page itself
+     doesn't scroll; only the table wraps. body-height from layout
+     (calc(100vh - topbar - footer) typically). */
+  .row.body-height { display: flex; flex-direction: column; flex: 1 1 auto; min-height: 0; }
+  .row.body-height > .tb-v2-table-wrap { flex: 1 1 auto; min-height: 0; }
   .tb-v2-table-wrap {
-    max-height: calc(100vh - 360px);
-    min-height: 20rem;
     overflow-y: auto;
     border: 1px solid #dee2e6;
     border-radius: 4px;
   }
   .tb-v2-table-wrap :global(.tb-v2-table) { margin-bottom: 0; }
-  .tb-v2-table-wrap :global(.tb-v2-table thead th) {
+  /* Override Bootstrap .table-light (white) so the sticky header is
+     clearly distinct from the body. Use !important to win specificity. */
+  .tb-v2-table-wrap :global(.tb-v2-table thead.table-light th) {
     position: sticky; top: 0; z-index: 5;
-    background: #f8f9fa;
-    box-shadow: inset 0 -1px 0 #dee2e6;
+    background: #e9ecef !important;
+    color: #212529;
+    box-shadow: inset 0 -2px 0 #adb5bd;
   }
   .tb-active-chips { display: flex; flex-wrap: wrap; gap: 0.3rem; }
   .tb-active-chip {
