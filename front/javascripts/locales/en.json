@@ -509,6 +509,8 @@
   "report_pl": "Profit & Loss Statement",
   "report_sga": "SG&A Report",
   "report_trial_balance": "Trial Balance Report",
+  "report_trial_balance_movement": "Trial Balance (Movement)",
+  "report_trial_balance_combined": "Trial Balance (Combined)",
   "required": "Required",
   "reset": "Reset",
   "restore": "Restore",

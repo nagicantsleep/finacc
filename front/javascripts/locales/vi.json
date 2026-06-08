@@ -170,6 +170,8 @@
   "balance": "Số dư",
   "report_financial": "Báo cáo tài chính",
   "report_trial_balance": "Bảng cân đối số dư",
+  "report_trial_balance_movement": "Bảng cân đối phát sinh",
+  "report_trial_balance_combined": "Bảng cân đối số dư phát sinh",
   "report_pl": "Báo cáo Kết quả Kinh doanh",
   "report_bs": "Bảng cân đối kế toán",
   "report_sga": "CP bán hàng & quản lý",
