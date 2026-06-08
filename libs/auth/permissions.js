@@ -11,16 +11,17 @@
  *   simulation:create  — create / edit / clone scenarios + entries
  *   simulation:lock    — lock / archive
  *   simulation:unlock  — unlock (admin only)
- *   simulation:export  — Excel export
+ *   simulation:export    — Excel export
+ *   simulation:regenerate — regenerate generated entries from assumptions
  *
  * Capability → permission mapping (a user is "accountant-like" if accounting,
  * "viewer-like" if fiscalBrowsing, "admin" if administrable):
  *   administrable  → all
- *   accounting     → view, create, lock, export  (not unlock)
+ *   accounting     → view, create, lock, export, regenerate  (not unlock)
  *   fiscalBrowsing → view, export
  */
 
-const PERMS = ['simulation:view', 'simulation:create', 'simulation:lock', 'simulation:unlock', 'simulation:export'];
+const PERMS = ['simulation:view', 'simulation:create', 'simulation:lock', 'simulation:unlock', 'simulation:export', 'simulation:regenerate'];
 
 export function simulationPermissions(user) {
   const set = new Set();
@@ -34,6 +35,7 @@ export function simulationPermissions(user) {
     set.add('simulation:create');
     set.add('simulation:lock');
     set.add('simulation:export');
+    set.add('simulation:regenerate');
   }
   if (user.fiscalBrowsing) {
     set.add('simulation:view');

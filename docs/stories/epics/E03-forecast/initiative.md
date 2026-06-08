@@ -2,8 +2,9 @@
 
 > Initiative notes. Shared artifact (committed). Mapped to git branch `epic/forecast` and GitHub label `epic:forecast`.
 
-Date: 2026-06-07
-Status: proposed
+Date: 2026-06-08
+Status: completed
+Epic issue: #260 | Branch: epic/forecast | Harness intake: #35
 Lane: high-risk (sinh virtual entries hàng loạt tự động, cash projection, đụng độ probability cao với actual data)
 
 ## Goal
@@ -221,22 +222,22 @@ Hard gates: Audit/security, Public contract mới.
 
 ## Candidate stories (issues)
 
-| # | Title | Lane | Depends on | Notes |
+| # | Issue | Title | Lane | Depends on | Notes |
 |---|---|---|---|---|
-| 3.1 | Migration + model `SimulationAssumption` | high-risk | E2.1 | JSONB parameters, indexes. |
-| 3.2 | Assumption CRUD API + JSON schema validate theo type | high-risk | 3.1 | 3 type phase 1: recurring, revenue_growth, expense_fixed. |
-| 3.3 | Generator service: sinh `SimulationEntry` từ recurring | high-risk | 3.1, E2.3 | Monthly/quarterly/yearly + day-of-month edge case. |
-| 3.4 | Generator: revenue_growth (percent/fixed/manual/avg/last) | high-risk | 3.3 | Collection timing tạo offset cash entry. |
-| 3.5 | Generator: expense_fixed (fixed/percent-of-sales/headcount) | high-risk | 3.3 | Headcount chỉ cần basic count × salary; phase 2 nếu muốn phức tạp hơn. |
-| 3.6 | Preview API (1 assumption hoặc all) | high-risk | 3.3, 3.4, 3.5 | Không ghi DB, chỉ trả danh sách. |
-| 3.7 | Regenerate API: xoá generated entries + insert lại, audit log | high-risk | 3.6, E2.13 | Manual entries giữ nguyên. |
-| 3.8 | Cash projection service + API | high-risk | 3.7 | Tách accrual vs cash theo payment timing. |
-| 3.9 | Simulated P/L API | high-risk | 3.7 | Group revenue/expense entries theo tháng. |
-| 3.10 | UI: tab Assumptions + wizard form theo type | high-risk | 3.2, 3.6 | Dynamic form dựa JSONB schema. |
-| 3.11 | UI: tab P/L + tab Cash (chart 12 tháng) | high-risk | 3.8, 3.9 | Native Svelte SVG (xem Open Q #5). |
-| 3.12 | Warning SIM-W010/W011/W012 | normal | 3.8, 3.6 | Highlight row đỏ, banner scenario. |
-| 3.13 | Permission `simulation:regenerate` | normal | E2.12 | 1 quyền mới. |
-| 3.14 | Reconciliation: regenerated entries sum = manual comparable | high-risk | 3.7 | Mocha, kiểm tra hash skip đúng. |
+| 3.1 | #261 | Migration + model `SimulationAssumption` | high-risk | E2.1 | JSONB parameters, indexes. |
+| 3.2 | #263 | Assumption CRUD API + JSON schema validate theo type | high-risk | 3.1 | 3 type phase 1: recurring, revenue_growth, expense_fixed. |
+| 3.3 | #264 | Generator service: sinh `SimulationEntry` từ recurring | high-risk | 3.1, E2.3 | Monthly/quarterly/yearly + day-of-month edge case. |
+| 3.4 | #265 | Generator: revenue_growth (percent/fixed/manual/avg/last) | high-risk | 3.3 | Collection timing tạo offset cash entry. |
+| 3.5 | #266 | Generator: expense_fixed (fixed/percent-of-sales/headcount) | high-risk | 3.3 | Headcount chỉ cần basic count × salary; phase 2 nếu muốn phức tạp hơn. |
+| 3.6 | #267 | Preview API (1 assumption hoặc all) | high-risk | 3.3, 3.4, 3.5 | Không ghi DB, chỉ trả danh sách. |
+| 3.7 | #268 | Regenerate API: xoá generated entries + insert lại, audit log | high-risk | 3.6, E2.13 | Manual entries giữ nguyên. |
+| 3.8 | #269 | Cash projection service + API | high-risk | 3.7 | Tách accrual vs cash theo payment timing. |
+| 3.9 | #270 | Simulated P/L API | high-risk | 3.7 | Group revenue/expense entries theo tháng. |
+| 3.10 | #271 | UI: tab Assumptions + wizard form theo type | high-risk | 3.2, 3.6 | Dynamic form dựa JSONB schema. |
+| 3.11 | #272 | UI: tab P/L + tab Cash (chart 12 tháng) | high-risk | 3.8, 3.9 | Native Svelte SVG (xem Open Q #5). |
+| 3.12 | #273 | Warning SIM-W010/W011/W012 | normal | 3.8, 3.6 | Highlight row đỏ, banner scenario. |
+| 3.13 | #262 | Permission `simulation:regenerate` | normal | E2.12 | 1 quyền mới. |
+| 3.14 | #274 | Reconciliation: regenerated entries sum = manual comparable | high-risk | 3.7 | Mocha, kiểm tra hash skip đúng. |
 
 ## Validation ladder
 
