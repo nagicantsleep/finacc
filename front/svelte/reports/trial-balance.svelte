@@ -127,28 +127,47 @@
   {#if availableClasses.length > 0}
     <div class="row page-subtitle align-items-center mt-1">
       <div class="col-md-auto">
-        <label class="tb-period-label">
+        <label class="tb-period-label me-2">
           <BilingualText primary="科目区分" secondary="Loại TK" inline={true} />:
         </label>
       </div>
       <div class="col-md-auto tb-class-filter">
-        <select multiple class="form-select form-select-sm tb-class-select"
-          size="3"
-          on:change={onClassSelectChange}>
-          <option value="" selected={accountClassFilter.size === 0}>
-            <BilingualText primary="全て" secondary="Tất cả" inline={true} />
-          </option>
-          {#each availableClasses as cls (cls.id)}
-            <option value={cls.id} selected={accountClassFilter.has(cls.id)}>
-              {cls.aclCode} {cls.major}{#if cls.middle} / {cls.middle}{/if}
-            </option>
-          {/each}
-        </select>
-        {#if accountClassFilter.size > 0}
-          <button type="button" class="btn btn-sm btn-link p-0 ms-2"
-            on:click={() => { accountClassFilter = new Set(); pushUrl(); fetchData(); }}>
-            <BilingualText primary="クリア" secondary="Xóa" inline={true} />
-          </button>
+        <button type="button"
+          class="btn btn-sm btn-outline-secondary tb-class-toggle"
+          on:click={() => classDropdownOpen = !classDropdownOpen}>
+          <BilingualText primary="選択" secondary="Chọn" inline={true} />
+          {#if accountClassFilter.size > 0}
+            <span class="badge bg-primary ms-1">{accountClassFilter.size}</span>
+          {/if}
+          <i class="bi bi-caret-down-fill ms-1"></i>
+        </button>
+        {#if classDropdownOpen}
+          <div class="tb-class-popover" use:clickOutside={() => classDropdownOpen = false}>
+            <div class="tb-class-popover-header">
+              <button type="button" class="btn btn-sm btn-link p-0"
+                on:click={() => { accountClassFilter = new Set(); pushUrl(); fetchData(); }}>
+                <BilingualText primary="全て" secondary="Tất cả" inline={true} />
+              </button>
+              <button type="button" class="btn btn-sm btn-link p-0 ms-2"
+                on:click={() => { accountClassFilter = new Set(availableClasses.map((c) => c.id)); pushUrl(); fetchData(); }}>
+                <BilingualText primary="全選択" secondary="Chọn tất cả" inline={true} />
+              </button>
+            </div>
+            <ul class="tb-class-popover-list">
+              {#each availableClasses as cls (cls.id)}
+                <li>
+                  <label class="tb-class-option"
+                    class:tb-class-option-on={accountClassFilter.has(cls.id)}>
+                    <input type="checkbox"
+                      checked={accountClassFilter.has(cls.id)}
+                      on:change={() => toggleClass(cls.id)} />
+                    <span class="tb-class-code">{cls.aclCode}</span>
+                    <span class="tb-class-name">{cls.major}{#if cls.middle} / {cls.middle}{/if}</span>
+                  </label>
+                </li>
+              {/each}
+            </ul>
+          </div>
         {/if}
       </div>
     </div>
@@ -197,13 +216,15 @@
   {/if}
 
   <div class="row body-height">
-    <TrialBalanceList
-      lines={visibleLines}
-      {expanded}
-      {languageMode}
-      {reportType}
-      onToggle={toggleAccount}
-      onRowClick={openDrillDown} />
+    <div class="tb-v2-table-wrap">
+      <TrialBalanceList
+        lines={visibleLines}
+        {expanded}
+        {languageMode}
+        {reportType}
+        onToggle={toggleAccount}
+        onRowClick={openDrillDown} />
+    </div>
   </div>
 </div>
 
@@ -250,6 +271,7 @@
   let warnings = [];
   let meta = null;
   let availableClasses = []; // [{ id, aclCode, major, middle }, ...]
+  let classDropdownOpen = false;
   let loading = false;
   let error = null;
   let lastFetched = '';
@@ -601,6 +623,17 @@
     a.click();
     document.body.removeChild(a);
   };
+
+  // Svelte action: invoke `handler` when a click occurs outside the bound node.
+  function clickOutside(node, handler) {
+    const onClick = (e) => {
+      if (!node.contains(e.target)) handler(e);
+    };
+    document.addEventListener('click', onClick, true);
+    return {
+      destroy() { document.removeEventListener('click', onClick, true); }
+    };
+  }
 </script>
 
 <style>
@@ -632,8 +665,44 @@
   .tb-period-label { font-weight: 500; }
   .tb-meta { font-size: 0.85rem; }
   .tb-hide-zero-label { font-size: 0.85rem; display: inline-flex; align-items: center; gap: 0.3rem; }
-  .tb-class-filter { display: inline-flex; align-items: center; }
-  .tb-class-select { min-width: 22rem; max-width: 32rem; font-size: 0.8rem; }
+  .tb-class-filter { display: inline-flex; align-items: center; position: relative; }
+  .tb-class-toggle { display: inline-flex; align-items: center; }
+  .tb-class-popover {
+    position: absolute; top: 100%; left: 0; z-index: 1000;
+    background: #fff; border: 1px solid #ccc; border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    min-width: 22rem; max-width: 28rem;
+    margin-top: 0.25rem;
+  }
+  .tb-class-popover-header {
+    display: flex; align-items: center; gap: 0.5rem;
+    padding: 0.4rem 0.75rem; border-bottom: 1px solid #eee; background: #f8f9fa;
+  }
+  .tb-class-popover-list {
+    list-style: none; margin: 0; padding: 0.25rem 0;
+    max-height: 18rem; overflow-y: auto;
+  }
+  .tb-class-option {
+    display: flex; align-items: center; gap: 0.5rem;
+    padding: 0.3rem 0.75rem; font-size: 0.85rem; cursor: pointer;
+  }
+  .tb-class-option:hover { background: #f0f6ff; }
+  .tb-class-option-on { background: #e7f1ff; font-weight: 500; }
+  .tb-class-code { font-family: monospace; font-weight: 600; min-width: 3.5rem; }
+  .tb-class-name { color: #555; }
+  .tb-v2-table-wrap {
+    max-height: calc(100vh - 360px);
+    min-height: 20rem;
+    overflow-y: auto;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+  }
+  .tb-v2-table-wrap :global(.tb-v2-table) { margin-bottom: 0; }
+  .tb-v2-table-wrap :global(.tb-v2-table thead th) {
+    position: sticky; top: 0; z-index: 5;
+    background: #f8f9fa;
+    box-shadow: inset 0 -1px 0 #dee2e6;
+  }
   .tb-active-chips { display: flex; flex-wrap: wrap; gap: 0.3rem; }
   .tb-active-chip {
     display: inline-flex; align-items: center; gap: 0.3rem;
