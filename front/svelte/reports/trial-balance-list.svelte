@@ -15,21 +15,36 @@
     lines          array of v2 lines (already through withAccountParents + applyExpandCollapse)
     expanded       Set<accountCode> of accounts that are currently expanded
     languageMode   'ja' | 'vi' | 'ja-vi' | 'vi-ja'  — drives name rendering
+    reportType     'balance' | 'movement' | 'combined' — controls which numeric columns to show
     onToggle       (code) => void       — fired when the user clicks [+/-]
     onRowClick     (line) => void       — fired when a data row is clicked (parent | account | subAccount)
 -->
+{#if true}
+  {@const showOpening = reportType === 'balance' || reportType === 'combined'}
+  {@const showMovement = reportType === 'movement' || reportType === 'combined'}
+  {@const showEnding = reportType === 'balance' || reportType === 'combined'}
+  {@const showBalance = reportType === 'balance' || reportType === 'combined' || reportType === 'movement'}
+  {@const colCount = 2 + (showOpening ? 2 : 0) + (showMovement ? 2 : 0) + (showEnding ? 2 : 0) + (showBalance ? 1 : 0)}
 <table class="table table-bordered table-sm tb-v2-table">
   <thead class="table-light">
     <tr>
       <th scope="col" class="tb-col-code">科目 / Mã</th>
       <th scope="col" class="tb-col-name">科目名 / Tên</th>
-      <th scope="col" class="tb-col-num">期首借方<br/>Dư đầu kỳ - Nợ</th>
-      <th scope="col" class="tb-col-num">期首貸方<br/>Dư đầu kỳ - Có</th>
-      <th scope="col" class="tb-col-num">期間借方<br/>Phát sinh - Nợ</th>
-      <th scope="col" class="tb-col-num">期間貸方<br/>Phát sinh - Có</th>
-      <th scope="col" class="tb-col-num">期末借方<br/>Dư cuối kỳ - Nợ</th>
-      <th scope="col" class="tb-col-num">期末貸方<br/>Dư cuối kỳ - Có</th>
-      <th scope="col" class="tb-col-num">残高<br/>Số dư</th>
+      {#if showOpening}
+        <th scope="col" class="tb-col-num">期首借方<br/>Dư đầu kỳ - Nợ</th>
+        <th scope="col" class="tb-col-num">期首貸方<br/>Dư đầu kỳ - Có</th>
+      {/if}
+      {#if showMovement}
+        <th scope="col" class="tb-col-num">期間借方<br/>Phát sinh - Nợ</th>
+        <th scope="col" class="tb-col-num">期間貸方<br/>Phát sinh - Có</th>
+      {/if}
+      {#if showEnding}
+        <th scope="col" class="tb-col-num">期末借方<br/>Dư cuối kỳ - Nợ</th>
+        <th scope="col" class="tb-col-num">期末貸方<br/>Dư cuối kỳ - Có</th>
+      {/if}
+      {#if showBalance}
+        <th scope="col" class="tb-col-num">残高<br/>Số dư</th>
+      {/if}
     </tr>
   </thead>
   <tbody>
@@ -75,22 +90,31 @@
             {#if dn.secondary}<span class="tb-name-vi"> / {dn.secondary}</span>{/if}
           {/if}
         </td>
-        <td class="tb-col-num">{formatNum(l.openingDebit)}</td>
-        <td class="tb-col-num">{formatNum(l.openingCredit)}</td>
-        <td class="tb-col-num">{formatNum(l.movementDebit)}</td>
-        <td class="tb-col-num">{formatNum(l.movementCredit)}</td>
-        <td class="tb-col-num">{formatNum(l.endingDebit)}</td>
-        <td class="tb-col-num">{formatNum(l.endingCredit)}</td>
-        <td class="tb-col-num tb-col-balance" class:tb-balance-negative={(l.balance || 0) < 0}>
-          {formatNum(l.balance)}
-        </td>
+        {#if showOpening}
+          <td class="tb-col-num">{formatNum(l.openingDebit)}</td>
+          <td class="tb-col-num">{formatNum(l.openingCredit)}</td>
+        {/if}
+        {#if showMovement}
+          <td class="tb-col-num">{formatNum(l.movementDebit)}</td>
+          <td class="tb-col-num">{formatNum(l.movementCredit)}</td>
+        {/if}
+        {#if showEnding}
+          <td class="tb-col-num">{formatNum(l.endingDebit)}</td>
+          <td class="tb-col-num">{formatNum(l.endingCredit)}</td>
+        {/if}
+        {#if showBalance}
+          <td class="tb-col-num tb-col-balance" class:tb-balance-negative={(l.balance || 0) < 0}>
+            {formatNum(l.balance)}
+          </td>
+        {/if}
       </tr>
     {/each}
     {#if lines.length === 0}
-      <tr><td colspan="9" class="text-center text-muted">データなし / Không có dữ liệu</td></tr>
+      <tr><td colspan={colCount} class="text-center text-muted">データなし / Không có dữ liệu</td></tr>
     {/if}
   </tbody>
 </table>
+{/if}
 
 <script>
   import { indentClass as _indentClass } from '../../../libs/reporting/tb-hierarchy.js';
@@ -99,6 +123,7 @@
   export let lines = [];
   export let expanded = new Set();
   export let languageMode = 'ja-vi';
+  export let reportType = 'combined';
   export let onToggle = () => {};
   export let onRowClick = () => {};
 

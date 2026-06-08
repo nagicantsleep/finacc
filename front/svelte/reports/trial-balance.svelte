@@ -193,6 +193,7 @@
       lines={visibleLines}
       {expanded}
       {languageMode}
+      {reportType}
       onToggle={toggleAccount}
       onRowClick={openDrillDown} />
   </div>
