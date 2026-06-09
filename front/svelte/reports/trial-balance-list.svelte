@@ -26,24 +26,24 @@
   {@const showBalance = reportType === 'balance' || reportType === 'combined' || reportType === 'movement'}
   {@const colCount = 2 + (showOpening ? 2 : 0) + (showMovement ? 2 : 0) + (showEnding ? 2 : 0) + (showBalance ? 1 : 0)}
 <table class="table table-bordered table-sm tb-v2-table">
-  <thead class="table-light">
+  <thead class="tb-v2-thead">
     <tr>
-      <th scope="col" class="tb-col-code">科目 / Mã</th>
-      <th scope="col" class="tb-col-name">科目名 / Tên</th>
+      <th scope="col" class="tb-col-code"><BilingualText primary="科目" secondary="Mã" /></th>
+      <th scope="col" class="tb-col-name"><BilingualText key="account_name" /></th>
       {#if showOpening}
-        <th scope="col" class="tb-col-num">期首借方<br/>Dư đầu kỳ - Nợ</th>
-        <th scope="col" class="tb-col-num">期首貸方<br/>Dư đầu kỳ - Có</th>
+        <th scope="col" class="tb-col-num"><BilingualText primary="期首借方" secondary="Dư đầu kỳ - Nợ" /></th>
+        <th scope="col" class="tb-col-num"><BilingualText primary="期首貸方" secondary="Dư đầu kỳ - Có" /></th>
       {/if}
       {#if showMovement}
-        <th scope="col" class="tb-col-num">期間借方<br/>Phát sinh - Nợ</th>
-        <th scope="col" class="tb-col-num">期間貸方<br/>Phát sinh - Có</th>
+        <th scope="col" class="tb-col-num"><BilingualText primary="期間借方" secondary="Phát sinh - Nợ" /></th>
+        <th scope="col" class="tb-col-num"><BilingualText primary="期間貸方" secondary="Phát sinh - Có" /></th>
       {/if}
       {#if showEnding}
-        <th scope="col" class="tb-col-num">期末借方<br/>Dư cuối kỳ - Nợ</th>
-        <th scope="col" class="tb-col-num">期末貸方<br/>Dư cuối kỳ - Có</th>
+        <th scope="col" class="tb-col-num"><BilingualText primary="期末借方" secondary="Dư cuối kỳ - Nợ" /></th>
+        <th scope="col" class="tb-col-num"><BilingualText primary="期末貸方" secondary="Dư cuối kỳ - Có" /></th>
       {/if}
       {#if showBalance}
-        <th scope="col" class="tb-col-num">残高<br/>Số dư</th>
+        <th scope="col" class="tb-col-num"><BilingualText key="balance" /></th>
       {/if}
     </tr>
   </thead>
@@ -120,6 +120,7 @@
 <script>
   import { indentClass as _indentClass } from '../../../libs/reporting/tb-hierarchy.js';
   import { pickDisplayName } from '../../../libs/reporting/tb-language.js';
+  import BilingualText from '../components/bilingual-text.svelte';
 
   export let lines = [];
   export let expanded = new Set();
@@ -148,6 +149,24 @@
 
 <style>
   .tb-v2-table { font-size: 0.9rem; }
+  /* Dark bilingual header — matches global .table thead (#184). */
+  .tb-v2-thead th {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    background-color: #264653 !important;
+    color: #fff !important;
+    --bs-table-bg: #264653;
+    --bs-table-color: #fff;
+    box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.2);
+    vertical-align: middle;
+  }
+  .tb-v2-thead th :global(.bilingual-secondary),
+  .tb-v2-thead th :global(.bilingual-sep) {
+    color: #b8c5c9;
+    opacity: 1;
+  }
+  .tb-v2-thead th.tb-col-num { white-space: normal; text-align: right; }
   .tb-col-num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
   .tb-col-code { font-family: monospace; word-break: break-all; max-width: 11rem; min-width: 6rem; }
   .tb-col-name { min-width: 14rem; }
