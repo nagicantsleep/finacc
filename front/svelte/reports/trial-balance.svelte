@@ -644,7 +644,12 @@
     } else {
       return;
     }
-    drilldown?.open();
+    drilldown?.open({
+      term: status?.fy?.term,
+      accountCode: drillAccount.code,
+      subCode: drillAccount.subCode,
+      accountName: drillAccount.name,
+    });
   };
 
   const formatInt = (n) => {
