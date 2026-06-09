@@ -198,6 +198,7 @@ const MODULE_I18N = {
   'ledger': 'ledger',
   'bank-ledger': 'bank_ledger',
   'trial-balance': 'trial_balance',
+  'reports/trial-balance': 'trial_balance_v2',
   'changes': 'changes',
   'voucher': 'voucher_info',
   'accounts': 'account_management2',
@@ -207,7 +208,9 @@ const MODULE_I18N = {
   'transaction': 'transaction_document',
   'item': 'item_management',
   'member': 'member_management',
-  'home': 'home'
+  'home': 'home',
+  'closing': 'closing',
+  'simulation': 'simulation'
 };
 
 // Map submenu hardcoded JA title -> i18n key
