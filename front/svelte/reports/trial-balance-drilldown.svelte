@@ -6,8 +6,7 @@
   /api/ledger/:term/:account[/:subAccount]?from=&to= and shows them in
   a compact table. Phase 1: modal. Phase 2: viewport-wide → side panel.
 
-  Closing on ESC / outside-click is handled by bootstrap's Modal class
-  (data-bs-backdrop="static" set on the .modal element).
+  Closing on ESC / outside-click uses Bootstrap Modal default backdrop.
 
   Props (bindable via the parent):
     term          — FiscalYear.term, comes from status.fy.term
@@ -19,15 +18,15 @@
   Methods:
     open() / close()
 -->
-<div class="modal" bind:this={modalEl} tabindex="-1" data-bs-backdrop="static">
+<div class="modal" bind:this={modalEl} tabindex="-1">
   <div class="modal-dialog modal-xl modal-dialog-scrollable">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title">
           <BilingualText key="ledger" inline={true} />
-          {#if accountCode}
+          {#if viewCode ?? accountCode}
             <span class="tb-drill-account">
-              / {accountCode}{subCode != null ? '-' + subCode : ''}{accountName ? ' ' + accountName : ''}
+              / {viewCode ?? accountCode}{(viewSub ?? subCode) != null ? '-' + (viewSub ?? subCode) : ''}{(viewName ?? accountName) ? ' ' + (viewName ?? accountName) : ''}
             </span>
           {/if}
         </h5>
@@ -37,6 +36,8 @@
       <div class="modal-body">
         {#if loading}
           <p class="text-muted">...</p>
+        {:else if errorKey}
+          <p class="text-danger"><BilingualText key={errorKey} inline={true} /></p>
         {:else if error}
           <p class="text-danger">{error}</p>
         {:else}
@@ -116,10 +117,23 @@
   let lines = [];
   let loading = false;
   let error = null;
+  let errorKey = null;
+  /** Snapshot for the active modal session (avoids prop timing on open()). */
+  let viewTerm = null;
+  let viewCode = null;
+  let viewSub = null;
+  let viewName = null;
 
-  export const open = async () => {
-    if (!term || !accountCode) {
-      error = 'missing term or account';
+  export const open = async (overrides = {}) => {
+    viewTerm = overrides.term ?? term;
+    viewCode = overrides.accountCode ?? accountCode;
+    viewSub = overrides.subCode !== undefined ? overrides.subCode : subCode;
+    viewName = overrides.accountName ?? accountName;
+    error = null;
+    errorKey = null;
+
+    if (!viewTerm || !viewCode) {
+      errorKey = 'tb_drill_missing_context';
       modal?.show();
       return;
     }
@@ -129,17 +143,26 @@
 
   export const close = () => {
     modal?.hide();
+  };
+
+  const resetState = () => {
     lines = [];
     error = null;
+    errorKey = null;
+    viewTerm = null;
+    viewCode = null;
+    viewSub = null;
+    viewName = null;
   };
 
   const load = async () => {
     loading = true;
     error = null;
+    errorKey = null;
     try {
-      const path = subCode != null
-        ? `/api/ledger/${term}/${accountCode}/${subCode}`
-        : `/api/ledger/${term}/${accountCode}`;
+      const path = viewSub != null
+        ? `/api/ledger/${viewTerm}/${viewCode}/${viewSub}`
+        : `/api/ledger/${viewTerm}/${viewCode}`;
       const r = await axios.get(path);
       lines = r.data || [];
     } catch (e) {
@@ -156,9 +179,8 @@
   };
 
   const counterAccountLabel = (l) => {
-    // For a debit-side entry on our account, the counter is creditAccount.
-    // For a credit-side entry, the counter is debitAccount.
-    if (l.debitAccount === accountCode) {
+    const code = viewCode ?? accountCode;
+    if (l.debitAccount === code) {
       return l.creditAccount + (l.creditSubAccount ? '-' + l.creditSubAccount : '');
     }
     return l.debitAccount + (l.debitSubAccount ? '-' + l.debitSubAccount : '');
@@ -176,14 +198,16 @@
     return `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`;
   };
 
-  $: fullLedgerHref = accountCode
-    ? (subCode != null
-        ? `/ledger/${term}/${accountCode}/${subCode}`
-        : `/ledger/${term}/${accountCode}`)
+  $: fullLedgerHref = (viewCode ?? accountCode) && (viewTerm ?? term)
+    ? ((viewSub ?? subCode) != null
+        ? `/ledger/${viewTerm ?? term}/${viewCode ?? accountCode}/${viewSub ?? subCode}`
+        : `/ledger/${viewTerm ?? term}/${viewCode ?? accountCode}`)
     : '#';
 
   onMount(() => {
     modal = new Modal(modalEl);
+    modalEl.addEventListener('hidden.bs.modal', resetState);
+    return () => modalEl.removeEventListener('hidden.bs.modal', resetState);
   });
 </script>
 
