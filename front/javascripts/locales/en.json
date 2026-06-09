@@ -342,6 +342,8 @@
   "language_pair_vi_ja": "Vietnamese / Japanese",
   "language_select": "Select Language Pair",
   "ledger": "Ledger",
+  "open_full_ledger": "Open full ledger",
+  "tb_drill_missing_context": "Missing fiscal term or account",
   "legal_name": "Legal Name",
   "legal_name_label": "Legal Name",
   "liabilities_section": "Liabilities",

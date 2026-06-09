@@ -67,6 +67,8 @@
   "item_class_name": "Tên loại",
   "journal": "Sổ nhật ký",
   "ledger": "Sổ cái",
+  "open_full_ledger": "Mở sổ cái đầy đủ",
+  "tb_drill_missing_context": "Thiếu kỳ kế toán hoặc mã tài khoản",
   "bank_ledger": "Sổ cái ngân hàng",
   "trial_balance": "Bảng cân đối số dư",
   "trial_balance_v2": "Bảng cân đối thử",

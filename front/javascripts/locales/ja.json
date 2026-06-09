@@ -67,6 +67,8 @@
   "item_class_name": "種別名",
   "journal": "仕訳日記帳",
   "ledger": "元帳",
+  "open_full_ledger": "元帳を開く",
+  "tb_drill_missing_context": "会計年度または勘定科目が指定されていません",
   "bank_ledger": "銀行元帳",
   "trial_balance": "残高試算表",
   "trial_balance_v2": "試算表",
