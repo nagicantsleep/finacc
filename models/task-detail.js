@@ -23,6 +23,10 @@ export default (sequelize, DataTypes) => {
 				sourceKey: 'taxRuleId',
 				as: 'taxRule'
 			});
+			this.belongsTo(models.Tenant, {
+			  foreignKey: 'tenantId',
+			  as: 'tenant'
+			});
     }
   }
   TaskDetail.init({

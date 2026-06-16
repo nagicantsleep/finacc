@@ -49,6 +49,10 @@ export default (sequelize, DataTypes) => {
 				sourceKey: 'updatedBy',
         as: 'updateUser'
 			});
+			this.belongsTo(models.Tenant, {
+			  foreignKey: 'tenantId',
+			  as: 'tenant'
+			});
     }
   }
   TransactionDocument.init({

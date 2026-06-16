@@ -39,6 +39,10 @@ export default (sequelize, DataTypes) => {
 				foreignKey: 'voucherId',
 				onDelete: 'SET NULL'
 			});
+			this.belongsTo(models.Tenant, {
+			  foreignKey: 'tenantId',
+			  as: 'tenant'
+			});
     }
   }
   Voucher.init({

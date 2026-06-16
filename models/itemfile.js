@@ -12,6 +12,10 @@ export default (sequelize, DataTypes) => {
 				foreignKey: 'itemId',
 				onDelete: 'CASCADE'
 			});
+			this.belongsTo(models.Tenant, {
+			  foreignKey: 'tenantId',
+			  as: 'tenant'
+			});
     }
   }
   ItemFile.init({

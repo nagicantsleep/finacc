@@ -11,7 +11,11 @@ export default (sequelize, DataTypes) => {
       this.hasMany(models.DocumentFile, {
         foreignKey: 'documentId',
         as: 'files'
-      })
+      });
+      this.belongsTo(models.Tenant, {
+        foreignKey: 'tenantId',
+        as: 'tenant'
+      });
     }
   }
   Document.init({

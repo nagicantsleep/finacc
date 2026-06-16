@@ -7,6 +7,10 @@ export default (sequelize, DataTypes) => {
         foreignKey: 'stickyId',
         onDelete: 'CASCADE'
       });
+      this.belongsTo(models.Tenant, {
+        foreignKey: 'tenantId',
+        as: 'tenant'
+      });
     }
   }
   Sticky.init({

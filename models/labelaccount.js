@@ -3,7 +3,10 @@ import { Model } from 'sequelize';
 export default (sequelize, DataTypes) => {
   class LabelAccount extends Model {
     static associate(models) {
-      // no association
+      this.belongsTo(models.Tenant, {
+        foreignKey: 'tenantId',
+        as: 'tenant'
+      });
     }
   };
   LabelAccount.init({
