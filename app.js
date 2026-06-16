@@ -34,36 +34,62 @@ const dbConfig = JSON.parse(readFileSync(path.join(__dirname, './config/config.j
 // SSRのためにローカルにaxiosを向けるため
 axios.defaults.baseURL = `http://localhost:${global.env.port}`;
 
+// Trust proxy when behind a reverse proxy (production)
+if (nodeEnv === 'production') {
+  app.set('trust proxy', 1);
+}
+
 app.use(logger('dev'));		//	アクセスログを見たい時には有効にする
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
+
+// CORS: env-driven origins; production must not use wildcard
+const corsOrigins = env.corsOrigins;
+if (nodeEnv === 'production' && corsOrigins.length === 0) {
+  console.error('[FATAL] CORS_ORIGINS must be set in production. Refusing to start with wildcard CORS.');
+  process.exit(1);
+}
 app.use(cors({
-  origin: ['*']
+  origin: corsOrigins.length > 0 ? corsOrigins : ['*'],
+  credentials: true
 }));
 app.use(multipart());
+
+// Build session store config
+const pgSessionConfig = {
+  conObject: {
+    host: dbConfig.host,
+    port: dbConfig.port,
+    database: dbConfig.database,
+    user: dbConfig.username,
+    password: dbConfig.password
+  },
+  tableName: 'session',
+  ttl: global.env.session_ttl
+};
+
+// connect-pg-simple: use top-level schemaName, not conObject.schema
+if (dbConfig.schema) {
+  pgSessionConfig.schemaName = dbConfig.schema;
+}
+
+// SSL for session store connection
+if (dbConfig.dialectOptions && dbConfig.dialectOptions.ssl) {
+  pgSessionConfig.conObject.ssl = dbConfig.dialectOptions.ssl;
+}
 
 app.use(session({
   secret: env.expressSecret,
   resave: false,
   saveUninitialized: false,
   name: env.appName,					    //	ここの名前は起動するnode.js毎にユニークにする
-  store: new (pgSession(session))({
-    conObject: {
-      host: dbConfig.host,
-      port: dbConfig.port,
-      database: dbConfig.database,
-      user: dbConfig.username,
-      password: dbConfig.password
-    },
-    tableName: 'session',
-    ttl: global.env.session_ttl
-  }),
-
+  store: new (pgSession(session))(pgSessionConfig),
   cookie: {
     httpOnly: true,
-    secure: false,
-    maxage: null
+    secure: nodeEnv === 'production',
+    sameSite: 'lax',
+    maxAge: global.env.session_ttl * 1000
   }
 }));
 app.use(passport.initialize());
@@ -81,8 +107,6 @@ app.use('/style', express.static(path.join(__dirname, './front/stylesheets')));
 app.use('/public', express.static(path.join(__dirname, './public')));
 
 const screen = async (req, res, next) => {
-  console.log('current', req.params.current);
-  console.log('command', req.params.command);
   let per = modules.find((ent) => {
     return	( req.params.current === ent.name );
   })
@@ -102,7 +126,6 @@ const screen = async (req, res, next) => {
 }
 
 const voucherFile = (req, res, next) => {
-  console.log('/voucher/file', req.params.id);
   if ( req.session.user.accounting )	{
     models.VoucherFile.findOne({
       where: {

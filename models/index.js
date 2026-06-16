@@ -43,9 +43,10 @@ import VoucherFile from './voucherfile.js';
 import {Sequelize, DataTypes} from 'sequelize';
 import fs from 'fs';
 
+const __dirname = import.meta.dirname;
 const env = process.env.NODE_ENV || 'development';
 
-const jsonData = JSON.parse(fs.readFileSync('config/config.json', 'utf-8'));
+const jsonData = JSON.parse(fs.readFileSync(new URL('../config/config.json', import.meta.url), 'utf-8'));
 const config = jsonData[env];
 
 let sequelize;

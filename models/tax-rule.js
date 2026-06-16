@@ -2,6 +2,13 @@ import {Model} from 'sequelize';
 
 export default (sequelize, DataTypes) => {
   class TaxRule extends Model {
+    static associate(models) {
+      this.belongsTo(models.Tenant, {
+        foreignKey: 'tenantId',
+        as: 'tenant'
+      });
+    }
+
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.

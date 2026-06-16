@@ -12,6 +12,10 @@ export default (sequelize, DataTypes) => {
         sourceKey: "userId",
         as: "user",
       });
+      this.belongsTo(models.Tenant, {
+        foreignKey: 'tenantId',
+        as: 'tenant'
+      });
     }
   }
   Menu.init(

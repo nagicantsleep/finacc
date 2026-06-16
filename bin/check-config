@@ -5,12 +5,21 @@ import fs from 'fs/promises';
 const configFilePath = './config/config.json';
 //const sampleFilePath = '/app/hieronymus/config/config.json.sample';
 const sampleFilePath = './config/config.json.sample';
-const envVariables = {
+
+// Required env vars for DB connection
+const requiredEnv = {
     username: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
     host: process.env.DB_HOST
 };
+
+// Optional env vars
+const optionalEnv = {
+    port: process.env.DB_PORT ? parseInt(process.env.DB_PORT, 10) : undefined,
+    ssl: process.env.DB_SSL
+};
+
 async function fileExists(path) {
   try {
     await fs.access(path);
@@ -18,6 +27,116 @@ async function fileExists(path) {
   } catch {
     return false;
   }
+}
+
+/**
+ * Deep-merge env values into the config object for the current NODE_ENV.
+ * Unlike naive string-replace, this handles nested objects (dialectOptions, pool).
+ */
+function mergeEnvIntoConfig(configData) {
+  const nodeEnv = process.env.NODE_ENV || 'development';
+  const envSection = configData[nodeEnv];
+  if (!envSection) {
+    console.warn(`警告: config.json に "${nodeEnv}" セクションが見つかりません。`);
+    return false;
+  }
+
+  let isModified = false;
+
+  // Merge required fields
+  for (const [key, value] of Object.entries(requiredEnv)) {
+    if (value !== undefined) {
+      if (envSection[key] !== value) {
+        console.log(`キー "${key}" の値を更新します: ${envSection[key]} → ${value}`);
+        envSection[key] = value;
+        isModified = true;
+      }
+    }
+  }
+
+  // Merge optional: port
+  if (optionalEnv.port !== undefined && !isNaN(optionalEnv.port)) {
+    if (envSection.port !== optionalEnv.port) {
+      console.log(`キー "port" の値を更新します: ${envSection.port} → ${optionalEnv.port}`);
+      envSection.port = optionalEnv.port;
+      isModified = true;
+    }
+  }
+
+  // Merge optional: SSL — sets dialectOptions.ssl.rejectUnauthorized
+  if (optionalEnv.ssl !== undefined) {
+    if (!envSection.dialectOptions) {
+      envSection.dialectOptions = {};
+    }
+    if (!envSection.dialectOptions.ssl) {
+      envSection.dialectOptions.ssl = {};
+    }
+    // DB_SSL=true means rejectUnauthorized: true (secure default)
+    // DB_SSL=false means rejectUnauthorized: false (self-signed certs in staging)
+    const rejectUnauthorized = optionalEnv.ssl !== 'false';
+    if (envSection.dialectOptions.ssl.rejectUnauthorized !== rejectUnauthorized) {
+      console.log(`キー "dialectOptions.ssl.rejectUnauthorized" の値を更新します: ${envSection.dialectOptions.ssl.rejectUnauthorized} → ${rejectUnauthorized}`);
+      envSection.dialectOptions.ssl.rejectUnauthorized = rejectUnauthorized;
+      isModified = true;
+    }
+  }
+
+  // Merge optional: pool settings via JSON env vars
+  if (process.env.DB_POOL) {
+    try {
+      const poolConfig = JSON.parse(process.env.DB_POOL);
+      if (!envSection.pool) {
+        envSection.pool = {};
+      }
+      for (const [key, value] of Object.entries(poolConfig)) {
+        if (envSection.pool[key] !== value) {
+          console.log(`キー "pool.${key}" の値を更新します: ${envSection.pool[key]} → ${value}`);
+          envSection.pool[key] = value;
+          isModified = true;
+        }
+      }
+    } catch (e) {
+      console.warn(`警告: DB_POOL のJSON解析に失敗しました: ${e.message}`);
+    }
+  }
+
+  // Merge optional: statement_timeout
+  if (process.env.DB_STATEMENT_TIMEOUT) {
+    const timeout = parseInt(process.env.DB_STATEMENT_TIMEOUT, 10);
+    if (!isNaN(timeout)) {
+      if (!envSection.dialectOptions) {
+        envSection.dialectOptions = {};
+      }
+      if (envSection.dialectOptions.statement_timeout !== timeout) {
+        console.log(`キー "dialectOptions.statement_timeout" の値を更新します: ${envSection.dialectOptions.statement_timeout} → ${timeout}`);
+        envSection.dialectOptions.statement_timeout = timeout;
+        isModified = true;
+      }
+    }
+  }
+
+  // Merge optional: application_name
+  if (process.env.DB_APPLICATION_NAME) {
+    if (!envSection.dialectOptions) {
+      envSection.dialectOptions = {};
+    }
+    if (envSection.dialectOptions.application_name !== process.env.DB_APPLICATION_NAME) {
+      console.log(`キー "dialectOptions.application_name" の値を更新します: ${envSection.dialectOptions.application_name} → ${process.env.DB_APPLICATION_NAME}`);
+      envSection.dialectOptions.application_name = process.env.DB_APPLICATION_NAME;
+      isModified = true;
+    }
+  }
+
+  // Merge optional: schema
+  if (process.env.DB_SCHEMA) {
+    if (envSection.schema !== process.env.DB_SCHEMA) {
+      console.log(`キー "schema" の値を更新します: ${envSection.schema} → ${process.env.DB_SCHEMA}`);
+      envSection.schema = process.env.DB_SCHEMA;
+      isModified = true;
+    }
+  }
+
+  return isModified;
 }
 
 async function ensureFileExists(targetPath, samplePath) {
@@ -33,21 +152,10 @@ async function ensureFileExists(targetPath, samplePath) {
     const fileContent = await fs.readFile(targetPath, 'utf8');
     const jsonData = JSON.parse(fileContent);
 
-    let isModified = false;
-    for (const envkey in jsonData) {
-      if ( envkey === process.env.NODE_ENV ){
-        for(const key in jsonData[envkey]){
-          if (envVariables[key] !== undefined) {
-            console.log(`キー "${key}" の値を更新します: ${jsonData[envkey][key]} → ${envVariables[key]}`);
-            jsonData[envkey][key] = envVariables[key];
-            isModified = true;
-          }
-        }
-      }
-    }
+    const isModified = mergeEnvIntoConfig(jsonData);
 
     if (isModified) {
-      const updatedJsonContent = JSON.stringify(jsonData, null, 2); // 見やすく整形
+      const updatedJsonContent = JSON.stringify(jsonData, null, 2);
       await fs.writeFile(targetPath, updatedJsonContent, 'utf8');
       console.log(`更新されたJSONファイルを保存しました: ${targetPath}`);
     } else {
@@ -60,7 +168,7 @@ async function ensureFileExists(targetPath, samplePath) {
 
 (async () => {
   try {
-    await ensureFileExists(configFilePath, sampleFilePath,envVariables);
+    await ensureFileExists(configFilePath, sampleFilePath);
   } catch (err) {
     console.error('プログラム実行中にエラーが発生しました:', err.message);
     process.exit(1);

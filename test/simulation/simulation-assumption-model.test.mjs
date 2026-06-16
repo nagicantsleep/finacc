@@ -1,5 +1,6 @@
 import { strict as assert } from 'node:assert';
 import models from '../../models/index.js';
+import { createTestTenant, destroyTestTenant } from '../helpers/createTestTenant.mjs';
 
 describe('Simulation — E3.1 SimulationAssumption model', function () {
   this.timeout(30000);
@@ -39,36 +40,28 @@ describe('Simulation — E3.1 SimulationAssumption model', function () {
   });
 
   describe('3) CRUD round-trip on test DB', function () {
-    let tenant, user, scenario, assumption;
+    let ctx, scenario, assumption;
 
     before(async function () {
-      const stamp = Date.now().toString(36);
-      tenant = await models.Tenant.create({
-        slug: `asm-${stamp}`, name: `asm-tenant-${stamp}`,
-      });
-      user = await models.User.create({
-        name: `asm_user_${stamp}`.slice(0, 20),
-        hashPassword: 'x-hash', legalName: 'Asm', email: `${stamp}@asm.example.com`,
-      });
+      ctx = await createTestTenant({ tag: 'asm' });
     });
 
     after(async function () {
       if (assumption) await assumption.destroy().catch(() => {});
       if (scenario) await scenario.destroy().catch(() => {});
-      if (user) await user.destroy().catch(() => {});
-      if (tenant) await tenant.destroy().catch(() => {});
+      await destroyTestTenant(ctx);
     });
 
     it('saves and reads back an Assumption under a Scenario', async function () {
       scenario = await models.SimulationScenario.create({
-        tenantId: tenant.id, name: 'ASM test scenario',
+        tenantId: ctx.tenant.id, name: 'ASM test scenario',
         baseTerm: 1, basePeriodFrom: '2026-01-01', basePeriodTo: '2026-06-30',
         simPeriodFrom: '2026-07-01', simPeriodTo: '2026-12-31',
-        ownerId: user.id,
+        ownerId: ctx.user.id,
       });
 
       assumption = await models.SimulationAssumption.create({
-        tenantId: tenant.id,
+        tenantId: ctx.tenant.id,
         scenarioId: scenario.id,
         type: 'recurring',
         name: 'Monthly salary',

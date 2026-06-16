@@ -17,6 +17,10 @@ export default (sequelize, DataTypes) => {
         foreignKey: 'projectId',
         as: 'projectLabelItems' // ユニークなエイリアスを追加
       });
+      this.belongsTo(models.Tenant, {
+        foreignKey: 'tenantId',
+        as: 'tenant'
+      });
     }
   };
   Project.init({

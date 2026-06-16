@@ -12,10 +12,16 @@ export default (sequelize, DataTypes) => {
      * Fetch translations for a batch of records in one query.
      * Returns a nested map: { language: { recordKey: { field: value } } }
      *
+     * Design note: this method is a utility for bulk-fetching translations.
+     * The production path (enrichBilingual) only reads system-wide translations
+     * (tenantId:null). Tenant-level override is not wired to any UI or API;
+     * if needed in the future, add a two-pass merge (tenant then system) at
+     * the call site — not inside this method.
+     *
      * @param {string} tableName - e.g. 'AccountClass'
      * @param {string[]} recordKeys - logical record keys
      * @param {string[]} languages - e.g. ['vi']
-     * @param {number|null} tenantId - null = system-wide only
+     * @param {number|null} tenantId - null = system-wide only (current usage)
      * @returns {object}
      */
     static async fetchBatch(tableName, recordKeys, languages, tenantId = null) {
@@ -27,7 +33,6 @@ export default (sequelize, DataTypes) => {
         language: languages
       };
       if (tenantId !== null) {
-        // Tenant-specific overrides take priority — but we fetch system-wide too
         where.tenantId = tenantId;
       }
 

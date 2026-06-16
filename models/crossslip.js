@@ -33,6 +33,10 @@ export default (sequelize, DataTypes) => {
         onDelete: "RESTRICT",
         onUpdate: "CASCADE",
       });
+      this.belongsTo(models.Tenant, {
+        foreignKey: 'tenantId',
+        as: 'tenant'
+      });
     }
   }
   CrossSlip.init(

@@ -3,7 +3,10 @@ import {Model} from 'sequelize';
 export default (sequelize, DataTypes) => {
   class AuditEvent extends Model {
     static associate(models) {
-      // define association here
+      this.belongsTo(models.Tenant, {
+        foreignKey: 'tenantId',
+        as: 'tenant'
+      });
     }
   };
   AuditEvent.init({
