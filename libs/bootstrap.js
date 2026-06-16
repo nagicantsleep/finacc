@@ -12,18 +12,91 @@ export const DEFAULT_COMPANY_CLASSES = [
 ];
 
 /**
+ * Generate a random string of lowercase letters.
+ */
+function randomChars(length) {
+  const chars = 'abcdefghijklmnopqrstuvwxyz';
+  return Array.from({ length }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+}
+
+/**
  * Generate a unique tenant slug from a username.
  * Strips characters not safe for a slug and appends a short timestamp suffix
- * so retries on collision are unlikely.
+ * with 4-6 random characters for entropy so concurrent/duplicate requests are
+ * unlikely to collide.
  */
-function slugFromName(name) {
+export function slugFromName(name) {
   const base = name
     .toLowerCase()
     .replace(/[^a-z0-9-]/g, '-')
     .replace(/-+/g, '-')
     .replace(/^-|-$/g, '')
     .slice(0, 40) || 'user';
-  return `${base}-${Date.now().toString(36)}`;
+  const entropy = 4 + Math.floor(Math.random() * 3); // 4-6 chars
+  return `${base}-${Date.now().toString(36)}${randomChars(entropy)}`;
+}
+
+/**
+ * Seed the base shell for a new tenant.
+ *
+ * Creates Tenant, TenantMember (owner), 8 CompanyClass, and 1 Company ("本社").
+ * This is the single source of truth for tenant shell creation.
+ *
+ * Must be called inside an existing Sequelize transaction (t).
+ * The caller is responsible for idempotency checks before calling this function.
+ *
+ * @param {object} user - The user object (must have id, legalName/name)
+ * @param {object} opts
+ * @param {string} opts.name - Tenant display name
+ * @param {string} opts.slug - Tenant URL slug (must be unique)
+ * @param {boolean} opts.isDefault - Whether this is the user's default tenant
+ * @param {object} t - Sequelize transaction
+ * @returns {Promise<{tenant, membership, companyClasses, company}>}
+ */
+export async function seedTenantBase(user, { name, slug, isDefault }, t) {
+  const tenant = await models.Tenant.create(
+    { slug, name, status: 'active' },
+    { transaction: t }
+  );
+
+  const membership = await models.TenantMember.create(
+    {
+      userId: user.id,
+      tenantId: tenant.id,
+      isOwner: true,
+      status: 'active',
+      isDefault: !!isDefault,
+      accounting: true,
+      fiscalBrowsing: true,
+      approvable: true,
+      administrable: true,
+      companyManagement: true,
+      inventoryManagement: true,
+      personnelManagement: true,
+      tenantSettings: true
+    },
+    { transaction: t }
+  );
+
+  const companyClasses = await models.CompanyClass.bulkCreate(
+    DEFAULT_COMPANY_CLASSES.map((cc) => ({
+      ...cc,
+      tenantId: tenant.id
+    })),
+    { transaction: t, returning: true }
+  );
+  const ownCompanyClass = companyClasses.find((cc) => cc.name === '自社');
+
+  const company = await models.Company.create(
+    {
+      tenantId: tenant.id,
+      companyClassId: ownCompanyClass.id,
+      name: '本社'
+    },
+    { transaction: t }
+  );
+
+  return { tenant, membership, companyClasses, company };
 }
 
 /**
@@ -48,61 +121,16 @@ export async function bootstrapTenantMember(user, t) {
     return { tenant, membership: existing };
   }
 
-  // Create the personal tenant.
+  // Create the personal tenant via the single source of truth.
   const slug = slugFromName(user.name);
-  const tenant = await models.Tenant.create(
-    {
-      slug,
-      name: `${user.legalName}さんの組織`,
-      status: 'active'
-    },
-    { transaction: t }
+  return seedTenantBase(
+    user,
+    { name: `${user.legalName}さんの組織`, slug, isDefault: true },
+    t
   );
-
-  // Create the owner membership with all permissions and marking default.
-  const membership = await models.TenantMember.create(
-    {
-      userId: user.id,
-      tenantId: tenant.id,
-      isOwner: true,
-      status: 'active',
-      isDefault: true,
-      accounting: true,
-      fiscalBrowsing: true,
-      approvable: true,
-      administrable: true,
-      companyManagement: true,
-      inventoryManagement: true,
-      personnelManagement: true,
-      tenantSettings: true
-    },
-    { transaction: t }
-  );
-
-  // Seed default company classes for the tenant.
-  const companyClasses = await models.CompanyClass.bulkCreate(
-    DEFAULT_COMPANY_CLASSES.map((companyClass) => ({
-      ...companyClass,
-      tenantId: tenant.id
-    })),
-    { transaction: t, returning: true }
-  );
-  const ownCompanyClass = companyClasses.find((companyClass) => companyClass.name === '自社');
-
-  // Create the default company for the tenant.
-  const company = await models.Company.create(
-    {
-      tenantId: tenant.id,
-      companyClassId: ownCompanyClass.id,
-      name: '本社'
-    },
-    { transaction: t }
-  );
-
-  return { tenant, membership, companyClasses, company };
 }
 
 // Keep old function name as alias for backward compatibility during transition
 export const bootstrapUserTenant = bootstrapTenantMember;
 
-export default { bootstrapTenantMember, bootstrapUserTenant };
+export default { bootstrapTenantMember, bootstrapUserTenant, seedTenantBase, slugFromName };

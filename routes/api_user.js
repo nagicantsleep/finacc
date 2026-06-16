@@ -1,7 +1,7 @@
 import models from '../models/index.js';
 const Op = models.Sequelize.Op;
 import {passwd, passport, is_authenticated, buildSessionUser} from '../libs/user.js';
-import {bootstrapTenantMember, DEFAULT_COMPANY_CLASSES} from '../libs/bootstrap.js';
+import {bootstrapTenantMember, seedTenantBase, slugFromName as generateSlug} from '../libs/bootstrap.js';
 import {switchTenant, overlayMembershipPermissions, clearMembershipPermissions} from '../libs/tenant.js';
 
 const MEMBERSHIP_PERMISSION_FIELDS = [
@@ -29,8 +29,9 @@ async function createOwnedTenant(user, name, transaction, slugInput) {
     .replace(/-+/g, '-')
     .replace(/^-|-$/g, '')
     .slice(0, 40) || 'tenant';
-  const slug = slugInput ? baseSlug : `${baseSlug}-${Date.now().toString(36)}`;
+  const slug = slugInput ? baseSlug : generateSlug(baseSlug.replace(/-+$/, ''));
 
+  // Pre-check for duplicate slug or name (UX: friendlier than DB constraint error)
   const existingTenant = await models.Tenant.findOne({
     where: { [Op.or]: [{ slug }, { name }] },
     transaction
@@ -42,27 +43,11 @@ async function createOwnedTenant(user, name, transaction, slugInput) {
     throw error;
   }
 
-  const tenant = await models.Tenant.create({ slug, name, status: 'active' }, { transaction });
-
-  await models.TenantMember.create({
-    userId: user.id, tenantId: tenant.id,
-    isOwner: true, status: 'active', isDefault: false,
-    accounting: true, fiscalBrowsing: true, approvable: true,
-    administrable: true, companyManagement: true,
-    inventoryManagement: true, personnelManagement: true,
-    tenantSettings: true
-  }, { transaction });
-
-  const companyClasses = await models.CompanyClass.bulkCreate(
-    DEFAULT_COMPANY_CLASSES.map((c) => ({ ...c, tenantId: tenant.id })),
-    { transaction, returning: true }
+  return seedTenantBase(
+    user,
+    { name, slug, isDefault: false },
+    transaction
   );
-  const ownCompanyClass = companyClasses.find((c) => c.name === '自社');
-  await models.Company.create({
-    tenantId: tenant.id, companyClassId: ownCompanyClass.id, name: '本社'
-  }, { transaction });
-
-  return tenant;
 }
 
 export default {
@@ -540,12 +525,19 @@ export default {
 
     const transaction = await models.sequelize.transaction();
     try {
-      const tenant = await createOwnedTenant(req.session.user, name, transaction, slug);
+      const result = await createOwnedTenant(req.session.user, name, transaction, slug);
       await transaction.commit();
-      res.json({ result: 'OK', tenant: { id: tenant.id, name: tenant.name, slug: tenant.slug } });
+      res.json({ result: 'OK', tenant: { id: result.tenant.id, name: result.tenant.name, slug: result.tenant.slug } });
     } catch (err) {
       await transaction.rollback();
       console.error('tenant create error', err);
+      // DB-level unique constraint violation (race between pre-check and insert)
+      if (err.name === 'SequelizeUniqueConstraintError') {
+        return res.status(409).json({
+          result: 'NG',
+          message: 'スラッグまたはテナント名が既に使用されています。'
+        });
+      }
       res.status(err.statusCode || 500).json({ result: 'NG', message: err.message || 'テナントの作成に失敗しました。' });
     }
   },
