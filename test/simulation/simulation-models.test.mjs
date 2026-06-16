@@ -13,6 +13,7 @@
 
 import { strict as assert } from 'node:assert';
 import models from '../../models/index.js';
+import { createTestTenant, destroyTestTenant } from '../helpers/createTestTenant.mjs';
 
 describe('Simulation — E2.1 models + migrations', function () {
   this.timeout(30000);
@@ -72,35 +73,23 @@ describe('Simulation — E2.1 models + migrations', function () {
   });
 
   describe('3) CRUD round-trip on test DB', function () {
-    let tenant;
-    let user;
+    let ctx;
     let scenario;
     let entry;
 
     before(async function () {
-      const stamp = Date.now().toString(36);
-      tenant = await models.Tenant.create({
-        slug: `sim-${stamp}`,
-        name: `sim-tenant-${stamp}`,
-      });
-      user = await models.User.create({
-        name: `sim_user_${stamp}`.slice(0, 20),
-        hashPassword: 'x-hash',
-        legalName: 'Sim',
-        email: `${stamp}@example.com`,
-      });
+      ctx = await createTestTenant({ tag: 'sim' });
     });
 
     after(async function () {
       if (entry) await entry.destroy().catch(() => {});
       if (scenario) await scenario.destroy().catch(() => {});
-      if (user) await user.destroy().catch(() => {});
-      if (tenant) await tenant.destroy().catch(() => {});
+      await destroyTestTenant(ctx);
     });
 
     it('saves and reads back a Scenario + Entry', async function () {
       scenario = await models.SimulationScenario.create({
-        tenantId: tenant.id,
+        tenantId: ctx.tenant.id,
         name: 'Q3 hiring scenario',
         description: 'projected +1 engineer',
         baseTerm: 1,
@@ -109,14 +98,14 @@ describe('Simulation — E2.1 models + migrations', function () {
         simPeriodFrom: '2026-07-01',
         simPeriodTo: '2026-09-30',
         status: 'draft',
-        ownerId: user.id,
+        ownerId: ctx.user.id,
         visibility: 'private',
       });
       assert.ok(scenario.id, 'scenario id assigned');
       assert.equal(scenario.status, 'draft');
 
       entry = await models.SimulationEntry.create({
-        tenantId: tenant.id,
+        tenantId: ctx.tenant.id,
         scenarioId: scenario.id,
         date: '2026-07-15',
         debitAccount: '5000',

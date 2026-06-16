@@ -1,133 +1,104 @@
 # Architecture
 
-No application stack is selected yet.
+## Stack
 
-No application code exists yet. This document defines generic architecture
-questions and boundary rules that future implementation should adapt after a
-user-provided spec and stack decision exist.
+- **Frontend:** Svelte 4 + Vite 5 (SSR via `vite.config.ssr.js`, routing via `@roxi/routify`)
+- **Backend:** Express 4 (ESM)
+- **Database:** PostgreSQL via Sequelize 6 (`pg`, `connect-pg-simple` for sessions)
+- **Auth:** Passport local strategy
+- **Testing:** Mocha + Supertest (unit, integration, E2E/smoke)
 
-## Discovery Before Shape
-
-Before proposing implementation shape, identify:
-
-- Product surfaces: browser, mobile, desktop, CLI, API, worker, or service.
-- Runtime stack: language, framework, database, queues, providers, and hosting.
-- Core domains: the product concepts that deserve stable names and contracts.
-- Boundary inputs: user input, API requests, webhooks, jobs, files, credentials,
-  provider payloads, and environment configuration.
-- Validation ladder: the smallest checks that can prove the selected stack.
-
-Record stack choices in `docs/decisions/` when they meaningfully constrain
-future work.
-
-## Default Layering
+## Project Structure
 
 ```text
-domain
-  <- application
-      <- infrastructure
-          <- interface
-              <- app surfaces
+front/          Svelte components and client JS
+views/          Server-rendered templates (.spy, .ejs)
+routes/         Express route handlers (api_*.js, home.js, forms.js)
+models/         Sequelize model definitions
+migrations/     Sequelize migrations
+config/         DB config, env, module list, menu templates
+libs/           Shared business logic (auth, reporting, simulation, bootstrap)
+bin/            Server entry (www), check-db, check-config
+public/         Static assets
+test/           Mocha tests (unit, integration, reporting, simulation, e2e)
+  helpers/      Test utilities (createTestTenant.mjs)
+docs/           Architecture, harness docs, stories
+scripts/        Harness CLI
 ```
 
-## Candidate Structure
+## Core Request Flow
 
 ```text
-app/
-  domain/
-    entities/
-    value-objects/
-    repositories/
-    services/
-
-  application/
-    commands/
-    queries/
-    handlers/
-
-  infrastructure/
-    database/
-    logging/
-    notifications/
-
-  interface/
-    controllers/
-    dto/
-    presenters/
-    routes/
-    middlewares/
-
-surfaces/
-  browser/
-  mobile/
-  desktop/
-  cli/
+HTTP request
+  -> Express route (routes/)
+  -> Middleware (auth, tenant guard)
+  -> Route handler
+  -> Sequelize model (models/)
+  -> PostgreSQL
+  -> Response (JSON or SSR render)
 ```
 
-This is a thinking template, not a scaffold. Create real folders only when a
-story enters implementation and the selected stack needs them.
+## Tenant Lifecycle — 2-Phase Model
 
-## Dependency Rule
+Every tenant goes through two distinct phases. The boundary between them is the
+**setup wizard** (`POST /api/setup`).
 
-Inner layers must not depend on outer layers.
+### Phase 1: Bootstrap Shell (signup)
 
-| Layer | May depend on | Must not depend on |
+Created automatically during user self-registration (`bootstrapTenantMember` in
+`libs/bootstrap.js`). Produces:
+
+| Entity | Count | Notes |
 | --- | --- | --- |
-| domain | nothing project-external except tiny pure utilities | framework, database, UI, provider, process/env |
-| application | domain | framework, UI, provider, database concrete clients |
-| infrastructure | domain, application | interface controllers or UI |
-| interface | all backend layers | UI state or platform shell assumptions |
-| app surfaces | API contracts and app-facing clients | domain internals directly |
+| Tenant | 1 | Slug, name, status='active' |
+| TenantMember | 1 | Owner, all permissions, isDefault |
+| CompanyClass | 8 | Fixed set (domestic/overseas buyers, customers, etc.) |
+| Company | 1 | "本社" (headquarters), linked to "自社" CompanyClass |
 
-## Parse-First Boundary Rule
+**Does NOT create:** FiscalYear, AccountClass, Account, AccountRemaining,
+SubAccount, SubAccountRemaining, Menus.
 
-Unknown data must be parsed at boundaries before it enters inner code.
+After Phase 1, the user has an empty tenant. Navigating to `/home` redirects
+to `/setup` because `FiscalYear.count === 0`.
 
-Boundaries include:
+### Phase 2: Setup Wizard (first-time setup)
 
-- HTTP request bodies, params, and query strings.
-- Session payloads and identity claims.
-- Environment variables.
-- Database rows returned from external clients.
-- Platform shell payloads.
-- Deep links, tokens, and signed URLs.
-- Provider webhooks, events, and async payloads.
+Triggered by `POST /api/setup` from the `/setup` page. Creates the accounting
+baseline:
 
-Target flow:
+| Entity | Notes |
+| --- | --- |
+| FiscalYear | User-selected start/end dates, term, year |
+| AccountClass | From `parse_accounts.js` based on companyClass |
+| Account | Full chart of accounts |
+| AccountRemaining | Per-account, per-term balances |
+| SubAccount | Sub-accounts where applicable |
+| SubAccountRemaining | Sub-account balances |
+| Menu templates | From `config/menu-template.cjs` |
+| Company | Updated with roundingMethod |
 
-```text
-unknown input
-  -> parser
-  -> typed DTO or command
-  -> application use case
-  -> domain object/value object
+After Phase 2, `FiscalYear.count > 0` and `/home` renders the main app.
+
+### Key Invariant
+
+```
+FiscalYear.count(tenantId) === 0  →  redirect to /setup
+FiscalYear.count(tenantId) > 0   →  render main app
 ```
 
-Inner layers should work with meaningful product types such as `UserId`,
-`AccountId`, `WorkspaceId`, `Role`, `DateRange`, or domain-specific IDs,
-rather than repeatedly validating raw strings.
+### Additional Tenants
 
-## Command/Query Boundary
+When a user is added to an additional tenant (via invitation or admin), that
+tenant goes through the same 2-phase lifecycle independently. The setup wizard
+is per-tenant; each tenant needs its own FiscalYear/Accounts.
 
-If the product has both reads and writes, keep command/query separation clear at
-the code level even when the storage layer is simple:
+## Translation System
 
-- Commands mutate state and own audit side effects.
-- Queries read state and format for consumers.
-- Shared domain rules live in domain/application, not controllers.
+Translations are **system-wide only** in production. The `enrichBilingual`
+helper queries `Translations` with `tenantId: null`. `Translation.fetchBatch` is
+a utility method; tenant-level override is not wired to any UI or API.
 
-## Observability Contract
+## Observability
 
-The future server should emit one canonical JSON log line per request with:
-
-- timestamp
-- level
-- request_id
-- user_id when known
-- action
-- duration_ms
-- status_code
-- message
-
-Audit logs are product records. Application logs are operational records. Do not
-use one as a substitute for the other.
+The server emits structured error logs with timestamp, URL, method, and stack
+trace. Audit logs are product records; application logs are operational records.
