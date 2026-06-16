@@ -15,6 +15,10 @@ export default (sequelize, DataTypes) => {
         onDelete: 'cascade',
         onUpdate: 'cascade'
       });
+      this.belongsTo(models.Tenant, {
+        foreignKey: 'tenantId',
+        as: 'tenant'
+      });
     }
   };
   ItemClass.init({

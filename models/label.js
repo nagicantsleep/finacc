@@ -15,6 +15,10 @@ export default (sequelize, DataTypes) => {
         otherKey: 'accountId',
         as: 'accounts'
       });
+      this.belongsTo(models.Tenant, {
+        foreignKey: 'tenantId',
+        as: 'tenant'
+      });
     }
   };
   Label.init({

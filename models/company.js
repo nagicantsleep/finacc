@@ -12,6 +12,10 @@ export default (sequelize, DataTypes) => {
 				sourceKey: 'companyClassId',
         as: 'companyClass'
 			});
+			this.belongsTo(models.Tenant, {
+			  foreignKey: 'tenantId',
+			  as: 'tenant'
+			});
     }
   }
   Company.init({

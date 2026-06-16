@@ -12,6 +12,10 @@ export default (sequelize, DataTypes) => {
         foreignKey: 'voucherClassId',
         as: 'vouchers'
       });
+      this.belongsTo(models.Tenant, {
+        foreignKey: 'tenantId',
+        as: 'tenant'
+      });
     }
   }
   VoucherClass.init({

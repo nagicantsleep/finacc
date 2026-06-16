@@ -39,6 +39,10 @@ export default (sequelize, DataTypes) => {
 				foreignKey: 'projectId',
 				as: 'projectData'
 			});
+			this.belongsTo(models.Tenant, {
+			  foreignKey: 'tenantId',
+			  as: 'tenant'
+			});
 		}
 	};
 	CrossSlipDetail.init({

@@ -16,6 +16,10 @@ export default (sequelize, DataTypes) => {
 				sourceKey: 'bookId',
         as: 'book'
 			});
+			this.belongsTo(models.Tenant, {
+			  foreignKey: 'tenantId',
+			  as: 'tenant'
+			});
     }
   };
   TransactionKind.init({

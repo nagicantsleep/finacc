@@ -12,6 +12,10 @@ export default (sequelize, DataTypes) => {
 				foreignKey: 'accountId',
 				onDelete: 'CASCADE'
 			});
+			this.belongsTo(models.Tenant, {
+			  foreignKey: 'tenantId',
+			  as: 'tenant'
+			});
 		}
 	};
 	SubAccount.init({
