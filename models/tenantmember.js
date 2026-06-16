@@ -117,7 +117,10 @@ export default (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: false,
       defaultValue: 'active',
-      comment: 'active | inactive'
+      comment: 'active | inactive',
+      validate: {
+        isIn: [['active', 'inactive']]
+      }
     },
 
     // Permissions (from UserTenant)

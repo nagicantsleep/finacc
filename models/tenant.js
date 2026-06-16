@@ -30,7 +30,10 @@ export default (sequelize, DataTypes) => {
     status: {
       type: DataTypes.STRING,
       allowNull: false,
-      defaultValue: 'active'
+      defaultValue: 'active',
+      validate: {
+        isIn: [['active', 'inactive']]
+      }
     },
     settings: {
       type: DataTypes.JSONB,
