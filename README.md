@@ -95,6 +95,16 @@ These endpoints require both `is_authenticated` and `requireTenant`.
 - Apply `is_authenticated` and `requireTenant` explicitly per route inside `routes/api.js` so user-scope endpoints can stay tenantless while tenant routes remain strictly guarded.
 
 
+## Tenant initialization (2-phase model)
+
+A tenant is initialized in two distinct phases, separated by the setup wizard (`POST /api/setup`):
+
+- **Phase 1 — bootstrap shell** (`bootstrapTenantMember` / `seedTenantBase` in `libs/bootstrap.js`, at signup): creates the `Tenant`, owner `TenantMember`, 8 `CompanyClass` rows, and the `本社` `Company`. It does **not** create `FiscalYear`, the chart of accounts, or `Menu`s. A tenant in this state has `FiscalYear.count === 0`, so `/home` redirects to `/setup`.
+- **Phase 2 — setup wizard** (`POST /api/setup`): creates `FiscalYear`, `AccountClass`/`Account`/`AccountRemaining`/`SubAccount`/`SubAccountRemaining`, `Menu`s, and sets the session term. Each tenant (including additional tenants) runs this independently.
+
+See [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md#tenant-lifecycle--2-phase-model) for the full entity tables and invariant.
+
+
 ### 次期メジャーバージョンアップ
 
 次期メジャーバージョンアップの時には、「台帳管理システム」が追加されます。
