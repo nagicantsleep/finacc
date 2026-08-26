@@ -1,8 +1,8 @@
 <script>
   import Icon from '@iconify/svelte';
-  import ClockPanel from './ClockPanel.svelte';
-  import MonthlyTimesheet from './MonthlyTimesheet.svelte';
-  import LeaveRequestModal from './LeaveRequestModal.svelte';
+  import ClockPanel from './clock-panel.svelte';
+  import MonthlyTimesheet from './monthly-timesheet.svelte';
+  import LeaveRequestModal from './leave-request-modal.svelte';
   import BilingualText from '../components/bilingual-text.svelte';
 
   let timesheetComponent;

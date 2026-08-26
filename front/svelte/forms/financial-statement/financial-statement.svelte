@@ -26,7 +26,7 @@
 import FrontCover from '../components/front-cover.svelte';
 import BalanceSheet from './balance-sheet.svelte';
 import PL from './pl.svelte';
-import SGA from './SGA.svelte';
+import SGA from './sga.svelte';
 
 export let fy;
 export let company;
