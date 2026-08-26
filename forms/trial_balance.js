@@ -315,7 +315,7 @@ export default async (term, month, tenantId) => {
     lastDate = new Date(parseInt(ymd[0]), parseInt(ymd[1]), 1);
   }
 
-  let book = new Book(term);
+  let book = new Book(term, tenantId);
   let {lines} = await TrialBalance(tenantId, term, lastDate);
   let trial_balance_page = new TrialBalancePage(book, term, lines, month);
   await trial_balance_page.run();

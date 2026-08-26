@@ -45,7 +45,8 @@
   import { currentPage, link } from '../../javascripts/router.js';
   import { Line } from "svelte-chartjs";
   import ProjectSummaryList from './project-summary-list.svelte';
-import BilingualText from '../components/bilingual-text.svelte';
+  import BilingualText from '../components/bilingual-text.svelte';
+  import { bi } from '../../javascripts/bilingual.js';
   import {
     Chart as ChartJS,
     Title,

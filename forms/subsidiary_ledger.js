@@ -21,7 +21,7 @@ Account.all2(TERM).then((accounts) => {
 
 */
 export default async (term, tenantId) => {
-    let book = new Book(term);
+    let book = new Book(term, tenantId);
     let accounts = await Account.all2(tenantId, term);
     let account_page = new AccountPage(book, accounts);
     await account_page.run();

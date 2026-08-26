@@ -2,15 +2,16 @@ import models from '../models/index.js';
 import ExcelJS from 'exceljs';
 
 export const Book = class {
-    constructor (term) {
+    constructor (term, tenantId) {
         this.book = new ExcelJS.Workbook();
         this.book.creator = 'ogochan';
         this.book.lastModifiedBy = 'ogochan';
-        this.fy = models.FiscalYear.findOne({
-            where: {
-                term: term
-            }
-        });
+        this.tenantId = tenantId;
+        const where = { term };
+        if (tenantId != null) {
+            where.tenantId = tenantId;
+        }
+        this.fy = models.FiscalYear.findOne({ where });
         this.term = term;
     }
     save(name) {

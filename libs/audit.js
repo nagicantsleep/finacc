@@ -49,22 +49,26 @@ export async function audit({
 }
 
 /**
- * Query a single entity's audit history (newest first).
+ * Query a single entity's audit history (newest first), scoped to tenant when provided.
  */
-export async function auditHistory(entityType, entityId) {
+export async function auditHistory(entityType, entityId, tenantId = null) {
   const { Op } = models.Sequelize;
+  const whereClauses = [
+    models.sequelize.where(
+      models.sequelize.json("payload.entityType"),
+      entityType
+    ),
+    models.sequelize.where(
+      models.sequelize.json("payload.entityId"),
+      String(entityId)
+    ),
+  ];
+  if (tenantId != null) {
+    whereClauses.push({ tenantId });
+  }
   const rows = await models.AuditEvent.findAll({
     where: {
-      [Op.and]: [
-        models.sequelize.where(
-          models.sequelize.json("payload.entityType"),
-          entityType
-        ),
-        models.sequelize.where(
-          models.sequelize.json("payload.entityId"),
-          String(entityId)
-        ),
-      ],
+      [Op.and]: whereClauses,
     },
     order: [['createdAt', 'DESC']],
   });

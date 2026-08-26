@@ -433,7 +433,7 @@ export default class {
         this.subAccount = subAccount;
         let fy = await this.book.fy;
         let sub_code = subAccount ? subAccount.code : null;
-        let details = await CrossSlipDetails.all(fy, account.code, sub_code);
+        let details = await CrossSlipDetails.all(fy, account.code, sub_code, this.book?.tenantId);
         if ( details.length > 0 ) {
             let this_page = new LedgerPage(this.book, account, subAccount);
             this_page.make_header();
