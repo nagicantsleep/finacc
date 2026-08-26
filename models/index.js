@@ -44,6 +44,10 @@ import LeaveRequest from './leaverequest.js';
 import SalaryFormula from './salaryformula.js';
 import PayrollPeriod from './payrollperiod.js';
 import PayrollSlip from './payrollslip.js';
+import ExpenseCategory from './expensecategory.js';
+import ExpenseAdvance from './expenseadvance.js';
+import ExpenseClaim from './expenseclaim.js';
+import ExpenseClaimItem from './expenseclaimitem.js';
 import User from './user.js';
 import Voucher from './voucher.js';
 import VoucherClass from './voucherclass.js';
@@ -94,6 +98,10 @@ const models = {
   SalaryFormula: SalaryFormula(sequelize, DataTypes),
   PayrollPeriod: PayrollPeriod(sequelize, DataTypes),
   PayrollSlip: PayrollSlip(sequelize, DataTypes),
+  ExpenseCategory: ExpenseCategory(sequelize, DataTypes),
+  ExpenseAdvance: ExpenseAdvance(sequelize, DataTypes),
+  ExpenseClaim: ExpenseClaim(sequelize, DataTypes),
+  ExpenseClaimItem: ExpenseClaimItem(sequelize, DataTypes),
   Sticky: Sticky(sequelize, DataTypes),
   StickyStatus: StickyStatus(sequelize, DataTypes),
   SubAccount: SubAccount(sequelize, DataTypes),

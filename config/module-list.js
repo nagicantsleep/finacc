@@ -189,6 +189,18 @@ export default [
     icon: { name: 'bi:wallet2' },
     description: `給与自動計算・明細書発行・会計仕訳自動起票。`
   }, {
+    name: 'expense',
+    title: '経費精算',
+    match: /^\/expense/,
+    href: (status) => {
+      return ('/expense');
+    },
+    authority: (user) => {
+      return true; // All active members can file expenses
+    },
+    icon: { name: 'bi:receipt-cutoff' },
+    description: `経費申請・仮払金精算・プロジェクト紐付け・会計仕訳自動起票。`
+  }, {
     name: 'task',
     title: '案件管理',
     href: (status) => {
