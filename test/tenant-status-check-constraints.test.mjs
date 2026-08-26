@@ -34,52 +34,62 @@ describe('Issue #334 — Tenant/TenantMember status CHECK constraints', function
   this.timeout(15000);
 
   let sequelize;
+  let testTenantId;
+  let testMemberId;
 
   before(async () => {
     sequelize = getTestSequelize();
     await sequelize.authenticate();
+
+    // Create a deterministic test tenant and member for the test suite
+    const [tRes] = await sequelize.query(`
+      INSERT INTO "Tenants" ("slug", "name", "status", "createdAt", "updatedAt")
+      VALUES ('test-check-suite-tenant', 'Test Check Tenant', 'active', NOW(), NOW())
+      RETURNING id;
+    `);
+    testTenantId = tRes[0].id;
+
+    const [mRes] = await sequelize.query(`
+      INSERT INTO "TenantMembers" ("tenantId", "status", "createdAt", "updatedAt")
+      VALUES (${testTenantId}, 'active', NOW(), NOW())
+      RETURNING id;
+    `);
+    testMemberId = mRes[0].id;
   });
 
   after(async () => {
-    if (sequelize) await sequelize.close();
+    if (sequelize) {
+      if (testTenantId) {
+        await sequelize.query(`DELETE FROM "TenantMembers" WHERE "tenantId" = ${testTenantId};`);
+        await sequelize.query(`DELETE FROM "Tenants" WHERE "id" = ${testTenantId};`);
+      }
+      await sequelize.close();
+    }
   });
 
   // -----------------------------------------------------------------------
   // 1. Model validation rejects invalid status
   // -----------------------------------------------------------------------
   describe('Model validation', () => {
-    // We test via raw Sequelize model definitions that mirror the validate config
     it('Tenant model rejects status="bogus"', async () => {
-      const [results] = await sequelize.query(
-        `SELECT id FROM "Tenants" LIMIT 1`
-      );
-      const tenantId = results[0]?.id;
-
-      // Direct Sequelize insert with invalid status should fail validation
       try {
         await sequelize.query(
           `UPDATE "Tenants" SET "status" = :status WHERE "id" = :id`,
-          { replacements: { status: 'bogus', id: tenantId } }
+          { replacements: { status: 'bogus', id: testTenantId } }
         );
-        // If raw SQL succeeds, the CHECK constraint should catch it
-        // (this tests the DB-level constraint, not Sequelize validation)
+        expect.fail('Expected CHECK constraint violation');
       } catch (err) {
-        // Expected: CHECK constraint violation
         expect(err.message).to.include('tenants_status_chk');
       }
     });
 
     it('TenantMember model rejects status="bogus"', async () => {
-      const [results] = await sequelize.query(
-        `SELECT id FROM "TenantMembers" LIMIT 1`
-      );
-      const memberId = results[0]?.id;
-
       try {
         await sequelize.query(
           `UPDATE "TenantMembers" SET "status" = :status WHERE "id" = :id`,
-          { replacements: { status: 'bogus', id: memberId } }
+          { replacements: { status: 'bogus', id: testMemberId } }
         );
+        expect.fail('Expected CHECK constraint violation');
       } catch (err) {
         expect(err.message).to.include('tenantmembers_status_chk');
       }
@@ -118,7 +128,6 @@ describe('Issue #334 — Tenant/TenantMember status CHECK constraints', function
           INSERT INTO "Tenants" ("slug", "name", "status", "createdAt", "updatedAt")
           VALUES ('test-bogus', 'Test Bogus', 'bogus', NOW(), NOW());
         `);
-        // If we get here, constraint is missing — fail the test
         expect.fail('Expected CHECK constraint violation');
       } catch (err) {
         expect(err.message).to.include('tenants_status_chk');
@@ -129,7 +138,7 @@ describe('Issue #334 — Tenant/TenantMember status CHECK constraints', function
       try {
         await sequelize.query(`
           INSERT INTO "TenantMembers" ("tenantId", "status", "createdAt", "updatedAt")
-          VALUES (1, 'bogus', NOW(), NOW());
+          VALUES (${testTenantId}, 'bogus', NOW(), NOW());
         `);
         expect.fail('Expected CHECK constraint violation');
       } catch (err) {
@@ -138,15 +147,10 @@ describe('Issue #334 — Tenant/TenantMember status CHECK constraints', function
     });
 
     it('Raw UPDATE with status="bogus" rejected on Tenants', async () => {
-      const [results] = await sequelize.query(
-        `SELECT id FROM "Tenants" LIMIT 1`
-      );
-      if (results.length === 0) return this.skip();
-
       try {
         await sequelize.query(
           `UPDATE "Tenants" SET "status" = 'bogus' WHERE "id" = :id`,
-          { replacements: { id: results[0].id } }
+          { replacements: { id: testTenantId } }
         );
         expect.fail('Expected CHECK constraint violation');
       } catch (err) {
@@ -155,15 +159,10 @@ describe('Issue #334 — Tenant/TenantMember status CHECK constraints', function
     });
 
     it('Raw UPDATE with status="bogus" rejected on TenantMembers', async () => {
-      const [results] = await sequelize.query(
-        `SELECT id FROM "TenantMembers" LIMIT 1`
-      );
-      if (results.length === 0) return this.skip();
-
       try {
         await sequelize.query(
           `UPDATE "TenantMembers" SET "status" = 'bogus' WHERE "id" = :id`,
-          { replacements: { id: results[0].id } }
+          { replacements: { id: testMemberId } }
         );
         expect.fail('Expected CHECK constraint violation');
       } catch (err) {
@@ -178,7 +177,6 @@ describe('Issue #334 — Tenant/TenantMember status CHECK constraints', function
         RETURNING id;
       `);
       expect(results).to.have.length(1);
-      // Clean up
       await sequelize.query(
         `DELETE FROM "Tenants" WHERE "slug" = 'test-valid-active';`
       );
@@ -191,7 +189,6 @@ describe('Issue #334 — Tenant/TenantMember status CHECK constraints', function
         RETURNING id;
       `);
       expect(results).to.have.length(1);
-      // Clean up
       await sequelize.query(
         `DELETE FROM "Tenants" WHERE "slug" = 'test-valid-inactive';`
       );
@@ -202,39 +199,37 @@ describe('Issue #334 — Tenant/TenantMember status CHECK constraints', function
   // 3. Migration source code verification
   // -----------------------------------------------------------------------
   describe('Migration source', () => {
-    it('migration file exists', () => {
+    it('baseline migration file exists', () => {
       const migrationPath = resolve(
         projectRoot,
-        'migrations/20260616210000-add-tenant-status-check-constraints.cjs'
+        'migrations/20260826000000-freshdb-baseline-schema.cjs'
       );
       expect(existsSync(migrationPath)).to.be.true;
     });
 
-    it('migration has preflight check for Tenants', () => {
+    it('baseline migration includes tenants_status_chk constraint', () => {
       const src = readFileSync(
-        resolve(projectRoot, 'migrations/20260616210000-add-tenant-status-check-constraints.cjs'),
+        resolve(projectRoot, 'migrations/20260826000000-freshdb-baseline-schema.cjs'),
         'utf8'
       );
-      expect(src).to.include('Migration aborted');
-      expect(src).to.include('Tenants');
-      expect(src).to.include('DISTINCT');
+      expect(src).to.include('tenants_status_chk');
     });
 
-    it('migration has preflight check for TenantMembers', () => {
+    it('baseline migration includes tenantmembers_status_chk constraint', () => {
       const src = readFileSync(
-        resolve(projectRoot, 'migrations/20260616210000-add-tenant-status-check-constraints.cjs'),
+        resolve(projectRoot, 'migrations/20260826000000-freshdb-baseline-schema.cjs'),
         'utf8'
       );
-      expect(src).to.include('TenantMembers');
+      expect(src).to.include('tenantmembers_status_chk');
     });
 
-    it('migration down drops correct constraint names', () => {
+    it('baseline migration down drops correct constraints/tables', () => {
       const src = readFileSync(
-        resolve(projectRoot, 'migrations/20260616210000-add-tenant-status-check-constraints.cjs'),
+        resolve(projectRoot, 'migrations/20260826000000-freshdb-baseline-schema.cjs'),
         'utf8'
       );
-      expect(src).to.include('DROP CONSTRAINT IF EXISTS "tenantmembers_status_chk"');
-      expect(src).to.include('DROP CONSTRAINT IF EXISTS "tenants_status_chk"');
+      expect(src).to.include('DROP TABLE IF EXISTS "TenantMembers" CASCADE');
+      expect(src).to.include('DROP TABLE IF EXISTS "Tenants" CASCADE');
     });
   });
 
