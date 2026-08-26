@@ -77,6 +77,7 @@ import Voucher from './voucher/voucher.svelte';
 import Accounts from './accounts/accounts.svelte';
 import Company from './company/company.svelte';
 import Project from './project/project.svelte';
+import Registry from './registry/registry.svelte';
 
 import Transaction from './transaction/transaction.svelte';
 import Item from './item/item.svelte';
@@ -158,6 +159,10 @@ const routes = [
   {
     match: /^\/project/,
     component: Project
+  },
+  {
+    match: /^\/registry/,
+    component: Registry
   },
   {
     match: /^\/task/,
