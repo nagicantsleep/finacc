@@ -36,6 +36,9 @@ import TransactionKind from './transaction-kind.js';
 import Translation from './translation.js';
 import Tenant from './tenant.js';
 import TenantMember from './tenantmember.js';
+import RegistryDefinition from './registrydefinition.js';
+import RegistryEntry from './registryentry.js';
+import RegistryTimeline from './registrytimeline.js';
 import User from './user.js';
 import Voucher from './voucher.js';
 import VoucherClass from './voucherclass.js';
@@ -78,6 +81,9 @@ const models = {
   Label: Label(sequelize, DataTypes),
   ProjectLabel: ProjectLabel(sequelize, DataTypes),
   LabelAccount: LabelAccount(sequelize, DataTypes),
+  RegistryDefinition: RegistryDefinition(sequelize, DataTypes),
+  RegistryEntry: RegistryEntry(sequelize, DataTypes),
+  RegistryTimeline: RegistryTimeline(sequelize, DataTypes),
   Sticky: Sticky(sequelize, DataTypes),
   StickyStatus: StickyStatus(sequelize, DataTypes),
   SubAccount: SubAccount(sequelize, DataTypes),

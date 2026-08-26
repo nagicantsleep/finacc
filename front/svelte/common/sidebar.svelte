@@ -203,6 +203,7 @@ const MODULE_I18N = {
   'voucher': 'voucher_info',
   'accounts': 'account_management2',
   'company': 'company_management',
+  'registry': 'registry_management',
   'project': 'project_management',
   'task': 'task_management',
   'transaction': 'transaction_document',

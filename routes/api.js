@@ -32,9 +32,12 @@ import projectSummary from './api-project-summary.js';
 import cross_slip from './api_cross_slip.js';
 import cross_slip_detail from './api_cross_slip_detail.js';
 import simulation from './api_simulation.js';
+import registry from './api_registry.js';
 
 const pkg = JSON.parse(fs.readFileSync('package.json', 'utf-8'));
 const VERSION = pkg.version;
+
+router.use('/registry', registry);
 
 router.post('/admin/backup', is_authenticated, requireTenant, admin.backup);
 router.post('/admin/restore', is_authenticated, requireTenant, admin.restore);

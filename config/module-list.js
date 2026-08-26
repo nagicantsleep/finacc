@@ -153,6 +153,18 @@ export default [
       }
     ]
   }, {
+    name: 'registry',
+    title: '台帳管理',
+    match: /^\/registry/,
+    href: (status) => {
+      return ('/registry');
+    },
+    authority: (user) => {
+      return (user.companyManagement || user.personnelManagement || user.administrable || user.accounting);
+    },
+    icon: { name: 'bi:journals' },
+    description: `ノーコード台帳管理システム。<br/>自由なデータ項目定義とタイムライン対応の顧客・取引履歴台帳。`
+  }, {
     name: 'task',
     title: '案件管理',
     href: (status) => {
