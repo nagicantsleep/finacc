@@ -5,7 +5,10 @@
 	"main": "index.js",
 	"type": "module",
 	"scripts": {
+		"dev": "vite dev --port 3010",
+		"dev:legacy": "cross-env APP_NAME=hieronymus-dev node --watch ./bin/www",
 		"build": "vite build",
+		"start": "node build/index.js",
 		"build-ssr": "vite build --config vite.config.ssr.js",
 		"watch": "vite build -w",
 		"watch-ssr": "vite build -w --config vite.config.ssr.js",
@@ -15,9 +18,7 @@
 		"test:smoke": "cross-env NODE_ENV=test APP_NAME=hieronymus-test mocha --timeout 30000 test/e2e/smoke/**/*.spec.mjs",
 		"test:all": "npm run test:unit && npm run test:e2e && npm run test:smoke",
 		"prepublishOnly": "npm test",
-		"dev": "cross-env APP_NAME=hieronymus-dev node --watch ./bin/www",
-		"start-dev": "cross-env APP_NAME=hieronymus-dev node ./bin/www",
-		"start": "cross-env NODE_ENV=production node ./bin/www",
+		"start-legacy": "cross-env NODE_ENV=production node ./bin/www",
 		"setup:config": "node ./bin/check-config"
 	},
 	"author": "ogochan@beesnest-inc.com",
@@ -98,6 +99,8 @@
 		"uuid": "^11.1.0"
 	},
 	"devDependencies": {
+		"@sveltejs/adapter-node": "^5.5.7",
+		"@sveltejs/kit": "^2.70.3",
 		"chai": "^4.2.0",
 		"cross-env": "^10.1.0",
 		"css-loader": "^5.2.4",
