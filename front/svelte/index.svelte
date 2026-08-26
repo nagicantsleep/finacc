@@ -78,6 +78,8 @@ import Accounts from './accounts/accounts.svelte';
 import Company from './company/company.svelte';
 import Project from './project/project.svelte';
 import Registry from './registry/registry.svelte';
+import Attendance from './attendance/attendance.svelte';
+import Payroll from './payroll/payroll.svelte';
 
 import Transaction from './transaction/transaction.svelte';
 import Item from './item/item.svelte';
@@ -163,6 +165,14 @@ const routes = [
   {
     match: /^\/registry/,
     component: Registry
+  },
+  {
+    match: /^\/attendance/,
+    component: Attendance
+  },
+  {
+    match: /^\/payroll/,
+    component: Payroll
   },
   {
     match: /^\/task/,

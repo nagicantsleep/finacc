@@ -204,6 +204,8 @@ const MODULE_I18N = {
   'accounts': 'account_management2',
   'company': 'company_management',
   'registry': 'registry_management',
+  'attendance': 'attendance_management',
+  'payroll': 'payroll_management',
   'project': 'project_management',
   'task': 'task_management',
   'transaction': 'transaction_document',
