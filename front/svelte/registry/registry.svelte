@@ -1,9 +1,9 @@
 <script>
   import { onMount } from 'svelte';
-  import RegistryList from './RegistryList.svelte';
-  import RegistryDataGrid from './RegistryDataGrid.svelte';
-  import RegistryDesignerModal from './RegistryDesignerModal.svelte';
-  import RegistryEntryModal from './RegistryEntryModal.svelte';
+  import RegistryList from './registry-list.svelte';
+  import RegistryDataGrid from './registry-data-grid.svelte';
+  import RegistryDesignerModal from './registry-designer-modal.svelte';
+  import RegistryEntryModal from './registry-entry-modal.svelte';
 
   let currentView = 'list'; // 'list' | 'grid'
   let selectedDefinition = null;

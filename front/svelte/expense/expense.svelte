@@ -1,9 +1,9 @@
 <script>
   import Icon from '@iconify/svelte';
-  import ExpenseClaimList from './ExpenseClaimList.svelte';
-  import ExpenseClaimModal from './ExpenseClaimModal.svelte';
-  import ExpenseAdvanceModal from './ExpenseAdvanceModal.svelte';
-  import ExpenseCategoryModal from './ExpenseCategoryModal.svelte';
+  import ExpenseClaimList from './expense-claim-list.svelte';
+  import ExpenseClaimModal from './expense-claim-modal.svelte';
+  import ExpenseAdvanceModal from './expense-advance-modal.svelte';
+  import ExpenseCategoryModal from './expense-category-modal.svelte';
   import BilingualText from '../components/bilingual-text.svelte';
 
   let listComponent;

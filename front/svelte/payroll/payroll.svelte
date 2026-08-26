@@ -1,8 +1,8 @@
 <script>
-  import PayrollPeriodList from './PayrollPeriodList.svelte';
-  import PayrollCalculationView from './PayrollCalculationView.svelte';
-  import SalaryFormulaModal from './SalaryFormulaModal.svelte';
-  import PayslipModal from './PayslipModal.svelte';
+  import PayrollPeriodList from './payroll-period-list.svelte';
+  import PayrollCalculationView from './payroll-calculation-view.svelte';
+  import SalaryFormulaModal from './salary-formula-modal.svelte';
+  import PayslipModal from './payslip-modal.svelte';
 
   let currentView = 'list'; // 'list' | 'calc'
   let selectedPeriod = null;
