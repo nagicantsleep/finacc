@@ -35,6 +35,7 @@ import simulation from './api_simulation.js';
 import registry from './api_registry.js';
 import attendance from './api_attendance.js';
 import payroll from './api_payroll.js';
+import expense from './api_expense.js';
 
 const pkg = JSON.parse(fs.readFileSync('package.json', 'utf-8'));
 const VERSION = pkg.version;
@@ -42,6 +43,7 @@ const VERSION = pkg.version;
 router.use('/registry', registry);
 router.use('/attendance', attendance);
 router.use('/payroll', payroll);
+router.use('/expense', expense);
 
 router.post('/admin/backup', is_authenticated, requireTenant, admin.backup);
 router.post('/admin/restore', is_authenticated, requireTenant, admin.restore);
