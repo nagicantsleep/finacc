@@ -81,6 +81,8 @@ accounts.json
 @Docs/
 GEMINI.md
 .*/
+!.opencode/
+!.opencode/**
 .gitnexus
 
 # Harness durable layer
