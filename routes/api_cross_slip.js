@@ -2,6 +2,34 @@ import models from '../models/index.js';
 const Op = models.Sequelize.Op;
 import {create as createCrossSlip, update as updateCrossSlip} from '../libs/cross_slip.js';
 
+import * as taxcalc from '../libs/tax-calc.js';
+
+const recalcReject = async (req, res, tenantId) => {
+  const body = req.body;
+  const year = parseInt(body.year);
+  const month = parseInt(body.month);
+  const day = parseInt(body.day);
+  const dayErr = taxcalc.validateDay(year, month, day);
+  if (dayErr) {
+    res.status(422).json({ code: -2, message: dayErr });
+    return null;
+  }
+  const ctx = await taxcalc.loadTaxContext(year, month, tenantId);
+  if (!ctx.fy) {
+    res.status(422).json({ code: -2, message: 'date error' });
+    return null;
+  }
+  const lines = taxcalc.recalcSlipLines(body.lines, ctx);
+  const err = taxcalc.validateLines(lines, ctx) || taxcalc.validateBalanced(lines);
+  if (err) {
+    res.status(422).json({ code: -2, message: err });
+    return null;
+  }
+  body.lines = lines;
+  body.term = ctx.fy.term;
+  return body;
+};
+
 export default {
   list: async(req, res, next) => {
     const tenantId = req.currentTenantId;
@@ -9,23 +37,24 @@ export default {
     switch  ( req.params.type)  {
       case  'not_approved':
         let where;
-        if  ( req.session.user.approvable ) {
+        if  ( req.session.user.approvable || req.session.user.accounting ) {
           where = {
             tenantId,
             approvedAt: {
               [Op.eq]: null
-            },
-            term: req.session.term
-          }
+            }
+          };
         } else {
           where = {
             tenantId,
             approvedAt: {
               [Op.eq]: null
             },
-            term: req.session.term,
             createdBy: req.session.user.id
-          }
+          };
+        }
+        if (req.session.term) {
+          where.term = req.session.term;
         }
         let cross_slips = await models.CrossSlip.findAll({
           where: where,
@@ -136,53 +165,51 @@ export default {
   post: async(req, res, next) => {
     const tenantId = req.currentTenantId;
     res.set('Access-Control-Allow-Origin', '*');
-    if	( req.session.user.accounting )  {
-      let body = req.body;
-      let slip = await createCrossSlip(body, req.session.user, tenantId);
-      if  ( slip )  {
-        res.json(slip);
-      } else {
-        res.json({
-          code: -2,
-          message: 'date error'
-        });
-      }
+    let body = await recalcReject(req, res, tenantId);
+    if (!body) return;
+    let slip = await createCrossSlip(body, req.session.user, tenantId);
+    if (slip) {
+      res.json(slip);
     } else {
-      res.json({
-        code: -10,
-        message: 'this account can not create'
+      res.status(422).json({
+        code: -2,
+        message: 'date error'
       });
     }
   },
   update: async(req, res, next) => {
     const tenantId = req.currentTenantId;
-    let body = req.body;
+    let body = await recalcReject(req, res, tenantId);
+    if (!body) return;
     let slip = await models.CrossSlip.findOne({
-        where: {
-          tenantId,
-          year: body.year,
-          month: body.month,
-          no: body.no
-        }
-      });
-    if ( slip ) {
-      if	( !slip.approvedAt )	{
-        if	(( req.session.user.accounting ) ||
-           ( req.session.user.id == slip.createdBy )) {
-            await updateCrossSlip(slip, body, req.session.user, tenantId);
-            res.json({
-              code: 0
-            });
+      where: {
+        tenantId,
+        year: body.year,
+        month: body.month,
+        no: body.no
+      }
+    });
+    if (slip) {
+      if (!slip.approvedAt) {
+        if (req.session.user.accounting || req.session.user.id == slip.createdBy) {
+          await updateCrossSlip(slip, body, req.session.user, tenantId);
+          res.json({
+            code: 0
+          });
         } else {
+          res.status(403).json({
+            code: -10,
+            message: 'permission denied'
+          });
         }
       } else {
-        res.json({
+        res.status(422).json({
           code: -2,
           message: 'this slip was approved'
         });
       }
     } else {
-      res.json({
+      res.status(404).json({
         code: -1,
         message: 'record not found'
       });
