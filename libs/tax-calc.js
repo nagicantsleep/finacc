@@ -88,22 +88,23 @@ export const normalizeLines = (lines) => {
 };
 
 export const loadTaxContext = async (year, month, tenantId) => {
+  if (!tenantId) {
+    throw new Error('loadTaxContext: tenantId is required for multi-tenant isolation');
+  }
   const info = await getCompanyInfo(tenantId);
   const fromDate = new Date(year, month - 1, 2);
   const fyWhere = {
+    tenantId,
     startDate: { [Op.lte]: fromDate },
     endDate: { [Op.gte]: fromDate }
   };
-  if (tenantId) {
-    fyWhere.tenantId = tenantId;
-  }
   const fy = await models.FiscalYear.findOne({
     where: fyWhere
   });
 
   const date = `${year}-${String(month).padStart(2, '0')}-01`;
-  const accWhere = tenantId ? { tenantId } : {};
-  const subAccWhere = tenantId ? { tenantId } : undefined;
+  const accWhere = { tenantId };
+  const subAccWhere = { tenantId };
 
   const accounts = await models.Account.findAll({
     where: accWhere,
@@ -118,14 +119,12 @@ export const loadTaxContext = async (year, month, tenantId) => {
   });
 
   const trWhere = {
+    tenantId,
     [Op.and]: [
       { [Op.or]: [{ startDate: null }, { startDate: { [Op.lte]: date } }] },
       { [Op.or]: [{ endDate: null }, { endDate: { [Op.gte]: date } }] }
     ]
   };
-  if (tenantId) {
-    trWhere.tenantId = tenantId;
-  }
   const taxRules = await models.TaxRule.findAll({
     where: trWhere
   });

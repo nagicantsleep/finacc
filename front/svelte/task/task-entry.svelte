@@ -64,6 +64,7 @@ import {currentTask, currentTransaction, getStore} from '../../javascripts/curre
 import { link, currentPage } from '../../javascripts/router.js';
 
 import BilingualText from '../components/bilingual-text.svelte';
+import { bi } from '../../javascripts/bilingual.js';
 export  let users;
 export	let	status;
 export	let task;

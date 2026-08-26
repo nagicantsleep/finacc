@@ -87,6 +87,12 @@ export default {
     })
   },
   restore: async(req, res, next) => {
+    if (process.env.ALLOW_DATABASE_RESTORE !== 'true') {
+      return res.status(403).json({
+        code: -1,
+        message: 'Database-level restore is disabled in multi-tenant environment to prevent data loss across tenants. Please contact system administrator.'
+      });
+    }
     restore(req.body.date).then(() => {
       res.json({
         code: 0

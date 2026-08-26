@@ -219,6 +219,8 @@ router.get('/transaction/:form/:id', async (req, res) => {
             {
               model: models.TenantMember,
               as: 'memberships',
+              where: { tenantId: req.currentTenantId },
+              required: false,
               attributes: ['tradingName']
             }
           ]

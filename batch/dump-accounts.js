@@ -1,23 +1,27 @@
 import models from '../models/index.js';
 
-const term = 17;
-
-
-const run = async () => {
+export const dumpAccounts = async (term, tenantId) => {
+	if (!tenantId) {
+		throw new Error('dumpAccounts: tenantId is required for multi-tenant isolation');
+	}
 	let dump = {};
 
 	let fy = await models.FiscalYear.findOne({
 		where: {
+			tenantId,
 			term: term
 		}
 	});
-	dump.FiscalYear = {
-		startDate: fy.startDate,
-		endDate: fy.endDate,
-		term: fy.term
+	if (fy) {
+		dump.FiscalYear = {
+			startDate: fy.startDate,
+			endDate: fy.endDate,
+			term: fy.term
+		};
 	}
 	let mls = await	models.MonthlyLog.findAll({
 		where: {
+			tenantId,
 			term: term
 		}
 	});
@@ -31,7 +35,7 @@ const run = async () => {
 		});
 	});
 
-	let account_classes = await models.AccountClass.findAll();
+	let account_classes = await models.AccountClass.findAll({ where: { tenantId } });
 	dump.AccountClass = [];
 	account_classes.forEach((acc) => {
 		dump.AccountClass.push({
@@ -43,15 +47,16 @@ const run = async () => {
 		});
 	});
 
-	let accounts = await models.Account.findAll();
+	let accounts = await models.Account.findAll({ where: { tenantId } });
 	dump.Account = [];
 	await Promise.all(
 		accounts.map( async (acc) => {
-			let account_class = await models.AccountClass.findByPk(acc.accountClassId);
+			let account_class = await models.AccountClass.findOne({ where: { id: acc.accountClassId, tenantId } });
 			let subAccounts = [];
 			if ( acc.subAccountCount > 0 ) {
 				let subs = await models.SubAccount.findAll({
 					where: {
+						tenantId,
 						accountId: acc.id
 					}
 				});
@@ -59,6 +64,7 @@ const run = async () => {
 					subs.map( async (sub) => {
 						let subr = await models.SubAccountRemaining.findOne({
 							where: {
+								tenantId,
 								subAccountId: sub.id,
 								term: term
 							}
@@ -79,6 +85,7 @@ const run = async () => {
 			}
 			let account_remain = await models.AccountRemaining.findOne({
 				where: {
+					tenantId,
 					accountId: acc.id,
 					term: term
 				}
@@ -87,10 +94,10 @@ const run = async () => {
 				dump.Account.push({
 					name: acc.name,
 					key: acc.key,
-					accountClass: {
+					accountClass: account_class ? {
 						field: account_class.field,
 						adding: account_class.adding
-					},
+					} : null,
 					accountCode: acc.accountCode,
 					taxClass: acc.taxClass,
 					subAccountCount: acc.subAccountCount,
@@ -107,8 +114,5 @@ const run = async () => {
 	return dump;
 };
 
-run().then((dump) => {
-	console.log(JSON.stringify(dump, null, 2));
-	return;
-});
+export default dumpAccounts;
 

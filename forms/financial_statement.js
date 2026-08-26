@@ -55,7 +55,7 @@ const	net_income = (lines) => {
 }
 
 export default async (term, tenantId) => {
-	let book = new Book(term);
+	let book = new Book(term, tenantId);
 	let {lines, accounts} = await TrialBalance(tenantId, term);
 	net_income(lines);
 

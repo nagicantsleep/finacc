@@ -1,53 +1,42 @@
 import models from '../models/index.js';
 
-const append_sub_accounts = async (account) => {
-
-	let code_len = account.code.length;
-	let field = parseInt(account.code.substring(code_len - 8, code_len - 6));
-	let adding = parseInt(account.code.substring(code_len - 5, code_len - 4));
-
-	//console.log(field, adding);
-	let account_class = await models.AccountClass.findOne({
-		where: {
-			field: field,
-			adding: adding
-		}
-	});
-	console.log(account_class);
+export const append_sub_accounts = async (account, tenantId) => {
+	const resolvedTenantId = tenantId || account.tenantId;
+	if (!resolvedTenantId) {
+		throw new Error('append_sub_accounts: tenantId is required for multi-tenant isolation');
+	}
 
 	let account_rec = await models.Account.findOne({
 		where: {
+			tenantId: resolvedTenantId,
 			accountCode: account.code
 		}
 	});
-	console.log(account_rec);
+	if (!account_rec) {
+		throw new Error(`Account not found for code=${account.code}, tenantId=${resolvedTenantId}`);
+	}
 
 	account_rec.subAccountCount += 1;
-	account_rec.save();
+	await account_rec.save();
 
 	let sub_account_rec = await models.SubAccount.create({
 		name: account.name,
 		key: account.key,
 		accountId: account_rec.id,
 		subAccountCode: account_rec.subAccountCount,
-		taxClass: account.tax_class
+		taxClass: account.tax_class,
+		tenantId: resolvedTenantId
 	});
 
 	await models.SubAccountRemaining.create({
 		subAccountId: sub_account_rec.id,
 		term: account.term,
 		debit: 0,
-		credit: account.balance,
-		balance: account.balance
+		credit: account.balance || 0,
+		balance: account.balance || 0,
+		tenantId: resolvedTenantId
 	});
-}
 
-append_sub_accounts({
-	code: '7010000',
-	name: 'TestTest',
-	key: 'test',
-	tax_class: 1,
-	term: 17,
-	balance: 0
-});
+	return sub_account_rec;
+}
 
