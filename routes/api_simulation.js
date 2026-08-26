@@ -49,7 +49,7 @@ import { audit } from '../libs/audit.js';
 
 const router = express.Router();
 
-router.use(is_authenticated, requireTenant);
+router.use('/simulation', is_authenticated, requireTenant);
 
 function notFound(res, msg = 'scenario not found') {
   return res.status(404).json({ result: 'NG', code: 'NOT_FOUND', message: msg });

@@ -107,9 +107,9 @@ describe('Language Pair API (#89)', function () {
     assert.equal(res.body.result, 'NG');
   });
 
-  it('language-pair requires authentication (302 redirect without login)', async function () {
-    const res = await request(app).get('/api/user/language-pair').expect(302);
-    assert.ok(res.headers.location, 'should redirect to login');
+  it('language-pair requires authentication (401 without login)', async function () {
+    const res = await request(app).get('/api/user/language-pair').expect(401);
+    assert.equal(res.body.code, -10);
   });
 });
 
