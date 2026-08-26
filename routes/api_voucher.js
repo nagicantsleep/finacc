@@ -1,8 +1,33 @@
 import models from '../models/index.js';
 import { enrichBilingual } from '../libs/bilingual-helper.js';
+import { numeric } from '../libs/utils.js';
+import * as taxcalc from '../libs/tax-calc.js';
 import fs from 'fs';
 import Mime from 'mime';
 const Op = models.Sequelize.Op;
+
+const prepareVoucher = async (body, tenantId, res) => {
+  if (!body.companyId) {
+    res.status(422).json({ code: -2, message: '相手先が未入力もしくは、取引先に存在しない相手先が入力されました。' });
+    return false;
+  }
+  const company = await models.Company.findOne({
+    where: { id: body.companyId, tenantId }
+  });
+  if (!company) {
+    res.status(422).json({ code: -2, message: '相手先が未入力もしくは、取引先に存在しない相手先が入力されました。' });
+    return false;
+  }
+  const issueDate = body.issueDate ? new Date(body.issueDate) : new Date();
+  const ctx = await taxcalc.loadTaxContext(issueDate.getFullYear(), issueDate.getMonth() + 1, tenantId);
+  if (body.amount) {
+    body.amount = numeric(body.amount);
+    body.tax = body.taxRuleId
+      ? taxcalc.computeVoucherTax(body.amount, body.taxRuleId, ctx)
+      : 0;
+  }
+  return true;
+};
 
 const getFiles = async (voucherId, tenantId) => {
   let files = await models.VoucherFile.findAll({
@@ -194,9 +219,12 @@ export default {
   post: async (req, res, next) => {
     try {
       let body = req.body;
+      const tenantId = req.currentTenantId;
       body.createdBy = req.session.user.id;
       body.updatedBy = req.session.user.id;
-      body.tenantId = req.currentTenantId;
+      body.tenantId = tenantId;
+      const ok = await prepareVoucher(body, tenantId, res);
+      if (!ok) return;
       let voucher = await models.Voucher.create(body);
       res.json({ code: 0, voucher });
     } catch (e) {
@@ -206,13 +234,19 @@ export default {
   update: async (req, res, next) => {
     try {
       let body = req.body;
+      const tenantId = req.currentTenantId;
       body.updatedBy = req.session.user.id;
       let id = req.params.id ? req.params.id : body.id;
+      const ok = await prepareVoucher(body, tenantId, res);
+      if (!ok) return;
       let voucher = await models.Voucher.findOne({
-        where: { id, tenantId: req.currentTenantId }
+        where: { id, tenantId }
       });
       if (voucher) {
-        voucher.set({ ...body, tenantId: req.currentTenantId });
+        if (!req.session.user.accounting && voucher.createdBy !== req.session.user.id) {
+          return res.status(403).json({ code: -10, message: 'permission denied' });
+        }
+        voucher.set({ ...body, tenantId });
         await voucher.save();
         res.json({ voucher });
       } else {
@@ -226,10 +260,14 @@ export default {
     try {
       let body = req.body;
       let id = req.params.id ? req.params.id : body.id;
+      const tenantId = req.currentTenantId;
       let voucher = await models.Voucher.findOne({
-        where: { id, tenantId: req.currentTenantId }
+        where: { id, tenantId }
       });
       if (voucher) {
+        if (!req.session.user.accounting && voucher.createdBy !== req.session.user.id) {
+          return res.status(403).json({ code: -10, message: 'permission denied' });
+        }
         await voucher.destroy();
         res.json({ code: 0 });
       } else {
