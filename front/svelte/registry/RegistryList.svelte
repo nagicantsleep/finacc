@@ -2,6 +2,7 @@
   import { createEventDispatcher, onMount } from 'svelte';
   import Icon from '@iconify/svelte';
   import axios from 'axios';
+  import BilingualText from '../components/bilingual-text.svelte';
 
   const dispatch = createEventDispatcher();
 
@@ -39,7 +40,7 @@
   }
 
   async function deleteDefinition(def) {
-    if (!confirm(`Bạn có chắc muốn xóa/lưu trữ sổ bộ "${def.name}" không?`)) return;
+    if (!confirm('この台帳を削除しますか？ / Bạn có chắc muốn xóa sổ bộ này?')) return;
     try {
       await axios.delete(`/api/registry/definitions/${def.id}`);
       loadDefinitions();
@@ -54,15 +55,15 @@
     <div>
       <h4 class="fw-bold mb-1 d-flex align-items-center gap-2">
         <Icon icon="bi:journals" class="text-primary" />
-        <span>Hệ thống Quản lý Sổ bộ (台帳管理システム)</span>
+        <BilingualText key="registry_management" />
       </h4>
       <div class="text-muted small">
-        Tự định nghĩa các loại sổ sách chuyên biệt, quản lý trường dữ liệu động và theo dõi lịch sử tương tác khách hàng theo thời gian thực.
+        <BilingualText key="registry_desc" />
       </div>
     </div>
     <button class="btn btn-primary d-flex align-items-center gap-1 shadow-sm" on:click={createNewDefinition}>
       <Icon icon="bi:plus-circle" />
-      <span>Tạo Mẫu Sổ Mới (No-code Designer)</span>
+      <BilingualText key="registry_create_new_template" stacked={false} />
     </button>
   </div>
 
@@ -79,10 +80,11 @@
     <div class="card shadow-sm border-0 text-center py-5">
       <div class="card-body">
         <Icon icon="bi:journal-plus" style="font-size: 3.5rem;" class="text-primary mb-3" />
-        <h5 class="fw-bold">Chưa có Mẫu Sổ bộ nào</h5>
-        <p class="text-muted mb-4">Bạn có thể tạo sổ quản lý khách hàng VIP, sổ hồ sơ hợp đồng, sổ bảo hành, hoặc bất kỳ loại sổ sách nào theo yêu cầu.</p>
+        <h5 class="fw-bold"><BilingualText key="registry_no_templates" /></h5>
+        <p class="text-muted mb-4"><BilingualText key="registry_no_templates_desc" /></p>
         <button class="btn btn-primary" on:click={createNewDefinition}>
-          <Icon icon="bi:plus-lg" class="me-1" /> Thiết kế Mẫu Sổ Đầu Tiên
+          <Icon icon="bi:plus-lg" class="me-1" />
+          <BilingualText key="registry_create_first" stacked={false} />
         </button>
       </div>
     </div>
@@ -107,27 +109,28 @@
                     <Icon icon="bi:three-dots-vertical" />
                   </button>
                   <ul class="dropdown-menu dropdown-menu-end">
-                    <li><button class="dropdown-item small" on:click={() => editDefinition(def)}><Icon icon="bi:gear" class="me-2" />Cấu hình schema</button></li>
+                    <li><button class="dropdown-item small" on:click={() => editDefinition(def)}><Icon icon="bi:gear" class="me-2" /><BilingualText key="registry_configure_schema" stacked={false} /></button></li>
                     <li><hr class="dropdown-divider"></li>
-                    <li><button class="dropdown-item small text-danger" on:click={() => deleteDefinition(def)}><Icon icon="bi:trash" class="me-2" />Xóa sổ bộ</button></li>
+                    <li><button class="dropdown-item small text-danger" on:click={() => deleteDefinition(def)}><Icon icon="bi:trash" class="me-2" /><BilingualText key="delete" stacked={false} /></button></li>
                   </ul>
                 </div>
               </div>
 
               <p class="text-muted small mb-3 flex-grow-1">
-                {def.description || 'Chưa có mô tả cho mẫu sổ này.'}
+                {def.description || ''}
               </p>
 
               <div class="d-flex justify-content-between align-items-center pt-3 border-top mt-auto">
                 <span class="badge bg-primary bg-opacity-10 text-primary fw-semibold px-2 py-1">
-                  {def.entryCount || 0} bản ghi
+                  {def.entryCount || 0} records
                 </span>
                 <div class="d-flex gap-1">
                   <button class="btn btn-sm btn-outline-secondary" on:click={() => editDefinition(def)} title="Cấu hình">
                     <Icon icon="bi:sliders" />
                   </button>
-                  <button class="btn btn-sm btn-primary" on:click={() => openRegistry(def)}>
-                    Mở Sổ Bộ <Icon icon="bi:arrow-right" class="ms-1" />
+                  <button class="btn btn-sm btn-primary d-flex align-items-center gap-1" on:click={() => openRegistry(def)}>
+                    <BilingualText key="registry_open_ledger" stacked={false} />
+                    <Icon icon="bi:arrow-right" />
                   </button>
                 </div>
               </div>

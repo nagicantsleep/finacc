@@ -2,6 +2,7 @@
   import { createEventDispatcher, onMount } from 'svelte';
   import Icon from '@iconify/svelte';
   import axios from 'axios';
+  import BilingualText from '../components/bilingual-text.svelte';
 
   export let definition = null;
 
@@ -64,7 +65,7 @@
   }
 
   async function deleteEntry(entry) {
-    if (!confirm(`Bạn có chắc muốn xóa bản ghi "${entry.title}" không?`)) return;
+    if (!confirm('このレコードを削除しますか？ / Bạn có chắc muốn xóa bản ghi này?')) return;
     try {
       await axios.delete(`/api/registry/entry/${entry.id}`);
       loadEntries();
@@ -88,22 +89,25 @@
   <div class="card-header bg-white py-3 border-bottom">
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
       <div class="d-flex align-items-center gap-2">
-        <button class="btn btn-outline-secondary btn-sm" on:click={() => dispatch('back')}>
-          <Icon icon="bi:arrow-left" /> Quay lại danh sách
+        <button class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-1" on:click={() => dispatch('back')}>
+          <Icon icon="bi:arrow-left" />
+          <BilingualText key="registry_back_to_list" stacked={false} />
         </button>
         <h5 class="mb-0 fw-bold d-flex align-items-center gap-2 text-dark">
           <Icon icon={definition?.icon || 'bi-journal-bookmark'} class="text-primary" />
           <span>{definition?.name}</span>
-          <span class="badge bg-light text-secondary border small">{total} bản ghi</span>
+          <span class="badge bg-light text-secondary border small">{total} records</span>
         </h5>
       </div>
 
       <div class="d-flex gap-2">
-        <button class="btn btn-outline-success btn-sm" on:click={exportCsv}>
-          <Icon icon="bi:file-earmark-spreadsheet" class="me-1" /> Xuất CSV
+        <button class="btn btn-outline-success btn-sm d-flex align-items-center gap-1" on:click={exportCsv}>
+          <Icon icon="bi:file-earmark-spreadsheet" />
+          <BilingualText key="registry_export_csv" stacked={false} />
         </button>
-        <button class="btn btn-primary btn-sm" on:click={openNewEntry}>
-          <Icon icon="bi:plus-lg" class="me-1" /> Thêm bản ghi mới
+        <button class="btn btn-primary btn-sm d-flex align-items-center gap-1" on:click={openNewEntry}>
+          <Icon icon="bi:plus-lg" />
+          <BilingualText key="registry_add_entry" stacked={false} />
         </button>
       </div>
     </div>
@@ -116,22 +120,24 @@
           <input
             type="text"
             class="form-control"
-            placeholder="Tìm kiếm theo mã hoặc tiêu đề..."
+            placeholder="Search / 検索..."
             bind:value={searchQuery}
             on:keydown={(e) => e.key === 'Enter' && handleSearch()}
           />
-          <button class="btn btn-outline-secondary" on:click={handleSearch}>Tìm</button>
+          <button class="btn btn-outline-secondary" on:click={handleSearch}>
+            <BilingualText key="search" stacked={false} />
+          </button>
         </div>
       </div>
 
       <div class="col-md-3">
         <select class="form-select form-select-sm" bind:value={statusFilter} on:change={handleSearch}>
-          <option value="all">Tất cả trạng thái</option>
-          <option value="open">Đang mở (Open)</option>
-          <option value="in_progress">Đang xử lý (In Progress)</option>
-          <option value="pending_review">Chờ duyệt (Review)</option>
-          <option value="closed_won">Thành công (Won)</option>
-          <option value="closed_lost">Đóng (Closed)</option>
+          <option value="all">すべてのステータス / Tất cả</option>
+          <option value="open">対応中 / Open</option>
+          <option value="in_progress">処理中 / In Progress</option>
+          <option value="pending_review">確認待ち / Review</option>
+          <option value="closed_won">完了・成約 / Won</option>
+          <option value="closed_lost">終了・見送り / Closed</option>
         </select>
       </div>
     </div>
@@ -152,7 +158,8 @@
         <Icon icon="bi:inbox" style="font-size: 2.5rem;" class="mb-2 text-secondary" />
         <div>Chưa có bản ghi nào trong sổ bộ này.</div>
         <button class="btn btn-outline-primary btn-sm mt-3" on:click={openNewEntry}>
-          <Icon icon="bi:plus-lg" class="me-1" /> Tạo bản ghi đầu tiên
+          <Icon icon="bi:plus-lg" class="me-1" />
+          <BilingualText key="registry_add_entry" stacked={false} />
         </button>
       </div>
     {:else}
@@ -160,18 +167,18 @@
         <table class="table table-hover table-striped mb-0 align-middle">
           <thead class="table-light">
             <tr>
-              <th style="width: 130px;">Mã</th>
-              <th>Tiêu đề / Đối tượng</th>
-              <th style="width: 120px;">Trạng thái</th>
-              <th>Đối tác</th>
-              <th>Người phụ trách</th>
+              <th style="width: 130px;"><BilingualText key="registry_col_code" stacked={false} /></th>
+              <th><BilingualText key="registry_col_title" stacked={false} /></th>
+              <th style="width: 120px;"><BilingualText key="registry_col_status" stacked={false} /></th>
+              <th><BilingualText key="registry_col_company" stacked={false} /></th>
+              <th><BilingualText key="registry_col_assignee" stacked={false} /></th>
               {#if definition && definition.schema && definition.schema.fields}
                 {#each definition.schema.fields.slice(0, 4) as field}
                   <th>{field.label || field.key}</th>
                 {/each}
               {/if}
-              <th style="width: 110px;">Ngày tạo</th>
-              <th style="width: 100px;" class="text-end">Thao tác</th>
+              <th style="width: 110px;"><BilingualText key="registry_col_created_at" stacked={false} /></th>
+              <th style="width: 100px;" class="text-end"><BilingualText key="registry_col_actions" stacked={false} /></th>
             </tr>
           </thead>
           <tbody>
