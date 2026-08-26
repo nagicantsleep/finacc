@@ -39,6 +39,11 @@ import TenantMember from './tenantmember.js';
 import RegistryDefinition from './registrydefinition.js';
 import RegistryEntry from './registryentry.js';
 import RegistryTimeline from './registrytimeline.js';
+import AttendanceRecord from './attendancerecord.js';
+import LeaveRequest from './leaverequest.js';
+import SalaryFormula from './salaryformula.js';
+import PayrollPeriod from './payrollperiod.js';
+import PayrollSlip from './payrollslip.js';
 import User from './user.js';
 import Voucher from './voucher.js';
 import VoucherClass from './voucherclass.js';
@@ -84,6 +89,11 @@ const models = {
   RegistryDefinition: RegistryDefinition(sequelize, DataTypes),
   RegistryEntry: RegistryEntry(sequelize, DataTypes),
   RegistryTimeline: RegistryTimeline(sequelize, DataTypes),
+  AttendanceRecord: AttendanceRecord(sequelize, DataTypes),
+  LeaveRequest: LeaveRequest(sequelize, DataTypes),
+  SalaryFormula: SalaryFormula(sequelize, DataTypes),
+  PayrollPeriod: PayrollPeriod(sequelize, DataTypes),
+  PayrollSlip: PayrollSlip(sequelize, DataTypes),
   Sticky: Sticky(sequelize, DataTypes),
   StickyStatus: StickyStatus(sequelize, DataTypes),
   SubAccount: SubAccount(sequelize, DataTypes),

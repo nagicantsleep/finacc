@@ -165,6 +165,30 @@ export default [
     icon: { name: 'bi:journals' },
     description: `ノーコード台帳管理システム。<br/>自由なデータ項目定義とタイムライン対応の顧客・取引履歴台帳。`
   }, {
+    name: 'attendance',
+    title: '勤怠管理',
+    match: /^\/attendance/,
+    href: (status) => {
+      return ('/attendance');
+    },
+    authority: (user) => {
+      return true; // All members can clock in and view attendance
+    },
+    icon: { name: 'bi:alarm' },
+    description: `出退勤打刻・残業管理・休暇申請ワークフロー。`
+  }, {
+    name: 'payroll',
+    title: '給与計算',
+    match: /^\/payroll/,
+    href: (status) => {
+      return ('/payroll');
+    },
+    authority: (user) => {
+      return (user.personnelManagement || user.accounting || user.administrable);
+    },
+    icon: { name: 'bi:wallet2' },
+    description: `給与自動計算・明細書発行・会計仕訳自動起票。`
+  }, {
     name: 'task',
     title: '案件管理',
     href: (status) => {

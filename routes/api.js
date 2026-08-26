@@ -33,11 +33,15 @@ import cross_slip from './api_cross_slip.js';
 import cross_slip_detail from './api_cross_slip_detail.js';
 import simulation from './api_simulation.js';
 import registry from './api_registry.js';
+import attendance from './api_attendance.js';
+import payroll from './api_payroll.js';
 
 const pkg = JSON.parse(fs.readFileSync('package.json', 'utf-8'));
 const VERSION = pkg.version;
 
 router.use('/registry', registry);
+router.use('/attendance', attendance);
+router.use('/payroll', payroll);
 
 router.post('/admin/backup', is_authenticated, requireTenant, admin.backup);
 router.post('/admin/restore', is_authenticated, requireTenant, admin.restore);
