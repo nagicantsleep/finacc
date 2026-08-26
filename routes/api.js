@@ -3,6 +3,9 @@ const router = express.Router();
 import fs from 'fs';
 import {is_authenticated} from '../libs/user.js';
 import {requireTenant} from '../libs/tenant.js';
+import {guard} from '../libs/permission.js';
+
+router.use(guard);
 import closingApi from './api_closing.js';
 
 import journal from './api_journal.js';
@@ -54,7 +57,7 @@ router.delete('/admin/backup/:date', is_authenticated, requireTenant, admin.dele
 
 router.get('/user', is_authenticated, user.get);
 router.get('/user/tenants', is_authenticated, user.tenants);
-router.get('/user/session-status', is_authenticated, user.sessionStatus);
+router.get('/user/session-status', user.sessionStatus);
 router.get('/user/language-pair', is_authenticated, user.languagePair);
 router.put('/user/language-pair', is_authenticated, user.updateLanguagePair);
 router.post('/user/select-tenant', is_authenticated, user.selectTenant);
@@ -228,7 +231,7 @@ router.get('/project-summary/:projectId', is_authenticated, requireTenant, proje
 
 router.post('/setup', is_authenticated, requireTenant, setup)
 
-router.get('/version', is_authenticated, (req, res, next) => {
+router.get('/version', (req, res, next) => {
   res.json({version: VERSION});
 });
 
