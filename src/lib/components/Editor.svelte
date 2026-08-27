@@ -59,7 +59,7 @@ import Editor from '@tinymce/tinymce-svelte';
 import CodeMirror from "svelte-codemirror-editor";
 import { markdown } from "@codemirror/lang-markdown";
 import { javascript } from "@codemirror/lang-javascript";
-import textConvert from '../../../libs/text-convert.js';
+import textConvert from '$lib/shared/text-convert.js';
 import morphdom from 'morphdom';
 
 export let type;

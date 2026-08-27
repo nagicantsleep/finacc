@@ -8,7 +8,7 @@
   export (E1.7), full filter UI (E1.8), bilingual mode selector (E1.9),
   legacy remove (E1.10).
 -->
-{#key $page.url.pathname}
+{#key $currentPage}
 <div class="tb-page">
   {#if mode === 'simulation'}
     <div class="tb-sim-banner">
@@ -22,7 +22,7 @@
 
   <header class="tb-chrome">
     <div class="tb-header-row">
-      <h1 class="tb-title page-title-bilingual">
+      <h1 class='$lib/i18n/bilingual.js'>
         <BilingualText key="trial_balance_v2" inline={true} />
       </h1>
       <ul class="nav tb-tabs" role="tablist">
@@ -248,7 +248,7 @@
 
 <script>
   import axios from 'axios';
-  import { page } from '$app/stores';
+  import { currentPage, link } from '$lib/client/router.js';
   import { languagePair } from '$lib/i18n/bilingual.js';
   import BilingualText from '$lib/components/BilingualText.svelte';
   import TrialBalanceList from './trial-balance-list.svelte';
@@ -305,9 +305,9 @@
     fetchScenarios();
   }
 
-  $: if ($page?.url?.pathname && $page.url.pathname !== lastFetched) {
+  $: if ($currentPage && $currentPage !== lastFetched) {
     syncFromUrl();
-    lastFetched = $page.url.pathname;
+    lastFetched = $currentPage;
     fetchData();
   }
   $: if (status && status.fy && status.fy.term && lastFetched && !loading && rawLines.length === 0 && !error) {
@@ -315,7 +315,7 @@
   }
 
   const syncFromUrl = () => {
-    const path = $page?.url?.pathname || (typeof location !== 'undefined' ? location.pathname : '');
+    const path = $currentPage || '';
     const m = path.match(/^\/reports\/trial-balance\/([^/]+)/);
     if (m) {
       const param = m[1];
@@ -492,13 +492,11 @@
     if (languageMode !== 'ja-vi') qs.set('lang', languageMode);
     const s = qs.toString();
     if (s) href += `?${s}`;
-    if (typeof window !== 'undefined' && href !== window.location.pathname + window.location.search) {
-      window.history.pushState({}, '', href);
-    }
+    if (href !== $currentPage) link(href);
   };
 
   $: syncFiltersFromUrl = (() => {
-    const path = $page?.url?.pathname ? ($page.url.pathname + $page.url.search) : '';
+    const path = $currentPage || '';
     const qIdx = path.indexOf('?');
     const qs = qIdx >= 0 ? path.slice(qIdx + 1) : '';
     const params = new URLSearchParams(qs);

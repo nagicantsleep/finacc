@@ -1,6 +1,6 @@
 <script>
 import {onMount, beforeUpdate, afterUpdate, createEventDispatcher} from 'svelte';
-import InputNumber from '$lib/components/InputNumber.svelte';
+import  InputNumber from '$lib/components/InputNumber.svelte';
 import BilingualText from '$lib/components/BilingualText.svelte';
 import {TAX_CLASS} from '$lib/utils.js';
 

@@ -1,6 +1,6 @@
 <div class="list">
   <div class="page-title d-flex justify-content-between">
-    <h1 class="page-title-bilingual"><BilingualText key="bank_ledger" inline={true} /></h1>
+    <h1 class='$lib/i18n/bilingual.js'><BilingualText key="bank_ledger" inline={true} /></h1>
   </div>
   <ul class="page-subtitle d-flex justify-content-between">
     <div class="nav">
@@ -197,13 +197,13 @@
 <script>
 import axios from 'axios';
 import {onMount, afterUpdate} from 'svelte';
-import {ledgerLines} from '../../../libs/ledger';
+import {ledgerLines} from '$lib/shared/ledger-lines.js';
 import {setAccounts} from '$lib/client/cross-slip.js';
-import CrossSlipModal from '$lib/components/cross-slip/cross-slip-modal.svelte';
+import CrossSlipModal from '../cross-slip/cross-slip-modal.svelte';
 import BilingualText from '$lib/components/BilingualText.svelte';
 import {languagePair} from '$lib/i18n/bilingual.js';
 import {DateString} from '$lib/utils.js';
-import {currentPage} from '../../javascripts/router.js';
+import {currentPage} from '$lib/client/router.js';
 
 export let status;
 

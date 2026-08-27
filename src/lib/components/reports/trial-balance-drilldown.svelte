@@ -99,7 +99,9 @@
 <script>
   import { onMount, createEventDispatcher } from 'svelte';
   import axios from 'axios';
+  import Modal from 'bootstrap/js/dist/modal';
   import BilingualText from '$lib/components/BilingualText.svelte';
+  import { link } from '$lib/client/router.js';
 
   export let term = null;
   export let accountCode = null;
@@ -203,21 +205,9 @@
     : '#';
 
   onMount(() => {
-    modal = {
-      show: () => {
-        if (modalEl) {
-          modalEl.classList.add('show');
-          modalEl.style.display = 'block';
-        }
-      },
-      hide: () => {
-        if (modalEl) {
-          modalEl.classList.remove('show');
-          modalEl.style.display = 'none';
-          resetState();
-        }
-      }
-    };
+    modal = new Modal(modalEl);
+    modalEl.addEventListener('hidden.bs.modal', resetState);
+    return () => modalEl.removeEventListener('hidden.bs.modal', resetState);
   });
 </script>
 

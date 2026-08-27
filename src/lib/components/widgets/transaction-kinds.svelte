@@ -24,7 +24,7 @@ const getClasses = async () => {
   { type: "order", name: 'displayOrder'},
   { type: "text", name: 'label', title: "kind", align: "left"},
   { type: "checkbox", name: 'hasDetails', title: "has_details", width: "100px"},
-  { type: "dropdown", name: 'hasDocument', title: "document", width: "100px",
+  { type: '$lib/client/document.js', width: "100px",
     source:[
       [0, $bi('home_opt_none')],
       [1, $bi('home_opt_optional')],

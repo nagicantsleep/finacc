@@ -113,7 +113,7 @@ import axios from 'axios';
 import Modal from 'bootstrap/js/dist/modal';
 import {onMount, beforeUpdate, afterUpdate, createEventDispatcher} from 'svelte';
 const dispatch = createEventDispatcher();
-import CrossSlip from '$lib/components/cross-slip/cross-slip.svelte';
+import CrossSlip from './cross-slip.svelte';
 import BilingualText from '$lib/components/BilingualText.svelte';
 import { bi } from '$lib/i18n/bilingual.js';
 

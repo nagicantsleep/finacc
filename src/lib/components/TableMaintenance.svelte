@@ -40,7 +40,7 @@ import {onMount, beforeUpdate, afterUpdate, createEventDispatcher} from 'svelte'
 import SpreadSheet from '$lib/components/Spreadsheet.svelte';
 import BilingualText from '$lib/components/BilingualText.svelte';
 import axios from 'axios';
-import {eventBus} from '../../javascripts/table-maintenance.js';
+import {eventBus} from '$lib/client/table-maintenance.js';
 
 export let title = '';
 export let endpoint = '';

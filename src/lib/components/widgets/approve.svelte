@@ -69,7 +69,7 @@
 import axios from 'axios';
 import {onMount, afterUpdate, tick, createEventDispatcher} from 'svelte';
 const dispatch = createEventDispatcher();
-import CrossSlipModal from '$lib/components/cross-slip/cross-slip-modal.svelte';
+import CrossSlipModal from '../cross-slip/cross-slip-modal.svelte';
 import {setAccounts} from '$lib/client/cross-slip.js';
 import { v4 as uuidv4 } from "uuid";
 import BilingualText from '$lib/components/BilingualText.svelte';
