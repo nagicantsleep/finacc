@@ -1,4 +1,4 @@
-import models from '../models/index.js';
+import models from '../../../models/index.js';
 
 export const DEFAULT_COMPANY_CLASSES = [
   { name: '国内購買先', displayOrder: 1, isClient: false },

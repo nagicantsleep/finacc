@@ -5,7 +5,7 @@
  * CRUD is tenant-scoped — every call receives tenantId.
  */
 
-import models from '../../models/index.js';
+import models from '.././db/index.js';
 import Ajv from 'ajv';
 import { getScenario } from './scenario-service.js';
 

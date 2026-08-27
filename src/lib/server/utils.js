@@ -14,7 +14,7 @@ export const isBrowser = () =>
 export const getCompanyInfo = async (tenantId) => {
   if (isNode()) {
     if (tenantId) {
-      const { default: models } = await import('../models/index.js');
+      const { default: models } = await import('../../../models/index.js');
       const tenant = await models.Tenant.findByPk(tenantId);
       if (tenant && tenant.settings) {
         company = tenant.settings;
@@ -41,7 +41,7 @@ export const getCompanyInfo = async (tenantId) => {
 export const putCompanyInfo = async(info, tenantId) => {
   if (isNode()) {
     if (tenantId) {
-      const { default: models } = await import('../models/index.js');
+      const { default: models } = await import('../../../models/index.js');
       const tenant = await models.Tenant.findByPk(tenantId);
       if (tenant) {
         await tenant.update({ settings: info });

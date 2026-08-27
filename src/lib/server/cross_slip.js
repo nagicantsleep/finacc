@@ -1,4 +1,4 @@
-import models from '../models/index.js';
+import models from '../../../models/index.js';
 const Op = models.Sequelize.Op;
 
 const createDetail = (line, slipId, lineNo, tenantId) => {

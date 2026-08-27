@@ -7,7 +7,7 @@
  * Returns [{ month, openingCash, cashIn, cashOut, netFlow, endingCash, accrualProfit }].
  */
 
-import models from '../../models/index.js';
+import models from '.././db/index.js';
 import { getScenario } from './scenario-service.js';
 
 const CASH_MIDDLE = '現金及び預金';

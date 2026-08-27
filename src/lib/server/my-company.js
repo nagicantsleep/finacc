@@ -9,7 +9,7 @@ export default async (tenantId) => {
       company = result.data.companies[0];
     }
   } else if  ( isNode() )  {
-    const { default: models } = await import('../models/index.js');
+    const { default: models } = await import('../../../models/index.js');
     const ownCompanyClass = await models.CompanyClass.findOne({
       where: {
         tenantId,

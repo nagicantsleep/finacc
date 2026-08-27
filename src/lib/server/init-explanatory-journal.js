@@ -8,7 +8,7 @@ let dates;
 const LINES = 24;
 
 const setupDates = async (term, tenantId) => {
-  const { default: models } = await import('../models/index.js');
+  const { default: models } = await import('../../../models/index.js');
   const Op = models.Sequelize.Op;
   
   fy = await models.FiscalYear.findOne({

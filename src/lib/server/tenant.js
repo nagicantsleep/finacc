@@ -1,4 +1,4 @@
-import models from '../models/index.js';
+import models from '../../../models/index.js';
 
 const SESSION_PERMISSION_FIELDS = [
   'accounting', 'fiscalBrowsing', 'approvable', 'administrable',

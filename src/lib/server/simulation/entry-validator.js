@@ -13,7 +13,7 @@
  * Plus: scenario must be status='draft' for any write.
  */
 
-import models from '../../models/index.js';
+import models from '.././db/index.js';
 
 function toNumber(n) {
   if (n == null) return NaN;

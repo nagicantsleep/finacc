@@ -1,4 +1,4 @@
-import models from '../models/index.js';
+import models from '../../../models/index.js';
 import { getCompanyInfo, numeric } from './utils.js';
 import { field } from './parse_account_code.js';
 

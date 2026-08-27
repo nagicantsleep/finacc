@@ -1,4 +1,4 @@
-import models from '../db/index.js';
+import models from '../../../../models/index.js';
 const Op = models.Sequelize.Op;
 
 export const getAccountLedger = async (tenantId, term, accountCode, subAccountCode) => {

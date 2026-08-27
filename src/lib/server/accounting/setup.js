@@ -1,5 +1,5 @@
-import models from '../db/index.js';
-import parseAccounts from '../../../../libs/parse_accounts.js';
+import models from '../../../../models/index.js';
+import parseAccounts from '../parse_accounts.js';
 import { menuTemplates } from './menuTemplates.js';
 
 export const createInitialMenuTemplates = async (tenantId, t) => {

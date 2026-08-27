@@ -5,7 +5,7 @@
  * via AccountClass. Returns { months: [{ month, revenue, expense, netIncome }] }.
  */
 
-import models from '../../models/index.js';
+import models from '.././db/index.js';
 import { getScenario } from './scenario-service.js';
 
 /**

@@ -91,7 +91,7 @@ const aggregateMovements = (details, accountByCode, validSubKeys, movementByLine
  *
  * deps: { Account, SubAccount, AccountRemaining, SubAccountRemaining }
  *       each must expose findAll({ where, include }). Production caller passes
- *       the result of `import models from '../../models/index.js'`.
+ *       the result of `import models from '.././db/index.js'`.
  */
 export async function balanceEngine(params, deps) {
   if (!deps) {

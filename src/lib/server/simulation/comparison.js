@@ -11,7 +11,7 @@
  * Tenant scoping: scenario must belong to tenantId; cross-tenant returns 404.
  */
 
-import models from '../../models/index.js';
+import models from '.././db/index.js';
 import { trialBalanceV2, actualEntrySource } from '../reporting/trial-balance-v2.js';
 
 function simulationEntrySource(deps, tenantId, scenarioId, fetchStart, fetchEnd) {

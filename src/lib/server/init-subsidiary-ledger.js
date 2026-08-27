@@ -5,7 +5,7 @@ import Accounts from './accounts.js';
 import {get_details} from '../routes/api_ledger.js';
 
 const ledgerPages = async (term, account, subAccount, tenantId) => {
-  const { default: models } = await import('../models/index.js');
+  const { default: models } = await import('../../../models/index.js');
   
   const fy = await models.FiscalYear.findOne({
     where: { term, tenantId }
@@ -45,7 +45,7 @@ const ledgerPages = async (term, account, subAccount, tenantId) => {
 }
 
 export default async (term, tenantId) => {
-  const { default: models } = await import('../models/index.js');
+  const { default: models } = await import('../../../models/index.js');
   
   let fy = await models.FiscalYear.findOne({
     where: { tenantId, term }

@@ -467,7 +467,7 @@ const SGA = () => {
 
 
 export default async(term, tenantId) => {
-  const { default: models } = await import('../models/index.js');
+  const { default: models } = await import('../../../models/index.js');
   
   let fy = await models.FiscalYear.findOne({
     where: { tenantId, term }

@@ -16,7 +16,7 @@
  */
 
 import ExcelJS from 'exceljs';
-import models from '../../models/index.js';
+import models from '.././db/index.js';
 import { simulatedTrialBalance } from './trial-balance.js';
 import { comparisonReport } from './comparison.js';
 import { buildSubtotals } from '../reporting/tb-subtotal.js';

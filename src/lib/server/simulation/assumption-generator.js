@@ -408,7 +408,7 @@ export function generateExpenseFixedEntries(assumption, scenario, salesPerMonth 
 // Preview (issue #267 — E3.6)
 // ---------------------------------------------------------------------------
 
-import models from '../../models/index.js';
+import models from '.././db/index.js';
 import { getScenario } from './scenario-service.js';
 
 /**

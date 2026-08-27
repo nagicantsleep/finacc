@@ -279,7 +279,7 @@ const printIncomeStatementPage = () => {
 
 
 export default async (term, tenantId) => {
-  const { default: models } = await import('../models/index.js');
+  const { default: models } = await import('../../../models/index.js');
   
   fy = await models.FiscalYear.findOne({
     where: { tenantId, term }

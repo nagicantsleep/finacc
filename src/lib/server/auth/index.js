@@ -1,4 +1,4 @@
-import models from '../db/index.js';
+import models from '../../../../models/index.js';
 import bcrypt from 'bcrypt';
 import config from '../config.js';
 import crypto from 'crypto';

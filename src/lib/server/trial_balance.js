@@ -1,4 +1,4 @@
-import models from '../models/index.js';
+import models from '../../../models/index.js';
 const Op = models.Sequelize.Op;
 import Accounts from './accounts.js';
 import { numeric } from './parse_account_code.js';

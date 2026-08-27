@@ -12,7 +12,7 @@
  *   archived: terminal (no further transitions)
  */
 
-import models from '../../models/index.js';
+import models from '.././db/index.js';
 
 const STATES = new Set(['draft', 'locked', 'archived']);
 

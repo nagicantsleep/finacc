@@ -12,7 +12,7 @@
  * audit row commits/rolls back with the caller's work.
  */
 
-import models from '../models/index.js';
+import models from '../../../models/index.js';
 
 export async function audit({
   tenantId,

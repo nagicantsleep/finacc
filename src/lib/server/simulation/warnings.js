@@ -7,7 +7,7 @@
  *   SIM-W012: expense counter account not found
  */
 
-import models from '../../models/index.js';
+import models from '.././db/index.js';
 import { generateRecurringEntries } from './assumption-generator.js';
 
 /**

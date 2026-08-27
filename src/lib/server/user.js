@@ -1,4 +1,4 @@
-import models from '../models/index.js';
+import models from '../../../models/index.js';
 import bcrypt from 'bcrypt';
 const SALT_ROUNDS = 10;
 
