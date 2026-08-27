@@ -1,4 +1,32 @@
-import axios from 'axios';
+export const TAX_CLASS = [
+  { id: 0, name: '非課税', label: '非課税' },
+  { id: 1, name: '税込', label: '税込' },
+  { id: 2, name: '税抜', label: '税抜' },
+  { id: 9, name: '対象外', label: '対象外' }
+];
+
+export const BANK_ACCOUNT_TYPE = [
+  ['0', '普通預金'],
+  ['1', '当座預金'],
+  ['2', '貯蓄預金']
+];
+
+export const formatMoney = (val) => {
+  if (val == null) return '';
+  return Number(val).toLocaleString('ja-JP');
+};
+
+export const formatDate = (d) => {
+  if (!d) return '';
+  const dt = (d instanceof Date) ? d : new Date(d);
+  if (isNaN(dt.getTime())) return String(d);
+  return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(dt.getDate()).padStart(2, '0')}`;
+};
+
+export const taxClass = (id) => {
+  const item = TAX_CLASS.find((t) => t.id === parseInt(id, 10));
+  return item ? item.name : '';
+};
 
 export const wareki = (date) => {
   if (!date) return '';

@@ -82,7 +82,7 @@
 import axios from 'axios';
 import {onMount, beforeUpdate, afterUpdate, createEventDispatcher} from 'svelte';
 const dispatch = createEventDispatcher();
-import CompanyEntry from '../company/company-entry.svelte';
+import CompanyEntry from '$lib/components/company/company-entry.svelte';
 import BilingualText from '$lib/components/BilingualText.svelte';
 import { bi } from '$lib/i18n/bilingual.js';
 

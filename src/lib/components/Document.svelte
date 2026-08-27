@@ -48,9 +48,9 @@
 
 <script>
 import axios from 'axios';
-import DocumentFormat from './document-format.svelte';
-import Editor from './editor.svelte';
-import textConvert from '../../../libs/text-convert.js';
+import DocumentFormat from '$lib/components/DocumentFormat.svelte';
+import Editor from '$lib/components/Editor.svelte';
+import textConvert from '$lib/shared/text-convert.js';
 import {onMount, beforeUpdate, afterUpdate, createEventDispatcher} from 'svelte';
 import BilingualText from '$lib/components/BilingualText.svelte';
 const dispatch = createEventDispatcher();
