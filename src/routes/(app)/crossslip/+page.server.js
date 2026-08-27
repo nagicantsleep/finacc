@@ -9,7 +9,13 @@ export async function load({ locals }) {
 
   const accounts = await models.Account.findAll({
     where: { tenantId: locals.tenantId },
+    include: [{ model: models.SubAccount, as: 'subAccounts' }],
     order: [['accountCode', 'ASC']]
+  });
+
+  const taxRules = await models.TaxRule.findAll({
+    where: { tenantId: locals.tenantId },
+    order: [['displayOrder', 'ASC'], ['id', 'ASC']]
   });
 
   const now = new Date();
@@ -17,12 +23,24 @@ export async function load({ locals }) {
     accounts: accounts.map((a) => ({
       id: a.id,
       code: a.accountCode,
-      name: a.name
+      name: a.name,
+      subAccounts: (a.subAccounts || []).map((s) => ({
+        id: s.id,
+        code: s.subAccountCode,
+        name: s.name
+      }))
     })),
-    defaultDate: {
-      year: now.getFullYear(),
-      month: now.getMonth() + 1,
-      day: now.getDate()
+    taxRules: taxRules.map((t) => t.toJSON()),
+    currentFy: locals.currentFy ? {
+      term: locals.currentFy.term,
+      startDate: new Date(locals.currentFy.startDate),
+      endDate: new Date(locals.currentFy.endDate),
+      taxIncluded: Boolean(locals.currentFy.taxIncluded)
+    } : {
+      term: 1,
+      startDate: new Date(`${now.getFullYear()}-01-01`),
+      endDate: new Date(`${now.getFullYear()}-12-31`),
+      taxIncluded: false
     }
   };
 }
