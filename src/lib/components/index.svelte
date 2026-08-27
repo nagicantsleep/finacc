@@ -1,0 +1,283 @@
+{#if ( getStore(currentPage) === '/login') }
+<Login
+  bind:current={status.current}></Login>
+{:else if ( getStore(currentPage) === '/signup' ) }
+<SignUp></SignUp>
+{:else}
+<div class="topbar">
+  <div class="brand-container">
+    <a href="#" class="brand-link"
+      on:click|preventDefault={() => {
+        link('/home');
+      }}>
+        <img src="/public/logo.png" alt="Logo" class="brand-image">
+        <span class="brand-text">Hieronymus</span>
+    </a>
+  </div>
+  <nav class="main-header navbar navbar-expand-lg">
+    <NavBar
+      status={status}></NavBar>
+  </nav>
+</div>
+<aside
+  class="main-sidebar">
+  <SideBar
+    bind:mainCount={mainCount}
+    bind:status={status}></SideBar>
+</aside>
+<main class="content-wrapper">
+  <div class="container-fluid">
+    {#key mainCount}
+    <div class="content">
+      <Alert bind:alert={alert} {alert_level}></Alert>
+      <Router {routes} {toast}
+        bind:status={status}/>
+    </div>
+    {/key}
+  </div>
+</main>
+<footer
+  class="main-footer">
+  <CommonFooter></CommonFooter>
+</footer>
+<Toast bind:this={toast}/>
+<OkModal
+  bind:this={modal}
+  title={title}
+  description={description}
+  on:answer={operation}
+  ></OkModal>
+{/if}
+
+<script>
+import {onMount, beforeUpdate, afterUpdate, createEventDispatcher} from 'svelte';
+import axios from 'axios';
+
+import NavBar from './common/nav.svelte';
+import CommonFooter from './common/footer.svelte';
+import SideBar from './common/sidebar.svelte';
+import Toast from '$lib/components/common/Toast.svelte';
+import eventBus from '$lib/client/event-bus.js';
+
+import Alert from './components/alert.svelte';
+
+import Login from './login/login.svelte';
+import SignUp from './login/signup.svelte';
+import Home from './home/home.svelte';
+import Tenant from './tenant/tenant.svelte';
+import Menu from './menu/menu.svelte';
+import Journal from './journal/journal.svelte';
+import Ledger from './ledger/ledger.svelte';
+import BankLedger from './bank-ledger/bank-ledger.svelte';
+import ReportsTrialBalance from './reports/trial-balance.svelte';
+import SimulationScenarios from './simulation/scenarios.svelte';
+import SimulationDetail from './simulation/detail.svelte';
+import Changes from './changes/changes.svelte';
+import Voucher from './voucher/voucher.svelte';
+import Accounts from './accounts/accounts.svelte';
+import Company from './company/company.svelte';
+import Project from './project/project.svelte';
+import Registry from './registry/registry.svelte';
+import Attendance from './attendance/attendance.svelte';
+import Payroll from './payroll/payroll.svelte';
+import Expense from './expense/expense.svelte';
+
+import Transaction from './transaction/transaction.svelte';
+import Item from './item/item.svelte';
+import Member from './member/member.svelte';
+import Task from './task/task.svelte';
+import ClosingConfirm from './closing/closing-confirm.svelte';
+import OkModal from '$lib/components/common/OkModal.svelte';
+
+import Router from './components/router.svelte';
+import BilingualText from '$lib/components/BilingualText.svelte';
+import {currentPage, getStore, link} from '$lib/client/router.js';
+import { loadDictionaries, languagePair } from '$lib/i18n/bilingual.js';
+import { getCompanyInfo } from '$lib/utils.js';
+import ja from '$lib/i18n/locales/ja.json';
+import vi from '$lib/i18n/locales/vi.json';
+import en from '$lib/i18n/locales/en.json';
+
+loadDictionaries({ ja, vi, en });
+
+export let term;
+
+const routes = [
+  {
+    match: /^\/closing/,
+    component: ClosingConfirm
+  },
+  {
+    match: /^\/menu/,
+    component: Menu
+  },
+  {
+    match: /^\/home/,
+    component: Home
+  },
+  {
+    match: /^\/tenant/,
+    component: Tenant
+  },
+  {
+    match: /^\/journal/,
+    component: Journal
+  },
+  {
+    match: /^\/ledger/,
+    component: Ledger
+  },
+  {
+    match: /^\/bank-ledger/,
+    component: BankLedger
+  },
+  {
+    match: /^\/reports\/trial-balance/,
+    component: ReportsTrialBalance
+  },
+  {
+    match: /^\/simulation\/scenarios\/\d+/,
+    component: SimulationDetail
+  },
+  {
+    match: /^\/simulation/,
+    component: SimulationScenarios
+  },
+  {
+    match: /^\/changes/,
+    component: Changes
+  },
+  {
+    match: /^\/voucher/,
+    component: Voucher
+  },
+  {
+    match: /^\/accounts/,
+    component: Accounts
+  },
+  {
+    match: /^\/company/,
+    component: Company
+  },
+  {
+    match: /^\/project/,
+    component: Project
+  },
+  {
+    match: /^\/registry/,
+    component: Registry
+  },
+  {
+    match: /^\/attendance/,
+    component: Attendance
+  },
+  {
+    match: /^\/payroll/,
+    component: Payroll
+  },
+  {
+    match: /^\/expense/,
+    component: Expense
+  },
+  {
+    match: /^\/task/,
+    component: Task
+  },
+  {
+    match: /^\/transaction/,
+    component: Transaction
+  },
+  {
+    match: /^\/item/,
+    component: Item
+  },
+  {
+    match: /^\/member/,
+    component: Member
+  }
+];
+
+let toast;
+let description;
+let title;
+let operation;
+let modal;
+
+let alert;
+let alert_level;
+let status = {
+  fy: {
+    term: term,
+    startDate: new Date(),
+    endDate: new Date()
+  },
+  company: {},
+  user: {},
+  pathname: '',
+  current: 'login'
+}
+
+let mainCount = 0;
+
+let reply;
+const doReply = (event) => {
+  eventBus.emit(reply, event.detail);
+}
+// currentPage.set('/home');
+
+onMount(async () => {
+  console.log('index onMount');
+  status.pathname = location.pathname;
+  // currentPage.set(location.pathname);
+
+  // Fetch language pair preference from server
+  try {
+    const langRes = await axios.get('/api/user/language-pair');
+    if (langRes.data && langRes.data.languagePair) {
+      languagePair.set(langRes.data.languagePair);
+    }
+  } catch (e) {
+    console.log('language-pair fetch failed, using default', e);
+  }
+
+  const res = await axios.get('/api/user');
+  status.user = res.data.user;
+  status.company = await getCompanyInfo();
+  axios.get(`/api/term/${term}`).then((res) => {
+    let fy = res.data;
+    if  ( fy )  {
+      status.fy = fy;
+      console.log({fy});
+      status.fy.startDate = new Date(fy.startDate);
+      status.fy.endDate = new Date(fy.endDate);
+    } else {
+      status.fy = {};
+    }
+  });
+  window.onpopstate = (event) => {
+    console.log('maybe back', event);
+    const page = location.pathname + location.search;
+    console.log("popstate:", page);
+    currentPage.set(page);
+  };
+  eventBus.on('okModal', (args) => {
+    console.log(args);
+    title = args.title;
+    description = args.description;
+    reply = args.reply;
+    operation = doReply;
+    modal.show();
+  })
+})
+
+beforeUpdate(() => {
+  let args = location.pathname.split('/');
+  //console.log('index beforeUpdate', args);
+  //status = status;
+  //console.log('index beforeUpdate', {status});
+})
+afterUpdate(() => {
+  console.log('index afterUpdate');
+})
+
+</script>

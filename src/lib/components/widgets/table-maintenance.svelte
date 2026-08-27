@@ -21,10 +21,10 @@
 
 <script>
 import {onMount, beforeUpdate, afterUpdate, createEventDispatcher} from 'svelte';
-import SpreadSheet from '../components/spreadsheet.svelte';
+import SpreadSheet from '$lib/components/Spreadsheet.svelte';
 import BilingualText from '$lib/components/BilingualText.svelte';
 import axios from 'axios';
-import {eventBus} from '$lib/client/table-maintenance.js';
+import {eventBus} from '../../javascripts/table-maintenance.js';
 
 export let endpoint = '';
 export let columns = [];

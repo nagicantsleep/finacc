@@ -33,7 +33,7 @@ import axios from 'axios';
 import {onMount, afterUpdate} from 'svelte';
 import VoucherEntry from './voucher-entry.svelte';
 import VoucherList from './voucher-list.svelte';
-import CrossSlipModal from '$lib/components/cross-slip/cross-slip-modal.svelte';
+import CrossSlipModal from '../cross-slip/cross-slip-modal.svelte';
 import {numeric, formatDate} from '$lib/utils.js';
 import {currentVoucher, getStore} from '$lib/client/current-record.js';
 import {setAccounts} from '$lib/client/cross-slip.js';

@@ -34,13 +34,14 @@
 
 <script>
 import axios from 'axios';
-import { onMount, beforeUpdate, afterUpdate, createEventDispatcher } from 'svelte';
-import { page } from '$app/stores';
+import Modal from 'bootstrap/js/dist/modal';
+import {onMount, beforeUpdate, afterUpdate, createEventDispatcher} from 'svelte';
 import AccountsList from './accounts-list.svelte';
 import AccountModal from './account-modal.svelte';
-import { setAccounts } from '$lib/client/cross-slip.js';
-import { numeric } from '$lib/utils.js';
-import { parseParams, buildParam } from '$lib/client/params.js';
+import {setAccounts} from '$lib/client/cross-slip.js';
+import {numeric, formatDate} from '$lib/utils.js';
+import {parseParams, buildParam} from '$lib/client/params.js';
+import { currentPage } from '$lib/client/router.js';
 
 import BilingualText from '$lib/components/BilingualText.svelte';
 import { languagePair } from '$lib/i18n/bilingual.js';
@@ -53,7 +54,7 @@ let	mode;
 let	account = {};
 let	subAccount = {};
 
-$: checkPage($page?.url?.pathname);
+$: checkPage($currentPage);
 
 const ready = () => {
   lines = [];
@@ -153,29 +154,14 @@ const checkPage = (page) => {
 
 onMount(() => {
   status.params = parseParams();
-  modal = {
-    show: () => {
-      const el = document.getElementById('account-modal');
-      if (el) {
-        el.classList.add('show');
-        el.style.display = 'block';
-      }
-    },
-    hide: () => {
-      const el = document.getElementById('account-modal');
-      if (el) {
-        el.classList.remove('show');
-        el.style.display = 'none';
-      }
-    }
-  };
+  modal = new Modal(document.getElementById('account-modal'));
   updateAccounts();
-  checkPage(location.pathname);
+  checkPage($currentPage);
 })
 
 let openModal = false;
 afterUpdate(() => {
-  if (openModal && modal) {
+  if	( openModal )	{
     modal.show();
     openModal = false;
   }

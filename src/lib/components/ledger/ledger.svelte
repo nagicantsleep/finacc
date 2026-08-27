@@ -1,6 +1,6 @@
 <div class="page-title d-flex justify-content-between">
-  <h1 class="page-title-bilingual"><BilingualText key="ledger" inline={true} /></h1>
-  <a href="/forms/general_ledger/{status.fy.term}?format=pdf" download="{$bi('form_print_gl')}-{today}.pdf" class="btn btn-primary btn-bilingual"><BilingualText key="download_general_ledger" inline={true} /><i class="bi bi-download"></i>
+  <h1 class='$lib/i18n/bilingual.js'><BilingualText key="ledger" inline={true} /></h1>
+  <a href='$lib/i18n/bilingual.js'><BilingualText key="download_general_ledger" inline={true} /><i class="bi bi-download"></i>
   </a>
 </div>
 <AccountSelect
@@ -21,16 +21,16 @@
   {/if}
   <div>
     {#if (account)}
-    <button type="button" class="btn btn-info btn-bilingual"
+    <button type='$lib/i18n/bilingual.js'
       on:click={() => {
         if (subAccountCode) {
-          window.location = `/changes/${status.fy.term}/${accountCode}/${subAccountCode}`;
+          link(`/changes/${status.fy.term}/${accountCode}/${subAccountCode}`)
         } else {
-          window.location = `/changes/${status.fy.term}/${accountCode}`;
+          link(`/changes/${status.fy.term}/${accountCode}`)
         }
       }}><BilingualText key="view_trends" inline={true} /></button>
     {/if}
-    <button type="button" class="btn btn-primary btn-bilingual"
+    <button type='$lib/client/cross-slip.js'
     	on:click={openSlip}>
       <BilingualText key="voucher_entry" inline={true} /><i class="bi bi-pencil-square"></i>
     </button>
@@ -49,25 +49,29 @@
       {/key}
     </div>
     <div class="col-4" style="text-align:right;">
-      <button type="button" class="btn btn-info btn-bilingual"
+      <button type='$lib/i18n/bilingual.js'
         on:click={() => {
-          window.location = `/changes/${status.fy.term}/${accountCode}/${subAccountCode}`;
+          link(`/changes/${status.fy.term}/${accountCode}/${subAccountCode}`)
         }}
         disabled={!subAccountCode}><BilingualText key="view_trends" inline={true} /></button>
-      <a href="/forms/subsidiary_ledger/{status.fy.term}?format=pdf" download="{$bi('form_print_sl')}-{today}.pdf" class="btn btn-primary btn-bilingual"><BilingualText key="download_sub_ledger" inline={true} /><i class="bi bi-download"></i>
+      <a href='$lib/i18n/bilingual.js'><BilingualText key="download_sub_ledger" inline={true} /><i class="bi bi-download"></i>
       </a>
     </div>
   </div>
 {/if}
-<LedgerList
-  account={account}
-  subAccountCode={subAccountCode}
-  fy={status.fy}
-  lines={lines}
-  sums={sums}
-  pickup={pickup}
-  on:open={openSlip}></LedgerList>
-
+<div class="full-height-4" style="overflow-y: auto;">
+	<LedgerList
+  	account={account}
+  	pickup={pickup}
+  	sums={sums}
+  	lines={lines}
+  	bind:status={status}
+  	on:link={_link}
+  	on:select={(event) => {
+    	accountSelect(event.detail);
+  	}}
+    on:open={openSlip}></LedgerList>
+</div>
 {#if popUp}
 {#key modalCount}
 <CrossSlipModal
@@ -106,12 +110,13 @@ import axios from 'axios';
 import {onMount, beforeUpdate, afterUpdate, createEventDispatcher} from 'svelte';
 import {get} from 'svelte/store';
 import LedgerList from './ledger-list.svelte';
-import CrossSlipModal from '$lib/components/cross-slip/cross-slip-modal.svelte';
+import CrossSlipModal from '../cross-slip/cross-slip-modal.svelte';
 import {ledgerLines} from '$lib/shared/ledger-lines.js';
 import AccountSelect from '$lib/components/AccountSelect.svelte';
-import SubAccountSelect from '$lib/components/SubAccountSelect.svelte';
+import SubAccountSelect from '$lib/components/AccountSelect.svelte';
 import {setAccounts} from '$lib/client/cross-slip.js';
 import parse_account_code from '$lib/shared/parse_account_code.js';
+import {currentPage, link} from '$lib/client/router.js';
 
 import {bi, languagePair} from '$lib/i18n/bilingual.js';
 import BilingualText from '$lib/components/BilingualText.svelte';

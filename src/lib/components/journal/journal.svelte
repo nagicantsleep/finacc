@@ -1,7 +1,7 @@
 <div class="list">
   <div class="page-title d-flex justify-content-between">
-  	<h1 class="page-title-bilingual"><BilingualText key="journal" inline={true} /></h1>
-  	<a href="/forms/explanatory_journal/{status.fy.term}?format=pdf" download="仕訳日記帳-{today}.pdf" class="btn btn-primary btn-bilingual"><BilingualText key="download_journal" inline={true} /><i class="bi bi-download"></i>
+  	<h1 class='$lib/i18n/bilingual.js'><BilingualText key="journal" inline={true} /></h1>
+  	<a href='$lib/i18n/bilingual.js'><BilingualText key="download_journal" inline={true} /><i class="bi bi-download"></i>
   	</a>
 	</div>
 	<ul class="page-subtitle nav">
@@ -31,7 +31,7 @@
   		<BilingualText key={`month_${month}`} inline={true} />
   	</h2>
   	<div>
-    	<button type="button" class="btn btn-primary btn-bilingual"
+    	<button type='$lib/client/cross-slip.js'
     		on:click={openSlip}><BilingualText key="journal_detail_entry_space" inline={true} /><i class="bi bi-pencil-square"></i>
       </button>
   	</div>
@@ -79,16 +79,16 @@
 }
 </style>
 
-<script>
+  <script>
 import axios from 'axios';
 import Icon from '@iconify/svelte';
-import { page } from '$app/stores';
 
 import {onMount, beforeUpdate, afterUpdate, createEventDispatcher} from 'svelte';
 import JournalList from './journal-list.svelte';
-import CrossSlipModal from '$lib/components/cross-slip/cross-slip-modal.svelte';
+import CrossSlipModal from '../cross-slip/cross-slip-modal.svelte';
 import {setAccounts, findAccount, findSubAccountByCode} from '$lib/client/cross-slip.js';
 import {numeric, dateStr} from '$lib/utils.js';
+import {currentPage} from '$lib/client/router.js';
 import BilingualText from '$lib/components/BilingualText.svelte';
 import { bi } from '$lib/i18n/bilingual.js';
 export let status;
@@ -106,7 +106,7 @@ let modalCount = 0;
 let popUp;
 let today;
 
-$: checkPage($page.url.pathname);
+$: checkPage($currentPage);
 
 const openMonth = (_year, _month) => {
   year = _year;
@@ -251,7 +251,7 @@ onMount(async () => {
       month: month,
       lines: []
   };
-  checkPage(location.pathname);
+  checkPage($currentPage);
 })
 
 const openSlip = (event) => {
