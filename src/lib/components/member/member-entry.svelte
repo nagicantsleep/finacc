@@ -1,0 +1,173 @@
+<div class="entry">
+  <div class="page-title d-flex justify-content-between">
+    <h1><BilingualText key="member_info" /></h1>
+  </div> 
+  <div class="full-height fontsize-12pt">
+    <div class="content">
+      <div class="body">
+        <FormError
+        	messages={errorMessages}></FormError>
+        <MemberInfo
+          classes={classes}
+          users={users}
+          bind:member={member} />
+      </div>
+      <div class="footer">
+        <button type="button" class="btn btn-secondary" disabled={disabled}
+          on:click={back}><BilingualText key="back" /></button>
+        {#if ( member && member.id && member.id > 0 )}
+        <button type="button" class="btn btn-danger" disabled={disabled}
+          on:click={deleteMember}
+          id="delete-button"><BilingualText key="delete" /></button>
+        {/if}
+        <button type="button" class="btn btn-primary" disabled={disabled}
+          on:click={save}
+          id="save-button"><BilingualText key="save" /></button>
+      </div>
+    </div>
+  </div>
+</div>
+<OkModal
+  bind:this={modal}
+  title={title}
+  description={description}
+  on:answer={doDelete}
+  ></OkModal>
+<script>
+import axios from 'axios';
+import {onMount, beforeUpdate, afterUpdate, createEventDispatcher} from 'svelte';
+import {get} from 'svelte/store';
+const dispatch = createEventDispatcher();
+import {numeric, formatDate} from '$lib/utils.js';
+import MemberInfo from './member-info.svelte';
+import FormError from '$lib/components/common/FormError.svelte';
+import OkModal from '$lib/components/common/OkModal.svelte';
+import {currentMember, getStore} from '$lib/client/current-record.js';
+import { link } from '$lib/client/router.js';
+
+import {bi} from '$lib/i18n/bilingual.js';
+import BilingualText from '$lib/components/BilingualText.svelte';
+export  let member;
+export  let classes;
+export  let users;
+export let status;
+
+let disabled = false;
+let errorMessages = [];
+let modal;
+let title;
+let description;
+
+const deleteMember = (event) => {
+  console.log('deleteMember', member);
+  title = get(bi)('member_delete_title');
+  description = `
+<table style="font-size:12px;">
+  <tbody>
+    <tr>
+			<td>${get(bi)('name_label')}</td><td>${member.tradingName}</td>
+		</tr>
+    <tr>
+			<td>${get(bi)('legal_name_label')}</td><td>${member.legalName}</td>
+		</tr>
+    <tr>
+			<td>${get(bi)('job_title_label')}</td><td>${member.memberClass.title}</td>
+		</tr>
+    <tr>
+			<td>${get(bi)('birthday_label')}</td><td>${member.birthDate ? formatDate(member.birthDate) : ''}</td>
+    </tr>
+  </tbody>
+`;
+  modal.show();
+}
+
+const doDelete = async (event) => {
+  if	( event.detail )	{
+  	try {
+  		let result = await axios.delete(`/api/member/${member.id}`);
+  		console.log(result);
+    	back();
+  	} catch (e) {
+	    console.log(e);
+  	}
+  }
+}
+
+const create_member = async (_member) => {
+  let result = await axios.post('/api/member', _member);
+  console.log('create', result);
+  return	(result);
+}
+const update_member = async (_member) => {
+  console.log('save_member', _member);
+  let result = await axios.put('/api/member', _member);
+     
+  console.log(result);
+  return	(result);
+}
+const delete_member = async (member) => {
+  console.log('delete_member', member);
+  let result = await axios.delete('/api/member', {
+    data: {
+      id: member.id
+    }
+  });
+  console.log(result);
+}
+
+const save = () => {
+  errorMessages = [];
+  console.log('member', member);
+  if	( member.memberClassId )	{
+    member.memberClassId = parseInt(member.memberClassId);
+  } else {
+    member.memberClassId = 0;
+  }
+  if  ( !member.memberClassId || member.memberClassId < 1 )  {
+    errorMessages.push(get(bi)('member_class_required'));
+  }
+  console.log('input', member);
+  if  ( errorMessages.length === 0 )  {
+    let	it;
+    let create = false;
+    if ( member.id  ) {
+      member.id = parseInt(member.id);
+      it = update_member(member);
+    } else {
+      it = create_member(member);
+      create = true;
+    }
+    it.then((result) => {
+      //console.log('result', result);
+      member = result.data.member;
+      if  ( member )  {
+        if  ( create )  {
+          link(`/member/entry/${member.id}`);
+        }
+      } else {
+        errorMessages.push(get(bi)('error_save_failed'));
+      }
+    }).catch((e) => {
+      console.log(e);
+      errorMessages.push(get(bi)('save_failed'));
+      // can't save
+      //	TODO alert
+    });
+  }
+  errorMessages = errorMessages;
+};
+
+const	back = (event) => {
+  dispatch('close');
+  currentMember.set(null);
+}
+
+beforeUpdate(() => {
+  //console.log('member-entry beforeUpdate', member);
+});
+
+
+onMount(() => {
+  console.log('member-entry onMount', member);
+})
+</script>
