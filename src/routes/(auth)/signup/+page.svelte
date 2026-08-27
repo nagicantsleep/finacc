@@ -12,7 +12,7 @@
 <div class="signup-page d-flex justify-content-center align-items-center min-vh-100 bg-light">
   <div class="signup-box" style="width: 440px; max-width: 90%;">
     <div class="signup-logo text-center mb-3 fs-3 fw-bold">
-      <img src="/public/logo.png" alt="Logo" class="pe-1" style="height: 36px;" /> Hieronymus
+      <img src="/logo.png" alt="Logo" class="pe-1" style="height: 36px;" /> Hieronymus
     </div>
     <div class="card shadow-sm border-0">
       <div class="card-body p-4">

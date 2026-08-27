@@ -15,7 +15,7 @@
   <div class="card shadow-sm border-0" style="width: 580px; max-width: 95%;">
     <div class="card-body p-4 p-md-5">
       <div class="text-center mb-4">
-        <img src="/public/logo.png" alt="Logo" style="height: 42px;" class="mb-2" />
+        <img src="/logo.png" alt="Logo" style="height: 42px;" class="mb-2" />
         <h3 class="fw-bold">初期設定ウィザード</h3>
         <p class="text-muted">会計基準と勘定科目の初期セットアップを行います</p>
       </div>

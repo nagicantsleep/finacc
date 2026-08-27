@@ -12,7 +12,7 @@
 <div class="login-page d-flex justify-content-center align-items-center min-vh-100 bg-light">
   <div class="login-box" style="width: 400px; max-width: 90%;">
     <div class="login-logo text-center mb-3 fs-3 fw-bold">
-      <img src="/public/logo.png" alt="Logo" class="pe-1" style="height: 36px;" /> Hieronymus
+      <img src="/logo.png" alt="Logo" class="pe-1" style="height: 36px;" /> Hieronymus
     </div>
     <div class="card shadow-sm border-0">
       <div class="card-body p-4">

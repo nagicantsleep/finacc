@@ -6,7 +6,7 @@
   <title>残高試算表 v2 :: Hieronymus</title>
 </svelte:head>
 
-<div class="container-fluid p-4">
+<div class="container-fluid">
   <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
     <div>
       <h3 class="fw-bold mb-1">残高試算表 (Trial Balance v2)</h3>
@@ -20,7 +20,6 @@
           {/each}
         </select>
       </form>
-      <a href="/home" class="btn btn-outline-secondary btn-sm">ホームに戻る</a>
     </div>
   </div>
 
