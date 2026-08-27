@@ -8,6 +8,9 @@ const config = {
     adapter: adapter({
       out: 'build'
     }),
+    csrf: {
+      checkOrigin: false
+    },
     alias: {
       $lib: 'src/lib',
       '$lib/*': 'src/lib/*'

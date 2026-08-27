@@ -9,7 +9,7 @@ export async function load({ locals }) {
   const companies = await models.Company.findAll({
     where: { tenantId: locals.tenantId },
     include: [{ model: models.CompanyClass, as: 'companyClass' }],
-    order: [['code', 'ASC']]
+    order: [['id', 'ASC']]
   });
 
   const companyClasses = await models.CompanyClass.findAll({
@@ -20,9 +20,8 @@ export async function load({ locals }) {
   return {
     companies: companies.map((c) => ({
       id: c.id,
-      code: c.code,
       name: c.name,
-      officialName: c.officialName,
+      chargeName: c.chargeName || '',
       className: c.companyClass?.name || '未分類'
     })),
     companyClasses: companyClasses.map((cls) => ({
@@ -38,23 +37,20 @@ export const actions = {
     if (!locals.user || !locals.tenantId) throw redirect(303, '/login');
 
     const data = await request.formData();
-    const code = parseInt(data.get('code')?.toString(), 10);
     const name = data.get('name')?.toString()?.trim();
-    const officialName = data.get('officialName')?.toString()?.trim() || name;
+    const chargeName = data.get('chargeName')?.toString()?.trim() || '';
     const companyClassId = parseInt(data.get('companyClassId')?.toString(), 10);
 
-    if (!code || !name || !companyClassId) {
-      return fail(400, { error: 'コード、取引先名、区分は必須です。' });
+    if (!name || !companyClassId) {
+      return fail(400, { error: '取引先名、区分は必須です。' });
     }
 
     try {
       await models.Company.create({
         tenantId: locals.tenantId,
-        code,
         name,
-        officialName,
-        companyClassId,
-        isClient: false
+        chargeName,
+        companyClassId
       });
       return { success: true };
     } catch (e) {

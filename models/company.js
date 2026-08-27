@@ -9,7 +9,7 @@ export default (sequelize, DataTypes) => {
      */
     static associate(models) {
 			this.belongsTo(models.CompanyClass, {
-				sourceKey: 'companyClassId',
+				foreignKey: 'companyClassId',
         as: 'companyClass'
 			});
 			this.belongsTo(models.Tenant, {

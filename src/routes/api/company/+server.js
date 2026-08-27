@@ -9,7 +9,7 @@ export async function GET({ locals }) {
   const companies = await models.Company.findAll({
     where: { tenantId: locals.tenantId },
     include: [{ model: models.CompanyClass, as: 'companyClass' }],
-    order: [['code', 'ASC']]
+    order: [['id', 'ASC']]
   });
 
   return json({ result: 'OK', companies });
@@ -24,12 +24,9 @@ export async function POST({ request, locals }) {
     const body = await request.json();
     const company = await models.Company.create({
       tenantId: locals.tenantId,
-      code: body.code,
       name: body.name,
-      officialName: body.officialName || body.name,
-      nameKana: body.nameKana || '',
-      companyClassId: body.companyClassId,
-      isClient: Boolean(body.isClient)
+      chargeName: body.chargeName || '',
+      companyClassId: body.companyClassId
     });
     return json({ result: 'OK', company });
   } catch (e) {

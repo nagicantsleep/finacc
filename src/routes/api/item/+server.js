@@ -8,7 +8,7 @@ export async function GET({ locals }) {
 
   const items = await models.Item.findAll({
     where: { tenantId: locals.tenantId },
-    order: [['code', 'ASC']]
+    order: [['id', 'ASC']]
   });
 
   return json({ result: 'OK', items });
@@ -23,9 +23,9 @@ export async function POST({ request, locals }) {
     const body = await request.json();
     const item = await models.Item.create({
       tenantId: locals.tenantId,
-      code: body.code,
+      localCode: body.code?.toString() || '',
       name: body.name,
-      price: body.price || 0,
+      standardPrice: body.price || 0,
       unit: body.unit || '',
       taxClass: body.taxClass || 1
     });

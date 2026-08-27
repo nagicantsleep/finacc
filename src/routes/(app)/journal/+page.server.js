@@ -16,22 +16,24 @@ export async function load({ locals, url }) {
   const slips = await models.CrossSlip.findAll({
     where: { tenantId: locals.tenantId, term },
     include: [{ model: models.CrossSlipDetail, as: 'lines' }],
-    order: [['year', 'DESC'], ['month', 'DESC'], ['day', 'DESC'], ['slipNo', 'DESC']]
+    order: [['year', 'DESC'], ['month', 'DESC'], ['day', 'DESC'], ['no', 'DESC']]
   });
 
   const accounts = await models.Account.findAll({ where: { tenantId: locals.tenantId } });
   const accountMap = {};
-  accounts.forEach((a) => { accountMap[a.id] = a.name; });
+  accounts.forEach((a) => {
+    accountMap[a.accountCode] = a.name;
+    accountMap[a.id] = a.name;
+  });
 
   return {
     term,
     fiscalYears: fiscalYears.map((f) => ({ term: f.term, year: f.year })),
     slips: slips.map((s) => ({
       id: s.id,
-      slipNo: s.slipNo,
+      slipNo: s.no,
       date: `${s.year}-${String(s.month).padStart(2, '0')}-${String(s.day).padStart(2, '0')}`,
-      memo: s.memo,
-      lines: s.lines.map((l) => ({
+      lines: (s.lines || []).map((l) => ({
         debitAccountName: accountMap[l.debitAccount] || `科目#${l.debitAccount}`,
         creditAccountName: accountMap[l.creditAccount] || `科目#${l.creditAccount}`,
         debitAmount: l.debitAmount,

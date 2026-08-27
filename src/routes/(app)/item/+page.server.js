@@ -8,15 +8,15 @@ export async function load({ locals }) {
 
   const items = await models.Item.findAll({
     where: { tenantId: locals.tenantId },
-    order: [['code', 'ASC']]
+    order: [['id', 'ASC']]
   });
 
   return {
     items: items.map((i) => ({
       id: i.id,
-      code: i.code,
+      code: i.localCode || i.id,
       name: i.name,
-      price: i.price,
+      price: i.standardPrice || 0,
       unit: i.unit || '',
       taxClass: i.taxClass
     }))
@@ -29,21 +29,21 @@ export const actions = {
     if (!locals.user || !locals.tenantId) throw redirect(303, '/login');
 
     const data = await request.formData();
-    const code = parseInt(data.get('code')?.toString(), 10);
+    const code = data.get('code')?.toString()?.trim() || '';
     const name = data.get('name')?.toString()?.trim();
     const price = parseInt(data.get('price')?.toString() || '0', 10);
     const unit = data.get('unit')?.toString()?.trim() || '個';
 
-    if (!code || !name) {
-      return fail(400, { error: '品目コードと品目名は必須です。' });
+    if (!name) {
+      return fail(400, { error: '品目名は必須です。' });
     }
 
     try {
       await models.Item.create({
         tenantId: locals.tenantId,
-        code,
+        localCode: code,
         name,
-        price,
+        standardPrice: price,
         unit,
         taxClass: 1
       });
