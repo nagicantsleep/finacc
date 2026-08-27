@@ -13,16 +13,17 @@ const projectRoot = resolve(import.meta.dirname, '..');
 // ---------------------------------------------------------------------------
 // Helper: get a Sequelize instance connected to the test DB
 // ---------------------------------------------------------------------------
+import dotenv from 'dotenv';
+dotenv.config();
+
 function getTestSequelize() {
-  const raw = readFileSync(resolve(projectRoot, 'config/config.json'), 'utf8');
-  const cfg = JSON.parse(raw).test;
   return new Sequelize({
     dialect: 'postgres',
-    host: cfg.host,
-    port: cfg.port || 5432,
-    database: cfg.database,
-    username: cfg.username,
-    password: cfg.password,
+    host: process.env.DB_HOST || '127.0.0.1',
+    port: parseInt(process.env.DB_PORT || '5432', 10),
+    database: process.env.DB_TEST_NAME || 'hieronymus_test',
+    username: process.env.DB_USER || 'hieronymus',
+    password: process.env.DB_PASSWORD || 'hieronymus',
     logging: false
   });
 }

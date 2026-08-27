@@ -53,19 +53,32 @@ import Voucher from './voucher.js';
 import VoucherClass from './voucherclass.js';
 import VoucherFile from './voucherfile.js';
 import {Sequelize, DataTypes} from 'sequelize';
-import fs from 'fs';
+import dotenv from 'dotenv';
+dotenv.config();
 
-const __dirname = import.meta.dirname;
 const env = process.env.NODE_ENV || 'development';
-
-const jsonData = JSON.parse(fs.readFileSync(new URL('../config/config.json', import.meta.url), 'utf-8'));
-const config = jsonData[env];
+const dbDatabase = env === 'test'
+  ? (process.env.DB_TEST_NAME || 'hieronymus_test')
+  : (process.env.DB_NAME || 'hieronymus_dev');
+const dbUser = process.env.DB_USER || 'hieronymus';
+const dbPassword = process.env.DB_PASSWORD || 'hieronymus';
+const dbHost = process.env.DB_HOST || '127.0.0.1';
+const dbPort = parseInt(process.env.DB_PORT || '5432', 10);
 
 let sequelize;
-if (config.use_env_variable) {
-  sequelize = new Sequelize(process.env[config.use_env_variable], config);
+if (process.env.DATABASE_URL) {
+  sequelize = new Sequelize(process.env.DATABASE_URL, {
+    dialect: 'postgres',
+    logging: process.env.DB_LOGGING === 'true' ? console.log : false
+  });
 } else {
-  sequelize = new Sequelize(config.database, config.username, config.password, config);
+  sequelize = new Sequelize(dbDatabase, dbUser, dbPassword, {
+    host: dbHost,
+    port: dbPort,
+    dialect: 'postgres',
+    schema: process.env.DB_SCHEMA || 'public',
+    logging: process.env.DB_LOGGING === 'true' ? console.log : false
+  });
 }
 
 const models = {
