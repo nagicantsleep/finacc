@@ -29,7 +29,7 @@ RUN npm ci --omit=dev && npm cache clean --force
 
 # Copy built application and required assets from builder
 COPY --from=builder /app/build ./build
-COPY --from=builder /app/public ./public
+COPY --from=builder /app/static ./static
 COPY --from=builder /app/accounts.csv ./accounts.csv
 
 EXPOSE 3000

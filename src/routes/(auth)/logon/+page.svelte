@@ -16,7 +16,7 @@
   <div class="container" style="max-width: 680px;">
     <div class="d-flex justify-content-between align-items-center mb-4">
       <div class="d-flex align-items-center">
-        <img src="/public/logo.png" alt="Logo" style="height: 36px;" class="pe-2" />
+        <img src="/logo.png" alt="Logo" style="height: 36px;" class="pe-2" />
         <h4 class="mb-0 fw-bold">テナント（組織）の選択</h4>
       </div>
       <form action="?/logout" method="POST">

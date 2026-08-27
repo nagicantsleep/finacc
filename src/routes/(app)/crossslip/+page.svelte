@@ -11,10 +11,9 @@
   <title>振替伝票入力 :: Hieronymus</title>
 </svelte:head>
 
-<div class="container-fluid p-4">
+<div class="container-fluid">
   <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
     <h3 class="fw-bold mb-0">振替伝票入力</h3>
-    <a href="/home" class="btn btn-outline-secondary btn-sm">ホームに戻る</a>
   </div>
 
   {#if form?.success}
