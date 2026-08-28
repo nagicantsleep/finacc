@@ -1,7 +1,4 @@
 <script>
-  import { page } from '$app/stores';
-  import { goto } from '$app/navigation';
-  import { onMount } from 'svelte';
   import WorkspaceView from '$lib/components/workspace/workspace.svelte';
   import Toast from '$lib/components/common/Toast.svelte';
 
@@ -15,19 +12,13 @@
     current: 'workspace',
     pathname: '/workspace'
   };
-
-  onMount(() => {
-    if ($page.params.id) {
-      goto(`/workspace/${$page.params.id}`, { replaceState: true });
-    }
-  });
 </script>
 
 <svelte:head>
   <title>ワークスペース :: Hieronymus</title>
 </svelte:head>
 
-<div class="menu-page container-fluid px-0">
+<div class="workspace-page container-fluid px-0">
   <WorkspaceView bind:status bind:toast />
   <Toast bind:toast />
 </div>

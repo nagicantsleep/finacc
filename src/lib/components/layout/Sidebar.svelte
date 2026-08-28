@@ -12,7 +12,8 @@
   $: status = { user, company, fy: currentFy };
 
   const MODULE_I18N = {
-    menu: 'menu',
+    workspace: 'workspace',
+    menu: 'workspace',
     journal: 'journal',
     ledger: 'ledger',
     'bank-ledger': 'bank_ledger',
