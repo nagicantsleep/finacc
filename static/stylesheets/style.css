@@ -210,7 +210,7 @@ tbody {
   background-color: var(--bs-body-bg);
   border-top: 1px solid #dee2e6;
   color: #777c81;
-  padding: 1rem;
+  padding: 0.5rem 1rem;
   width: inherit;
 }
 
@@ -797,104 +797,4 @@ table.details .input {
 .summary-list-container {
   height: calc(100vh - 850px);
   overflow-y: auto;
-}
-
-/* Layout fixed wrapper */
-body.layout-fixed {
-  overflow-x: hidden;
-  background-color: var(--bs-body-bg, #f4f4f4);
-}
-
-.wrapper {
-  min-height: 100vh;
-  position: relative;
-  display: flex;
-  flex-direction: column;
-}
-
-.topbar {
-  align-items: stretch;
-  display: flex;
-  flex-direction: row;
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: var(--topbar-height, 56px);
-  z-index: 1039;
-  background-color: var(--header-bg-color, #2f3e46);
-}
-
-.topbar .main-header {
-  flex: 1 1 auto;
-  margin-left: 0;
-  min-width: 0;
-  background-color: var(--header-bg-color, #2f3e46);
-}
-
-.brand-container {
-  align-items: center;
-  background-color: var(--header-bg-color, #2f3e46);
-  display: flex;
-  flex: 0 0 250px;
-  width: 250px;
-  font-size: 1.25rem;
-  overflow: hidden;
-  padding: 0.5rem 0.5rem;
-  white-space: nowrap;
-}
-
-.brand-container .brand-link {
-  align-items: center;
-  color: #fff;
-  display: flex;
-  text-decoration: none;
-}
-
-.brand-container .brand-image {
-  max-height: 33px;
-  margin-left: 0.8rem;
-  margin-right: 0.5rem;
-}
-
-.brand-container .brand-text {
-  font-weight: 600;
-  color: #ffffff;
-}
-
-.main-sidebar {
-  bottom: 0;
-  left: 0;
-  position: fixed;
-  top: var(--topbar-height, 56px);
-  width: 250px;
-  z-index: 1038;
-  background-color: var(--sidebar-bg, #264653);
-  overflow-y: auto;
-}
-
-.main-sidebar .sidebar {
-  height: calc(100vh - var(--topbar-height, 56px));
-  overflow-y: auto;
-}
-
-.content-wrapper {
-  margin-left: 250px;
-  margin-top: var(--topbar-height, 56px);
-  min-height: calc(100vh - var(--topbar-height, 56px) - 60px);
-  background-color: var(--bs-body-bg, #f4f4f4);
-  padding-bottom: 2rem;
-  position: relative;
-  z-index: 1;
-}
-
-.main-footer {
-  margin-left: 250px;
-  background-color: #ffffff;
-  border-top: 1px solid #dee2e6;
-  color: #777c81;
-  padding: 1rem;
-  z-index: 1;
-  position: relative;
-  width: calc(100% - 250px);
 }
