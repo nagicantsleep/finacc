@@ -1,0 +1,329 @@
+export default [
+  {
+    name: 'menu',
+    match: /^\/menu/,
+  }, {
+    name: 'journal',
+    title: '仕訳日記帳',
+    match: /^\/journal/,
+    authority: (user) => {
+      return (!user || user.accounting || user.fiscalBrowsing);
+    },
+    href: (status) => {
+      const d = (status && status.fy && status.fy.startDate) ? new Date(status.fy.startDate) : new Date();
+      return (`/journal/${d.getFullYear()}/${d.getMonth()+1}`);
+    },
+    icon: { name: 'bi:calendar3'},
+    description: `
+  伝票入力等の基本画面です。<br/>
+  入力した伝票の閲覧、伝票の入力(修正)が可能です。`
+  }, {
+    name: 'ledger',
+    title: '元帳',
+    match: /^\/ledger/,
+    href: (status) => {
+      return (`/ledger/1000000`);
+    },
+    authority: (user) => {
+      return (!user || user.accounting || user.fiscalBrowsing);
+    },
+    icon: { name: 'bi-journal-text' },
+    description: `
+総勘定元帳と補助元帳が複合した画面です。<br/>
+科目及び補助科目毎の明細が表示されます。<br/>
+ここから直接伝票を修正することも可能です(新規入力はできません)。`
+  }, {
+    name: 'bank-ledger',
+    title: '銀行元帳',
+    match: /^\/bank-ledger/,
+    href: (status) => {
+      return (`/bank-ledger`);
+    },
+    authority: (user) => {
+      return (!user || user.accounting || user.fiscalBrowsing);
+    },
+    icon: { name: 'bi:bank' },
+    description: `
+基本的には元帳画面と同じですが、預金通帳を模した表示となっています。<br/>
+主には会計データと預金通帳の整合を確認するためのものです。`
+  }, {
+    name: 'closing',
+    title: '決算',
+    match: /^\/closing/,
+    href: (status) => {
+      const term = (status && status.fy && status.fy.term) ? status.fy.term : 1;
+      return (`/closing/${term}/confirm`);
+    },
+    authority: (user) => {
+      return (!user || user.administrable);
+    },
+  }, {
+    name: 'reports/trial-balance',
+    title: '試算表 v2',
+    match: /^\/reports\/trial-balance/,
+    href: (status) => {
+      return (`/reports/trial-balance`);
+    },
+    authority: (user) => {
+      return (!user || user.accounting || user.fiscalBrowsing);
+    },
+    icon: { name: 'bi-table' },
+    description: `新しい試算表画面 (3 report types, hierarchy, drill-down, export).`
+  }, {
+    name: 'simulation',
+    title: 'シミュレーション',
+    match: /^\/simulation/,
+    href: (status) => {
+      return (`/simulation/scenarios`);
+    },
+    authority: (user) => {
+      return (!user || user.accounting || user.fiscalBrowsing);
+    },
+    icon: { name: 'bi-graph-up-arrow' },
+    description: `仮想仕訳でシナリオを作成し、シミュレーション試算表と実績比較を表示します (正式な会計報告ではありません)。`
+  }, {
+    name: 'changes',
+    title: '推移表',
+    match: /^\/changes/,
+    href: (status) => {
+      const term = (status && status.fy && status.fy.term) ? status.fy.term : 1;
+      return (`/changes/${term}/6000000`);
+    },
+    authority: (user) => {
+      return (!user || user.accounting || user.fiscalBrowsing);
+    },
+    icon: { name: 'bi-bar-chart-fill' },
+    description: `
+科目毎の月次集計の推移をグラフ表示します。<br/>
+年度内だけではなく、前年同月比較や通年表示もできます。`
+  }, {
+    name: 'voucher',
+    title: '証憑管理',
+    match: /^\/voucher/,
+    href: (status) => {
+      return (`/voucher`);
+    },
+    authority: (user) => {
+      return (!user || user.accounting || user.fiscalBrowsing);
+    },
+    icon: { name: 'bi:archive-fill' },
+    description: `
+電子化証票を登録できます。<br/>
+ここで登録した証票は、伝票入力の時に結合させることができます。 <br/>
+伝票に証票が結合された場合、伝票明細が表示される画面で参照(ダウンロード)が可能になります。
+`
+	}, {
+    name: 'accounts',
+    title: '勘定科目管理',
+    match: /^\/accounts/,
+    href: (status) => {
+      return (`/accounts`);
+    },
+    authority: (user) => {
+      return (!user || user.accounting || user.fiscalBrowsing);
+    },
+    icon: { name: 'bi:tag' },
+    description: `
+勘定科目を追加変更ができます。<br/>
+なお「削除」はできません。`
+  }, {
+    name: 'company',
+    title: '取引先管理',
+    match: /^\/company/,
+    authority: (user) => {
+      return (!user || user.companyManagement || user.accounting);
+    },
+    icon: { name: 'bi-building'},
+    href: (status) => {
+      return (`/company/`);
+    },
+    description: `
+このシステムで扱う取引先を登録管理します。<br/>
+「取引先」は会計上の取引だけではなく、顧客管理での「顧客」等も含まれます。`,
+    submenu: [
+      {
+        title: '取引先管理',
+        match: /^\/company\/($|entry|new)/,
+        href: (status) => {
+          return (`/company/`);
+        },
+      }, {
+        title: '設定',
+        match: /^\/company\/home/,
+        href: (status) => {
+          return (`/company/home`);
+        },
+      }
+    ]
+  }, {
+    name: 'registry',
+    title: '台帳管理',
+    match: /^\/registry/,
+    href: (status) => {
+      return ('/registry');
+    },
+    authority: (user) => {
+      return (!user || user.companyManagement || user.personnelManagement || user.administrable || user.accounting);
+    },
+    icon: { name: 'bi:journals' },
+    description: `ノーコード台帳管理システム。<br/>自由なデータ項目定義とタイムライン対応の顧客・取引履歴台帳。`
+  }, {
+    name: 'attendance',
+    title: '勤怠管理',
+    match: /^\/attendance/,
+    href: (status) => {
+      return ('/attendance');
+    },
+    authority: (user) => {
+      return true; // All members can clock in and view attendance
+    },
+    icon: { name: 'bi:alarm' },
+    description: `出退勤打刻・残業管理・休暇申請ワークフロー。`
+  }, {
+    name: 'payroll',
+    title: '給与計算',
+    match: /^\/payroll/,
+    href: (status) => {
+      return ('/payroll');
+    },
+    authority: (user) => {
+      return (!user || user.personnelManagement || user.accounting || user.administrable);
+    },
+    icon: { name: 'bi:wallet2' },
+    description: `給与自動計算・明細書発行・会計仕訳自動起票。`
+  }, {
+    name: 'expense',
+    title: '経費精算',
+    match: /^\/expense/,
+    href: (status) => {
+      return ('/expense');
+    },
+    authority: (user) => {
+      return true; // All active members can file expenses
+    },
+    icon: { name: 'bi:receipt-cutoff' },
+    description: `経費申請・仮払金精算・プロジェクト紐付け・会計仕訳自動起票。`
+  }, {
+    name: 'task',
+    title: '案件管理',
+    href: (status) => {
+      return (`/task/`);
+    },
+    authority: (user) => {
+      return (!user || user.companyManagement);
+    },
+    icon: { name: 'bi-folder2-open'},
+    match: /^\/task/,
+    description: `
+顧客取引の「案件」を管理します。<br/>
+見積請求等の取引や各種文書の管理等は、案件を単位に行います。`
+  }, {
+    name: 'transaction',
+    title: '取引管理',
+    match: /^\/transaction/,
+    href: (status) => {
+      return (`/transaction/`);
+    },
+    authority: (user) => {
+      return (!user || user.companyManagement);
+    },
+    icon: { name: 'bi-file-earmark-text-fill'},
+    description: `
+顧客との「取引」を管理します。<br/>
+見積請求だけではなく、各種文書の管理や経費記録等を行います。`
+  }, {
+    name: 'item',
+    title: '品目管理',
+    href: (status) => {
+      return (`/item/`);
+    },
+    match: /^\/item/,
+    authority: (user) => {
+      return (!user || user.companyManagement || user.accounting);
+    },
+    icon: { name: 'bi:shop' },
+    description: `
+このシステムで扱う「品(item)」を管理します。<br/>
+有形の商品だけではなく無形の商品(作業)もここで登録します。`,
+    submenu: [
+      {
+        title: '品目管理',
+        href: (status) => {
+          return (`/item/`);
+        },
+        match: /^\/item\/($|entry|new)/,
+      }, {
+        title: '設定',
+        match: /^\/item\/home/,
+        href: (status) => {
+          return (`/item/home`);
+        },
+      }
+    ]
+  }, {
+    name: 'project',
+    title: 'プロジェクト管理',
+    href: (status) => {
+      return (`/project/`);
+    },
+    match: /^\/project/,
+    authority: (user, company) => {
+      if (!company) return true;
+      return (company.useProjectAccounting && (!user || user.companyManagement || user.accounting));
+    },
+    icon: { name: 'bi:diagram-3' },
+    description: `
+会計の部門計算や、案件の原価計算に用いる「プロジェクト」を管理します。`,
+    submenu: [
+      {
+        title: 'プロジェクト管理',
+        href: (status) => {
+          return (`/project/`);
+        },
+        match: /^\/project\/($|entry|new|settings)/,
+      },
+      {
+        title: '集計用ラベル管理',
+        match: /^\/project\/labels/,
+        href: (status) => {
+          return (`/project/labels`);
+        }
+      },
+      {
+        title: 'プロジェクト集計',
+        match: /^\/project\/summary/,
+        href: (status) => {
+          return (`/project/summary`);
+        }
+      }
+    ]
+  }, {
+    name: 'member',
+    title: '役職員管理',
+    authority: (user) => {
+      return (!user || user.administrable || user.personnelManagement);
+    },
+    href: (status) => {
+      return ('/member/');
+    },
+    match: /^\/member/,
+    icon: { name: 'bi:person-square' },
+    description: `
+人事情報を入力します。<br/>
+現在は担当者名の情報源として使っているだけですが、将来的には人事給与システムが付加されます。`
+  }, {
+    name: 'home',
+    title: '会社設定',
+    match: /^\/tenant/,
+    authority: (user) => {
+      return (!user || user.tenantSettings);
+    },
+    href: (status) => {
+      return ('/tenant');
+    },
+    icon: { name: 'bi:gear-fill' },
+    description: `
+テナント情報とシステム設定を管理します。<br/>
+自社情報、種別マスタ、税区分、システム設定などが含まれます。`
+  }
+];
