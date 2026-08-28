@@ -21,11 +21,11 @@
         </a>
         {:else if ( file.mimeType === "application/pdf" )}
         <a href="/api/document/file/{file.id}" target="_blank">
-          <img src="/public/file_icons/{fileIcon(file.mimeType)}" class="w-100" />
+          <img src="/file_icons/{fileIcon(file.mimeType)}" class="w-100" />
         </a>
         {:else}
         <a href="/api/document/file/{file.id}" download={file.name}>
-          <img src="/public/file_icons/{fileIcon(file.mimeType)}" class="w-100" />
+          <img src="/file_icons/{fileIcon(file.mimeType)}" class="w-100" />
           <span style="">{file.name}</span>
         </a>
         {/if}

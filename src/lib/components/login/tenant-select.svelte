@@ -1,7 +1,7 @@
 <div class="login-page">
   <div class="login-box tenant-select-box">
     <div class="login-logo">
-      <img src="/public/logo.png" alt="Logo" class="pe-1">Hieronyms
+      <img src="/logo.png" alt="Logo" class="pe-1">Hieronyms
     </div>
     <div class="card">
       <div class="card-body login-card-body">

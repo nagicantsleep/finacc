@@ -185,7 +185,7 @@
                 <img src="data:{file.mimeType};base64,{(file.body)}"
                   class="rect-image"/>
                 {:else if ( file.name.match(/\.pdf$/) ) }
-                <img src="/public/icons/icon_pdf.png" class="rect-image" />
+                <img src="/icons/icon_pdf.png" class="rect-image" />
                 {/if}
               </a>
             </div>

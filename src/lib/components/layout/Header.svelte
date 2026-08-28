@@ -78,7 +78,7 @@
 <div class="topbar">
   <div class="brand-container">
     <a href="/home" class="brand-link">
-      <img src="/public/logo.png" alt="Logo" class="brand-image" on:error={(e) => e.target.src = '/logo.png'} />
+      <img src="/logo.png" alt="Logo" class="brand-image" />
       <span class="brand-text">Hieronymus</span>
     </a>
   </div>
