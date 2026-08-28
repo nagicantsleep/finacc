@@ -18,7 +18,8 @@ const USER_SCOPE_PATHS = [
   '/api/user/session-status',
   '/api/user/select-tenant',
   '/api/user/logoff',
-  '/api/user/tenant'
+  '/api/user/tenant',
+  '/logout'
 ];
 
 /** @type {import('@sveltejs/kit').Handle} */
