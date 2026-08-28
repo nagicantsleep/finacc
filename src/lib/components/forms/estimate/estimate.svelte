@@ -2,7 +2,7 @@
   <title>{$bi('estimate_title')}</title>
   <meta http-equiv="Content-Language" content="ja" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="/public/bootstrap-icons/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="/bootstrap-icons/font/bootstrap-icons.css">
   <link rel="stylesheet" href="/style/transaction.css">
 </svelte:head>
   

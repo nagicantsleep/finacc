@@ -10,7 +10,7 @@
       on:click|preventDefault={() => {
         link('/home');
       }}>
-        <img src="/public/logo.png" alt="Logo" class="brand-image">
+        <img src="/logo.png" alt="Logo" class="brand-image">
         <span class="brand-text">Hieronymus</span>
     </a>
   </div>
