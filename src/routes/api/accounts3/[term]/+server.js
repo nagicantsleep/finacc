@@ -5,6 +5,6 @@ import { accountsVariant, parseLanguagePair } from '$lib/server/master/accounts-
 export async function GET({ locals, params, url }) {
   const denied = requireTenant(locals);
   if (denied) return denied;
-  const lines = await accountsVariant('all4', locals.tenantId, params.term, parseLanguagePair(url, locals));
+  const lines = await accountsVariant('all3', locals.tenantId, params.term, parseLanguagePair(url, locals));
   return json(lines);
 }
