@@ -1,4 +1,4 @@
-import models from '../../../../models/index.js';
+import models from '../db/index.js';
 const Op = models.Sequelize.Op;
 
 export const createCrossSlipDetail = async (line, slipId, lineNo, tenantId, t) => {
@@ -96,4 +96,94 @@ export const createCrossSlip = async (body, user, tenantId) => {
     if (!t.finished) await t.rollback();
     throw e;
   }
+};
+
+export const updateCrossSlip = async (slip, body, user, tenantId) => {
+  const t = await models.sequelize.transaction();
+  try {
+    slip.lineCount = Array.isArray(body.lines) ? body.lines.length : 0;
+    slip.day = body.day;
+    slip.updatedBy = user.id;
+    if (user.approvable) {
+      slip.approvedAt = new Date();
+      slip.approvedBy = user.id;
+    }
+    await slip.save({ transaction: t });
+    await models.CrossSlipDetail.destroy({
+      where: { crossSlipId: slip.id, tenantId },
+      transaction: t
+    });
+    if (Array.isArray(body.lines)) {
+      for (let i = 0; i < body.lines.length; i += 1) {
+        await createCrossSlipDetail(body.lines[i], slip.id, i + 1, tenantId, t);
+      }
+    }
+    await t.commit();
+  } catch (e) {
+    if (!t.finished) await t.rollback();
+    throw e;
+  }
+};
+
+const voucherInclude = (tenantId) => ({
+  model: models.Voucher,
+  required: false,
+  where: { tenantId },
+  include: [
+    {
+      model: models.VoucherFile,
+      as: 'files',
+      where: { tenantId },
+      required: false
+    }
+  ]
+});
+
+export const getCrossSlip = async (tenantId, year, month, no) => {
+  return models.CrossSlip.findOne({
+    where: { tenantId, year, month, no },
+    include: [
+      {
+        model: models.CrossSlipDetail,
+        as: 'lines',
+        include: [
+          { ...voucherInclude(tenantId), as: 'debitVoucher' },
+          { ...voucherInclude(tenantId), as: 'creditVoucher' },
+          { model: models.TaxRule, as: 'debitTaxRule', where: { tenantId }, required: false },
+          { model: models.TaxRule, as: 'creditTaxRule', where: { tenantId }, required: false },
+          { model: models.Project, as: 'projectData', where: { tenantId }, required: false }
+        ]
+      },
+      { model: models.User, as: 'creater' },
+      { model: models.User, as: 'approver' }
+    ],
+    order: [['lines', 'lineNo', 'ASC']]
+  });
+};
+
+export const listNotApproved = async (tenantId, user, term) => {
+  const where = {
+    tenantId,
+    approvedAt: { [Op.eq]: null }
+  };
+  if (!(user.approvable || user.accounting)) {
+    where.createdBy = user.id;
+  }
+  if (term) where.term = term;
+  return models.CrossSlip.findAll({
+    where,
+    include: [
+      { model: models.User, as: 'creater' },
+      { model: models.User, as: 'approver' },
+      { model: models.User, as: 'updater' },
+      { model: models.CrossSlipDetail, as: 'lines' }
+    ],
+    order: [
+      ['year', 'ASC'],
+      ['month', 'ASC'],
+      ['day', 'ASC'],
+      ['no', 'ASC'],
+      ['lines', 'lineNo', 'ASC']
+    ]
+  });
 };
