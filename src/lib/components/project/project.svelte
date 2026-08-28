@@ -51,7 +51,7 @@ let projects = [];
 $: checkPage($currentPage);
 
 const checkPage = (page) => {
-  page = page || location.pathname;
+  page = page || (typeof location !== 'undefined' ? location.pathname : '');
   const args = page.split('/');
   status.state = args[2] || 'list';
   

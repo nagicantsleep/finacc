@@ -21,7 +21,7 @@
 
 <script>
 import {onMount, beforeUpdate, afterUpdate, createEventDispatcher} from 'svelte';
-import Modal from 'bootstrap/js/dist/modal';
+// Modal dynamically loaded
 import BilingualText from '$lib/components/BilingualText.svelte';
 const dispatch = createEventDispatcher();
 
@@ -32,21 +32,37 @@ let modalEl;
 
 let modal;
 
-export const show = () => {
-  modal?.show();
-}
+export const show = async () => {
+  if (modal) {
+    modal.show();
+  } else if (modalEl) {
+    try {
+      const bs = await import('bootstrap');
+      modal = new bs.Modal(modalEl);
+      modal.show();
+    } catch (e) {
+      console.error(e);
+    }
+  }
+};
 
 const Answer = (answer) => {
-  modal.hide();
+  modal?.hide();
   dispatch('answer', answer);
-}
-const close_ = () => {
-  modal.hide();
-}
-beforeUpdate(() => {
-})
-onMount(() => {
-  modal = new Modal(modalEl);
-})
+};
 
+const close_ = () => {
+  modal?.hide();
+};
+
+onMount(async () => {
+  if (typeof window !== 'undefined') {
+    try {
+      const bs = await import('bootstrap');
+      modal = new bs.Modal(modalEl);
+    } catch (e) {
+      console.error(e);
+    }
+  }
+});
 </script>

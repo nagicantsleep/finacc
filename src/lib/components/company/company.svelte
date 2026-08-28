@@ -37,7 +37,7 @@ let companies = [];
 $: checkPage($currentPage);
 
 const checkPage = (page) => {
-  const pathOnly = (page || location.pathname).split('?')[0].split('#')[0];
+  const pathOnly = (page || (typeof location !== 'undefined' ? location.pathname : '')).split('?')[0].split('#')[0];
   let args = pathOnly.split('/');
   
   const newStatus = { ...status };

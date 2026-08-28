@@ -31,7 +31,7 @@
 </style>
 <script>
 import {onMount, beforeUpdate, afterUpdate, createEventDispatcher} from 'svelte';
-import entries from '../../../config/module-list.js';
+import entries from '$lib/config/module-list.js';
 import Editor from '@tinymce/tinymce-svelte';
 export let status;
 export let options;

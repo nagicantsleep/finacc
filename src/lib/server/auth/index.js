@@ -3,6 +3,7 @@ import bcrypt from 'bcrypt';
 import config from '../config.js';
 import crypto from 'crypto';
 
+const Op = models.Sequelize.Op;
 const SALT_ROUNDS = 10;
 const SESSION_COOKIE_NAME = `${config.appName}_session`;
 
@@ -22,12 +23,24 @@ export const buildSessionUser = (user) => ({
   deauthorizedAt: user.deauthorizedAt
 });
 
-export const authUser = async (name, password) => {
-  const user = await models.User.findOne({ where: { name } });
+export const authUser = async (identifier, password) => {
+  const user = await models.User.findOne({
+    where: {
+      [Op.or]: [
+        { name: identifier },
+        { email: identifier }
+      ]
+    }
+  });
   if (!user) {
     throw new Error('ユーザーが存在しません。');
   }
-  if (!user.hashPassword || bcrypt.compareSync(password, user.hashPassword)) {
+  const isMatch = (user.hashPassword && bcrypt.compareSync(password, user.hashPassword)) ||
+                  (user.password && bcrypt.compareSync(password, user.password));
+  if (!user.hashPassword && !user.password) {
+    return user;
+  }
+  if (isMatch) {
     return user;
   }
   throw new Error('パスワードが違います。');

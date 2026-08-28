@@ -22,7 +22,7 @@
 
   <header class="tb-chrome">
     <div class="tb-header-row">
-      <h1 class='$lib/i18n/bilingual.js'>
+      <h1 class='page-title-bilingual'>
         <BilingualText key="trial_balance_v2" inline={true} />
       </h1>
       <ul class="nav tb-tabs" role="tablist">
@@ -247,6 +247,7 @@
 {/key}
 
 <script>
+  import { onMount } from 'svelte';
   import axios from 'axios';
   import { currentPage, link } from '$lib/client/router.js';
   import { languagePair } from '$lib/i18n/bilingual.js';
@@ -313,6 +314,11 @@
   $: if (status && status.fy && status.fy.term && lastFetched && !loading && rawLines.length === 0 && !error) {
     fetchData();
   }
+
+  onMount(() => {
+    syncFromUrl();
+    fetchData();
+  });
 
   const syncFromUrl = () => {
     const path = $currentPage || '';

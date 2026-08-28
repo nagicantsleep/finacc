@@ -246,12 +246,28 @@ const dispatch = createEventDispatcher();
 
 export let status;
 export let vouchers;
-
 let companyId;
 let upperAmount;
 let lowerAmount;
 let dates = [];
 let voucherClasses = [];
+
+$: if (status?.fy && (!dates || dates.length === 0)) {
+  let fy = status.fy;
+  if (fy.startDate && fy.endDate) {
+    const d = [];
+    const end = new Date(fy.endDate);
+    for (let mon = new Date(fy.startDate); mon <= end;) {
+      d.push({
+        year: mon.getFullYear(),
+        month: mon.getMonth() + 1,
+        ym: `${mon.getFullYear()}-${mon.getMonth() + 1}`
+      });
+      mon.setMonth(mon.getMonth() + 1);
+    }
+    dates = d;
+  }
+}
 
 const compDate = (date, year, month, day) => {
   let ymd = date.split('-');
@@ -304,19 +320,38 @@ const openVoucher = (id) => {
 }
 onMount(() => {
   axios.get(`/api/voucher/classes`).then((result) => {
-    voucherClasses = result.data.values;
+    voucherClasses = result.data?.values || [];
   });
-  axios.get(`/api/term/${status.fy.term}`).then((result) => {
-    let fy = result.data;
-    for ( let mon = new Date(fy.startDate); mon < new Date(fy.endDate); ) {
-      dates.push({
-        year: mon.getFullYear(),
-        month: mon.getMonth()+1,
-        ym: `${mon.getFullYear()}-${mon.getMonth()+1}`
-      });
-      mon.setMonth(mon.getMonth() + 1);
+  const term = status?.fy?.term || 1;
+  axios.get(`/api/term/${term}`).then((result) => {
+    let fy = result.data?.startDate ? result.data : (status?.fy?.startDate ? status.fy : null);
+    if (fy && fy.startDate && fy.endDate) {
+      dates = [];
+      const end = new Date(fy.endDate);
+      for (let mon = new Date(fy.startDate); mon <= end;) {
+        dates.push({
+          year: mon.getFullYear(),
+          month: mon.getMonth() + 1,
+          ym: `${mon.getFullYear()}-${mon.getMonth() + 1}`
+        });
+        mon.setMonth(mon.getMonth() + 1);
+      }
+      dates = [...dates];
+    } else {
+      const curYear = new Date().getFullYear();
+      dates = Array.from({ length: 12 }, (_, i) => ({
+        year: curYear,
+        month: i + 1,
+        ym: `${curYear}-${i + 1}`
+      }));
     }
-    dates = dates;
+  }).catch(() => {
+    const curYear = new Date().getFullYear();
+    dates = Array.from({ length: 12 }, (_, i) => ({
+      year: curYear,
+      month: i + 1,
+      ym: `${curYear}-${i + 1}`
+    }));
   });
-})
+});
 </script>

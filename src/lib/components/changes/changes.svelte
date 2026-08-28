@@ -236,13 +236,15 @@ const changeAccount = (update) => {
 }
 
 const checkPage = (page) => {
-  const path = page || location.pathname;
+  const path = page || (typeof location !== 'undefined' ? location.pathname : '');
   let args = path.split('/');
-  status.fy.term = args[2];
+  status.fy.term = (args[2] && args[2] !== '') ? args[2] : (status?.fy?.term || 1);
   accountCode = args[3];
   subAccountCode = args[4] ? parseInt(args[4]) : undefined;
   
-  changeAccount(true);
+  if (accountCode) {
+    changeAccount(true);
+  }
 }
 
 onMount(() => {
@@ -276,6 +278,13 @@ onMount(() => {
       }
     }
     fields = fields;
+    if (!accountCode) {
+      const defaultAcc = accounts.find((a) => a.code && a.code.startsWith('6')) || accounts[0];
+      if (defaultAcc) {
+        accountCode = defaultAcc.code;
+        changeAccount(true);
+      }
+    }
   });
 
   checkPage();

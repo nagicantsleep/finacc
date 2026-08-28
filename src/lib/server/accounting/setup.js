@@ -1,4 +1,4 @@
-import models from '../../../../models/index.js';
+import models from '../db/index.js';
 import parseAccounts from '../parse_accounts.js';
 import { menuTemplates } from './menuTemplates.js';
 

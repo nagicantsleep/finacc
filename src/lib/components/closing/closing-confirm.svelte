@@ -1,6 +1,6 @@
 <div class="list">
   <div class="page-title">
-    <h1 class='$lib/i18n/bilingual.js'><BilingualText key="year_end_process" inline={true} /> — {term}{$bi('period_suffix')}</h1>
+    <h1 class="page-title-bilingual"><BilingualText key="year_end_process" inline={true} /> — {term}{$bi('period_suffix')}</h1>
   </div>
 
   <div class="alert alert-warning" role="alert">
@@ -83,12 +83,16 @@ $: canClose = !!data
   && (!data.plPrecheck.hasNonZeroPL || plResetAcknowledged);
 
 const parseTerm = (page) => {
-  // /closing/<term>/confirm  or  /closing/<term>
-  const parts = (page || '').split('?')[0].split('/');
-  return parseInt(parts[2]);
+  // /closing/<term>/confirm  or  /closing/<term> or /closing
+  const path = page || (typeof location !== 'undefined' ? location.pathname : '');
+  const parts = path.split('?')[0].split('/');
+  const parsed = parseInt(parts[2]);
+  if (!isNaN(parsed) && parsed > 0) return parsed;
+  return status?.fy?.term || 1;
 };
 
 const loadData = async () => {
+  if (!term) return;
   loadError = null;
   try {
     const res = await axios.get(`/api/closing/${term}/confirm`);
@@ -114,6 +118,11 @@ const runClosing = async () => {
     submitting = false;
   }
 };
+
+$: if (!term && status?.fy?.term) {
+  term = status.fy.term;
+  loadData();
+}
 
 onMount(() => {
   term = parseTerm(getCurrentPage());

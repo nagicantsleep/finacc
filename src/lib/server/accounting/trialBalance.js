@@ -1,4 +1,4 @@
-import models from '../../../../models/index.js';
+import models from '../db/index.js';
 
 export const calculateTrialBalance = async (tenantId, term) => {
   const accounts = await models.Account.findAll({

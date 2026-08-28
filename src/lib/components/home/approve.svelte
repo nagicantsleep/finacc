@@ -78,7 +78,7 @@ import axios from 'axios';
 import {onMount, beforeUpdate, afterUpdate, createEventDispatcher} from 'svelte';
 const dispatch = createEventDispatcher();
 import CrossSlipModal from '../cross-slip/cross-slip-modal.svelte';
-import Modal from 'bootstrap/js/dist/modal';
+// Modal dynamically loaded
 import {setAccounts} from '$lib/client/cross-slip.js';
 
 import BilingualText from '$lib/components/BilingualText.svelte';

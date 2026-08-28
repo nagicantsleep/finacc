@@ -150,7 +150,7 @@
   import axios from 'axios';
   import { onMount, tick } from 'svelte';
   import { writable } from 'svelte/store';
-  import Modal from 'bootstrap/js/dist/modal';
+  // Modal dynamically loaded
   import OkModal from '$lib/components/common/OkModal.svelte';
   import { dc } from '$lib/shared/parse_account_code.js';
 
@@ -348,12 +348,17 @@ import BilingualText from '$lib/components/BilingualText.svelte';
   };
 
   onMount(async () => {
-    const modalElement = document.getElementById('labelModal');
-    if (modalElement) {
-      labelModal = new Modal(modalElement);
-      modalElement.addEventListener('hidden.bs.modal', () => {
-        editingLabel = null;
-      });
+    try {
+      const bs = await import('bootstrap');
+      const modalElement = document.getElementById('labelModal');
+      if (modalElement) {
+        labelModal = new bs.Modal(modalElement);
+        modalElement.addEventListener('hidden.bs.modal', () => {
+          editingLabel = null;
+        });
+      }
+    } catch (e) {
+      console.error('Modal init error', e);
     }
 
     await fetchLabels();

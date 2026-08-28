@@ -55,18 +55,18 @@
         {/if}
         <p class="handler">
           {$bi('person_in_charge')}: &nbsp;
-          {#if transaction.handleUser.memberships && transaction.handleUser.memberships[0]?.tradingName}
+          {#if transaction?.handleUser?.memberships?.[0]?.tradingName}
           {transaction.handleUser.memberships[0].tradingName}
           {:else}
-          {transaction.handleUser.legalName}
+          {transaction?.handleUser?.legalName || ''}
           {/if}
         </p>
         <p class="account">
           [{$bi('bank_transfer_destination')}]
-          {company.bankName}
-          {company.bankBranchName}
-          {BANK_ACCOUNT_TYPE.find((bank) => bank[0] === company.accountType)}
-          {company.accountNo}
+          {company.bankName || ''}
+          {company.bankBranchName || ''}
+          {(BANK_ACCOUNT_TYPE.find((bank) => String(bank[0]) === String(company.accountType)) || [])[1] || ''}
+          {company.accountNo || ''}
         </p>
       </div>
     </div>

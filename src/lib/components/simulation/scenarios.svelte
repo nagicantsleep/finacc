@@ -11,11 +11,11 @@
 {#key $currentPage}
 <div class="container-fluid">
   <div class="page-title d-flex justify-content-between mt-2">
-    <h1 class='$lib/i18n/bilingual.js'>
+    <h1 class="page-title-bilingual">
       <BilingualText primary="シミュレーション" secondary="Mô phỏng" inline={true} />
     </h1>
     <div>
-      <button type='$lib/i18n/bilingual.js'
+      <button type="button" class="btn btn-primary btn-bilingual"
         on:click={openCreate}>
         <BilingualText primary="新規作成" secondary="Tạo mới" inline={true} />
         <i class="bi bi-plus-lg"></i>

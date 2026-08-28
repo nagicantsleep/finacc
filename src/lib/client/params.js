@@ -1,5 +1,5 @@
 export const parseParams = () => {
-  let _params = location.search.substring(1);
+  let _params = (typeof location !== 'undefined' ? location.search : '').substring(1);
   let params = new Map();
   if  ( _params )	{
     _params.split('&').map((item) => {

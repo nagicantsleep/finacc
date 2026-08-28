@@ -3,17 +3,31 @@
 
   export let data;
 
-  let status = {
-    user: data.user || { administrable: true, accounting: true },
-    fy: data.currentFy,
-    tenant: data.tenant
-  };
+  $: fy = data.fy || { term: 1, year: 2026, startDate: '2026-01-01', endDate: '2026-12-31' };
+  $: company = data.company || { name: data.tenant?.name || 'Hieronymus Corp', zip: '100-0001', address1: '東京都千代田区千代田1-1' };
+  $: bsLines = data.bsLines || [];
+  $: plOut = data.plOut || [];
+  $: sgaPage = data.sgaPage || [];
+  $: sgaSum = data.sgaSum || 0;
+  $: asset = typeof data.asset === 'number' ? data.asset : 0;
+  $: liabilities = typeof data.liabilities === 'number' ? data.liabilities : 0;
+  $: networth = typeof data.networth === 'number' ? data.networth : 0;
 </script>
 
 <svelte:head>
-  <title>決算書 :: Hieronymus</title>
+  <title>決算報告書 :: Hieronymus</title>
 </svelte:head>
 
 <div class="page-container container-fluid px-0">
-  <View bind:status />
+  <View
+    {fy}
+    {company}
+    {bsLines}
+    {plOut}
+    {sgaPage}
+    {sgaSum}
+    {asset}
+    {liabilities}
+    {networth}
+  />
 </div>

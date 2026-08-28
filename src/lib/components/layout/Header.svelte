@@ -1,50 +1,159 @@
 <script>
+  import { onMount } from 'svelte';
+  import axios from 'axios';
+  import { formatFiscalHeader } from '$lib/utils.js';
+  import ProfileModal from '$lib/components/common/profile-modal.svelte';
+  import LanguagePairSelector from '$lib/components/widgets/language-pair-selector.svelte';
+  import BilingualText from '$lib/components/BilingualText.svelte';
+  import { bi, languagePair } from '$lib/i18n/bilingual.js';
+
   export let user = {};
   export let tenant = {};
   export let currentFy = {};
   export let fiscalYears = [];
+
+  let profileModal;
+  let switchingTenant = false;
+  let creatingTenant = false;
+
+  $: fyObj = currentFy ? {
+    term: currentFy.term,
+    year: currentFy.year,
+    startDate: currentFy.startDate ? new Date(currentFy.startDate) : null,
+    endDate: currentFy.endDate ? new Date(currentFy.endDate) : null
+  } : {};
+
+  $: fiscalHeader = {
+    primary: formatFiscalHeader(fyObj, $languagePair?.primary || 'ja'),
+    secondary: formatFiscalHeader(fyObj, $languagePair?.secondary || 'vi')
+  };
+
+  const openProfile = () => profileModal?.show();
+
+  const onProfileUpdated = (event) => {
+    user = { ...user, ...event.detail };
+  };
+
+  const openTenantCreate = async () => {
+    if (creatingTenant) return;
+    const name = window.prompt($bi('nav_tenant_name_prompt'));
+    if (!name?.trim()) return;
+
+    const slug = window.prompt($bi('nav_tenant_slug_prompt')) || '';
+    creatingTenant = true;
+    try {
+      const res = await axios.post('/api/tenant', {
+        name: name.trim(),
+        slug: slug.trim() || undefined
+      });
+      if (res.data.result !== 'OK') {
+        window.alert(res.data.message || $bi('nav_tenant_create_fail'));
+        return;
+      }
+      window.location.reload();
+    } catch (err) {
+      window.alert(err.response?.data?.message || $bi('nav_tenant_create_fail'));
+    } finally {
+      creatingTenant = false;
+    }
+  };
+
+  const switchTenantFromApp = async () => {
+    if (switchingTenant) return;
+    switchingTenant = true;
+    try {
+      const res = await axios.post('/api/user/logoff');
+      if (res.data.result !== 'OK') {
+        switchingTenant = false;
+        return;
+      }
+      window.location = res.data.action === 'logout' ? '/login' : '/logon';
+    } catch (err) {
+      console.error('tenant switch error', err);
+      switchingTenant = false;
+    }
+  };
 </script>
 
-<header class="navbar navbar-expand-lg navbar-dark bg-dark px-3 shadow-sm border-bottom border-dark-subtle sticky-top">
-  <div class="container-fluid d-flex justify-content-between align-items-center">
-    <div class="d-flex align-items-center">
-      <a class="navbar-brand fw-bold d-flex align-items-center me-4" href="/home">
-        <img src="/logo.png" alt="Hieronymus" style="height: 28px;" class="me-2" />
-        <span>Hieronymus</span>
-      </a>
-      <div class="d-flex align-items-center">
-        <span class="badge bg-primary text-wrap me-2 fs-6">{tenant.name || 'テナント'}</span>
-        {#if currentFy?.term}
-          <span class="badge bg-secondary">第 {currentFy.term} 期 ({currentFy.year}年度)</span>
-        {/if}
-      </div>
-    </div>
-
-    <div class="d-flex align-items-center gap-3">
-      {#if fiscalYears && fiscalYears.length > 1}
-        <form method="GET" class="d-flex align-items-center">
-          <select name="term" class="form-select form-select-sm bg-dark text-light border-secondary" on:change={(e) => e.target.form.submit()}>
-            {#each fiscalYears as fy}
-              <option value={fy.term} selected={fy.term === currentFy.term}>第 {fy.term} 期 ({fy.year}年)</option>
-            {/each}
-          </select>
-        </form>
-      {/if}
-
-      <div class="text-light small d-none d-md-block">
-        <i class="bi bi-person-circle me-1"></i> {user.name}
-      </div>
-
-      <div class="btn-group">
-        <a href="/logon" class="btn btn-outline-light btn-sm" title="組織・テナント切替">
-          <i class="bi bi-arrow-left-right me-1"></i> 切替
-        </a>
-        <form action="/logon?/logout" method="POST" class="d-inline">
-          <button type="submit" class="btn btn-outline-danger btn-sm" title="ログアウト">
-            <i class="bi bi-box-arrow-right"></i>
-          </button>
-        </form>
-      </div>
-    </div>
+<div class="topbar">
+  <div class="brand-container">
+    <a href="/home" class="brand-link">
+      <img src="/public/logo.png" alt="Logo" class="brand-image" on:error={(e) => e.target.src = '/logo.png'} />
+      <span class="brand-text">Hieronymus</span>
+    </a>
   </div>
-</header>
+
+  <nav class="main-header navbar navbar-expand-lg">
+    <div class="container-fluid">
+      <span class="navbar-text text-light">
+        {#if fyObj.startDate && fyObj.endDate}
+          {#if fiscalHeader.primary === fiscalHeader.secondary}
+            {fiscalHeader.primary}
+          {:else}
+            {fiscalHeader.primary} / {fiscalHeader.secondary}
+          {/if}
+        {:else}
+          <span class="text-danger fw-bold">
+            <i class="bi bi-exclamation-diamond-fill me-1"></i>
+            <BilingualText key="select_fiscal_year" />
+          </span>
+        {/if}
+      </span>
+
+      <ul class="navbar-nav ms-auto align-items-center">
+        <li class="nav-item me-2">
+          <LanguagePairSelector />
+        </li>
+        <li class="nav-item dropdown">
+          <a
+            href="#"
+            class="nav-link dropdown-toggle user-menu-toggle text-light"
+            data-bs-toggle="dropdown"
+            id="user_menu"
+            role="button"
+            aria-expanded="false"
+          >
+            <span class="user-avatar" aria-hidden="true" title={user.name}>
+              {(user.name || '?').trim().charAt(0).toUpperCase()}
+            </span>
+            <span class="d-none d-md-inline user-menu-name">{user.name || 'User'}</span>
+          </a>
+          <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="user_menu">
+            <li>
+              <a href="#" class="dropdown-item" on:click|preventDefault={openProfile}>
+                <i class="bi bi-person-circle me-2"></i>
+                <BilingualText key="profile" stacked={false} />
+              </a>
+            </li>
+            <li>
+              <a href="#" class="dropdown-item" on:click|preventDefault={openTenantCreate}>
+                <i class="bi bi-building-add me-2"></i>
+                <BilingualText key="create_tenant" stacked={false} />
+              </a>
+            </li>
+            <li>
+              <a href="#" class="dropdown-item" on:click|preventDefault={switchTenantFromApp}>
+                <i class="bi bi-arrow-left-right me-2"></i>
+                <BilingualText key="nav_tenant_switch" stacked={false} />
+                {#if switchingTenant}
+                  <span class="spinner-border spinner-border-sm ms-2" role="status" aria-hidden="true"></span>
+                {/if}
+              </a>
+            </li>
+            <li><hr class="dropdown-divider" /></li>
+            <li>
+              <form action="/logon?/logout" method="POST" class="d-block m-0 p-0">
+                <button type="submit" class="dropdown-item text-danger">
+                  <i class="bi bi-power me-2"></i>
+                  <BilingualText key="nav_sign_out" stacked={false} />
+                </button>
+              </form>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+  </nav>
+</div>
+
+<ProfileModal bind:this={profileModal} {user} on:updated={onProfileUpdated} />

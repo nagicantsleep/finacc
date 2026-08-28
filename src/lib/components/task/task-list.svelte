@@ -24,7 +24,7 @@
               register={false}
               on:input={(event) => {
                 const companyId = parseInt(event.detail);
-                const newParams = new URLSearchParams(location.search);
+                const newParams = new URLSearchParams((typeof location !== 'undefined' ? location.search : ''));
                 if (companyId > 0) {
                   newParams.set('company', companyId);
                 } else {

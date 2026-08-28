@@ -30,7 +30,7 @@
               let value = parseInt(event.currentTarget.value);
               status.params.set('kind', value);
               const param = buildParam(status, {});
-              link(`${location.pathname}?${param}`);
+              link(`${(typeof location !== 'undefined' ? location.pathname : '')}?${param}`);
             }}
             value={status.params ? parseInt(status.params.get('kind')) : -1}>
             <option value={-1}><BilingualText key="all" /></option>

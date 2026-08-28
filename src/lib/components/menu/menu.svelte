@@ -47,9 +47,9 @@ import Menu from '../components/menu.svelte';
 import { onMount, beforeUpdate, tick} from "svelte";
 import {currentMenu, getStore} from '$lib/client/current-record.js'
 import {numeric, formatDate} from '$lib/utils.js';
-import {eventBus as tableBus} from '../../javascripts/table-maintenance.js';
+import {eventBus as tableBus} from '$lib/client/table-maintenance.js';
 import menuBus from '$lib/client/event-bus.js';
-import {componentList} from '../../javascripts/widget-list.js';
+import {componentList} from '$lib/client/widget-list.js';
 
 import BilingualText from '$lib/components/BilingualText.svelte';
 export let status;
@@ -122,7 +122,7 @@ const save = (event) => {
 }
 
 $: {
-  let args = location.pathname.split('/');
+  let args = (typeof location !== 'undefined' ? location.pathname : '').split('/');
 	if	( args[2] === 'new')	{
 		status.state = args[2];
     tick().then(() => {
@@ -155,7 +155,7 @@ $: {
 
 beforeUpdate(() => {
   console.log('menu/menu', isEditMode);
-  let args = location.pathname.split('/');
+  let args = (typeof location !== 'undefined' ? location.pathname : '').split('/');
   if	( numeric(args[2]) )	{
     if  ( arg2 !== args[2] ) {
       arg2 = args[2];
@@ -173,7 +173,19 @@ beforeUpdate(() => {
 
 onMount(() => {
   console.log('menu onMount');
-  menu = null;
-  widgets = [];
+  let args = (typeof location !== 'undefined' ? location.pathname : '').split('/');
+  if (!args[2] || args[2] === '') {
+    axios.get('/api/menu').then((result) => {
+      const menus = result.data.menus || [];
+      if (menus.length > 0) {
+        menu = deserializeMenu(menus[0]);
+        widgets = menu.widgets || [];
+        reload += 1;
+      } else {
+        menu = { title: 'メニュー', widgets: [] };
+        widgets = [];
+      }
+    });
+  }
 })
 </script>

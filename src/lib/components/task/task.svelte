@@ -39,7 +39,8 @@ const openTransaction = (event) => {
 import {parseParams} from '$lib/client/params.js';
 
 const checkPage = (page) => {
-  page = page || location.pathname + location.search;
+  if (typeof window === 'undefined') return;
+  page = page || (typeof location !== 'undefined' ? location.pathname : '') + location.search;
   const path = page.split('?')[0];
   const query = page.split('?')[1];
   const args = path.split('/');

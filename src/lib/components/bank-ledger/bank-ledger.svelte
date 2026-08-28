@@ -1,6 +1,6 @@
 <div class="list">
   <div class="page-title d-flex justify-content-between">
-    <h1 class='$lib/i18n/bilingual.js'><BilingualText key="bank_ledger" inline={true} /></h1>
+    <h1 class="page-title-bilingual"><BilingualText key="bank_ledger" inline={true} /></h1>
   </div>
   <ul class="page-subtitle d-flex justify-content-between">
     <div class="nav">
@@ -10,7 +10,7 @@
         style="background-color:var(--bs-primary);color:white;"
         role="button" data-bs-toggle="dropdown" aria-expanded="false">
         {#if accountCode}
-        <BilingualText key={BANK_ACCOUNTS.find((el) => el[0] == accountCode)[1]} inline={true} />
+        <BilingualText key={BANK_ACCOUNTS.find((el) => el[0] == accountCode)?.[1] || 'account'} inline={true} />
         {:else}
         <BilingualText key="account" inline={true} />
         {/if}
@@ -20,36 +20,38 @@
         <li>
           <button type="button" class="btn btn-link dropdown-item account-dropdown-item"
             on:click={() => {
-              openAccount(account[0])}
-            }>
+              openAccount(account[0]);
+            }}>
             <BilingualText key={account[1]} inline={true} />
           </button>
         </li>
         {/each}
       </ul>
     </li>
-    {#each bank_list.subAccounts as bank}
-      <li class="nav-item">
-        {#if ( subAccountCode === bank.subAccountCode )}
-        <button type="button" class="btn btn-info"
-          on:click|preventDefault={() => {
-            openBank(bank.subAccountCode);
-          }}>
-          <BilingualText primary={bank.name} secondary={bank.nameVi} inline={true} />
-        </button>
-        {:else}
-        <button type="button" class="btn btn-outline-info"
-          on:click|preventDefault={() => {
-            openBank(bank.subAccountCode);
-          }}>
-          <BilingualText primary={bank.name} secondary={bank.nameVi} inline={true} />
-        </button>
-        {/if}
-      </li>
-    {/each}
+    {#if bank_list && bank_list.subAccounts}
+      {#each bank_list.subAccounts as bank}
+        <li class="nav-item">
+          {#if ( subAccountCode === bank.subAccountCode )}
+          <button type="button" class="btn btn-info"
+            on:click|preventDefault={() => {
+              openBank(bank.subAccountCode);
+            }}>
+            <BilingualText primary={bank.name} secondary={bank.nameVi} inline={true} />
+          </button>
+          {:else}
+          <button type="button" class="btn btn-outline-info"
+            on:click|preventDefault={() => {
+              openBank(bank.subAccountCode);
+            }}>
+            <BilingualText primary={bank.name} secondary={bank.nameVi} inline={true} />
+          </button>
+          {/if}
+        </li>
+      {/each}
+    {/if}
     </div>
     <div>
-    	<button type='$lib/client/cross-slip.js'
+    	<button type="button" class="btn btn-primary" id="open-cross-slip"
         on:click={openSlip}>
         <BilingualText key="voucher_entry" inline />&nbsp;<i class="bi bi-pencil-square"></i>
       </button>
@@ -88,7 +90,7 @@
           <td style="width:50px;" class={'number ' + ( line.approvedAt ? 'bg-body' : 'bg-warning' )}>
             <button type="button" class="btn btn-link"
               on:click={() => {
-                openSlip(line.year, line.month, line.no)
+                openSlip(line.year, line.month, line.no);
               }}>
               {line.no}
             </button>
@@ -141,7 +143,7 @@
             {/if}
           </td>
           <td class="number">
-            {line.pureBalance.toLocaleString()}
+            {line.pureBalance ? line.pureBalance.toLocaleString() : '0'}
           </td>
         </tr>
       {/each}
@@ -161,10 +163,6 @@
 {/if}
   
 <style>
-/* Bilingual H1 + buttons need more height than the global
-   `.page-title { height: 50px }` to avoid the H1 overflowing
-   into the `.page-subtitle` row (which contains the account
-   dropdown — see issue #147). */
 .page-title {
   height: auto;
   min-height: 50px;
@@ -196,29 +194,27 @@
 
 <script>
 import axios from 'axios';
-import {onMount, afterUpdate} from 'svelte';
-import {ledgerLines} from '$lib/shared/ledger-lines.js';
-import {setAccounts} from '$lib/client/cross-slip.js';
-import CrossSlipModal from '../cross-slip/cross-slip-modal.svelte';
+import { onMount, afterUpdate } from 'svelte';
+import { page } from '$app/stores';
+import { goto } from '$app/navigation';
+import { ledgerLines } from '$lib/shared/ledger-lines.js';
+import { setAccounts } from '$lib/client/cross-slip.js';
+import CrossSlipModal from '$lib/components/cross-slip/cross-slip-modal.svelte';
 import BilingualText from '$lib/components/BilingualText.svelte';
-import {languagePair} from '$lib/i18n/bilingual.js';
-import {DateString} from '$lib/utils.js';
-import {currentPage} from '$lib/client/router.js';
+import { languagePair } from '$lib/i18n/bilingual.js';
 
-export let status;
+export let status = { fy: {} };
 
-let	bank_list = { subAccounts: []};
+let	bank_list = { subAccounts: [] };
 let slip = {
-    year: 0,
-    month: 0,
-    lines: []
-  };
+  year: 0,
+  month: 0,
+  lines: []
+};
 let	lines = [];
-let	accounts;
+let	accounts = [];
 let modalCount = 0;
-let popUp;
-
-$: checkPage($currentPage);
+let popUp = false;
 
 const BANK_ACCOUNTS = [
   [ '1010000',	'bank_checking_dep' ],
@@ -227,75 +223,92 @@ const BANK_ACCOUNTS = [
   [ '1010030',	'bank_fixed_dep' ]
 ];
 
-const link = (href) => {
-  window.history.pushState(status, "", href);
-  currentPage.set(href);
-}
-
 let accountCode;
 let subAccountCode;
+
+$: checkPage($page.params);
+
+const link = (href) => {
+  goto(href, { keepFocus: true, noScroll: true });
+};
 
 const openAccount = (_account) => {
   accountCode = _account;
   subAccountCode = undefined;
   link(`/bank-ledger/${accountCode}`);
-}
+};
+
 const openBank = (id) => {
   subAccountCode = id;
   link(`/bank-ledger/${accountCode}/${subAccountCode}`);
-}
+};
 
-const checkPage = (page) => {
-  page = page || location.pathname;
-  const args = page.split('/');
-  accountCode = args[2];
-  subAccountCode = args[3] ? parseInt(args[3]) : undefined;
-  console.log('checkPage', args, accountCode, subAccountCode);
+const checkPage = (params) => {
+  accountCode = params?.accountCode || accountCode || BANK_ACCOUNTS[0][0];
+  subAccountCode = params?.subAccountCode ? parseInt(params.subAccountCode) : undefined;
   updateAccount();
-  if ( subAccountCode ) {
+  if (subAccountCode) {
     updateList();
   } else {
     lines = [];
   }
-}
+};
 
 onMount(async () => {
   lines = [];
-  bank_list = { subAccounts: []};
-  let result = await axios.get('/api/accounts');
-  accounts = result.data;
-  setAccounts(accounts);
+  bank_list = { subAccounts: [] };
+  try {
+    let result = await axios.get('/api/accounts');
+    accounts = result.data;
+    setAccounts(accounts);
 
-  checkPage();
+    if (!status?.fy?.startDate) {
+      const termRes = await axios.get('/api/term');
+      if (Array.isArray(termRes.data) && termRes.data.length > 0) {
+        status.fy = termRes.data[0];
+      } else if (termRes.data?.startDate) {
+        status.fy = termRes.data;
+      }
+    }
+  } catch (e) {
+    console.error('bank-ledger init error', e);
+  }
 
+  checkPage($page.params);
 });
+
 afterUpdate(() => {
-  if  (!popUp)  {
+  if (!popUp) {
     modalCount += 1;
   }
-})
+});
 
 const lpQuery = () => {
   const pair = $languagePair;
   return `?languagePair=${encodeURIComponent(JSON.stringify(pair))}`;
-}
+};
 
 $: if ($languagePair && accountCode) {
   updateAccount();
 }
 
 const updateAccount = () => {
-  if	( accountCode )	{
+  if (accountCode) {
     axios.get(`/api/account/${accountCode}${lpQuery()}`).then((result) => {
       bank_list = result.data;
+      if (!subAccountCode && bank_list?.subAccounts?.length > 0) {
+        openBank(bank_list.subAccounts[0].subAccountCode);
+      }
+    }).catch(() => {
+      bank_list = { subAccounts: [] };
     });
   } else {
     bank_list = { subAccounts: [] };
   }
-}
+};
 
 const updateList = () => {
-  if	( subAccountCode )	{
+  if (subAccountCode && status?.fy?.term) {
     axios.get(`/api/remaining/${status.fy.term}/${accountCode}/${subAccountCode}`).then((result) => {
       let remaining = result.data;
 
@@ -304,15 +317,18 @@ const updateList = () => {
         let ret = ledgerLines(accountCode, subAccountCode, remaining, details);
         lines = ret.lines;
       });
+    }).catch((e) => {
+      console.error('ledger update error', e);
     });
   }
-}
+};
 
-const	openSlip = (year, month, no) => {
-  if  ( !no ) {
+const openSlip = (year, month, no) => {
+  const fyStartDate = status?.fy?.startDate ? new Date(status.fy.startDate) : new Date();
+  if (!no) {
     slip = {
-      year: status.fy.startDate.getFullYear(),
-      month: status.fy.startDate.getMonth()+1,
+      year: fyStartDate.getFullYear(),
+      month: fyStartDate.getMonth() + 1,
       lines: [{
         debitAccount: "",
         debitSubAccount: 0,
@@ -334,13 +350,13 @@ const	openSlip = (year, month, no) => {
         day: data.day,
         no: data.no,
         createdBy: data.createdBy,
-        approvedAt: data.approvedAt ? new Date(data.approvedAt): null,
-        createrName: data.creater ? data.creater.name: '',
+        approvedAt: data.approvedAt ? new Date(data.approvedAt) : null,
+        createrName: data.creater ? data.creater.name : '',
         approverName: data.approver ? data.approver.name : '',
         lines: data.lines
       };
       popUp = true;
     });
   }
-}
+};
 </script>

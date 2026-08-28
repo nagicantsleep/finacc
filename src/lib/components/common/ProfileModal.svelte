@@ -72,7 +72,7 @@
 
 <script>
 import { onMount, createEventDispatcher } from 'svelte';
-import Modal from 'bootstrap/js/dist/modal';
+// Modal dynamically loaded
 import axios from 'axios';
 import BilingualText from '$lib/components/BilingualText.svelte';
 import { bi } from '$lib/i18n/bilingual.js';
@@ -91,7 +91,7 @@ let currentPassword = '';
 let newPassword = '';
 let confirmPassword = '';
 
-export const show = () => {
+export const show = async () => {
   form = {
     name: user.name || '',
     legalName: user.legalName || '',
@@ -103,7 +103,17 @@ export const show = () => {
   newPassword = '';
   confirmPassword = '';
   message = '';
-  modal?.show();
+  if (modal) {
+    modal.show();
+  } else if (modalEl) {
+    try {
+      const bs = await import('bootstrap');
+      modal = new bs.Modal(modalEl);
+      modal.show();
+    } catch (e) {
+      console.error(e);
+    }
+  }
 };
 
 const close = () => modal?.hide();
@@ -157,7 +167,14 @@ const save = async () => {
   }
 };
 
-onMount(() => {
-  modal = new Modal(modalEl);
+onMount(async () => {
+  if (typeof window !== 'undefined') {
+    try {
+      const bs = await import('bootstrap');
+      modal = new bs.Modal(modalEl);
+    } catch (e) {
+      console.error(e);
+    }
+  }
 });
 </script>

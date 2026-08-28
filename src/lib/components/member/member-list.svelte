@@ -122,7 +122,7 @@ export  let classes;
 let memberClassId;
 
 const handleFilterChange = (event) => {
-  const newParams = new URLSearchParams(window.location.search);
+  const newParams = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '');
   const value = event.currentTarget.value;
   if (value === '-1') {
     newParams.delete('memberClassId');

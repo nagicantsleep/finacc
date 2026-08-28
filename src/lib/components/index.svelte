@@ -227,8 +227,8 @@ const doReply = (event) => {
 
 onMount(async () => {
   console.log('index onMount');
-  status.pathname = location.pathname;
-  // currentPage.set(location.pathname);
+  status.pathname = (typeof location !== 'undefined' ? location.pathname : '');
+  // currentPage.set((typeof location !== 'undefined' ? location.pathname : ''));
 
   // Fetch language pair preference from server
   try {
@@ -256,7 +256,7 @@ onMount(async () => {
   });
   window.onpopstate = (event) => {
     console.log('maybe back', event);
-    const page = location.pathname + location.search;
+    const page = (typeof location !== 'undefined' ? location.pathname : '') + location.search;
     console.log("popstate:", page);
     currentPage.set(page);
   };
@@ -271,7 +271,7 @@ onMount(async () => {
 })
 
 beforeUpdate(() => {
-  let args = location.pathname.split('/');
+  let args = (typeof location !== 'undefined' ? location.pathname : '').split('/');
   //console.log('index beforeUpdate', args);
   //status = status;
   //console.log('index beforeUpdate', {status});

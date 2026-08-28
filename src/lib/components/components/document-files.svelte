@@ -1,5 +1,4 @@
-<!-- svelte-ignore a11y-no-static-element-interactions -->
-<div class='$lib/client/document.js'>
+<div class="document">
   <div class="row mb-3 w-100 file"
     on:drop={onDrop}
     on:dragover={onDragOver}>

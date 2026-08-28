@@ -2,8 +2,8 @@
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="moda-title" id="modal-label">{title}</h5>
-        <button type="button" class="btn-close" id="close-button" area-label="Close"
+        <h5 class="modal-title" id="modal-label">{title}</h5>
+        <button type="button" class="btn-close" id="close-button" aria-label="Close"
           on:click={close_}></button>
       </div>
       <div class="modal-body">
@@ -20,33 +20,44 @@
 </div>
 
 <script>
-import {onMount, beforeUpdate, afterUpdate, createEventDispatcher} from 'svelte';
-import Modal from 'bootstrap/js/dist/modal';
+import { onMount, createEventDispatcher } from 'svelte';
 import BilingualText from '$lib/components/BilingualText.svelte';
 const dispatch = createEventDispatcher();
 
-export let title;
-export let description;
+export let title = '';
+export let description = '';
 
 let modalEl;
-
 let modal;
 
 export const show = () => {
-  modal?.show();
-}
+  if (modal) {
+    modal.show();
+  } else if (modalEl) {
+    import('bootstrap').then((bs) => {
+      modal = new bs.Modal(modalEl);
+      modal.show();
+    });
+  }
+};
 
 const Answer = (answer) => {
-  modal.hide();
+  modal?.hide();
   dispatch('answer', answer);
-}
-const close_ = () => {
-  modal.hide();
-}
-beforeUpdate(() => {
-})
-onMount(() => {
-  modal = new Modal(modalEl);
-})
+};
 
+const close_ = () => {
+  modal?.hide();
+};
+
+onMount(async () => {
+  if (typeof window !== 'undefined') {
+    try {
+      const bs = await import('bootstrap');
+      modal = new bs.Modal(modalEl);
+    } catch (e) {
+      console.error(e);
+    }
+  }
+});
 </script>

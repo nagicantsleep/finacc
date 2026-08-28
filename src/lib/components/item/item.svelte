@@ -44,7 +44,7 @@ const closeEntry = (event) => {
 }
 
 const checkPage = (page) => {
-  page = page || location.pathname;
+  page = page || (typeof location !== 'undefined' ? location.pathname : '');
   const args = page.split('/');
   const action = args[2] || 'list';
 	status.state = action;
