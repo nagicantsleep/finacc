@@ -49,7 +49,7 @@ export const formatFiscalHeader = (fy, lang) => {
     case 'ja': {
       const wS = wareki(s);
       const wE = wareki(e);
-      return `第${term}期 ${s.getFullYear()}年${s.getMonth() + 1}月${s.getDate()}日（${wS}）〜 ${e.getFullYear()}年${e.endDate ? e.getFullYear() : ''}年${e.getMonth() + 1}月${e.getDate()}日（${wE}）`;
+      return `第${term}期 ${s.getFullYear()}年${s.getMonth() + 1}月${s.getDate()}日（${wS}）〜 ${e.getFullYear()}年${e.getMonth() + 1}月${e.getDate()}日（${wE}）`;
     }
     case 'vi':
       return `Kỳ ${term}: ${pad2(s.getDate())}/${pad2(s.getMonth() + 1)}/${s.getFullYear()} – ${pad2(e.getDate())}/${pad2(e.getMonth() + 1)}/${e.getFullYear()}`;
@@ -104,3 +104,32 @@ export const getCompanyInfo = async () => {
     return null;
   }
 };
+
+export const isSameOrigin = (targetUrl) => {
+  if (typeof window === 'undefined') return true;
+  try {
+    const currentOrigin = window.location.origin;
+    const url = new URL(targetUrl, window.location.href);
+    return url.origin === currentOrigin;
+  } catch (e) {
+    return false;
+  }
+};
+
+export const fetchTitleFromUrl = async (url) => {
+  if (typeof window === 'undefined') return null;
+  try {
+    const response = await axios.get(url, {
+      responseType: 'text'
+    });
+    const htmlString = response.data;
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(htmlString, 'text/html');
+    const title = doc.querySelector('title')?.innerText || '(no title)';
+    return title;
+  } catch (error) {
+    console.error('fetchTitleFromUrl error:', error);
+    return null;
+  }
+};
+

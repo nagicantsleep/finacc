@@ -35,6 +35,7 @@ export async function load({ locals, url }) {
       startDate: currentFy.startDate,
       endDate: currentFy.endDate
     },
+    company: tenant?.settings && typeof tenant.settings === 'object' ? tenant.settings : {},
     fiscalYears: fiscalYears.map((f) => ({
       id: f.id,
       term: f.term,

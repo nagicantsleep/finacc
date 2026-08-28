@@ -1,11 +1,12 @@
 <script>
   import Header from '$lib/components/layout/Header.svelte';
   import Sidebar from '$lib/components/layout/Sidebar.svelte';
+  import CommonFooter from '$lib/components/common/footer.svelte';
 
   export let data;
 </script>
 
-<div class="erp-wrapper min-vh-100 d-flex flex-column bg-light">
+<div class="wrapper">
   <Header
     user={data.user}
     tenant={data.tenant}
@@ -13,12 +14,21 @@
     fiscalYears={data.fiscalYears}
   />
 
-  <div class="d-flex flex-grow-1">
-    <div class="d-none d-md-block d-print-none">
-      <Sidebar />
+  <Sidebar
+    user={data.user}
+    company={data.company}
+    currentFy={data.currentFy}
+  />
+
+  <main class="content-wrapper">
+    <div class="container-fluid">
+      <div class="content py-3">
+        <slot />
+      </div>
     </div>
-    <main class="flex-grow-1 p-3 p-md-4 overflow-auto">
-      <slot />
-    </main>
-  </div>
+  </main>
+
+  <footer class="main-footer d-print-none">
+    <CommonFooter />
+  </footer>
 </div>
