@@ -1,7 +1,11 @@
 export default [
   {
-    name: 'menu',
-    match: /^\/menu/,
+    name: 'workspace',
+    title: 'ワークスペース',
+    match: /^\/(workspace|menu)/,
+    href: () => '/workspace',
+    icon: { name: 'bi:menu-button-wide' },
+    authority: () => true
   }, {
     name: 'journal',
     title: '仕訳日記帳',

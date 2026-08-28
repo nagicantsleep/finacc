@@ -1,5 +1,7 @@
 <script>
-  import MenuView from '$lib/components/menu/menu.svelte';
+  import { goto } from '$app/navigation';
+  import { onMount } from 'svelte';
+  import WorkspaceView from '$lib/components/workspace/workspace.svelte';
   import Toast from '$lib/components/common/Toast.svelte';
 
   export let data;
@@ -9,16 +11,20 @@
     user: data.user || { administrable: true, accounting: true },
     fy: data.currentFy,
     tenant: data.tenant,
-    current: 'menu',
-    pathname: '/menu'
+    current: 'workspace',
+    pathname: '/workspace'
   };
+
+  onMount(() => {
+    goto('/workspace', { replaceState: true });
+  });
 </script>
 
 <svelte:head>
-  <title>メニュー :: Hieronymus</title>
+  <title>ワークスペース :: Hieronymus</title>
 </svelte:head>
 
 <div class="menu-page container-fluid px-0">
-  <MenuView bind:status bind:toast />
+  <WorkspaceView bind:status bind:toast />
   <Toast bind:toast />
 </div>

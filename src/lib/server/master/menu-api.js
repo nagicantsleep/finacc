@@ -94,3 +94,7 @@ export async function previewMenuUrl(targetUrl) {
     return { ok: false, status: 500, payload: { error: 'Failed to fetch or parse target URL' } };
   }
 }
+
+export const getWorkspaceTemplates = getMenuTemplates;
+export const previewWorkspaceUrl = previewMenuUrl;
+
