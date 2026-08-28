@@ -7,6 +7,7 @@ import {
   overlayMembershipPermissions
 } from '$lib/server/auth/index.js';
 import { json, redirect } from '@sveltejs/kit';
+import { respondFormPdf } from '$lib/server/form-pdf.js';
 
 const PUBLIC_PATHS = ['/login', '/signup', '/api/user/login', '/api/user/signup', '/api/health'];
 
@@ -131,6 +132,9 @@ export async function handle({ event, resolve }) {
       console.error('[hooks.server.js] FiscalYear count error:', e);
     }
   }
+
+  const pdf = await respondFormPdf(event);
+  if (pdf) return pdf;
 
   return resolve(event);
 }

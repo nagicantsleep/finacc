@@ -1,5 +1,5 @@
 import {numeric, burstPage} from './utils.js';
-import SumTable from '../forms/sum-table.js';
+import SumTable from '$lib/server/sum-table.js';
 import {field} from './parse_account_code.js';
 import trial_balance from './trial_balance.js';
 
