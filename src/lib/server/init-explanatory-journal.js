@@ -1,5 +1,5 @@
 import {numeric, burstPage } from './utils.js';
-import {setAccounts, findAccount, findSubAccountByCode} from '../front/javascripts/cross-slip.js';
+import {setAccounts, findAccount, findSubAccountByCode} from '$lib/client/cross-slip.js';
 import Accounts from './accounts.js';
 
 let fy = {};
@@ -14,8 +14,9 @@ const setupDates = async (term, tenantId) => {
   fy = await models.FiscalYear.findOne({
     where: { term, tenantId }
   });
-  
+
   dates = [];
+  if (!fy) return;
   for ( let mon = new Date(fy.startDate); mon < new Date(fy.endDate); ) {
     let year = mon.getFullYear();
     let month = mon.getMonth() + 1;

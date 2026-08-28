@@ -4,7 +4,7 @@ const CANONICAL = {
   explanatory_journal: '/forms/explanatory-journal',
   'general_ledger': '/forms/general-ledger',
   subsidiary_ledger: '/forms/subsidiary-ledger',
-  trial_balance: '/reports/trial-balance',
+  trial_balance: '/forms/trial-balance',
   financial_statement: '/forms/financial-statement',
   'explanatory-journal': '/forms/explanatory-journal',
   'general-ledger': '/forms/general-ledger',

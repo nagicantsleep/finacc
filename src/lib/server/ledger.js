@@ -1,5 +1,5 @@
 import {dc, numeric} from './parse_account_code.js';
-import {findAccount, findSubAccountByCode, taxClass} from '../front/javascripts/cross-slip.js';
+import {findAccount, findSubAccountByCode, taxClass} from '$lib/client/cross-slip.js';
 
 export const ledgerLines = (account_code, sub_account_code, remaining, details) => {
   //console.log({remaining});

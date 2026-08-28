@@ -1,7 +1,6 @@
 import {field} from './parse_account_code.js';
-import SumTable from '../forms/sum-table.js';
+import SumTable from '$lib/server/sum-table.js';
 import {formatMoney} from './utils.js';
-import axios from 'axios';
 
 let trialBalanceLines;
 
@@ -473,6 +472,19 @@ export default async(term, tenantId) => {
     where: { tenantId, term }
   });
   
+  if (!fy) {
+    return {
+      fy: null,
+      bsLines: [],
+      plOut: [],
+      sgaPage: [],
+      asset: 0,
+      liabilities: 0,
+      networth: 0,
+      sgaSum: 0
+    };
+  }
+
   const lastDate = new Date(fy.endDate);
   const ret = await trial_balance(tenantId, term, lastDate);
   trialBalanceLines = ret.lines;

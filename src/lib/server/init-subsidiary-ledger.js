@@ -1,8 +1,8 @@
 import {numeric, formatDate, burstPage } from './utils.js';
-import {setAccounts, findAccount, findSubAccountByCode} from '../front/javascripts/cross-slip.js';
+import {setAccounts, findAccount, findSubAccountByCode} from '$lib/client/cross-slip.js';
 import {ledgerLines} from './ledger.js';
 import Accounts from './accounts.js';
-import {get_details} from '../routes/api_ledger.js';
+import {get_details} from '$lib/server/ledger-details.js';
 
 const ledgerPages = async (term, account, subAccount, tenantId) => {
   const { default: models } = await import('../../../models/index.js');
@@ -10,7 +10,10 @@ const ledgerPages = async (term, account, subAccount, tenantId) => {
   const fy = await models.FiscalYear.findOne({
     where: { term, tenantId }
   });
-  
+  if (!fy) {
+    return { name: account.name, sub_name: subAccount.name, pages: [{ lines: [], balance: 0 }], sums: { debit: 0, credit: 0, balance: 0 } };
+  }
+
   const LINES = 17;
 
   let pages = [];
@@ -52,6 +55,7 @@ export default async (term, tenantId) => {
   });
 
   let accounts = await Accounts.all2(tenantId, term);
+  setAccounts(accounts);
 
   let ledgerLines = [];
   for ( let account of accounts ) {
