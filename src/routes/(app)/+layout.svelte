@@ -22,7 +22,7 @@
 
   <main class="content-wrapper">
     <div class="container-fluid">
-      <div class="content py-3">
+      <div class="content">
         <slot />
       </div>
     </div>
