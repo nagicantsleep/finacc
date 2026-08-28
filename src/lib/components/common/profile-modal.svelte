@@ -72,7 +72,6 @@
 
 <script>
 import { onMount, createEventDispatcher } from 'svelte';
-import Modal from 'bootstrap/js/dist/modal';
 import axios from 'axios';
 import BilingualText from '$lib/components/BilingualText.svelte';
 import { bi } from '$lib/i18n/bilingual.js';
@@ -93,17 +92,24 @@ let confirmPassword = '';
 
 export const show = () => {
   form = {
-    name: user.name || '',
-    legalName: user.legalName || '',
-    legalRuby: user.legalRuby || '',
-    email: user.email || '',
-    telNo: user.telNo || ''
+    name: user?.name || '',
+    legalName: user?.legalName || '',
+    legalRuby: user?.legalRuby || '',
+    email: user?.email || '',
+    telNo: user?.telNo || ''
   };
   currentPassword = '';
   newPassword = '';
   confirmPassword = '';
   message = '';
-  modal?.show();
+  if (modal) {
+    modal.show();
+  } else if (modalEl) {
+    import('bootstrap').then((bs) => {
+      modal = new bs.Modal(modalEl);
+      modal.show();
+    });
+  }
 };
 
 const close = () => modal?.hide();
@@ -151,13 +157,20 @@ const save = async () => {
     saving = false;
   } catch (err) {
     console.error('profile save error', err);
-    message = $bi('modal_update_fail');
+    message = err.response?.data?.message || $bi('modal_update_fail');
     msg_type = 'danger';
     saving = false;
   }
 };
 
-onMount(() => {
-  modal = new Modal(modalEl);
+onMount(async () => {
+  if (typeof window !== 'undefined') {
+    try {
+      const bs = await import('bootstrap');
+      modal = new bs.Modal(modalEl);
+    } catch (e) {
+      console.error(e);
+    }
+  }
 });
 </script>

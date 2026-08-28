@@ -51,7 +51,7 @@
           </th>
         </tr>
       </thead>
-      <tbody id='$lib/client/cross-slip.js'>
+      <tbody id="cross-slip">
         {#if slip}
         {#each slip.lines as line, i}
         <tr
@@ -350,7 +350,7 @@ export let accounts;
 export let slip;
 export let fy;
 export let taxRules;
-let sums;
+let sums = { debit_amount: 0, debit_tax: 0, credit_amount: 0, credit_tax: 0 };
 let projects = [];
 let showProject = false;
 
@@ -393,6 +393,7 @@ onMount(async () => {
   }
 });
 
+$: sums = (slip && slip.lines) ? computeSum() : { debit_amount: 0, debit_tax: 0, credit_amount: 0, credit_tax: 0 };
 const computeSum = () => {
   //console.log('computeSum');
   let debit_amount = 0;

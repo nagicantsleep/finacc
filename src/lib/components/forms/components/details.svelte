@@ -70,6 +70,7 @@ import { bi } from '$lib/i18n/bilingual.js';
 export let transaction;
 
 const formatNumber = (num) => {
-  return num.toLocaleString();
+  if (num == null) return '';
+  return Number(num).toLocaleString();
 };
 </script>

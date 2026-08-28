@@ -5,7 +5,10 @@ export const currentPage = writable(typeof location !== 'undefined' ? location.p
 
 export const link = (href) => {
   if (typeof window !== 'undefined') {
-    window.location.href = href;
+    currentPage.set(href);
+    goto(href).catch(() => {
+      window.location.href = href;
+    });
   }
 };
 

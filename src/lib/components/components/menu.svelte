@@ -114,10 +114,10 @@
   
 <script>
 import { onMount, beforeUpdate, afterUpdate, tick, createEventDispatcher } from "svelte";
+import { browser } from '$app/environment';
 import "gridstack/dist/gridstack.min.css";
-import { GridStack } from "gridstack";
 import { v4 as uuidv4 } from "uuid";
-import {findComponent} from '../../javascripts/widget-list.js';
+import {findComponent} from '$lib/client/widget-list.js';
 import {isSameOrigin, fetchTitleFromUrl} from '$lib/utils.js';
 
 export let status;
@@ -128,6 +128,7 @@ export let reload;
 export let isEditMode;
 
 let grid;
+let GridStack;
 
 const startDrag = (event, widget) => {
   console.log('dragData', widget);
@@ -241,13 +242,19 @@ const addWidget = (component, x, y, w, h, options) => {
   console.log('after addWidgets', widgets);
 }
   
-const initializeGrid = () => {
+const initializeGrid = async () => {
+  if (!browser) return;
+  if (!GridStack) {
+    const mod = await import('gridstack');
+    GridStack = mod.GridStack;
+  }
   if (grid) {
     grid.destroy(false);
     grid = null;
   }
   
   tick().then(() => {
+    if (!GridStack) return;
     grid = GridStack.init({
       cellHeight: 10,
       margin: 5,

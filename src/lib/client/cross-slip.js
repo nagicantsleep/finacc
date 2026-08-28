@@ -55,6 +55,7 @@ export const findSubAccountByCode = (account_code, code) => {
 
 export const findTaxClass = (ac, sub) => {
   let tax = 0;
+  if (!accounts || !accounts.length) return 0;
   //console.log('findTaxClass', ac, sub);
   for ( let i = 0; i < accounts.length; i ++ ) {
     let account = accounts[i];

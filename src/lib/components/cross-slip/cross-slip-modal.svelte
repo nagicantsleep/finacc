@@ -110,7 +110,7 @@
 
 import {numeric, dateStr, DateString, getCompanyInfo} from '$lib/utils.js';
 import axios from 'axios';
-import Modal from 'bootstrap/js/dist/modal';
+// Modal dynamically loaded
 import {onMount, beforeUpdate, afterUpdate, createEventDispatcher} from 'svelte';
 const dispatch = createEventDispatcher();
 import CrossSlip from './cross-slip.svelte';
@@ -165,10 +165,17 @@ onMount(async () => {
   const result = await axios.get(`/api/tax-rule?type=active&date=${date}`);
   taxRules = result.data.values;
   console.log(taxRules);
-  modalEl = document.getElementById(id ? id : 'cross-slip-modal');
-  modalEl.addEventListener('hidden.bs.modal', teardown);
-  modal = new Modal(modalEl);
-  modal.show();
+  try {
+    const bs = await import('bootstrap');
+    modalEl = document.getElementById(id ? id : 'cross-slip-modal');
+    if (modalEl) {
+      modalEl.addEventListener('hidden.bs.modal', teardown);
+      modal = new bs.Modal(modalEl);
+      modal.show();
+    }
+  } catch (e) {
+    console.error('Modal init error', e);
+  }
 });
 beforeUpdate(() => {
   //console.log('cross-slip-modal', slip);

@@ -1,4 +1,4 @@
-<div class='$lib/client/document.js'>
+<div class="document">
   {#if !noTitle }
   <div class="row">
     <div class="col-1">

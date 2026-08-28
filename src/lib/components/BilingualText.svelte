@@ -16,7 +16,7 @@
 -->
 {#if stacked}
 <span
-  class='$lib/components/BilingualText.svelte'
+  class="bilingual-text"
   style="display:{inline ? 'inline-flex' : 'flex'};flex-direction:column;line-height:1.4;vertical-align:middle"
 >
   <span class="bilingual-primary" style="font-weight:600;line-height:1.4">{_primary}</span>

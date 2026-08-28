@@ -34,7 +34,7 @@
 
 <script>
 import axios from 'axios';
-import Modal from 'bootstrap/js/dist/modal';
+// Modal dynamically loaded
 import {onMount, beforeUpdate, afterUpdate, createEventDispatcher} from 'svelte';
 import AccountsList from './accounts-list.svelte';
 import AccountModal from './account-modal.svelte';
@@ -146,15 +146,23 @@ const	updateAccounts = () => {
 }
 
 const checkPage = (page) => {
-  page = page || location.pathname;
+  page = page || (typeof location !== 'undefined' ? location.pathname : '');
   let args = page.split('/');
   // /transaction/entry/23
   status.state = args[2] || 'list';
 }
 
-onMount(() => {
+onMount(async () => {
   status.params = parseParams();
-  modal = new Modal(document.getElementById('account-modal'));
+  try {
+    const bs = await import('bootstrap');
+    const el = document.getElementById('account-modal');
+    if (el) {
+      modal = new bs.Modal(el);
+    }
+  } catch (e) {
+    console.error('Modal init error', e);
+  }
   updateAccounts();
   checkPage($currentPage);
 })

@@ -85,7 +85,7 @@ const updateProjects = (_params) => {
   });
   if	( _params )	{
     window.history.pushState(
-        status, "", `${location.pathname}?${param}`);
+        status, "", `${(typeof location !== 'undefined' ? location.pathname : '')}?${param}`);
   }
 };
 

@@ -21,8 +21,8 @@ let status = {
 let reply;
 onMount(() => {
   console.log('index onMount');
-  status.pathname = location.pathname;
-  if (location.pathname === '/login/select-tenant') {
+  status.pathname = (typeof location !== 'undefined' ? location.pathname : '');
+  if ((typeof location !== 'undefined' ? location.pathname : '') === '/login/select-tenant') {
     window.location.replace('/logon');
     return;
   }
@@ -32,9 +32,9 @@ onMount(() => {
 })
 
 beforeUpdate(() => {
-  let args = location.pathname.split('/');
+  let args = (typeof location !== 'undefined' ? location.pathname : '').split('/');
   console.log('index beforeUpdate', args);
-  if (location.pathname === '/login/select-tenant') {
+  if ((typeof location !== 'undefined' ? location.pathname : '') === '/login/select-tenant') {
     window.location.replace('/logon');
     return;
   }

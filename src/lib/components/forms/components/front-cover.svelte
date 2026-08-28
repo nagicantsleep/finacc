@@ -7,7 +7,7 @@ export let titleKey;
 export let company;
 export let fy;
 
-$: displayTitle = titleKey ? bi(titleKey) : title;
+$: displayTitle = titleKey ? $bi(titleKey) : title;
 </script>
 
 <svelte:head>
@@ -26,7 +26,7 @@ $: displayTitle = titleKey ? bi(titleKey) : title;
       {company.name}
     </div>
     <div class="term">
-      {fy.year}{bi('fiscal_year')}
+      {fy.year}{$bi('fiscal_year')}
     </div>
     <div class="month">
       {formatDate(fy.startDate, 'ja')}〜

@@ -99,7 +99,7 @@
 <script>
   import { onMount, createEventDispatcher } from 'svelte';
   import axios from 'axios';
-  import Modal from 'bootstrap/js/dist/modal';
+  // Modal dynamically loaded
   import BilingualText from '$lib/components/BilingualText.svelte';
   import { link } from '$lib/client/router.js';
 
@@ -204,10 +204,17 @@
         : `/ledger/${viewTerm ?? term}/${viewCode ?? accountCode}`)
     : '#';
 
-  onMount(() => {
-    modal = new Modal(modalEl);
-    modalEl.addEventListener('hidden.bs.modal', resetState);
-    return () => modalEl.removeEventListener('hidden.bs.modal', resetState);
+  onMount(async () => {
+    try {
+      const bs = await import('bootstrap');
+      if (modalEl) {
+        modal = new bs.Modal(modalEl);
+        modalEl.addEventListener('hidden.bs.modal', resetState);
+      }
+    } catch (e) {
+      console.error('Drilldown modal init error', e);
+    }
+    return () => modalEl?.removeEventListener('hidden.bs.modal', resetState);
   });
 </script>
 

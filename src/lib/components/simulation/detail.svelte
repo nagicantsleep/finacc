@@ -11,7 +11,7 @@
 {#key scenarioId}
 <div class="container-fluid">
   <div class="page-title d-flex justify-content-between mt-2">
-    <h1 class='$lib/i18n/bilingual.js'>
+    <h1 class="page-title-bilingual">
       {#if scenario}{scenario.name}{:else}<BilingualText primary="シナリオ" secondary="Kịch bản" inline={true} />{/if}
       {#if scenario}<span class="badge sim-badge-{scenario.status} ms-2">{scenario.status}</span>{/if}
     </h1>

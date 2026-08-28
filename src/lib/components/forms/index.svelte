@@ -43,6 +43,6 @@ import FinancialStatement from './financial-statement/index.svelte';
 let args = [];
 
 beforeUpdate(() => {
-  args = location.pathname.split('/');
+  args = (typeof location !== 'undefined' ? location.pathname : '').split('/');
 })
 </script>

@@ -27,7 +27,7 @@
                 let value = parseInt(event.currentTarget.value);
                 status.params.set('kind', value);
                 const param = buildParam(status, {});
-                link(`${location.pathname}?${param}`);
+                link(`${(typeof location !== 'undefined' ? location.pathname : '')}?${param}`);
               }}
               value={status.params ? parseInt(status.params.get('kind')) : -1}>
               <option value={-1}><BilingualText key="all" /></option>
@@ -171,7 +171,7 @@ const changeCompany = (event) => {
   let companyId = event.detail;
   status.params.set('company', companyId);
   const param = buildParam(status, {});
-  link(`${location.pathname}?${param}`);
+  link(`${(typeof location !== 'undefined' ? location.pathname : '')}?${param}`);
 }
 
 const changeAmount = (event) => {
@@ -179,7 +179,7 @@ const changeAmount = (event) => {
     status.params.set('upper', numeric(upperAmount));
     status.params.set('lower', numeric(lowerAmount));
     const param = buildParam(status, {});
-    link(`${location.pathname}?${param}`);
+    link(`${(typeof location !== 'undefined' ? location.pathname : '')}?${param}`);
   }
 }
 

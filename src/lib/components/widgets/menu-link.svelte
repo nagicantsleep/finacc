@@ -2,7 +2,7 @@
 	bind:status={status}
   bind:options={options}/>
 <script>
-import entries from '../../../config/module-list.js';
+import entries from '$lib/config/module-list.js';
 import HTMLPanel from './html-panel.svelte';
 export let status;
 export let options;

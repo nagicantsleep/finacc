@@ -1,7 +1,8 @@
 <div class="list">
   <div class="page-title d-flex justify-content-between">
-  	<h1 class='$lib/i18n/bilingual.js'><BilingualText key="journal" inline={true} /></h1>
-  	<a href='$lib/i18n/bilingual.js'><BilingualText key="download_journal" inline={true} /><i class="bi bi-download"></i>
+  	<h1 class="page-title-bilingual"><BilingualText key="journal" inline={true} /></h1>
+  	<a href="/forms/explanatory-journal/{status?.fy?.term || 1}?format=pdf" download="仕訳日記帳-{today}.pdf" class="btn btn-primary btn-bilingual">
+      <BilingualText key="download_journal" inline={true} /><i class="bi bi-download"></i>
   	</a>
 	</div>
 	<ul class="page-subtitle nav">
@@ -10,14 +11,14 @@
       	{#if (date.month == month)}
       	<button type="button" class="btn btn-primary month-btn disabled me-2"
         	on:click={() => {
-          	openMonth(date.year, date.month)
+          	openMonth(date.year, date.month);
         	}}>
         	<BilingualText key={`month_${date.month}`} stacked={true} />
       	</button>
       	{:else}
       	<button type="button" class="btn btn-outline-primary month-btn me-2"
       		on:click={() => {
-        		openMonth(date.year, date.month)
+        		openMonth(date.year, date.month);
       		}}>
         	<BilingualText key={`month_${date.month}`} stacked={true} />
       	</button>
@@ -31,28 +32,29 @@
   		<BilingualText key={`month_${month}`} inline={true} />
   	</h2>
   	<div>
-    	<button type='$lib/client/cross-slip.js'
+    	<button type="button" class="btn btn-primary btn-bilingual" id="open-cross-slip"
     		on:click={openSlip}><BilingualText key="journal_detail_entry_space" inline={true} /><i class="bi bi-pencil-square"></i>
       </button>
   	</div>
 	</div>
 	<JournalList
-    fy={fy}
-  	slips={slips}
-  	lines={lines}
-  	sums={sums}
-  	on:open={openSlip}></JournalList>
+    {fy}
+  	{slips}
+  	{lines}
+  	{sums}
+  	on:open={openSlip} />
 </div>
 {#if popUp}
 {#key modalCount}
 <CrossSlipModal
-  accounts={accounts}
-  slip={slip}
-  status={status}
+  {accounts}
+  {slip}
+  {status}
   bind:popUp={popUp}
-  on:close={close_}></CrossSlipModal>
+  on:close={close_} />
 {/key}
 {/if}
+
 <style>
 .page-title {
   margin-bottom: 1rem;
@@ -79,187 +81,205 @@
 }
 </style>
 
-  <script>
+<script>
 import axios from 'axios';
-import Icon from '@iconify/svelte';
-
-import {onMount, beforeUpdate, afterUpdate, createEventDispatcher} from 'svelte';
+import { onMount, afterUpdate } from 'svelte';
+import { page } from '$app/stores';
+import { goto } from '$app/navigation';
 import JournalList from './journal-list.svelte';
-import CrossSlipModal from '../cross-slip/cross-slip-modal.svelte';
-import {setAccounts, findAccount, findSubAccountByCode} from '$lib/client/cross-slip.js';
-import {numeric, dateStr} from '$lib/utils.js';
-import {currentPage} from '$lib/client/router.js';
+import CrossSlipModal from '$lib/components/cross-slip/cross-slip-modal.svelte';
+import { setAccounts, findAccount, findSubAccountByCode } from '$lib/client/cross-slip.js';
+import { numeric } from '$lib/utils.js';
 import BilingualText from '$lib/components/BilingualText.svelte';
 import { bi } from '$lib/i18n/bilingual.js';
-export let status;
+
+export let status = { fy: {} };
 
 let year;
 let month;
 let fy = {};
-let slip = { lines: []};
+let slip = { lines: [] };
 let dates = [];
-let accounts;
-let	sums;
-let	lines = [];
-let slips;
+let accounts = [];
+let sums = {
+  debitAmount: 0,
+  debitTax: 0,
+  creditAmount: 0,
+  creditTax: 0
+};
+let lines = [];
+let slips = [];
 let modalCount = 0;
-let popUp;
-let today;
-
-$: checkPage($currentPage);
+let popUp = false;
+let today = '';
 
 const openMonth = (_year, _month) => {
   year = _year;
   month = _month;
-  let href = `/journal/${year}/${month}`
-  status.pathname = href;
-  update();
-  window.history.pushState(status, "", href);
-}
-
-const close_ = (event) => {
+  const href = `/journal/${year}/${month}`;
+  if (status) status.pathname = href;
   updateList();
-}
+  goto(href, { keepFocus: true, noScroll: true });
+};
 
-const ready = (slips) => {
-  let _lines = [];
-  let _sums = {
+const close_ = () => {
+  updateList();
+};
+
+const ready = (slipsList) => {
+  const _lines = [];
+  const _sums = {
     debitAmount: 0,
     debitTax: 0,
     creditAmount: 0,
     creditTax: 0
-  }
-  for ( let i = 0; i < slips.length; i ++ ) {
-    let slip = slips[i];
-    slip.approvedAt = slip.approvedAt ? new Date(slip.approvedAt) : null;
-    for ( let j = 0; j < slip.lines.length; j ++ ) {
-      let line = slip.lines[j];
+  };
+  if (Array.isArray(slipsList)) {
+    for (let i = 0; i < slipsList.length; i++) {
+      const s = slipsList[i];
+      s.approvedAt = s.approvedAt ? new Date(s.approvedAt) : null;
+      if (Array.isArray(s.lines)) {
+        for (let j = 0; j < s.lines.length; j++) {
+          const line = s.lines[j];
 
-      _sums.debitAmount += line.debitAmount != null ? numeric(line.debitAmount) : 0;
-      _sums.debitTax += line.debitTax != null ? numeric(line.debitTax) : 0
-      _sums.creditAmount += line.creditAmount != null ? numeric(line.creditAmount) : 0;
-      _sums.creditTax += line.creditTax != null ? numeric(line.creditTax) : 0;
+          _sums.debitAmount += line.debitAmount != null ? numeric(line.debitAmount) : 0;
+          _sums.debitTax += line.debitTax != null ? numeric(line.debitTax) : 0;
+          _sums.creditAmount += line.creditAmount != null ? numeric(line.creditAmount) : 0;
+          _sums.creditTax += line.creditTax != null ? numeric(line.creditTax) : 0;
 
-      _lines.push({
-        id: line.id,
-        month: slip.month,
-        day: slip.day,
-        no: slip.no,
-        approvedAt: slip.approvedAt,
-        lineNo: line.lineNo,
+          const debAcc = findAccount(line.debitAccount);
+          const debSubAcc = findSubAccountByCode(line.debitAccount, line.debitSubAccount);
+          const credAcc = findAccount(line.creditAccount);
+          const credSubAcc = findSubAccountByCode(line.creditAccount, line.creditSubAccount);
 
-        debitAmount: line.debitAmount !== null ? numeric(line.debitAmount).toLocaleString() : '',
-        debitTax: line.debitTax != null ? numeric(line.debitTax).toLocaleString() : '',
-        debitTaxRule: line.debitTaxRule ? line.debitTaxRule.label : '',
-        debitTaxRuleId: line.debitTaxRuleId,
-        creditAmount: line.creditAmount !== null ? numeric(line.creditAmount).toLocaleString() : '',
-        creditTax: line.creditTax != null ? numeric(line.creditTax).toLocaleString() : '',
-        creditTaxRule: line.creditTaxRule ? line.creditTaxRule.label : '',
-        creditTaxTuleId: line.creditTaxTuleId,
-           
-        debitAccount: findAccount(line.debitAccount).name,
-        debitSubAccount: findSubAccountByCode(line.debitAccount, line.debitSubAccount).name,
+          _lines.push({
+            id: line.id,
+            month: s.month,
+            day: s.day,
+            no: s.no,
+            approvedAt: s.approvedAt,
+            lineNo: line.lineNo,
 
-        creditAccount: findAccount(line.creditAccount).name,
-        creditSubAccount: findSubAccountByCode(line.creditAccount, line.creditSubAccount).name,
+            debitAmount: line.debitAmount !== null ? numeric(line.debitAmount).toLocaleString() : '',
+            debitTax: line.debitTax != null ? numeric(line.debitTax).toLocaleString() : '',
+            debitTaxRule: line.debitTaxRule ? line.debitTaxRule.label : '',
+            debitTaxRuleId: line.debitTaxRuleId,
+            creditAmount: line.creditAmount !== null ? numeric(line.creditAmount).toLocaleString() : '',
+            creditTax: line.creditTax != null ? numeric(line.creditTax).toLocaleString() : '',
+            creditTaxRule: line.creditTaxRule ? line.creditTaxRule.label : '',
+            creditTaxRuleId: line.creditTaxRuleId,
+               
+            debitAccount: debAcc ? debAcc.name : line.debitAccount,
+            debitSubAccount: debSubAcc ? debSubAcc.name : '',
 
-        debitVoucher: line.debitVoucher,
-        debitVoucherId: line.debitVoucherId,
-        creditVoucher: line.creditVoucher,
-        creditVoucherId: line.creditVoucherId,
+            creditAccount: credAcc ? credAcc.name : line.creditAccount,
+            creditSubAccount: credSubAcc ? credSubAcc.name : '',
 
-        application1: line.application1 || '',
-        application2: line.application2 || '',
-        projectName: line.projectData ? line.projectData.name : '',
-        projectId: line.projectId
-      });
+            debitVoucher: line.debitVoucher,
+            debitVoucherId: line.debitVoucherId,
+            creditVoucher: line.creditVoucher,
+            creditVoucherId: line.creditVoucherId,
+
+            application1: line.application1 || '',
+            application2: line.application2 || '',
+            projectName: line.projectData ? line.projectData.name : '',
+            projectId: line.projectId
+          });
+        }
+      }
     }
   }
   lines = _lines;
   sums = _sums;
-  //console.log('lines', lines);
-}
+};
 
 const updateList = () => {
-  console.log('updateList', year, month);
+  if (!year || !month) return;
   axios.get(`/api/journal/${year}/${month}`).then((result) => {
-    slips = result.data.journal;
-    //console.log(slips);
+    slips = result.data.journal || [];
     ready(slips);
+  }).catch((e) => {
+    console.error('journal list error', e);
   });
-}
+};
 
-const setupDates = () => {
-  dates = [];
-  axios.get(`/api/term/${year}/${month}`).then((result) => {
-    fy = result.data;
-    //status.fy= fy;
-    for ( let mon = new Date(fy.startDate); mon < new Date(fy.endDate); ) {
-      dates.push({
-        year: mon.getFullYear(),
-        month: mon.getMonth()+1
-      });
-      mon.setMonth(mon.getMonth() + 1);
+const setupDates = async () => {
+  try {
+    let sourceFy = status?.fy?.startDate ? status.fy : null;
+    if (!sourceFy) {
+      const result = await axios.get(year && month ? `/api/term/${year}/${month}` : '/api/term');
+      const terms = Array.isArray(result.data) ? result.data : (result.data?.fiscalYear ? [result.data.fiscalYear] : (result.data?.startDate ? [result.data] : []));
+      sourceFy = terms.find((t) => t?.term === (status?.fy?.term || 1)) || terms[0] || null;
     }
-    dates = dates;
-    console.log('dates', dates);
-  });
-}
+    fy = sourceFy || {};
+    if (fy?.startDate && fy?.endDate) {
+      dates = [];
+      const end = new Date(fy.endDate);
+      for (let mon = new Date(fy.startDate); mon <= end;) {
+        dates.push({
+          year: mon.getFullYear(),
+          month: mon.getMonth() + 1
+        });
+        mon.setMonth(mon.getMonth() + 1);
+      }
+      dates = [...dates];
+    } else {
+      const y = year || new Date().getFullYear();
+      dates = Array.from({ length: 12 }, (_, i) => ({ year: y, month: i + 1 }));
+    }
+  } catch (e) {
+    console.error('setupDates error', e);
+    const y = year || new Date().getFullYear();
+    dates = Array.from({ length: 12 }, (_, i) => ({ year: y, month: i + 1 }));
+  }
+};
 
-const setupAccount = () => {
-  accounts = [];
-  axios.get(`/api/accounts`).then((res) => {
-    accounts = res.data;
+const setupAccount = async () => {
+  try {
+    const res = await axios.get('/api/accounts');
+    accounts = res.data || [];
     setAccounts(accounts);
-  }).then(() => {
-    axios.get(`/api/journal/${year}/${month}`).then((result) => {
-      slips = result.data.journal;
-      //console.log(slips);
-      ready(slips);
-    });
-  });
-}
+    updateList();
+  } catch (e) {
+    console.error('setupAccount error', e);
+  }
+};
 
-const update = () => {
-	updateList();
-}
-const checkPage = (page) => {
-  page = page || location.pathname;
-  const args = page.split('/');
+onMount(async () => {
+  const now = new Date();
+  today = `${now.getUTCFullYear()}${("00" + (now.getMonth() + 1)).slice(-2)}${("00" + now.getDate()).slice(-2)}`;
 
-  year = args[2];
-  month = args[3];
-  update();
-}
+  const params = $page.params;
+  if (params?.year && params?.month) {
+    year = parseInt(params.year);
+    month = parseInt(params.month);
+  } else {
+    year = now.getFullYear();
+    month = now.getMonth() + 1;
+  }
+
+  slip = {
+    year,
+    month,
+    lines: []
+  };
+
+  await setupDates();
+  await setupAccount();
+});
 
 afterUpdate(() => {
-  if  (!popUp)  {
+  if (!popUp) {
     modalCount += 1;
   }
-})
-onMount(async () => {
-  console.log('journal onMount');
-  let args = location.pathname.split('/');
-  year = args[2];
-  month = args[3];
-  setupDates();
-  setupAccount();
-  let now = new Date();
-  today = `${now.getUTCFullYear()}${("00"+(now.getMonth()+1).toString()).slice(-2)}${("00"+now.getDate().toString()).slice(-2)}`;
-  slip = {
-      year: year,
-      month: month,
-      lines: []
-  };
-  checkPage($currentPage);
-})
+});
 
 const openSlip = (event) => {
-  slip = event.detail;
-  if	( !slip.no )	{
+  slip = event.detail || {};
+  if (!slip.no) {
     slip = {
-      year: parseInt(year),
-      month: parseInt(month),
+      year: parseInt(year) || new Date().getFullYear(),
+      month: parseInt(month) || (new Date().getMonth() + 1),
       lines: [{
         debitAccount: "",
         debitSubAccount: 0,
@@ -273,5 +293,5 @@ const openSlip = (event) => {
     };
   }
   popUp = true;
-}
+};
 </script>

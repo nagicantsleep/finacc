@@ -174,7 +174,7 @@
 <script>
 import axios from 'axios';
 import {onMount, afterUpdate, createEventDispatcher, tick} from 'svelte';
-import menu from '../../../config/module-list.js';
+import menu from '$lib/config/module-list.js';
 import Sortable from 'sortablejs';
 import Icon from '@iconify/svelte';
 import BilingualText from '$lib/components/BilingualText.svelte';
@@ -209,7 +209,7 @@ const MODULE_I18N = {
   'expense': 'expense_management',
   'project': 'project_management',
   'task': 'task_management',
-  '$lib/client/document.js',
+  'transaction': 'transaction',
   'item': 'item_management',
   'member': 'member_management',
   'home': 'home',

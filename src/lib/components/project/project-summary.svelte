@@ -213,7 +213,7 @@
 
     // URLにprojectIdが含まれている場合 (他の画面から来た場合など)
     if (pathProjectId && queryFrom && queryTo) {
-      checkPage(location.pathname + location.search);
+      checkPage((typeof location !== 'undefined' ? location.pathname : '') + location.search);
     } else {
       const projectIdToUse = pathProjectId;
       const fromToUse = queryFrom || formatMonth(status.fy.startDate);
@@ -221,7 +221,7 @@
 
       if (projectIdToUse) {
         const newUrl = `/project/summary/${projectIdToUse}?from=${fromToUse}&to=${toToUse}`;
-        if (location.pathname + location.search !== newUrl) {
+        if ((typeof location !== 'undefined' ? location.pathname : '') + location.search !== newUrl) {
           link(newUrl, { replace: true });
         }
       }

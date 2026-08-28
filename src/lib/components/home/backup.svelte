@@ -21,12 +21,12 @@
             </td>
             <td style="text-align:center;">
               {#if (i == 0) }
-              <btton class="btn btn-success" on:click|preventDefault={() => restore(i)}><BilingualText key="restore" /></btton>
+              <button type="button" class="btn btn-success" on:click|preventDefault={() => restore(i)}><BilingualText key="restore" /></button>
               {:else}
-              <btton class="btn btn-warning" on:click|preventDefault={() => restore(i)}><BilingualText key="restore" /></btton>
+              <button type="button" class="btn btn-warning" on:click|preventDefault={() => restore(i)}><BilingualText key="restore" /></button>
               {/if}
-              <btton class="btn btn-danger" on:click|preventDefault={() => remove(i)}><BilingualText key="delete" /></btton>
-              <btton class="btn btn-info" on:click|preventDefault={() => download(i)}><BilingualText key="download" /></btton>
+              <button type="button" class="btn btn-danger" on:click|preventDefault={() => remove(i)}><BilingualText key="delete" /></button>
+              <button type="button" class="btn btn-info" on:click|preventDefault={() => download(i)}><BilingualText key="download" /></button>
             </td>
           </tr>
           {/each}
