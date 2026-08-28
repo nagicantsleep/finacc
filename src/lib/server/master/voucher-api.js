@@ -2,6 +2,7 @@ import models from '$lib/server/db/index.js';
 import { numeric } from '$lib/utils.js';
 import { loadTaxContext, computeVoucherTax } from '$lib/server/tax-calc.js';
 import { asJson } from '$lib/server/api-guard.js';
+import Mime from 'mime';
 
 const Op = models.Sequelize.Op;
 
@@ -194,5 +195,44 @@ export async function deleteVoucher(tenantId, user, id) {
     return { ok: false, status: 403, payload: { code: -10, message: 'permission denied' } };
   }
   await voucher.destroy();
+  return { ok: true, payload: { code: 0 } };
+}
+
+export async function uploadVoucherFile(tenantId, voucherId, file) {
+  if (!file || typeof file.arrayBuffer !== 'function') {
+    return { ok: false, payload: { code: -1 } };
+  }
+  if (voucherId) {
+    const voucher = await models.Voucher.findOne({ where: { id: voucherId, tenantId } });
+    if (!voucher) return { ok: false, status: 404, payload: { code: -1 } };
+  }
+  const buf = Buffer.from(await file.arrayBuffer());
+  const mimeType = file.type || Mime.getType(file.name) || 'application/octet-stream';
+  const row = await models.VoucherFile.create({
+    name: file.name,
+    voucherId: voucherId || null,
+    tenantId,
+    mimeType,
+    body: buf
+  });
+  const rec = asJson(row);
+  rec.body = buf.toString('base64');
+  return { ok: true, payload: { code: 0, file: rec } };
+}
+
+export async function bindVoucherFile(tenantId, fileId, voucherId) {
+  const file = await models.VoucherFile.findOne({ where: { id: fileId, tenantId } });
+  if (!file) return { ok: false, status: 404, payload: { code: -1 } };
+  const voucher = await models.Voucher.findOne({ where: { id: voucherId, tenantId } });
+  if (!voucher) return { ok: false, status: 403, payload: { code: -3 } };
+  file.voucherId = voucherId;
+  await file.save();
+  return { ok: true, payload: { code: 0 } };
+}
+
+export async function deleteVoucherFile(tenantId, fileId) {
+  const file = await models.VoucherFile.findOne({ where: { id: fileId, tenantId } });
+  if (!file) return { ok: false, payload: { code: -1 } };
+  await file.destroy();
   return { ok: true, payload: { code: 0 } };
 }

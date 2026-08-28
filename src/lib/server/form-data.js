@@ -117,3 +117,47 @@ export async function loadTrialBalanceForm(term, tenantId) {
     });
   }
 }
+
+export async function loadTransactionForm(id, tenantId) {
+  const company = await formCompany(tenantId);
+  const transaction = await models.TransactionDocument.findOne({
+    where: { id, tenantId },
+    include: [
+      { model: models.Task, as: 'task', where: { tenantId }, required: false },
+      {
+        model: models.TransactionDetail,
+        as: 'lines',
+        where: { tenantId },
+        required: false,
+        include: [{ model: models.TaxRule, as: 'taxRule', where: { tenantId }, required: false }]
+      },
+      { model: models.Company, as: 'company', where: { tenantId }, required: false },
+      {
+        model: models.User,
+        as: 'handleUser',
+        attributes: ['name', 'legalName'],
+        include: [{
+          model: models.TenantMember,
+          as: 'memberships',
+          where: { tenantId },
+          required: false,
+          attributes: ['tradingName']
+        }]
+      },
+      { model: models.Document, as: 'document', where: { tenantId }, required: false },
+      {
+        model: models.TransactionKind,
+        as: 'kind',
+        where: { tenantId },
+        required: false,
+        include: [{ model: models.VoucherClass, as: 'book', where: { tenantId }, required: false }]
+      }
+    ]
+  });
+  if (!transaction) return null;
+  const plain = typeof transaction.toJSON === 'function' ? transaction.toJSON() : transaction;
+  if (!plain.issueDate) plain.issueDate = new Date().toISOString();
+  if (!plain.handleUser) plain.handleUser = { memberships: [], legalName: '' };
+  if (!Array.isArray(plain.lines)) plain.lines = [];
+  return serializeForm({ company, transaction: plain });
+}
