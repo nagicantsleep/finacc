@@ -22,8 +22,8 @@
 	      {#each lines as line}
   	    <tr>
       	    <td>
-      	    {#if ( line.term != status.fy.term)}
-        	  <a href="/home/{line.term}">
+      	    {#if ( line.term != status?.fy?.term)}
+        	  <a href="/workspace">
           	  {line.term}<BilingualText key="term" />
 		          </a>
   	        {:else}
@@ -48,7 +48,7 @@
           	  on:change={() => change(line)}>
 		        </td>
   	      <td>
-    	      {#if ( status.user && status.user.administrable )}
+    	      {#if ( status?.user && status?.user?.administrable )}
       	    <a class="btn btn-danger closing" href="/forms/closing/{line.term}">
         	    <BilingualText key="carry_forward" />
 		          </a>
@@ -76,7 +76,7 @@ import {wareki} from '$lib/utils.js';
 import BilingualText from '$lib/components/BilingualText.svelte';
 import { bi } from '$lib/i18n/bilingual.js';
 
-export  let status;
+export let status = {};
 
 let lines = [];
 

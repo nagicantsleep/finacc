@@ -1,38 +1,38 @@
 <div class="menu">
   <div class="body">
     <ul class="list-group">
-      <li class="list-group-item"><BilingualText key="download_journal_title" /><a href="/forms/explanatory_journal/{status.fy.term}?format=html" target="_blank">
+      <li class="list-group-item"><BilingualText key="download_journal_title" /><a href="/forms/explanatory_journal/{status?.fy?.term || 1}?format=html" target="_blank">
           <Icon icon="mdi:language-html5" width="24" color="#E34F26" />
         </a>
-        <a href="/forms/explanatory_journal/{status.fy.term}?format=pdf" download="{$bi('journal')}-{today}.pdf">
+        <a href="/forms/explanatory_journal/{status?.fy?.term || 1}?format=pdf" download="{$bi('journal')}-{today}.pdf">
           <Icon icon="mdi:file-pdf-box" width="24" color="#D32F2F" />
         </a>
       </li>
-      <li class="list-group-item"><BilingualText key="download_gl_title" /><a href="/forms/general_ledger/{status.fy.term}?format=html" target="_blank">
+      <li class="list-group-item"><BilingualText key="download_gl_title" /><a href="/forms/general_ledger/{status?.fy?.term || 1}?format=html" target="_blank">
           <Icon icon="mdi:language-html5" width="24" color="#E34F26" />
         </a>
-        <a href="/forms/general_ledger/{status.fy.term}?format=pdf" download="{$bi('ledger')}-{today}.pdf">
+        <a href="/forms/general_ledger/{status?.fy?.term || 1}?format=pdf" download="{$bi('ledger')}-{today}.pdf">
           <Icon icon="mdi:file-pdf-box" width="24" color="#D32F2F" />
         </a>
       </li>
-      <li class="list-group-item"><BilingualText key="download_sl_title" /><a href="/forms/subsidiary_ledger/{status.fy.term}?format=html" target="_blank">
+      <li class="list-group-item"><BilingualText key="download_sl_title" /><a href="/forms/subsidiary_ledger/{status?.fy?.term || 1}?format=html" target="_blank">
           <Icon icon="mdi:language-html5" width="24" color="#E34F26" />
         </a>
-        <a href="/forms/subsidiary_ledger/{status.fy.term}?format=pdf" download="{$bi('subsidiary_ledger')}-{today}.pdf">
+        <a href="/forms/subsidiary_ledger/{status?.fy?.term || 1}?format=pdf" download="{$bi('subsidiary_ledger')}-{today}.pdf">
           <Icon icon="mdi:file-pdf-box" width="24" color="#D32F2F" />
         </a>
       </li>
-      <li class="list-group-item"><BilingualText key="download_tb_title" /><a href="/forms/trial_balance/{status.fy.term}?format=html" target="_blank">
+      <li class="list-group-item"><BilingualText key="download_tb_title" /><a href="/forms/trial_balance/{status?.fy?.term || 1}?format=html" target="_blank">
           <Icon icon="mdi:language-html5" width="24" color="#E34F26" />
         </a>
-        <a href="/forms/trial_balance/{status.fy.term}?format=pdf" download="{$bi('trial_balance')}-{today}.pdf">
+        <a href="/forms/trial_balance/{status?.fy?.term || 1}?format=pdf" download="{$bi('trial_balance')}-{today}.pdf">
           <Icon icon="mdi:file-pdf-box" width="24" color="#D32F2F" />
         </a>
       </li>
-      <li class="list-group-item"><BilingualText key="download_fs_title" /><a href="/forms/financial_statement/{status.fy.term}?format=html" target="_blank">
+      <li class="list-group-item"><BilingualText key="download_fs_title" /><a href="/forms/financial_statement/{status?.fy?.term || 1}?format=html" target="_blank">
           <Icon icon="mdi:language-html5" width="24" color="#E34F26" />
         </a>
-        <a href="/forms/financial_statement/{status.fy.term}?format=pdf" download="{$bi('report_financial')}-{today}.pdf">
+        <a href="/forms/financial_statement/{status?.fy?.term || 1}?format=pdf" download="{$bi('report_financial')}-{today}.pdf">
           <Icon icon="mdi:file-pdf-box" width="24" color="#D32F2F" />
         </a>
       </li>
@@ -46,7 +46,7 @@ import Icon from '@iconify/svelte';
 
 import BilingualText from '$lib/components/BilingualText.svelte';
 import { bi } from '$lib/i18n/bilingual.js';
-export	let	status;
+export let status = {};
 let today;
 
 onMount(() => {
