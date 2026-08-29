@@ -32,7 +32,8 @@
     transaction: 'transaction_document',
     item: 'item_management',
     member: 'member_management',
-    home: 'home',
+    tenant: 'tenant_settings',
+    home: 'tenant_settings',
     closing: 'closing',
     simulation: 'simulation'
   };
