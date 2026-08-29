@@ -55,7 +55,7 @@
 <CrossSlipModal
 	slip={slip}
 	status={status}
-	user={status.user}
+	user={status?.user}
 	accounts={accounts}
 	bind:popUp={popUp}
 	on:close={close_}></CrossSlipModal>
@@ -63,7 +63,13 @@
 {/if}
 {/if}
 <style>
-
+th {
+  text-align: center;
+  font-weight: bold;
+}
+td {
+    vertical-align: middle;
+}
 </style>
 <script>
 import axios from 'axios';
@@ -74,7 +80,7 @@ import {setAccounts} from '$lib/client/cross-slip.js';
 import { v4 as uuidv4 } from "uuid";
 import BilingualText from '$lib/components/BilingualText.svelte';
 
-export let status;
+export let status = {};
 export let toast;
 
 let count = 0;

@@ -3,9 +3,9 @@
   <div class="grid-stack"
     on:dragover={allowDrop}
     on:drop|preventDefault={dropWidget}>
-    {#each widgets as widget (widget.id)}
-    {#if ( !widget.options.authority ||
-            widget.options.authority(status.user, widget.options))}
+    {#each (widgets || []) as widget (widget?.id || Math.random())}
+    {#if ( !widget?.options?.authority ||
+            (typeof widget.options.authority === 'function' && widget.options.authority(status?.user, widget.options)))}
     <div class="grid-stack-item"
       gs-id={widget.id}
       gs-x={widget.x}
@@ -21,12 +21,12 @@
       	>
         <div class="menu-header d-flex align-items-center justify-content-between">
           <div class="flex-grow-1 mt-2 ms-2 d-flex align-items-center text-truncate" style="overflow-x: hidden; white-space: nowrap;">
-            {#if (widget.options.favicon)}
+            {#if (widget?.options?.favicon)}
             <img src="{widget.options.favicon}" alt="icon" style="width: 20px; height: 20px; margin-right: 6px; flex-shrink: 0;">
             {/if}
-            {#if ( !widget.isEditMode)}
+            {#if ( !widget?.isEditMode)}
             <h5 class="text-truncate">
-              {#if ( widget.options)}
+              {#if ( widget?.options)}
               {#if ( widget.options.href )}
               {#if ( isSameOrigin(widget.options.href) )}
               <!-- svelte-ignore a11y-invalid-attribute -->
@@ -35,15 +35,15 @@
                   link(widget.options.href);
                 }}
               >
-                {widget.options.title}
+                {widget.options.title || ''}
               </a>
               {:else}
               <a href={widget.options.href} class="link" target="_blank">
-                {widget.options.title}
+                {widget.options.title || ''}
               </a>
               {/if}
               {:else}
-              {widget.options.title}
+              {widget.options.title || ''}
               {/if}
               {/if}
             </h5>
@@ -55,7 +55,7 @@
           </div>
           <div class="flex-shrink-0  mt-0" style="width:100px;text-align:right;">
             {#if (isEditMode)}
-            {#if (widget.isEditMode)}
+            {#if (widget?.isEditMode)}
             <button type="button" class="btn btn-narrow" on:click={() => {
               widget.isEditMode = !widget.isEditMode;
             }}><i class="bi bi-check"></i></button>
@@ -76,7 +76,7 @@
                 }
               }
             }>
-              {#if widget.minimize}
+              {#if widget?.minimize}
               <i class="bi bi-square"></i>
               {:else}
               <i class="bi bi-dash-square"></i>
@@ -93,7 +93,7 @@
             {/if}
           </div>
         </div>
-        {#if !widget.minimize }
+        {#if !widget?.minimize && widget?._component}
         <svelte:component class="mt-0"
           this={widget._component}
           isEditMode={isEditMode}
@@ -113,8 +113,9 @@
 </style>
   
 <script>
-import { onMount, beforeUpdate, afterUpdate, tick, createEventDispatcher } from "svelte";
+import { onMount, onDestroy, beforeUpdate, afterUpdate, tick, createEventDispatcher } from "svelte";
 import { browser } from '$app/environment';
+import { goto } from '$app/navigation';
 import "gridstack/dist/gridstack.min.css";
 import { v4 as uuidv4 } from "uuid";
 import {findComponent} from '$lib/client/widget-list.js';
@@ -131,17 +132,17 @@ let grid;
 let GridStack;
 
 const startDrag = (event, widget) => {
-  console.log('dragData', widget);
   event.dataTransfer.setData("application/json", JSON.stringify(widget));
   event.dataTransfer.effectAllowed = "copy";
 };
 
 const link = (href) => {
-  let pathes = href.split('/');
-  status.current = pathes[1];
-  window.history.pushState(status, "", href);
-  status.pathname = href;
-}
+  if (href) {
+    goto(href).catch(() => {
+      window.location.href = href;
+    });
+  }
+};
 
 const allowDrop = (event) => {
   event.preventDefault();
@@ -293,11 +294,17 @@ const initiateWidgets = () => {
 }
 
 onMount(() => {
-  console.log("menu onMount");
-
   initiateWidgets();
   initializeGrid();
-  console.log("menu onMount end");
+});
+
+onDestroy(() => {
+  if (grid) {
+    try {
+      grid.destroy(false);
+    } catch (e) {}
+    grid = null;
+  }
 });
 
 let previousReload = -1;
