@@ -173,7 +173,8 @@ tbody {
 
 .content-wrapper,
 .main-footer {
-  margin-left: 250px;
+  margin-left: var(--sidebar-width, 250px);
+  transition: margin-left 0.2s ease-in-out;
 }
 
 .topbar {
@@ -210,9 +211,10 @@ tbody {
   float: none;
   left: 0;
   position: fixed;
-  top: var(--topbar-height);
-  width: 250px;
+  top: var(--topbar-height, 56px);
+  width: var(--sidebar-width, 250px);
   z-index: 1038;
+  transition: width 0.2s ease-in-out, transform 0.2s ease-in-out, left 0.2s ease-in-out;
 }
 
 .main-footer {
@@ -224,7 +226,7 @@ tbody {
 }
 
 .main-sidebar .sidebar {
-  height: calc(100vh - var(--topbar-height));
+  height: calc(100vh - var(--topbar-height, 56px));
 }
 
 .sidebar {
@@ -236,6 +238,101 @@ tbody {
   padding-top: 0.5rem;
   background-color: var(--sidebar-bg);
   color: white;
+}
+
+/* Pushmenu Toggle Button */
+.pushmenu-btn {
+  background: none;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 4px;
+  transition: background-color 0.15s ease-in-out, color 0.15s ease-in-out;
+  line-height: 1;
+}
+.pushmenu-btn:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+  color: #fff;
+}
+
+/* Desktop Collapsed Mode (.sidebar-collapse) */
+@media (min-width: 768px) {
+  .sidebar-collapse .main-sidebar {
+    width: var(--sidebar-mini-width, 60px);
+  }
+
+  .sidebar-collapse .brand-container {
+    width: var(--sidebar-mini-width, 60px);
+    flex: 0 0 var(--sidebar-mini-width, 60px);
+    padding: 0 0.25rem;
+    justify-content: center;
+  }
+
+  .sidebar-collapse .brand-container .brand-link {
+    display: none;
+  }
+
+  .sidebar-collapse .content-wrapper,
+  .sidebar-collapse .main-footer {
+    margin-left: var(--sidebar-mini-width, 60px);
+  }
+
+  .sidebar-collapse .main-sidebar .sidebar-row__text {
+    display: none !important;
+  }
+
+  .sidebar-collapse .main-sidebar .sidebar-row {
+    justify-content: center !important;
+  }
+
+  .sidebar-collapse .main-sidebar .sidebar-row__icon {
+    flex: 0 0 auto;
+    font-size: 1.25rem;
+  }
+
+  .sidebar-collapse .main-sidebar .nav-pills .nav-link {
+    padding: 0.65rem 0.25rem;
+    text-align: center;
+    justify-content: center;
+  }
+}
+
+/* Mobile & Tablet (< 768px) Rules */
+@media (max-width: 767.98px) {
+  .main-sidebar {
+    width: var(--sidebar-width, 250px);
+    transform: translateX(-100%);
+    box-shadow: none;
+    z-index: 1045;
+  }
+
+  .content-wrapper,
+  .main-footer {
+    margin-left: 0 !important;
+  }
+
+  /* When open on mobile (drawer) */
+  .sidebar-open .main-sidebar {
+    transform: translateX(0);
+    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.4);
+  }
+
+  .sidebar-backdrop {
+    position: fixed;
+    top: var(--topbar-height, 56px);
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1040;
+    backdrop-filter: blur(2px);
+    cursor: pointer;
+  }
 }
 .sidebar ul li {
   list-style: none;

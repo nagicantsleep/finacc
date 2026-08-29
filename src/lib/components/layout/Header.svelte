@@ -6,6 +6,7 @@
   import LanguagePairSelector from '$lib/components/widgets/language-pair-selector.svelte';
   import BilingualText from '$lib/components/BilingualText.svelte';
   import { bi, languagePair } from '$lib/i18n/bilingual.js';
+  import { sidebarCollapsed } from '$lib/client/ui.js';
 
   export let user = {};
   export let tenant = {};
@@ -29,6 +30,10 @@
     compact: formatFiscalCompact(fyObj, $languagePair?.primary || 'ja'),
     badge: formatFiscalBadge(fyObj, $languagePair?.primary || 'ja'),
     tooltip: `${formatFiscalHeader(fyObj, $languagePair?.primary || 'ja')} / ${formatFiscalHeader(fyObj, $languagePair?.secondary || 'vi')}`
+  };
+
+  const toggleSidebar = () => {
+    sidebarCollapsed.update((c) => !c);
   };
 
   const openProfile = () => profileModal?.show();
@@ -79,7 +84,16 @@
 </script>
 
 <div class="topbar">
-  <div class="brand-container">
+  <div class="brand-container {$sidebarCollapsed ? 'collapsed' : ''}">
+    <button
+      type="button"
+      class="btn btn-link text-light pushmenu-btn p-0 me-1"
+      on:click={toggleSidebar}
+      title="Toggle sidebar"
+      aria-label="Toggle sidebar"
+    >
+      <i class="bi bi-list fs-4"></i>
+    </button>
     <a href="/workspace" class="brand-link">
       <img src="/logo.png" alt="Logo" class="brand-image" />
       <span class="brand-text">Hieronymus</span>

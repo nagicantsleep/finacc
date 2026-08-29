@@ -71,10 +71,11 @@
                 href={hrefFor(entry)}
                 class="nav-link {currentPath.match(entry.match) ? 'active' : ''}"
                 data-type={entry.name}
+                title={entry.title}
               >
                 <span class="sidebar-row">
                   <span class="sidebar-row__icon">
-                    <Icon class="nav-icon me-2" icon={iconifyName(entry.icon?.name)} />
+                    <Icon class="nav-icon" icon={iconifyName(entry.icon?.name)} />
                   </span>
                   <span class="sidebar-row__text">
                     {#if MODULE_I18N[entry.name]}
@@ -98,12 +99,15 @@
     display: flex;
     flex-direction: row;
     align-items: center;
-    gap: 0.4rem;
+    gap: 0.5rem;
+    width: 100%;
   }
   .sidebar-row__icon {
-    flex: 0 0 auto;
+    flex: 0 0 24px;
     display: inline-flex;
-    font-size: 1.1rem;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.15rem;
   }
   .sidebar-row__text {
     flex: 1 1 auto;
@@ -115,7 +119,7 @@
     border-radius: 0;
     color: var(--sidebar-text, #eee);
     padding: 0.5rem 1rem;
-    transition: background-color 0.15s ease-in-out;
+    transition: background-color 0.15s ease-in-out, padding 0.2s ease-in-out;
   }
   .nav-pills .nav-link:hover {
     background-color: rgba(255, 255, 255, 0.1);
