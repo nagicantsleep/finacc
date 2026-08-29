@@ -92,10 +92,10 @@ export async function handle({ event, resolve }) {
 
   // If user-scope route or public route (already logged in)
   if (isUserScope || isPublic) {
-    // If logged in user hits /login or /signup, redirect to /home or /logon
+    // If logged in user hits /login or /signup, redirect to /workspace or /logon
     if (pathname === '/login' || pathname === '/signup') {
       if (event.locals.tenantId) {
-        throw redirect(303, '/home');
+        throw redirect(303, '/workspace');
       }
       throw redirect(303, '/logon');
     }
@@ -118,14 +118,17 @@ export async function handle({ event, resolve }) {
     throw redirect(303, '/logon');
   }
 
-  // Key Invariant check: If FiscalYear count is 0, redirect /home to /setup (Phase 1 -> Phase 2 wizard)
-  if (pathname === '/home' || pathname === '/') {
+  // Key Invariant check: If FiscalYear count is 0, redirect /workspace, /home to /setup (Phase 1 -> Phase 2 wizard)
+  if (pathname === '/home' || pathname === '/' || pathname === '/workspace') {
     try {
       const fyCount = await models.FiscalYear.count({
         where: { tenantId: event.locals.tenantId }
       });
       if (fyCount === 0) {
         throw redirect(303, '/setup');
+      }
+      if (pathname === '/home' || pathname === '/') {
+        throw redirect(303, '/workspace');
       }
     } catch (e) {
       if (e?.status === 303) throw e;

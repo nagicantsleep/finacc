@@ -1,34 +1,30 @@
 <script>
-  import HomeDashboard from '$lib/components/home/home.svelte';
+  import { goto } from '$app/navigation';
+  import { onMount } from 'svelte';
+  import WorkspaceView from '$lib/components/workspace/workspace.svelte';
   import Toast from '$lib/components/common/Toast.svelte';
 
   export let data;
 
   let toast;
-  let alert;
-  let alert_level;
-
   let status = {
     user: data.user || { administrable: true, accounting: true, approvable: true },
     fy: data.currentFy,
     tenant: data.tenant,
-    current: 'home',
-    pathname: '/home'
+    current: 'workspace',
+    pathname: '/workspace'
   };
+
+  onMount(() => {
+    goto('/workspace', { replaceState: true });
+  });
 </script>
 
 <svelte:head>
-  <title>ホーム :: Hieronymus</title>
+  <title>ワークスペース :: Hieronymus</title>
 </svelte:head>
 
-<div class="dashboard-page container-fluid px-0">
-  {#if alert}
-    <div class="alert alert-{alert_level || 'info'} alert-dismissible fade show" role="alert">
-      {alert}
-      <button type="button" class="btn-close" on:click={() => alert = null} aria-label="Close"></button>
-    </div>
-  {/if}
-
-  <HomeDashboard bind:status bind:toast bind:alert bind:alert_level />
+<div class="workspace-page container-fluid px-0">
+  <WorkspaceView bind:status bind:toast />
   <Toast bind:toast />
 </div>

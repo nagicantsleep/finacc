@@ -24,7 +24,7 @@ export const actions = {
       });
 
       if (currentTenantId) {
-        throw redirect(303, '/home');
+        throw redirect(303, '/workspace');
       } else {
         throw redirect(303, '/logon');
       }

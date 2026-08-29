@@ -14,7 +14,7 @@ export async function load({ locals }) {
 
   const countFy = await models.FiscalYear.count({ where: { tenantId: locals.tenantId } });
   if (countFy > 0) {
-    throw redirect(303, '/home');
+    throw redirect(303, '/workspace');
   }
 
   const currentYear = new Date().getFullYear();
@@ -61,7 +61,7 @@ export const actions = {
           currentTenantId: locals.tenantId,
           term: parseInt(term, 10)
         });
-        throw redirect(303, '/home');
+        throw redirect(303, '/workspace');
       } else {
         return fail(400, { error: result.message || '初期設定に失敗しました。' });
       }

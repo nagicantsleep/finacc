@@ -79,16 +79,22 @@ const serializeWorkspace = () => {
 };
 
 const deserializeWorkspace = (_ws) => {
-  if (!_ws) return { title: '', widgets: [] };
+  if (!_ws) return { title: 'ホーム', widgets: [] };
   let parsedWidgets = [];
   try {
-    parsedWidgets = typeof _ws.body === 'string' ? JSON.parse(_ws.body) : (_ws.widgets || []);
+    if (typeof _ws.body === 'string') {
+      parsedWidgets = JSON.parse(_ws.body);
+    } else if (Array.isArray(_ws.menu)) {
+      parsedWidgets = _ws.menu;
+    } else if (Array.isArray(_ws.widgets)) {
+      parsedWidgets = _ws.widgets;
+    }
   } catch (e) {
     parsedWidgets = [];
   }
   return ({
     id: _ws.id,
-    title: _ws.title,
+    title: _ws.title || 'ホーム',
     displayOrder: _ws.displayOrder,
     widgets: parsedWidgets
   });
@@ -133,7 +139,7 @@ $: {
       currentMenu.set(null);
       if (value) {
         workspace = value;
-        widgets = value.widgets || [];
+        widgets = value.widgets || value.menu || [];
         isEditMode = true;
         reload += 1;
       }
@@ -171,15 +177,29 @@ beforeUpdate(() => {
 onMount(() => {
   let args = (typeof location !== 'undefined' ? location.pathname : '').split('/');
   if (!args[2] || args[2] === '') {
-    axios.get('/api/workspace').then((result) => {
+    axios.get('/api/workspace').then(async (result) => {
       const list = result.data.workspaces || result.data.menus || [];
       if (list.length > 0) {
         workspace = deserializeWorkspace(list[0]);
         widgets = workspace.widgets || [];
         reload += 1;
       } else {
-        workspace = { title: 'Workspace', widgets: [] };
-        widgets = [];
+        try {
+          const tResult = await axios.get('/api/workspace/templates');
+          const templates = tResult.data.workspaces || tResult.data.templates || [];
+          const homeTpl = templates.find(t => t.title === 'ホーム') || templates[1] || templates[0];
+          if (homeTpl) {
+            workspace = deserializeWorkspace(homeTpl);
+            widgets = workspace.widgets || [];
+            reload += 1;
+          } else {
+            workspace = { title: 'ホーム', widgets: [] };
+            widgets = [];
+          }
+        } catch (e) {
+          workspace = { title: 'ホーム', widgets: [] };
+          widgets = [];
+        }
       }
     });
   }

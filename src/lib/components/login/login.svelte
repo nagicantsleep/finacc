@@ -83,7 +83,7 @@ const Login = async () => {
       if (response.data.requiresTenantSelection) {
         window.location = '/logon';
       } else {
-        window.location = '/home';
+        window.location = '/workspace';
       }
     } else {
       msg_type = 'danger';

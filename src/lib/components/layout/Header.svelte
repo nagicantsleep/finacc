@@ -77,7 +77,7 @@
 
 <div class="topbar">
   <div class="brand-container">
-    <a href="/home" class="brand-link">
+    <a href="/workspace" class="brand-link">
       <img src="/logo.png" alt="Logo" class="brand-image" />
       <span class="brand-text">Hieronymus</span>
     </a>

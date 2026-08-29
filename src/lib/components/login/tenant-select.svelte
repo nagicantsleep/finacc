@@ -100,7 +100,7 @@ function selectTenant(tenant) {
   axios.post('/api/user/select-tenant', { tenantId: tenant.tenantId })
     .then((response) => {
       if (response.data.result === 'OK') {
-        window.location = response.data.redirectTo || '/home';
+        window.location = response.data.redirectTo || '/workspace';
       } else {
         message = response.data.message || $bi('tenant_select_fail');
         msg_type = 'danger';
