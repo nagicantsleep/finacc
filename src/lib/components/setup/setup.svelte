@@ -234,7 +234,7 @@
       if (result.data.code === -99){
         serverError = get(bi)('setup_error_cancelled');
       }else{
-        window.location.href = '/home';
+        window.location.href = '/workspace';
       }
     }catch(e){
       loding = false;

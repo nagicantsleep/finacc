@@ -268,7 +268,7 @@ export async function selectUserTenant(cookies, user, tenantIdRaw) {
         result: 'OK',
         tenantId: membership.tenantId,
         tenantName: membership.tenant.name,
-        redirectTo: '/home'
+        redirectTo: '/workspace'
       }
     };
   } catch {

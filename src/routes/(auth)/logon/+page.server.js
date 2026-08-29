@@ -56,7 +56,7 @@ export const actions = {
       term: null
     });
 
-    throw redirect(303, '/home');
+    throw redirect(303, '/workspace');
   },
 
   createTenant: async ({ request, locals, cookies }) => {
