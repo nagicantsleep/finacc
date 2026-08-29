@@ -1,6 +1,8 @@
-import { redirect } from '@sveltejs/kit';
-
 /** @type {import('./$types').PageServerLoad} */
-export async function load() {
-  throw redirect(303, '/workspace');
+export async function load({ locals }) {
+  return {
+    user: locals.user,
+    currentFy: locals.currentFy,
+    tenant: locals.tenant
+  };
 }

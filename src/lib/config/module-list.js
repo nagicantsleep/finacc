@@ -316,7 +316,7 @@ export default [
 人事情報を入力します。<br/>
 現在は担当者名の情報源として使っているだけですが、将来的には人事給与システムが付加されます。`
   }, {
-    name: 'home',
+    name: 'tenant',
     title: '会社設定',
     match: /^\/tenant/,
     authority: (user) => {
