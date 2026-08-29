@@ -1,7 +1,7 @@
 <script>
   import { onMount } from 'svelte';
   import axios from 'axios';
-  import { formatFiscalHeader } from '$lib/utils.js';
+  import { formatFiscalHeader, formatFiscalCompact, formatFiscalBadge } from '$lib/utils.js';
   import ProfileModal from '$lib/components/common/profile-modal.svelte';
   import LanguagePairSelector from '$lib/components/widgets/language-pair-selector.svelte';
   import BilingualText from '$lib/components/BilingualText.svelte';
@@ -25,7 +25,10 @@
 
   $: fiscalHeader = {
     primary: formatFiscalHeader(fyObj, $languagePair?.primary || 'ja'),
-    secondary: formatFiscalHeader(fyObj, $languagePair?.secondary || 'vi')
+    secondary: formatFiscalHeader(fyObj, $languagePair?.secondary || 'vi'),
+    compact: formatFiscalCompact(fyObj, $languagePair?.primary || 'ja'),
+    badge: formatFiscalBadge(fyObj, $languagePair?.primary || 'ja'),
+    tooltip: `${formatFiscalHeader(fyObj, $languagePair?.primary || 'ja')} / ${formatFiscalHeader(fyObj, $languagePair?.secondary || 'vi')}`
   };
 
   const openProfile = () => profileModal?.show();
@@ -83,31 +86,46 @@
     </a>
   </div>
 
-  <nav class="main-header navbar navbar-expand-lg">
-    <div class="container-fluid">
-      <span class="navbar-text text-light">
+  <nav class="main-header navbar navbar-expand">
+    <div class="container-fluid d-flex flex-nowrap align-items-center justify-content-between px-1 px-sm-2 px-md-3">
+      <!-- Fiscal Year Info (Progressive Responsive Display) -->
+      <div class="header-fiscal-info text-truncate me-1 me-md-2" title={fiscalHeader.tooltip}>
         {#if fyObj.startDate && fyObj.endDate}
-          {#if fiscalHeader.primary === fiscalHeader.secondary}
-            {fiscalHeader.primary}
-          {:else}
-            {fiscalHeader.primary} / {fiscalHeader.secondary}
-          {/if}
+          <!-- Desktop Full (>= 1200px) -->
+          <span class="d-none d-xl-inline navbar-text text-light fiscal-full text-truncate">
+            {#if fiscalHeader.primary === fiscalHeader.secondary}
+              {fiscalHeader.primary}
+            {:else}
+              {fiscalHeader.primary} / {fiscalHeader.secondary}
+            {/if}
+          </span>
+          <!-- Tablet / Small Desktop (768px - 1199px) -->
+          <span class="d-none d-md-inline d-xl-none navbar-text text-light fiscal-compact text-truncate">
+            <i class="bi bi-calendar-event me-1 text-info"></i>
+            {fiscalHeader.compact}
+          </span>
+          <!-- Mobile (< 768px) -->
+          <span class="d-inline d-md-none badge bg-dark border border-secondary text-light fiscal-badge">
+            <i class="bi bi-calendar3 me-1 text-info"></i>
+            {fiscalHeader.badge}
+          </span>
         {:else}
-          <span class="text-danger fw-bold">
+          <span class="text-danger fw-bold fs-7">
             <i class="bi bi-exclamation-diamond-fill me-1"></i>
             <BilingualText key="select_fiscal_year" />
           </span>
         {/if}
-      </span>
+      </div>
 
-      <ul class="navbar-nav ms-auto align-items-center">
-        <li class="nav-item me-2">
+      <!-- Right Side Actions: Language Selector & User Menu -->
+      <ul class="navbar-nav align-items-center flex-row flex-nowrap ms-auto">
+        <li class="nav-item me-1 me-md-2">
           <LanguagePairSelector />
         </li>
         <li class="nav-item dropdown">
           <a
             href="#"
-            class="nav-link dropdown-toggle user-menu-toggle text-light"
+            class="nav-link dropdown-toggle user-menu-toggle text-light p-1 px-md-2"
             data-bs-toggle="dropdown"
             id="user_menu"
             role="button"
@@ -116,9 +134,9 @@
             <span class="user-avatar" aria-hidden="true" title={user.name}>
               {(user.name || '?').trim().charAt(0).toUpperCase()}
             </span>
-            <span class="d-none d-md-inline user-menu-name">{user.name || 'User'}</span>
+            <span class="d-none d-lg-inline user-menu-name ms-1">{user.name || 'User'}</span>
           </a>
-          <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="user_menu">
+          <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="user_menu">
             <li>
               <a href="#" class="dropdown-item" on:click|preventDefault={openProfile}>
                 <i class="bi bi-person-circle me-2"></i>

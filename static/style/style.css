@@ -177,18 +177,27 @@ tbody {
 }
 
 .topbar {
-  align-items: stretch;
+  align-items: center;
   display: flex;
   flex-direction: row;
+  flex-wrap: nowrap;
+  height: var(--topbar-height, 56px);
+  max-height: var(--topbar-height, 56px);
   position: sticky;
   top: 0;
   z-index: 1039;
+  overflow: hidden;
+  background-color: var(--header-bg-color);
 }
 
 .topbar .main-header {
   flex: 1 1 auto;
   margin-left: 0;
   min-width: 0;
+  height: 100%;
+  padding: 0;
+  display: flex;
+  align-items: center;
 }
 
 .main-header {
@@ -321,8 +330,9 @@ tr.over td {
   flex: 0 0 250px;
   font-size: 1.25rem;
   overflow: hidden;
-  padding: 0.5rem 0.5rem;
-  transition: width 0.3s ease-in-out;
+  padding: 0 0.5rem;
+  height: 100%;
+  transition: width 0.2s ease-in-out;
   white-space: nowrap;
   width: 250px;
 }
@@ -333,6 +343,7 @@ tr.over td {
   align-items: center;
   color: #fff;
   display: flex;
+  text-decoration: none;
 }
 .brand-container .brand-link .brand-image {
   line-height: 0.8;
@@ -341,6 +352,43 @@ tr.over td {
   margin-top: -3px;
   max-height: 33px;
   width: auto;
+}
+
+@media (max-width: 767.98px) {
+  .brand-container {
+    flex: 0 0 auto;
+    width: auto;
+    max-width: 50px;
+    padding: 0 0.25rem;
+  }
+  .brand-container .brand-link .brand-text {
+    display: none;
+  }
+  .brand-container .brand-link .brand-image {
+    margin-left: 0.2rem;
+    margin-right: 0.2rem;
+    max-height: 28px;
+  }
+}
+
+.header-fiscal-info {
+  flex: 1 1 auto;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.header-fiscal-info .navbar-text {
+  padding-top: 0;
+  padding-bottom: 0;
+  font-size: 0.85rem;
+  line-height: 1.2;
+}
+.fiscal-badge {
+  font-size: 0.78rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-weight: 500;
 }
 
 .fw-light {

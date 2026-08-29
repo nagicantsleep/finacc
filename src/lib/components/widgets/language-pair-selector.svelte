@@ -12,13 +12,41 @@
            (login/signup) where there is no authenticated user yet:
            the pick only updates the client store for immediate display.
 -->
-<div class="d-flex align-items-center" style="font-size:0.85rem; padding: 0 0.5rem;">
-  <select class="form-select form-select-sm" style="width:auto; min-width:120px;" bind:value={selectedPair} title={currentLabel}>
+<div class="d-flex align-items-center language-pair-container">
+  <select class="form-select form-select-sm language-pair-select" bind:value={selectedPair} title={currentLabel}>
     {#each optionLabels as opt}
       <option value="{opt.value}">{opt.label}</option>
     {/each}
   </select>
 </div>
+
+<style>
+  .language-pair-container {
+    font-size: 0.85rem;
+    padding: 0 0.35rem;
+  }
+  .language-pair-select {
+    width: auto;
+    min-width: 90px;
+    max-width: 145px;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.8rem;
+    background-color: rgba(255, 255, 255, 0.95);
+    border-color: rgba(255, 255, 255, 0.4);
+    cursor: pointer;
+  }
+  @media (max-width: 767.98px) {
+    .language-pair-container {
+      padding: 0 0.15rem;
+    }
+    .language-pair-select {
+      min-width: 75px;
+      max-width: 95px;
+      padding: 0.18rem 0.35rem;
+      font-size: 0.72rem;
+    }
+  }
+</style>
 
 <script>
   import axios from 'axios';

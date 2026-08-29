@@ -61,6 +61,38 @@ export const formatFiscalHeader = (fy, lang) => {
   }
 };
 
+export const formatFiscalCompact = (fy, lang) => {
+  if (!fy || !fy.startDate || !fy.endDate) return '';
+  const term = fy.term;
+  const s = new Date(fy.startDate);
+  const e = new Date(fy.endDate);
+  const pad2 = (n) => String(n).padStart(2, '0');
+
+  switch (lang) {
+    case 'ja':
+      return `第${term}期 (${s.getFullYear()}/${pad2(s.getMonth() + 1)}/${pad2(s.getDate())}〜${e.getFullYear()}/${pad2(e.getMonth() + 1)}/${pad2(e.getDate())})`;
+    case 'vi':
+      return `Kỳ ${term} (${pad2(s.getDate())}/${pad2(s.getMonth() + 1)}〜${pad2(e.getDate())}/${pad2(e.getMonth() + 1)}/${e.getFullYear()})`;
+    case 'en':
+    default:
+      return `Term ${term} (${pad2(s.getMonth() + 1)}/${pad2(s.getDate())}–${pad2(e.getMonth() + 1)}/${pad2(e.getDate())}/${e.getFullYear()})`;
+  }
+};
+
+export const formatFiscalBadge = (fy, lang) => {
+  if (!fy || !fy.term) return '';
+  const term = fy.term;
+  switch (lang) {
+    case 'ja':
+      return `第${term}期`;
+    case 'vi':
+      return `Kỳ ${term}`;
+    case 'en':
+    default:
+      return `Term ${term}`;
+  }
+};
+
 export const round = (n) => {
   return Math.round(n);
 };
