@@ -6,7 +6,7 @@
     <div class="card">
       <div class="card-body login-card-body">
         <div class="d-flex justify-content-end mb-2">
-          <LanguagePairSelector save={false} />
+          <LanguagePairSelector save={false} tone="card" />
         </div>
         <p class="fs-4 text-center "><BilingualText key="login" /></p>
         <p class="text-{msg_type} text-center">{message}</p>

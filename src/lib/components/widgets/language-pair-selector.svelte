@@ -1,100 +1,229 @@
 <!--
-  LanguagePairSelector — compact dropdown for the top navbar.
+  LanguagePairSelector — compact bilingual pair control.
 
-  Renders the current pair as "日本語/Tiếng Việt" (primary self-name / secondary self-name)
-  using lang_ja/lang_vi/lang_en keys. Pair options are hardcoded as
-  (primary, secondary) tuples so each option's display is independent of
-  the current $languagePair.
+  Closed state: primary flag, swap, secondary flag.
+  Click a flag to replace that one language (the other side is excluded).
+  Swap flips primary/secondary immediately.
 
   Props:
-    save — when true (default), persist the pick to the user via
-           PUT /api/user/language-pair. Set false on outer pages
-           (login/signup) where there is no authenticated user yet:
-           the pick only updates the client store for immediate display.
+    save — persist pick via PUT /api/user/language-pair (default true)
+    tone — "navbar" for dark header, "card" for white login/signup card
 -->
-<div class="d-flex align-items-center language-pair-container">
-  <select class="form-select form-select-sm language-pair-select" bind:value={selectedPair} title={currentLabel}>
-    {#each optionLabels as opt}
-      <option value="{opt.value}">{opt.label}</option>
-    {/each}
-  </select>
+<div
+  class="language-pair-root"
+  class:tone-navbar={tone === 'navbar'}
+  class:tone-card={tone === 'card'}
+  bind:this={rootEl}
+>
+  <div class="language-pair-control" role="group" aria-label={currentLabel}>
+    <button
+      type="button"
+      class="flag-slot"
+      bind:this={primaryBtn}
+      title={selfName(currentPrimary)}
+      aria-label={selfName(currentPrimary)}
+      aria-haspopup="listbox"
+      aria-expanded={openSlot === 'primary'}
+      on:click={() => toggleSlot('primary')}
+    >
+      <span class="flag-primary" aria-hidden="true">
+        <Icon icon={FLAG_ICON[currentPrimary]} width="18" />
+      </span>
+    </button>
+
+    <button
+      type="button"
+      class="swap-btn"
+      title={swapLabel}
+      aria-label={swapLabel}
+      on:click|stopPropagation={swapLanguages}
+    >
+      <i class="bi bi-arrow-left-right" aria-hidden="true"></i>
+    </button>
+
+    <button
+      type="button"
+      class="flag-slot"
+      bind:this={secondaryBtn}
+      title={selfName(currentSecondary)}
+      aria-label={selfName(currentSecondary)}
+      aria-haspopup="listbox"
+      aria-expanded={openSlot === 'secondary'}
+      on:click={() => toggleSlot('secondary')}
+    >
+      <span class="flag-secondary" aria-hidden="true">
+        <Icon icon={FLAG_ICON[currentSecondary]} width="16" />
+      </span>
+    </button>
+  </div>
+
+  {#if openSlot}
+    <ul
+      class="language-pair-menu"
+      style={menuStyle}
+      role="listbox"
+      aria-label={openSlot === 'primary' ? selfName(currentPrimary) : selfName(currentSecondary)}
+    >
+      {#each slotOptions as lang (lang)}
+        <li>
+          <button
+            type="button"
+            class="menu-lang"
+            class:active={lang === (openSlot === 'primary' ? currentPrimary : currentSecondary)}
+            role="option"
+            aria-selected={lang === (openSlot === 'primary' ? currentPrimary : currentSecondary)}
+            title={selfName(lang)}
+            aria-label={selfName(lang)}
+            on:click={() => pickLang(openSlot, lang)}
+          >
+            <Icon icon={FLAG_ICON[lang]} width="20" />
+          </button>
+        </li>
+      {/each}
+    </ul>
+  {/if}
 </div>
 
 <style>
-  .language-pair-container {
-    font-size: 0.85rem;
+  .language-pair-root {
+    position: relative;
+    display: inline-flex;
     padding: 0 0.35rem;
   }
-  .language-pair-select {
-    width: auto;
-    min-width: 90px;
-    max-width: 145px;
-    padding: 0.25rem 0.5rem;
-    font-size: 0.8rem;
-    background-color: rgba(255, 255, 255, 0.95);
-    border-color: rgba(255, 255, 255, 0.4);
-    cursor: pointer;
+
+  .language-pair-control {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 0.375rem;
+    border: 1px solid transparent;
+    line-height: 1;
   }
+
+  .tone-navbar .language-pair-control {
+    background-color: rgba(255, 255, 255, 0.14);
+    border-color: rgba(255, 255, 255, 0.35);
+    color: #fff;
+  }
+
+  .tone-card .language-pair-control {
+    background-color: #f8f9fa;
+    border-color: #ced4da;
+    color: #212529;
+  }
+
+  .flag-slot,
+  .swap-btn,
+  .menu-lang {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+    line-height: 1;
+  }
+
+  .flag-slot {
+    padding: 0.22rem 0.35rem;
+  }
+
+  .flag-primary {
+    display: inline-flex;
+  }
+
+  .flag-secondary {
+    display: inline-flex;
+    opacity: 0.78;
+  }
+
+  .swap-btn {
+    width: 1.35rem;
+    height: 1.35rem;
+    border-radius: 50%;
+    font-size: 0.72rem;
+    opacity: 0.85;
+  }
+
+  .tone-navbar .swap-btn:hover,
+  .tone-navbar .flag-slot:hover {
+    background-color: rgba(255, 255, 255, 0.16);
+  }
+
+  .tone-card .swap-btn:hover,
+  .tone-card .flag-slot:hover {
+    background-color: #e9ecef;
+  }
+
+  .language-pair-menu {
+    position: fixed;
+    z-index: 2000;
+    margin: 0;
+    padding: 0.25rem 0;
+    list-style: none;
+    min-width: 2.75rem;
+    background: #fff;
+    color: #212529;
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+  }
+
+  .menu-lang {
+    width: 100%;
+    padding: 0.4rem 0.55rem;
+  }
+
+  .menu-lang:hover {
+    background-color: #f8f9fa;
+  }
+
+  .menu-lang.active {
+    background-color: var(--bs-primary-bg-subtle, #e7f1ff);
+  }
+
   @media (max-width: 767.98px) {
-    .language-pair-container {
+    .language-pair-root {
       padding: 0 0.15rem;
     }
-    .language-pair-select {
-      min-width: 75px;
-      max-width: 95px;
-      padding: 0.18rem 0.35rem;
-      font-size: 0.72rem;
+
+    .flag-slot {
+      padding: 0.16rem 0.28rem;
     }
   }
 </style>
 
 <script>
+  import { onMount, tick } from 'svelte';
   import axios from 'axios';
+  import Icon from '@iconify/svelte';
   import { languagePair } from '$lib/i18n/bilingual.js';
   import ja from '$lib/i18n/locales/ja.json';
   import vi from '$lib/i18n/locales/vi.json';
   import en from '$lib/i18n/locales/en.json';
 
-  // When false, only update the client store (no API persist).
-  // Used by outer pages (login/signup) where no user session exists yet.
   export let save = true;
+  export let tone = 'navbar';
 
   const DICT = { ja, vi, en };
-
-  // Self-name of each language, rendered in its own script
-  // (日本語, Tiếng Việt, English) — looked up in that language's own dict.
   const LANG_SELF = { ja: 'lang_ja', vi: 'lang_vi', en: 'lang_en' };
+  const FLAG_ICON = { ja: 'circle-flags:jp', vi: 'circle-flags:vn', en: 'circle-flags:us' };
+  const LANGS = ['ja', 'vi', 'en'];
+
   function selfName(lang) {
     return DICT[lang]?.[LANG_SELF[lang]] ?? lang;
   }
 
-  // Hardcoded pair options so the dropdown label is independent of $languagePair.
-  // Each option shows "primary-self / secondary-self" (e.g. 日本語/Tiếng Việt).
-  const PAIR_OPTIONS = [
-    { value: 'ja,vi', primary: 'ja', secondary: 'vi' },
-    { value: 'vi,ja', primary: 'vi', secondary: 'ja' },
-    { value: 'ja,en', primary: 'ja', secondary: 'en' },
-    { value: 'en,ja', primary: 'en', secondary: 'ja' },
-    { value: 'vi,en', primary: 'vi', secondary: 'en' },
-    { value: 'en,vi', primary: 'en', secondary: 'vi' }
-  ];
-
-  // Build the option labels (e.g. "日本語/Tiếng Việt") once. Each option's
-  // label is independent of $languagePair — self-names come from each
-  // language's own dictionary.
-  const optionLabels = PAIR_OPTIONS.map((opt) => ({
-    value: opt.value,
-    label: `${selfName(opt.primary)}/${selfName(opt.secondary)}`
-  }));
-
+  let rootEl;
+  let primaryBtn;
+  let secondaryBtn;
+  let menuStyle = '';
+  let openSlot = null;
   let selectedPair = 'ja,vi';
-  // Tracks the last pair value that has been synced to/from the store.
-  // Used to break the reactive feedback loop between `selectedPair` and
-  // `$languagePair` (e.g. when index.svelte fetches the persisted pair
-  // from /api/user/language-pair on init).
   let lastSyncedPair = 'ja,vi';
+  let currentPrimary = 'ja';
+  let currentSecondary = 'vi';
 
-  // External store -> dropdown (e.g. server fetch on init)
   $: if ($languagePair) {
     const fromStore = `${$languagePair.primary},${$languagePair.secondary}`;
     if (fromStore !== lastSyncedPair) {
@@ -105,16 +234,90 @@
     }
   }
 
-  // Title for the <select> element: shows the current selection in compact form.
-  $: currentLabel = (() => {
-    const opt = optionLabels.find((o) => o.value === selectedPair);
-    return opt ? opt.label : '';
-  })();
+  $: {
+    const parts = selectedPair.split(',');
+    currentPrimary = parts[0];
+    currentSecondary = parts[1];
+  }
+  $: currentLabel = `${selfName(currentPrimary)}/${selfName(currentSecondary)}`;
+  $: swapLabel = `${selfName(currentSecondary)} / ${selfName(currentPrimary)}`;
+  $: slotOptions = LANGS.filter((lang) =>
+    lang !== (openSlot === 'primary' ? currentSecondary : currentPrimary)
+  );
 
-  // Dropdown -> store (user click). Reactive statement with lastSyncedPair
-  // guard fires exactly once per user selection; avoids the bind:value +
-  // on:change race where on:change could fire before bind:value updated
-  // selectedPair (causing languagePair.set with the previous value).
+  async function positionMenu(slot) {
+    await tick();
+    const el = slot === 'primary' ? primaryBtn : secondaryBtn;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    menuStyle = `top:${rect.bottom + 4}px;left:${rect.left + rect.width / 2}px;transform:translateX(-50%);`;
+  }
+
+  async function toggleSlot(slot) {
+    if (openSlot === slot) {
+      openSlot = null;
+      return;
+    }
+    openSlot = slot;
+    await positionMenu(slot);
+  }
+
+  function closeMenu() {
+    openSlot = null;
+  }
+
+  function swapLanguages() {
+    selectedPair = `${currentSecondary},${currentPrimary}`;
+    closeMenu();
+  }
+
+  function pickLang(slot, lang) {
+    if (slot === 'primary') {
+      if (lang === currentPrimary) {
+        closeMenu();
+        return;
+      }
+      selectedPair = `${lang},${currentSecondary}`;
+    } else {
+      if (lang === currentSecondary) {
+        closeMenu();
+        return;
+      }
+      selectedPair = `${currentPrimary},${lang}`;
+    }
+    closeMenu();
+  }
+
+  function handleDocumentClick(event) {
+    if (openSlot && rootEl && !rootEl.contains(event.target)) {
+      closeMenu();
+    }
+  }
+
+  function handleDocumentKeydown(event) {
+    if (openSlot && event.key === 'Escape') {
+      closeMenu();
+    }
+  }
+
+  onMount(() => {
+    const reposition = () => {
+      if (openSlot) positionMenu(openSlot);
+    };
+
+    document.addEventListener('click', handleDocumentClick);
+    document.addEventListener('keydown', handleDocumentKeydown);
+    window.addEventListener('resize', reposition);
+    window.addEventListener('scroll', reposition, true);
+
+    return () => {
+      document.removeEventListener('click', handleDocumentClick);
+      document.removeEventListener('keydown', handleDocumentKeydown);
+      window.removeEventListener('resize', reposition);
+      window.removeEventListener('scroll', reposition, true);
+    };
+  });
+
   $: if (selectedPair && selectedPair !== lastSyncedPair) {
     lastSyncedPair = selectedPair;
     const [primary, secondary] = selectedPair.split(',');
