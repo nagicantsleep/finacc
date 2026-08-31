@@ -3,6 +3,7 @@
   import Icon from '@iconify/svelte';
   import BilingualText from '$lib/components/BilingualText.svelte';
   import menu from '$lib/config/module-list.js';
+  import { sidebarCollapsed } from '$lib/client/ui.js';
 
   export let user = {};
   export let company = {};
@@ -10,6 +11,7 @@
 
   $: currentPath = $page.url.pathname;
   $: status = { user, company, fy: currentFy };
+  $: toggleLabel = $sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar';
 
   const MODULE_I18N = {
     workspace: 'workspace',
@@ -58,11 +60,15 @@
     if (!entry.authority) return true;
     return entry.authority(user, company);
   }
+
+  const toggleSidebar = () => {
+    sidebarCollapsed.update((collapsed) => !collapsed);
+  };
 </script>
 
 <aside class="main-sidebar">
   <div class="sidebar">
-    <nav class="mt-2">
+    <nav class="sidebar-nav mt-2">
       <ul class="nav nav-pills nav-sidebar flex-column">
         {#each menu as entry (entry.name)}
           {#if isVisible(entry)}
@@ -91,6 +97,21 @@
         {/each}
       </ul>
     </nav>
+
+    <div class="sidebar-footer">
+      <button
+        type="button"
+        class="sidebar-toggle"
+        title={toggleLabel}
+        aria-label={toggleLabel}
+        on:click={toggleSidebar}
+      >
+        <i
+          class="bi {$sidebarCollapsed ? 'bi-layout-sidebar-inset' : 'bi-layout-sidebar-inset-reverse'}"
+          aria-hidden="true"
+        ></i>
+      </button>
+    </div>
   </div>
 </aside>
 
