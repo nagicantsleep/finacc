@@ -8,7 +8,8 @@
     fy: data.currentFy,
     tenant: data.tenant,
     current: 'accounts',
-    pathname: '/accounts'
+    pathname: '/accounts',
+    state: 'list'
   };
 </script>
 
@@ -17,5 +18,5 @@
 </svelte:head>
 
 <div class="accounts-page container-fluid px-0">
-  <AccountsView bind:status />
+  <AccountsView bind:status initialAccounts={data.accounts} />
 </div>

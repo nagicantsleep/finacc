@@ -33,84 +33,82 @@
 </style>
 
 <script>
-import axios from 'axios';
-// Modal dynamically loaded
-import {onMount, beforeUpdate, afterUpdate, createEventDispatcher} from 'svelte';
+import { onMount, afterUpdate } from 'svelte';
+import { invalidate } from '$app/navigation';
 import AccountsList from './accounts-list.svelte';
 import AccountModal from './account-modal.svelte';
-import {setAccounts} from '$lib/client/cross-slip.js';
-import {numeric, formatDate} from '$lib/utils.js';
-import {parseParams, buildParam} from '$lib/client/params.js';
-import { currentPage } from '$lib/client/router.js';
+import { setAccounts } from '$lib/client/cross-slip.js';
+import { numeric } from '$lib/utils.js';
 
 import BilingualText from '$lib/components/BilingualText.svelte';
-import { languagePair } from '$lib/i18n/bilingual.js';
+
 export let status;
+export let initialAccounts = null;
 
-let accounts;
-let	lines = [];
+let accounts = [];
+let lines = [];
 let modal;
-let	mode;
-let	account = {};
-let	subAccount = {};
-
-$: checkPage($currentPage);
+let mode;
+let account = {};
+let subAccount = {};
 
 const ready = () => {
   lines = [];
   let last_account = {};
-  for ( let i = 0; i < accounts.length; i ++ ) {
-    let account = accounts[i];
-    let new_line = {
-      aclId: account.acl_id,
-      aclCode: account.acl_code
+  for (let i = 0; i < accounts.length; i++) {
+    const row = accounts[i];
+    const new_line = {
+      aclId: row.acl_id,
+      aclCode: row.acl_code
     };
-    if ( last_account.major_name != account.major_name ) {
-      new_line.majorName = account.major_name;
-      new_line.majorNameVi = account.major_nameVi || '';
+    if (last_account.major_name != row.major_name) {
+      new_line.majorName = row.major_name;
+      new_line.majorNameVi = row.major_nameVi || '';
     } else {
       new_line.majorName = '';
       new_line.majorNameVi = '';
     }
-    if ( last_account.middle_name != account.middle_name ) {
-      new_line.middleName = account.middle_name;
-      new_line.middleNameVi = account.middle_nameVi || '';
+    if (last_account.middle_name != row.middle_name) {
+      new_line.middleName = row.middle_name;
+      new_line.middleNameVi = row.middle_nameVi || '';
     } else {
       new_line.middleName = '';
       new_line.middleNameVi = '';
     }
-    if ( last_account.minor_name != account.minor_name ) {
-      new_line.minorName = account.minor_name;
-      new_line.minorNameVi = account.minor_nameVi || '';
+    if (last_account.minor_name != row.minor_name) {
+      new_line.minorName = row.minor_name;
+      new_line.minorNameVi = row.minor_nameVi || '';
     } else {
       new_line.minorName = '';
       new_line.minorNameVi = '';
     }
-    if		(( new_line.major_name != '') ||
-         ( new_line.middle_name != '' ) ||
-         ( new_line.minor_name != '' )) {
+    if (
+      new_line.major_name != '' ||
+      new_line.middle_name != '' ||
+      new_line.minor_name != ''
+    ) {
       lines.push(new_line);
     }
-    if	( account.name && ( account.name != '' ) )	{
+    if (row.name && row.name != '') {
       lines.push({
         majorName: '',
         middleName: '',
         minorName: '',
-        accountName: account.name,
-        accountNameVi: account.nameVi || '',
+        accountName: row.name,
+        accountNameVi: row.nameVi || '',
         subAccountName: '',
         subAccountNameVi: '',
-        taxClass: ( account.subAccounts && account.subAccounts.length > 0 ) ? 0 : account.taxClass,
-        key: account.key ? account.key : '',
-        debit: account.debit ? numeric(account.debit) : 0,
-        credit: account.credit ? numeric(account.credit) : 0,
-        remaining: account.balance ? numeric(account.balance) : 0,
+        taxClass: row.subAccounts && row.subAccounts.length > 0 ? 0 : row.taxClass,
+        key: row.key ? row.key : '',
+        debit: row.debit ? numeric(row.debit) : 0,
+        credit: row.credit ? numeric(row.credit) : 0,
+        remaining: row.balance ? numeric(row.balance) : 0,
         subCode: -1,
-        code: account.code
+        code: row.code
       });
-      if ( account.subAccounts && account.subAccounts.length > 0 ) {
-        for ( let j = 0; j < account.subAccounts.length; j ++) {
-          let sub = account.subAccounts[j];
+      if (row.subAccounts && row.subAccounts.length > 0) {
+        for (let j = 0; j < row.subAccounts.length; j++) {
+          const sub = row.subAccounts[j];
           lines.push({
             majorName: '',
             middleName: '',
@@ -125,35 +123,30 @@ const ready = () => {
             credit: sub.credit ? numeric(sub.credit) : 0,
             remaining: sub.balance ? numeric(sub.balance) : 0,
             subCode: sub.code,
-            code: account.code
+            code: row.code
           });
         }
       }
     }
-    last_account = account;	 
+    last_account = row;
   }
+};
+
+const applyAccounts = (data) => {
+  accounts = Array.isArray(data) ? data : [];
+  setAccounts(accounts);
+  ready();
+};
+
+$: if (initialAccounts) {
+  applyAccounts(initialAccounts);
 }
 
-
-const	updateAccounts = () => {
-  const lp = encodeURIComponent(JSON.stringify($languagePair));
-  axios.get(`/api/accounts4/${status.fy.term}?languagePair=${lp}`).then((result) => {
-    accounts = result.data;
-    //console.log('accounts', accounts);
-    setAccounts(accounts);
-    ready();
-  });
-}
-
-const checkPage = (page) => {
-  page = page || (typeof location !== 'undefined' ? location.pathname : '');
-  let args = page.split('/');
-  // /transaction/entry/23
-  status.state = args[2] || 'list';
-}
+const updateAccounts = () => {
+  invalidate('app:accounts');
+};
 
 onMount(async () => {
-  status.params = parseParams();
   try {
     const bs = await import('bootstrap');
     const el = document.getElementById('account-modal');
@@ -163,23 +156,21 @@ onMount(async () => {
   } catch (e) {
     console.error('Modal init error', e);
   }
-  updateAccounts();
-  checkPage($currentPage);
-})
+});
 
 let openModal = false;
 afterUpdate(() => {
-  if	( openModal )	{
+  if (openModal) {
     modal.show();
     openModal = false;
   }
 });
-const	openAccount = (event) => {
-  let	args = event.detail;
-  console.log({args});
+
+const openAccount = (event) => {
+  const args = event.detail;
   mode = args.mode;
   account = args.account;
   subAccount = args.subAccount;
   openModal = true;
-}
+};
 </script>

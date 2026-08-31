@@ -1,18 +1,21 @@
 import { redirect } from '@sveltejs/kit';
-import models from '$lib/server/db/index.js';
+import {
+  accountsVariant,
+  parseLanguagePair
+} from '$lib/server/master/accounts-variant-api.js';
 
-export async function load({ locals }) {
+/** @type {import('./$types').PageServerLoad} */
+export async function load({ locals, url, parent, depends }) {
+  depends('app:accounts');
   if (!locals.user) throw redirect(303, '/login');
   if (!locals.tenantId) throw redirect(303, '/logon');
 
-  return {
-    user: locals.user,
-    tenant: locals.tenant,
-    currentFy: locals.currentFy ? {
-      term: locals.currentFy.term,
-      startDate: locals.currentFy.startDate,
-      endDate: locals.currentFy.endDate,
-      taxIncluded: Boolean(locals.currentFy.taxIncluded)
-    } : { term: 1, startDate: '2026-01-01', endDate: '2026-12-31', taxIncluded: false }
-  };
+  const { currentFy } = await parent();
+  const term = currentFy?.term;
+  const accounts =
+    term != null
+      ? await accountsVariant('all4', locals.tenantId, term, parseLanguagePair(url, locals))
+      : [];
+
+  return { accounts };
 }
