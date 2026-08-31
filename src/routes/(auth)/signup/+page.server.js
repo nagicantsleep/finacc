@@ -1,56 +1,59 @@
 import { fail, redirect } from '@sveltejs/kit';
-import models from '$lib/server/db/index.js';
-import { hashPassword, setSessionCookie } from '$lib/server/auth/index.js';
-import { bootstrapTenantMember } from '$lib/server/auth/bootstrap.js';
+import { signupUser } from '$lib/server/auth/user-session-api.js';
+
+function field(data, name) {
+  const value = data.get(name)?.toString()?.trim();
+  return value || undefined;
+}
 
 /** @type {import('./$types').Actions} */
 export const actions = {
-  default: async ({ request, cookies }) => {
+  default: async ({ request }) => {
     const data = await request.formData();
-    const username = data.get('username')?.toString()?.trim();
-    const password = data.get('password')?.toString();
-    const email = data.get('email')?.toString()?.trim();
-    const legalName = data.get('legalName')?.toString()?.trim() || username;
-    const tenantName = data.get('tenantName')?.toString()?.trim() || legalName;
+    const username = field(data, 'username');
+    const password = data.get('password')?.toString() || '';
+    const confirmPassword = data.get('confirmPassword')?.toString() || '';
+    const legalName = field(data, 'legalName');
+    const email = field(data, 'email');
 
-    if (!username || !password || !email) {
-      return fail(400, { error: 'ユーザー名、パスワード、メールアドレスは必須です。', username, email, legalName, tenantName });
+    const bounce = {
+      username,
+      legalName,
+      email,
+      legalRuby: field(data, 'legalRuby') || '',
+      birthDate: field(data, 'birthDate') || '',
+      legalSex: field(data, 'legalSex') || '',
+      telNo: field(data, 'telNo') || '',
+      zip: field(data, 'zip') || '',
+      address1: field(data, 'address1') || '',
+      address2: field(data, 'address2') || ''
+    };
+
+    if (password !== confirmPassword) {
+      return fail(400, { error: 'パスワードが一致しません。', ...bounce });
     }
 
-    const t = await models.sequelize.transaction();
-    try {
-      const existing = await models.User.findOne({ where: { name: username }, transaction: t });
-      if (existing) {
-        await t.rollback();
-        return fail(400, { error: 'このユーザー名は既に使用されています。', username, email, legalName, tenantName });
-      }
+    const result = await signupUser({
+      user_name: username,
+      password,
+      legalName,
+      email,
+      legalRuby: bounce.legalRuby,
+      birthDate: bounce.birthDate,
+      legalSex: bounce.legalSex,
+      telNo: bounce.telNo,
+      zip: bounce.zip,
+      address1: bounce.address1,
+      address2: bounce.address2
+    });
 
-      const user = await models.User.create(
-        {
-          name: username,
-          hashPassword: hashPassword(password),
-          email: email,
-          legalName: legalName,
-          status: 'active'
-        },
-        { transaction: t }
-      );
-
-      const { tenant } = await bootstrapTenantMember(user, { name: tenantName }, t);
-
-      await t.commit();
-
-      setSessionCookie(cookies, {
-        userId: user.id,
-        currentTenantId: tenant.id,
-        term: null
+    if (result.payload?.result !== 'OK') {
+      return fail(400, {
+        error: result.payload?.message || 'アカウント作成に失敗しました。',
+        ...bounce
       });
-
-      throw redirect(303, '/setup');
-    } catch (e) {
-      if (e?.status === 303) throw e;
-      if (!t.finished) await t.rollback();
-      return fail(400, { error: e.message || 'アカウント作成に失敗しました。', username, email, legalName, tenantName });
     }
+
+    throw redirect(303, '/login?registered=1');
   }
 };

@@ -1,12 +1,12 @@
 <div class="list">
   <div class="page-title d-flex justify-content-between">
   	<h1 class="page-title-bilingual"><BilingualText key="journal" inline={true} /></h1>
-  	<a href="/forms/explanatory-journal/{status?.fy?.term || 1}?format=pdf" download="仕訳日記帳-{today}.pdf" class="btn btn-primary btn-bilingual">
+  	<a href={resolve(`/forms/explanatory-journal/${status?.fy?.term || 1}?format=pdf`)} download="仕訳日記帳-{today}.pdf" class="btn btn-primary btn-bilingual">
       <BilingualText key="download_journal" inline={true} /><i class="bi bi-download"></i>
   	</a>
 	</div>
 	<ul class="page-subtitle nav">
-  	{#each dates as date}
+  	{#each dates as date (`${date.year}-${date.month}`)}
     	<li class="nav-item">
       	{#if (date.month == month)}
       	<button type="button" class="btn btn-primary month-btn disabled me-2"
@@ -82,10 +82,9 @@
 </style>
 
 <script>
-import axios from 'axios';
-import { onMount, afterUpdate } from 'svelte';
-import { page } from '$app/stores';
-import { goto } from '$app/navigation';
+import { onMount } from 'svelte';
+import { goto, invalidate } from '$app/navigation';
+import { resolve } from '$app/paths';
 import JournalList from './journal-list.svelte';
 import CrossSlipModal from '$lib/components/cross-slip/cross-slip-modal.svelte';
 import { setAccounts, findAccount, findSubAccountByCode } from '$lib/client/cross-slip.js';
@@ -94,13 +93,13 @@ import BilingualText from '$lib/components/BilingualText.svelte';
 import { bi } from '$lib/i18n/bilingual.js';
 
 export let status = { fy: {} };
+export let journal = [];
+export let accounts = [];
+export let dates = [];
+export let year;
+export let month;
 
-let year;
-let month;
-let fy = {};
 let slip = { lines: [] };
-let dates = [];
-let accounts = [];
 let sums = {
   debitAmount: 0,
   debitTax: 0,
@@ -113,20 +112,22 @@ let modalCount = 0;
 let popUp = false;
 let today = '';
 
+$: fy = status?.fy || {};
+$: setAccounts(accounts || []);
+$: slips = journal || [];
+$: ready(slips);
+
 const openMonth = (_year, _month) => {
-  year = _year;
-  month = _month;
-  const href = `/journal/${year}/${month}`;
+  const href = `/journal/${_year}/${_month}`;
   if (status) status.pathname = href;
-  updateList();
-  goto(href, { keepFocus: true, noScroll: true });
+  goto(resolve(href), { keepFocus: true, noScroll: true });
 };
 
 const close_ = () => {
-  updateList();
+  invalidate('app:journal');
 };
 
-const ready = (slipsList) => {
+function ready(slipsList) {
   const _lines = [];
   const _sums = {
     debitAmount: 0,
@@ -137,7 +138,7 @@ const ready = (slipsList) => {
   if (Array.isArray(slipsList)) {
     for (let i = 0; i < slipsList.length; i++) {
       const s = slipsList[i];
-      s.approvedAt = s.approvedAt ? new Date(s.approvedAt) : null;
+      const approvedAt = s.approvedAt ? new Date(s.approvedAt) : null;
       if (Array.isArray(s.lines)) {
         for (let j = 0; j < s.lines.length; j++) {
           const line = s.lines[j];
@@ -157,7 +158,7 @@ const ready = (slipsList) => {
             month: s.month,
             day: s.day,
             no: s.no,
-            approvedAt: s.approvedAt,
+            approvedAt,
             lineNo: line.lineNo,
 
             debitAmount: line.debitAmount !== null ? numeric(line.debitAmount).toLocaleString() : '',
@@ -168,7 +169,7 @@ const ready = (slipsList) => {
             creditTax: line.creditTax != null ? numeric(line.creditTax).toLocaleString() : '',
             creditTaxRule: line.creditTaxRule ? line.creditTaxRule.label : '',
             creditTaxRuleId: line.creditTaxRuleId,
-               
+
             debitAccount: debAcc ? debAcc.name : line.debitAccount,
             debitSubAccount: debSubAcc ? debSubAcc.name : '',
 
@@ -191,90 +192,15 @@ const ready = (slipsList) => {
   }
   lines = _lines;
   sums = _sums;
-};
+}
 
-const updateList = () => {
-  if (!year || !month) return;
-  axios.get(`/api/journal/${year}/${month}`).then((result) => {
-    slips = result.data.journal || [];
-    ready(slips);
-  }).catch((e) => {
-    console.error('journal list error', e);
-  });
-};
-
-const setupDates = async () => {
-  try {
-    let sourceFy = status?.fy?.startDate ? status.fy : null;
-    if (!sourceFy) {
-      const result = await axios.get(year && month ? `/api/term/${year}/${month}` : '/api/term');
-      const terms = Array.isArray(result.data) ? result.data : (result.data?.fiscalYear ? [result.data.fiscalYear] : (result.data?.startDate ? [result.data] : []));
-      sourceFy = terms.find((t) => t?.term === (status?.fy?.term || 1)) || terms[0] || null;
-    }
-    fy = sourceFy || {};
-    if (fy?.startDate && fy?.endDate) {
-      dates = [];
-      const end = new Date(fy.endDate);
-      for (let mon = new Date(fy.startDate); mon <= end;) {
-        dates.push({
-          year: mon.getFullYear(),
-          month: mon.getMonth() + 1
-        });
-        mon.setMonth(mon.getMonth() + 1);
-      }
-      dates = [...dates];
-    } else {
-      const y = year || new Date().getFullYear();
-      dates = Array.from({ length: 12 }, (_, i) => ({ year: y, month: i + 1 }));
-    }
-  } catch (e) {
-    console.error('setupDates error', e);
-    const y = year || new Date().getFullYear();
-    dates = Array.from({ length: 12 }, (_, i) => ({ year: y, month: i + 1 }));
-  }
-};
-
-const setupAccount = async () => {
-  try {
-    const res = await axios.get('/api/accounts');
-    accounts = res.data || [];
-    setAccounts(accounts);
-    updateList();
-  } catch (e) {
-    console.error('setupAccount error', e);
-  }
-};
-
-onMount(async () => {
+onMount(() => {
   const now = new Date();
   today = `${now.getUTCFullYear()}${("00" + (now.getMonth() + 1)).slice(-2)}${("00" + now.getDate()).slice(-2)}`;
-
-  const params = $page.params;
-  if (params?.year && params?.month) {
-    year = parseInt(params.year);
-    month = parseInt(params.month);
-  } else {
-    year = now.getFullYear();
-    month = now.getMonth() + 1;
-  }
-
-  slip = {
-    year,
-    month,
-    lines: []
-  };
-
-  await setupDates();
-  await setupAccount();
-});
-
-afterUpdate(() => {
-  if (!popUp) {
-    modalCount += 1;
-  }
 });
 
 const openSlip = (event) => {
+  modalCount += 1;
   slip = event.detail || {};
   if (!slip.no) {
     slip = {
