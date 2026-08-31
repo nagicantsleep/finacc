@@ -1,4 +1,5 @@
 import { json } from '@sveltejs/kit';
+import { listCompanyClasses } from '$lib/server/accounting/company-list.js';
 import models from '$lib/server/db/index.js';
 
 export async function GET({ locals }) {
@@ -6,11 +7,7 @@ export async function GET({ locals }) {
     return json({ result: 'NG', message: 'Unauthorized' }, { status: 401 });
   }
 
-  const values = await models.CompanyClass.findAll({
-    where: { tenantId: locals.tenantId },
-    order: [['displayOrder', 'ASC'], ['id', 'ASC']]
-  });
-
+  const values = await listCompanyClasses(locals.tenantId);
   return json({ result: 'OK', values });
 }
 
