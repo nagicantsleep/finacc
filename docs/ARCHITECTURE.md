@@ -45,7 +45,7 @@ HTTP request
 
 Page reads should prefer `load` over client axios GET. Mutations that are native forms should use `actions` + `enhance`. JSON `/api/*` remains for remaining SPA screens, mocha, and MCP.
 
-SSR first-paint via `load`: journal month, ledger account, trial balance v2, company list (`/company`, `/company/home`, `/company/new`, `/company/entry/:id`).
+SSR first-paint via `load`: journal month, ledger account, trial balance v2, company list (`/company`, `/company/home`, `/company/new`, `/company/entry/:id`), accounts chart (`/accounts`).
 
 CSRF: Kit origin checks are on (production only). They apply to form POSTs (`application/x-www-form-urlencoded`, `multipart/form-data`, `text/plain`), not to `application/json` API calls.
 
