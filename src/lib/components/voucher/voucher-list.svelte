@@ -56,7 +56,7 @@
       </li>
     </ul>
   </div>
-  <div class="full-height-2 fontsize-12pt">
+  <div class="full-height-2 fontsize-12pt table-responsive">
     <table class="table table-bordered">
       <thead class="table-light">
         <tr>

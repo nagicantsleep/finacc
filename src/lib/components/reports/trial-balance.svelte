@@ -856,6 +856,15 @@
     max-width: min(52rem, calc(100vw - 16rem));
     margin-top: 0.25rem;
   }
+  @media (max-width: 767.98px) {
+    .tb-class-popover {
+      left: 0;
+      right: 0;
+      min-width: 0;
+      max-width: calc(100vw - 1.5rem);
+      width: auto;
+    }
+  }
   .tb-class-popover-header {
     display: flex; align-items: center; gap: 0.5rem;
     padding: 0.4rem 0.75rem; border-bottom: 1px solid #eee; background: #f8f9fa;
@@ -903,6 +912,7 @@
   .tb-v2-table-wrap {
     flex: 1 1 auto;
     min-height: 0;
+    overflow-x: auto;
     overflow-y: auto;
     border: 1px solid #dee2e6;
     border-radius: 4px;

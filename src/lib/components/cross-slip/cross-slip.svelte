@@ -1,6 +1,6 @@
 <div class="container-fluid crossslip">
-  <div class="row mb-3">
-    <div class="col-5">
+  <div class="row mb-3 g-2">
+    <div class="col-12 col-lg-5">
       <div class="input-group date-group">
         <span class="badge bg-secondary year-badge">
           <span class="year-input">{slip.year || ''}</span>
@@ -18,13 +18,13 @@
         {/if}
       </div>
     </div>
-    <div class="col">
-      <div class="row">
-        <div class="col-4 input-group-text stacked-label">
+    <div class="col-12 col-lg">
+      <div class="row g-2">
+        <div class="col-12 col-md-4 input-group-text stacked-label">
           <BilingualText key="entry_person" stacked={false} inline={true} />:
           <span class="ms-1 person-name">{slip.createrName || ''}</span>
         </div>
-        <div class="col-8 input-group-text stacked-label">
+        <div class="col-12 col-md-8 input-group-text stacked-label">
           <BilingualText key="approve_person" stacked={false} inline={true} />:
           <span class="ms-1 person-name">{slip.approverName || ''}</span>
           {#if (slip.approvedAt)}
@@ -38,7 +38,7 @@
       </div>
     </div>
 	</div>
-  <div class="row">
+  <div class="row table-responsive">
     <table class="table table-striped table-bordered">
       <thead class="table-light">
         <tr>

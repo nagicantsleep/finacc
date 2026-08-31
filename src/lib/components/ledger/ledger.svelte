@@ -61,7 +61,7 @@
     </div>
   </div>
 {/if}
-<div class="full-height-4" style="overflow-y: auto;">
+<div class="full-height-4 table-responsive" style="overflow-y: auto;">
 	<LedgerList
   	{account}
   	{pickup}

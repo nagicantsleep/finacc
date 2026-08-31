@@ -1,4 +1,4 @@
-<div class="full-height-3">
+<div class="full-height-3 table-responsive">
   <table class="table table-bordered journal">
     <thead class="table-light">
       <tr>
