@@ -1,3 +1,4 @@
+<div class="table-responsive">
 <table class="table table-bordered">
   <thead class="table-light">
     <tr>
@@ -146,6 +147,7 @@
     {/if}
   </tbody>
 </table>
+</div>
 
 <script>
 import {onMount, beforeUpdate, afterUpdate, createEventDispatcher} from 'svelte';

@@ -6,7 +6,7 @@
         openCompany(null);
       }}><BilingualText key="company_entry_space" inline={true} /><i class="bi bi-pencil-square"></i></button>
   </div>
-  <div class="full-height-1 fontsize-12pt">
+  <div class="full-height-1 fontsize-12pt table-responsive">
     <table class="table table-bordered">
     <thead class="table-light">
       <tr>

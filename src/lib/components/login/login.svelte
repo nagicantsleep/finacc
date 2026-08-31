@@ -19,7 +19,7 @@
           <input type="password" bind:value={password} class="form-control" placeholder={$bi('password_placeholder')}>
         </div>
         <div class="row d-flex justify-content-center">
-          <div class="col-lg-8 col-4 d-grid">
+          <div class="col-12 col-lg-8 d-grid">
             <button type="button" class="btn btn-primary mb-3"
               on:click={Login}
               disabled={isSubmitting}>

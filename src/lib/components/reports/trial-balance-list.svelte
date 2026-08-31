@@ -24,6 +24,7 @@
   {@const showEnding = reportType === 'balance' || reportType === 'combined'}
   {@const showBalance = reportType === 'balance' || reportType === 'combined' || reportType === 'movement'}
   {@const colCount = 3 + (showOpening ? 2 : 0) + (showMovement ? 2 : 0) + (showEnding ? 2 : 0) + (showBalance ? 1 : 0)}
+<div class="table-responsive">
 <table class="table table-bordered table-sm tb-v2-table">
   <thead class="tb-v2-thead">
     <tr>
@@ -122,6 +123,7 @@
     {/if}
   </tbody>
 </table>
+</div>
 {/if}
 
 <script>

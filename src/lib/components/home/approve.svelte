@@ -12,7 +12,7 @@
         </li>
       </ul>
     </div>
-	  <div class="row full-height" style="overflow-y: scroll;">
+	  <div class="row full-height table-responsive" style="overflow-y: scroll;">
 		  <table class="table table-bordered">
         <thead class="table-light">
           <th colspan="2"><BilingualText key="date_voucher_no" /></th>

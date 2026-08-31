@@ -2,7 +2,7 @@
   <div class="page-title d-flex justify-content-between">
     <h1 class="page-title-bilingual"><BilingualText key="bank_ledger" inline={true} /></h1>
   </div>
-  <ul class="page-subtitle d-flex justify-content-between">
+  <ul class="page-subtitle d-flex justify-content-between flex-wrap gap-2">
     <div class="nav">
     <li class="nav-item dropdown">
       <button type="button"
@@ -57,7 +57,7 @@
       </button>
     </div>
   </ul>
-  <div class="full-height-2">
+  <div class="full-height-2 table-responsive">
     <table class="table table-bordered">
       <thead class="table-light">
         <tr>

@@ -12,7 +12,7 @@
 </svelte:head>
 
 <div class="setup-page d-flex justify-content-center align-items-center min-vh-100 bg-light py-5">
-  <div class="card shadow-sm border-0" style="width: 580px; max-width: 95%;">
+  <div class="card shadow-sm border-0" style="width: 100%; max-width: 580px;">
     <div class="card-body p-4 p-md-5">
       <div class="text-center mb-4">
         <img src="/logo.png" alt="Logo" style="height: 42px;" class="mb-2" />
