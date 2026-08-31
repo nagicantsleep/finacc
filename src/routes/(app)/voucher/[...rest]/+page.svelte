@@ -8,7 +8,8 @@
     fy: data.currentFy,
     tenant: data.tenant,
     current: 'voucher',
-    pathname: '/voucher'
+    pathname: '/voucher',
+    state: data.viewState || 'list'
   };
 </script>
 
@@ -17,5 +18,14 @@
 </svelte:head>
 
 <div class="voucher-page container-fluid px-0">
-  <VoucherView bind:status />
+  <VoucherView
+    bind:status
+    vouchers={data.vouchers}
+    selectedVoucher={data.selectedVoucher}
+    voucherClasses={data.voucherClasses}
+    accounts={data.accounts}
+    dates={data.dates}
+    viewState={data.viewState}
+    filters={data.filters}
+  />
 </div>

@@ -20,7 +20,8 @@
           on:endregister={() => { disabled = false} }
           bind:status={status}
           bind:voucher={voucher}
-          bind:files={files}></VoucherInfo>
+          bind:files={files}
+          voucherClasses={voucherClasses}></VoucherInfo>
       </div>
       <div class="footer">
         <button type="button" class="btn btn-secondary" disabled={disabled}
@@ -64,16 +65,18 @@
 */
 import axios from 'axios';
 import {numeric, formatDate} from '$lib/utils.js';
-import {onMount, beforeUpdate, afterUpdate, createEventDispatcher} from 'svelte';
+import {createEventDispatcher} from 'svelte';
+import { goto, invalidate } from '$app/navigation';
 const dispatch = createEventDispatcher();
 import VoucherInfo from './voucher-info.svelte';
-import {currentVoucher, getStore} from '$lib/client/current-record.js'
+import {currentVoucher} from '$lib/client/current-record.js'
 import BilingualText from '$lib/components/BilingualText.svelte';
 import { bi } from '$lib/i18n/bilingual.js';
 
 
 export let voucher;
 export let status;
+export let voucherClasses = [];
 
 let	files;
 let ok = true;
@@ -152,26 +155,21 @@ const save = (event) => {
       create = true;
     }
     pr.then((result) => {
-      console.log('result', result);
       voucher = result.data.voucher;
-      if	( files )	{
-      	console.log('files', files.length);
-      	for	( let i = 0; i < files.length ; i += 1 )	{
-        	console.log('voucherId', files[i].voucherId);
-        	if	( !files[i].voucherId )	{
-          	files[i].voucherId = voucher.id;
-          	bind_file(files[i]);
-        	}
-      	}
+      if (files) {
+        for (let i = 0; i < files.length; i += 1) {
+          if (!files[i].voucherId) {
+            files[i].voucherId = voucher.id;
+            bind_file(files[i]);
+          }
+        }
       }
-      if	( create )	{
-        window.history.replaceState(
-          status, "", `/voucher/entry/${voucher.id}`);
-      }
-      axios.get(`/api/voucher/${voucher.id}`).then((result) => {
-        voucher = result.data.voucher;
+      if (create) {
         currentVoucher.set(voucher);
-      })
+        goto(`/voucher/entry/${voucher.id}`);
+      } else {
+        invalidate('app:voucher');
+      }
     });
   }
   catch(e) {
@@ -191,19 +189,10 @@ const clean_popup = () => {
 const	close_ = (event) => {
   currentVoucher.set(null);
   clean_popup();
-  window.history.back();
   dispatch('close');
 }
 
-onMount(() => {
-
-})
-
-beforeUpdate(() => {
-  console.log('voucher-entry beforeUpdate', voucher);
-});
-
-const	delete_ = (event) => {
+const delete_ = (event) => {
   try {
     console.log('delete');
     delete_voucher(voucher).then(() => {

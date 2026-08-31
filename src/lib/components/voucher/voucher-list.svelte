@@ -10,23 +10,19 @@
       </button>
     </div>
     <ul class="page-subtitle nav me-auto flex-wrap mb-0">
-      {#each dates as date}
+      {#each dates as date (date.ym)}
         <li class="nav-item">
-          {#if ( status.params && (date.ym == status.params.get('month')) )}
+          {#if filters.month === date.ym}
           <button type="button" class="btn btn-primary month-btn disabled me-2"
             on:click={() => {
-              dispatch('update', {
-                month: `${date.year}-${date.month}`
-              });
+              dispatch('filter', { month: `${date.year}-${date.month}` });
             }}>
             <BilingualText key={`month_${date.month}`} stacked={true} />
           </button>
           {:else}
           <button type="button" class="btn btn-outline-primary month-btn me-2"
             on:click={() => {
-              dispatch('update', {
-                month: `${date.year}-${date.month}`
-              });
+              dispatch('filter', { month: `${date.year}-${date.month}` });
             }}>
             <BilingualText key={`month_${date.month}`} stacked={true} />
           </button>
@@ -34,21 +30,17 @@
         </li>
       {/each}
       <li class="nav-item">
-        {#if ( !status.params || !status.params.get('month') )}
+        {#if !filters.month}
         <button type="button" class="btn btn-primary month-btn disabled me-2"
           on:click={() => {
-            dispatch('update' ,{
-              month: undefined
-            });
+            dispatch('filter', { month: undefined });
           }}>
           <BilingualText key="all" stacked={true} />
         </button>
         {:else}
         <button type="button" class="btn btn-outline-primary month-btn me-2"
           on:click={() => {
-            dispatch('update', {
-              month: undefined
-            });
+            dispatch('filter', { month: undefined });
           }}>
           <BilingualText key="all" stacked={true} />
         </button>
@@ -75,9 +67,9 @@
           <td>
             <select class="form-select"
                 on:input={changeVoucherType}
-                value={status.params ? parseInt(status.params.get('type')): -1}>
+                value={filters.type ? parseInt(filters.type, 10) : -1}>
               <option value={-1}><BilingualText key="all" /></option>
-              {#each voucherClasses as voucherClass}
+              {#each voucherClasses as voucherClass (voucherClass.id)}
               <option value={voucherClass.id}>{voucherClass.name}</option>
               {/each}
             </select>
@@ -107,7 +99,7 @@
           <td>
           </td>
         </tr>
-        {#each vouchers as line}
+        {#each vouchers as line (line.id)}
         <tr>
           <td>
             <button type="button" class="btn btn-link"
@@ -235,123 +227,66 @@
 </style>
 
 <script>
-import axios from 'axios';
 import CompanySelect from '$lib/components/CompanySelect.svelte';
-
-import {numeric, formatDate} from '$lib/utils.js';
-import {onMount, beforeUpdate, afterUpdate, createEventDispatcher} from 'svelte';
+import { numeric, formatDate } from '$lib/utils.js';
+import { createEventDispatcher } from 'svelte';
 import BilingualText from '$lib/components/BilingualText.svelte';
 import { bi } from '$lib/i18n/bilingual.js';
+
 const dispatch = createEventDispatcher();
 
 export let status;
-export let vouchers;
-let companyId;
-let upperAmount;
-let lowerAmount;
-let dates = [];
-let voucherClasses = [];
+export let vouchers = [];
+export let voucherClasses = [];
+export let dates = [];
+export let filters = {};
 
-$: if (status?.fy && (!dates || dates.length === 0)) {
-  let fy = status.fy;
-  if (fy.startDate && fy.endDate) {
-    const d = [];
-    const end = new Date(fy.endDate);
-    for (let mon = new Date(fy.startDate); mon <= end;) {
-      d.push({
-        year: mon.getFullYear(),
-        month: mon.getMonth() + 1,
-        ym: `${mon.getFullYear()}-${mon.getMonth() + 1}`
-      });
-      mon.setMonth(mon.getMonth() + 1);
-    }
-    dates = d;
-  }
-}
+let companyId = filters.company || '';
+let upperAmount = filters.upper || '';
+let lowerAmount = filters.lower || '';
+
+$: companyId = filters.company || '';
+$: upperAmount = filters.upper || upperAmount;
+$: lowerAmount = filters.lower || lowerAmount;
 
 const compDate = (date, year, month, day) => {
-  let ymd = date.split('-');
-  return	(	( parseInt(ymd[0]) == year )
-    &&	( parseInt(ymd[1]) == month )
-    &&	( parseInt(ymd[2]) == day ));
-}
-
-beforeUpdate(() => {
-  //console.log('voucher-list beforeUpdate', vouchers);
-  //console.log({status});
-});
+  const ymd = date.split('-');
+  return (
+    parseInt(ymd[0], 10) === year &&
+    parseInt(ymd[1], 10) === month &&
+    parseInt(ymd[2], 10) === day
+  );
+};
 
 const changeVoucherType = (event) => {
-  let value = parseInt(event.currentTarget.value);
-  console.log({value});
-  status.params.set('type', value);
-  dispatch('update');
-}
-const changeCompany = (event) => {
-  let companyId = event.detail;
-  //console.log({companyId});
-  dispatch('update', {
-    company: companyId
+  const value = parseInt(event.currentTarget.value, 10);
+  dispatch('filter', {
+    type: Number.isFinite(value) && value > 0 ? value : undefined
   });
-}
+};
+
+const changeCompany = (event) => {
+  dispatch('filter', {
+    company: event.detail || undefined
+  });
+};
+
 const changeAmount = (event) => {
-  if	( event.keyCode == 13 )	{
-    dispatch('update', {
-      upper: numeric(upperAmount),
-      lower: numeric(lowerAmount)
+  if (event.keyCode === 13) {
+    dispatch('filter', {
+      upper: upperAmount ? numeric(upperAmount) : undefined,
+      lower: lowerAmount ? numeric(lowerAmount) : undefined
     });
   }
-}
+};
 
 const openVoucher = (id) => {
-  let	voucher;
-
-  if  ( id )  {
-    for ( let i = 0; i < vouchers.length; i ++ ) {
-      if ( vouchers[i].id == id ) {
-        voucher = vouchers[i];
-        break;
-      }
-    }
+  let voucher;
+  if (id) {
+    voucher = vouchers.find((row) => row.id == id);
   } else {
     voucher = null;
   }
   dispatch('open', voucher);
-}
-onMount(() => {
-  axios.get(`/api/voucher/classes`).then((result) => {
-    voucherClasses = result.data?.values || [];
-  });
-  const term = status?.fy?.term || 1;
-  axios.get(`/api/term/${term}`).then((result) => {
-    let fy = result.data?.startDate ? result.data : (status?.fy?.startDate ? status.fy : null);
-    if (fy && fy.startDate && fy.endDate) {
-      dates = [];
-      const end = new Date(fy.endDate);
-      for (let mon = new Date(fy.startDate); mon <= end;) {
-        dates.push({
-          year: mon.getFullYear(),
-          month: mon.getMonth() + 1,
-          ym: `${mon.getFullYear()}-${mon.getMonth() + 1}`
-        });
-        mon.setMonth(mon.getMonth() + 1);
-      }
-      dates = [...dates];
-    } else {
-      const curYear = new Date().getFullYear();
-      dates = Array.from({ length: 12 }, (_, i) => ({
-        year: curYear,
-        month: i + 1,
-        ym: `${curYear}-${i + 1}`
-      }));
-    }
-  }).catch(() => {
-    const curYear = new Date().getFullYear();
-    dates = Array.from({ length: 12 }, (_, i) => ({
-      year: curYear,
-      month: i + 1,
-      ym: `${curYear}-${i + 1}`
-    }));
-  });
-});
+};
 </script>
