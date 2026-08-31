@@ -1,15 +1,19 @@
-{#if ( status.state === 'list' )}
+{#if viewState === 'list'}
 <VoucherList
   bind:status={status}
-  bind:vouchers={vouchers}
+  vouchers={vouchers}
+  voucherClasses={voucherClasses}
+  dates={dates}
+  filters={filters}
   on:open={openEntry}
   on:slip={openSlip}
-  on:update={changeMonth}
-  ></VoucherList>
-{:else if ( (status.state === 'entry' || status.state === 'new') && voucher )}
+  on:filter={applyFilters}
+></VoucherList>
+{:else if (viewState === 'entry' || viewState === 'new') && voucher}
 <VoucherEntry
   bind:status={status}
   bind:voucher={voucher}
+  voucherClasses={voucherClasses}
   on:open={openSlip}
   on:close={closeEntry}>
 </VoucherEntry>
@@ -30,15 +34,14 @@
 
 <script>
 import axios from 'axios';
-import {onMount, afterUpdate} from 'svelte';
+import { afterUpdate } from 'svelte';
+import { goto, invalidate } from '$app/navigation';
 import VoucherEntry from './voucher-entry.svelte';
 import VoucherList from './voucher-list.svelte';
 import CrossSlipModal from '../cross-slip/cross-slip-modal.svelte';
-import {numeric, formatDate} from '$lib/utils.js';
-import {currentVoucher, getStore} from '$lib/client/current-record.js';
-import {setAccounts} from '$lib/client/cross-slip.js';
-import {parseParams, buildParam} from '$lib/client/params.js';
-import {currentPage, link} from '$lib/client/router.js';
+import { currentVoucher } from '$lib/client/current-record.js';
+import { setAccounts } from '$lib/client/cross-slip.js';
+import { link } from '$lib/client/router.js';
 
 let slip = {
   year: 0,
@@ -49,117 +52,93 @@ let modalCount = 0;
 let popUp;
 
 export let status;
+export let vouchers = [];
+export let selectedVoucher = null;
+export let voucherClasses = [];
+export let accounts = [];
+export let dates = [];
+export let viewState = 'list';
+export let filters = {};
 
-let	voucher;
-let vouchers = [];
-let accounts = [];
+let voucher = selectedVoucher;
 
-$: checkPage($currentPage);
+$: voucher = selectedVoucher;
+$: if (status) status.state = viewState;
+$: if (accounts?.length) setAccounts(accounts);
 
 const openSlip = (event) => {
   const slipNo = event.detail;
-  if	( slipNo.no )	{
+  if (slipNo.no) {
     axios.get(`/api/cross_slip/${slipNo.year}/${slipNo.month}/${slipNo.no}`).then((result) => {
       slip = result.data;
       slip.approvedAt = slip.approvedAt ? new Date(slip.approvedAt) : null;
-      console.log('slip', slip);
       popUp = true;
-    })
+    });
   } else {
     slip = {
-      year: parseInt(slipNo.year),
-      month: parseInt(slipNo.month),
-      day: parseInt(slipNo.day),
+      year: parseInt(slipNo.year, 10),
+      month: parseInt(slipNo.month, 10),
+      day: parseInt(slipNo.day, 10),
       lines: [{
-        debitAccount: "",
+        debitAccount: '',
         debitSubAccount: 0,
-        debitAmount: "",
-        debitTax: "",
-        creditAccount: "",
+        debitAmount: '',
+        debitTax: '',
+        creditAccount: '',
         creditSubAccount: 0,
-        creditAmount: "",
-        creditTax: "",
+        creditAmount: '',
+        creditTax: ''
       }]
     };
     popUp = true;
   }
 };
 
-const	openEntry = (event)	=> {
-  voucher = event.detail;
-  if ( !voucher || !voucher.id )	{
+const openEntry = (event) => {
+  const row = event.detail;
+  if (!row || !row.id) {
     link('/voucher/new');
   } else {
-    link(`/voucher/entry/${voucher.id}`);
+    currentVoucher.set(row);
+    link(`/voucher/entry/${row.id}`);
   }
 };
 
-const updateSlip = (event) => {
-  checkPage(location.href);
-}
-
-const closeEntry = (event) => {
-  const query = status.params ? `?${status.params.toString()}` : '';
-  link(`/voucher${query}`);
-}
-
-const changeMonth = (event) => {
-  const param = buildParam(status, event.detail);
-  link(`/voucher?${param}`);
-}
-
-const updateVouchers = (event) => {
-  const param = status.params ? status.params.toString() : '';
-  axios.get(`/api/voucher?${param}`).then((result) => {
-    vouchers = result.data.vouchers;
-  });
+const updateSlip = () => {
+  invalidate('app:voucher');
 };
 
-const checkPage = (pageUrl) => {
-  if (!pageUrl) return; // 初回レンダリング時など、URLがまだない場合は何もしない
-  const url = new URL(pageUrl, window.location.origin); // 相対URLを絶対URLに変換してパース
-  const args = url.pathname.split('/');
-  status.params = url.searchParams;
-  console.log('voucher checkPage', args, status.params, status.params.get('month'));
-
-  status.state = args[2] || 'list';
-  switch  (status.state)  {
-  case  'entry':
-    axios.get(`/api/voucher/${args[3]}`).then((result) => {
-      voucher = result.data.voucher;
-      currentVoucher.set(voucher);
-    });
-    break;
-  case  'new':
-    voucher = {
-      issueDate: formatDate(new Date()),
-      paymentDate: null,
-      amount: 0,
-      taxClass: -1,
-      tax: 0,
-      type: -1
-    };
-    currentVoucher.set(voucher);
-    break;
-  default:
-    updateVouchers();
-    break;
+const filterQuery = () => {
+  const params = new URLSearchParams();
+  for (const [key, value] of Object.entries(filters || {})) {
+    if (value != null && value !== '' && String(value) !== '-1') {
+      params.set(key, String(value));
+    }
   }
-}
+  const query = params.toString();
+  return query ? `?${query}` : '';
+};
 
-onMount(async () => {
-  axios.get(`/api/accounts`).then((res) => {
-    accounts = res.data;
-    setAccounts(accounts);
-  });
+const closeEntry = () => {
+  currentVoucher.set(null);
+  goto(`/voucher${filterQuery()}`);
+};
 
-  checkPage(location.href);
-
-})
+const applyFilters = (event) => {
+  const patch = event.detail || {};
+  const params = new URLSearchParams();
+  const merged = { ...filters, ...patch };
+  for (const [key, value] of Object.entries(merged)) {
+    if (value == null || value === '' || String(value) === '-1') continue;
+    params.set(key, String(value));
+  }
+  const query = params.toString();
+  goto(query ? `/voucher?${query}` : '/voucher', { keepFocus: true, noScroll: true });
+};
 
 afterUpdate(() => {
-  if  (!popUp)  {
+  if (!popUp) {
     modalCount += 1;
   }
-})
+});
 </script>
