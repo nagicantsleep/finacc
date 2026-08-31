@@ -8,6 +8,7 @@ import {
 } from '$lib/server/auth/index.js';
 import { json, redirect } from '@sveltejs/kit';
 import { respondFormPdf } from '$lib/server/form-pdf.js';
+import { GENERIC_ERROR_MESSAGE, NOT_FOUND_MESSAGE } from '$lib/errors.js';
 
 const PUBLIC_PATHS = ['/login', '/signup', '/api/user/login', '/api/user/signup', '/api/health'];
 
@@ -146,7 +147,7 @@ export async function handle({ event, resolve }) {
 export function handleError({ error, event, status, message }) {
   console.error('[handleError]', status, event.url.pathname, error?.message || error);
   if (status === 404) {
-    return { message: 'ページが見つかりません。' };
+    return { message: NOT_FOUND_MESSAGE, status: 404 };
   }
-  return { message: message || 'エラーが発生しました。' };
+  return { message: message || GENERIC_ERROR_MESSAGE, status };
 }

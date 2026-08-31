@@ -17,5 +17,5 @@
 </svelte:head>
 
 <div class="trial-balance-page container-fluid px-0">
-  <TrialBalanceView bind:status />
+  <TrialBalanceView bind:status initialReport={data.tb} />
 </div>

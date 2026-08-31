@@ -1,25 +1,44 @@
-import { redirect } from '@sveltejs/kit';
-import { calculateTrialBalance } from '$lib/server/accounting/trialBalance.js';
 import models from '$lib/server/db/index.js';
+import { trialBalanceV2 } from '$lib/server/reporting/trial-balance-v2.js';
+
+function parseCsv(v) {
+  if (v == null || v === '') return [];
+  return String(v)
+    .split(',')
+    .map((x) => x.trim())
+    .filter(Boolean);
+}
 
 /** @type {import('./$types').PageServerLoad} */
-export async function load({ locals, url }) {
-  if (!locals.user) throw redirect(303, '/login');
-  if (!locals.tenantId) throw redirect(303, '/logon');
+export async function load({ locals, url, parent, depends }) {
+  depends('app:trial-balance');
+  const { currentFy } = await parent();
 
-  const fiscalYears = await models.FiscalYear.findAll({
-    where: { tenantId: locals.tenantId },
-    order: [['term', 'DESC']]
-  });
+  const term = parseInt(url.searchParams.get('term') || currentFy?.term, 10);
+  const reportType = url.searchParams.get('reportType') || 'balance';
+  const month = url.searchParams.get('month') || null;
+  const hideZero = url.searchParams.get('hideZero') === 'true';
+  const accountClassIds = parseCsv(
+    url.searchParams.get('accountClassIds') || url.searchParams.get('class')
+  );
 
-  if (fiscalYears.length === 0) throw redirect(303, '/setup');
+  if (!Number.isFinite(term)) {
+    return { term: null, tb: { version: 2, meta: null, lines: [] } };
+  }
 
-  const term = parseInt(url.searchParams.get('term') || locals.term || fiscalYears[0].term.toString(), 10);
-  const data = await calculateTrialBalance(locals.tenantId, term);
+  const tb = await trialBalanceV2(
+    {
+      tenantId: locals.tenantId,
+      term,
+      reportType,
+      month,
+      accountClassIds,
+      hideZero,
+      includeUnapproved: false,
+      languagePair: null
+    },
+    models
+  );
 
-  return {
-    term,
-    fiscalYears: fiscalYears.map((f) => ({ term: f.term, year: f.year })),
-    ...data
-  };
+  return { term, tb };
 }

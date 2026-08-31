@@ -259,6 +259,7 @@
   import { LANG_MODES, languagePairQuery, pickDisplayName } from '$lib/shared/reporting/tb-language.js';
 
   export let status;
+  export let initialReport = null;
 
   const tabs = [
     { value: 'balance',  key: 'report_trial_balance' },
@@ -290,6 +291,19 @@
   let expanded = new Set(); // account codes currently expanded
   let drilldown;
   let drillAccount = null;  // { code, subCode, name } | null
+  let loadedFromServer = false;
+
+  const applyPayload = (data) => {
+    meta = data?.meta ?? null;
+    warnings = data?.meta?.warnings || [];
+    const sub = buildSubtotals(data?.lines || []);
+    rawLines = sub;
+    withParents = withAccountParents(sub);
+    mergeClassesFromLines(data?.lines);
+    expanded = new Set(
+      sub.filter((l) => l.type === 'subAccount' && l.code).map((l) => l.code)
+    );
+  };
 
   $: periodBounds = (() => {
     if (!status || !status.fy) return { from: null, to: null };
@@ -307,17 +321,19 @@
   }
 
   $: if ($currentPage && $currentPage !== lastFetched) {
+    const isFirstClientUrl = !lastFetched;
     syncFromUrl();
     lastFetched = $currentPage;
-    fetchData();
+    if (!(isFirstClientUrl && loadedFromServer)) fetchData();
   }
-  $: if (status && status.fy && status.fy.term && lastFetched && !loading && rawLines.length === 0 && !error) {
+  $: if (status && status.fy && status.fy.term && lastFetched && !loading && rawLines.length === 0 && !error && !loadedFromServer) {
     fetchData();
   }
 
   onMount(() => {
     syncFromUrl();
-    fetchData();
+    if (!lastFetched) lastFetched = $currentPage || '';
+    if (!loadedFromServer) fetchData();
   });
 
   const syncFromUrl = () => {
@@ -390,6 +406,11 @@
       );
     }
   };
+
+  if (initialReport && (initialReport.lines || initialReport.meta)) {
+    applyPayload(initialReport);
+    loadedFromServer = true;
+  }
 
   const refreshClassCatalog = async () => {
     if (!status?.fy?.term) return;
@@ -542,16 +563,7 @@
       if (lp) params.set('languagePair', JSON.stringify(lp));
       const url = `/api/trial-balance?${params.toString()}`;
       const r = await axios.get(url);
-      meta = r.data.meta;
-      warnings = r.data.meta?.warnings || [];
-      const sub = buildSubtotals(r.data.lines || []);
-      rawLines = sub;
-      withParents = withAccountParents(sub);
-      mergeClassesFromLines(r.data.lines);
-      expanded = new Set(
-        sub.filter((l) => l.type === 'subAccount' && l.code)
-           .map((l) => l.code)
-      );
+      applyPayload(r.data);
     } catch (e) {
       error = e?.response?.data?.error || e.message || 'fetch failed';
       rawLines = [];
@@ -592,13 +604,7 @@
       if (lp) params.set('languagePair', JSON.stringify(lp));
       const url = `/api/simulation/scenarios/${scenarioId}/trial-balance?${params.toString()}`;
       const r = await axios.get(url);
-      meta = r.data.meta;
-      warnings = r.data.meta?.warnings || [];
-      const sub = buildSubtotals(r.data.lines || []);
-      rawLines = sub;
-      withParents = withAccountParents(sub);
-      mergeClassesFromLines(r.data.lines);
-      expanded = new Set(sub.filter((l) => l.type === 'subAccount' && l.code).map((l) => l.code));
+      applyPayload(r.data);
     } catch (e) {
       error = e?.response?.data?.message || e.message || 'fetch failed';
       rawLines = []; withParents = []; meta = null; warnings = [];
