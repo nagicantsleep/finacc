@@ -1,6 +1,6 @@
 <div class="page-title d-flex justify-content-between">
   <h1 class="page-title-bilingual"><BilingualText key="ledger" inline={true} /></h1>
-  <a href="/forms/general-ledger/{status?.fy?.term || 1}?format=pdf" download="総勘定元帳-{today}.pdf" class="btn btn-primary btn-bilingual">
+  <a href={resolve(`/forms/general-ledger/${status?.fy?.term || 1}?format=pdf`)} download="総勘定元帳-{today}.pdf" class="btn btn-primary btn-bilingual">
     <BilingualText key="download_general_ledger" inline={true} /><i class="bi bi-download"></i>
   </a>
 </div>
@@ -55,7 +55,7 @@
           link(`/changes/${status?.fy?.term || 1}/${accountCode}/${subAccountCode}`);
         }}
         disabled={!subAccountCode}><BilingualText key="view_trends" inline={true} /></button>
-      <a href="/forms/subsidiary-ledger/{status?.fy?.term || 1}?format=pdf" download="補助元帳-{today}.pdf" class="btn btn-primary btn-bilingual">
+      <a href={resolve(`/forms/subsidiary-ledger/${status?.fy?.term || 1}?format=pdf`)} download="補助元帳-{today}.pdf" class="btn btn-primary btn-bilingual">
         <BilingualText key="download_sub_ledger" inline={true} /><i class="bi bi-download"></i>
       </a>
     </div>
@@ -81,7 +81,7 @@
   {status}
   {accounts}
   bind:popUp={popUp}
-  on:close={updateList} />
+  on:close={refresh} />
 {/key}
 {/if}
 
@@ -108,179 +108,108 @@
 
 <script>
 import axios from 'axios';
-import { onMount, afterUpdate } from 'svelte';
-import { page } from '$app/stores';
-import { goto } from '$app/navigation';
+import { onMount } from 'svelte';
+import { goto, invalidate } from '$app/navigation';
+import { resolve } from '$app/paths';
 import LedgerList from './ledger-list.svelte';
 import CrossSlipModal from '$lib/components/cross-slip/cross-slip-modal.svelte';
 import { ledgerLines } from '$lib/shared/ledger-lines.js';
 import AccountSelect from '$lib/components/AccountSelect.svelte';
-import SubAccountSelect from '$lib/components/AccountSelect.svelte';
+import SubAccountSelect from '$lib/components/SubAccountSelect.svelte';
 import { setAccounts } from '$lib/client/cross-slip.js';
 import parse_account_code from '$lib/shared/parse_account_code.js';
-import { bi, languagePair } from '$lib/i18n/bilingual.js';
 import BilingualText from '$lib/components/BilingualText.svelte';
 
 export let status = { fy: {} };
+export let accounts = [];
+export let account = null;
+export let remaining = null;
+export let details = [];
+export let accountCode = '1000000';
+export let subAccountCode = null;
 
 let modalCount = 0;
 let popUp = false;
-let accounts = [];
-let account;
-let details = [];
-let remaining = [];
 let slip = {
   year: 0,
   month: 0,
   lines: []
 };
-let pickup;
-let sums;
-let lines = [];
-let fields = [
-  {
-    titleKey: 'chart_assets',
-    accounts: []
-  },{
-    titleKey: 'chart_liabilities',
-    accounts: []
-  },{
-    titleKey: 'chart_net_assets',
-    accounts: []
-  },{
-    titleKey: 'chart_revenue',
-    accounts: []
-  },{
-    titleKey: 'chart_cost_of_sales',
-    accounts: []
-  },{
-    titleKey: 'chart_non_operating',
-    accounts: []
-  }
-];
 let today = '';
-let accountCode = '1000000';
-let subAccountCode;
+
+const emptyFields = () => [
+  { titleKey: 'chart_assets', accounts: [] },
+  { titleKey: 'chart_liabilities', accounts: [] },
+  { titleKey: 'chart_net_assets', accounts: [] },
+  { titleKey: 'chart_revenue', accounts: [] },
+  { titleKey: 'chart_cost_of_sales', accounts: [] },
+  { titleKey: 'chart_non_operating', accounts: [] }
+];
+
+function groupFields(list) {
+  const next = emptyFields();
+  for (let i = 0; i < (list || []).length; i++) {
+    const acc = list[i];
+    switch (parse_account_code.field(acc.code)) {
+      case '1':
+      case '2':
+        next[0].accounts.push(acc);
+        break;
+      case '3':
+      case '4':
+        next[1].accounts.push(acc);
+        break;
+      case '5':
+        next[2].accounts.push(acc);
+        break;
+      case '6':
+        next[3].accounts.push(acc);
+        break;
+      case '7':
+        next[4].accounts.push(acc);
+        break;
+      default:
+        next[5].accounts.push(acc);
+        break;
+    }
+  }
+  return next;
+}
+
+$: fields = groupFields(accounts);
+$: setAccounts(accounts || []);
+$: computed = ledgerLines(accountCode, subAccountCode, remaining || {}, details || []);
+$: lines = computed.lines || [];
+$: sums = computed.sums || {};
+$: pickup = computed.pickup;
 
 const link = (href) => {
-  goto(href, { keepFocus: true, noScroll: true });
+  goto(resolve(href), { keepFocus: true, noScroll: true });
 };
 
 const _link = (event) => {
   link(event.detail);
 };
 
-const lpQuery = () => {
-  const pair = $languagePair;
-  return `?languagePair=${encodeURIComponent(JSON.stringify(pair))}`;
-};
-
-$: if ($languagePair && accountCode) {
-  update(false);
-}
-
 const accountSelect = (code) => {
-  let href;
   if (code.sub) {
-    href = `/ledger/${code.code}/${code.sub}`;
+    link(`/ledger/${code.code}/${code.sub}`);
   } else {
-    href = `/ledger/${code.code}`;
-  }
-  accountCode = code.code;
-  subAccountCode = code.sub;
-  link(href);
-};
-
-const update = async (loadDetails) => {
-  if (!accountCode) return;
-  try {
-    const result = await axios.get(`/api/account/${accountCode}${lpQuery()}`);
-    account = result.data;
-    if (loadDetails && status?.fy?.term) {
-      const term = status.fy.term;
-      const remRes = await axios.get(subAccountCode ? `/api/remaining/${term}/${accountCode}/${subAccountCode}` : `/api/remaining/${term}/${accountCode}`);
-      remaining = remRes.data || [];
-      updateList();
-    }
-  } catch (e) {
-    console.error('ledger update error', e);
+    link(`/ledger/${code.code}`);
   }
 };
 
-const checkPage = (params) => {
-  accountCode = params?.accountCode || accountCode || '1000000';
-  subAccountCode = params?.subAccountCode ? parseInt(params.subAccountCode) : undefined;
-  update(true);
+const refresh = () => {
+  invalidate('app:ledger');
 };
 
-$: checkPage($page.params);
-
-onMount(async () => {
+onMount(() => {
   const now = new Date();
   today = `${now.getUTCFullYear()}${("00" + (now.getMonth() + 1)).slice(-2)}${("00" + now.getDate()).slice(-2)}`;
-
-  try {
-    const res = await axios.get(`/api/accounts${lpQuery()}`);
-    accounts = res.data || [];
-    setAccounts(accounts);
-    for (let i = 0; i < accounts.length; i++) {
-      const acc = accounts[i];
-      switch (parse_account_code.field(acc.code)) {
-        case '1':
-        case '2':
-          fields[0].accounts.push(acc);
-          break;
-        case '3':
-        case '4':
-          fields[1].accounts.push(acc);
-          break;
-        case '5':
-          fields[2].accounts.push(acc);
-          break;
-        case '6':
-          fields[3].accounts.push(acc);
-          break;
-        case '7':
-          fields[4].accounts.push(acc);
-          break;
-        default:
-          fields[5].accounts.push(acc);
-          break;
-      }
-    }
-    fields = fields;
-  } catch (e) {
-    console.error('accounts load error in ledger', e);
-  }
-
-  checkPage($page.params);
 });
-
-afterUpdate(() => {
-  if (!popUp) {
-    modalCount += 1;
-  }
-});
-
-const updateList = async () => {
-  if (!accountCode || !status?.fy?.term) return;
-  const term = status.fy.term;
-  try {
-    const pr = subAccountCode 
-      ? axios.get(`/api/ledger/${term}/${accountCode}/${subAccountCode}${lpQuery()}`)
-      : axios.get(`/api/ledger/${term}/${accountCode}${lpQuery()}`);
-    const result = await pr;
-    details = result.data || [];
-    const ret = ledgerLines(accountCode, subAccountCode, remaining, details);
-    lines = ret.lines || [];
-    sums = ret.sums || {};
-    pickup = ret.pickup;
-  } catch (e) {
-    console.error('ledger list update error', e);
-  }
-};
 
 const openSlip = (event) => {
+  modalCount += 1;
   const dataset = event.detail;
   if (dataset?.no) {
     axios.get(`/api/cross_slip/${dataset.year}/${dataset.month}/${dataset.no}`).then((result) => {

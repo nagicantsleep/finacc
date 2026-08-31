@@ -1,5 +1,33 @@
 import models from '$lib/server/db/index.js';
 
+export async function getAccountByCode(tenantId, accountCode) {
+  if (!accountCode || accountCode === 'undefined') {
+    return { accountCode: accountCode || '', name: '', subAccounts: [] };
+  }
+
+  const account = await models.Account.findOne({
+    where: {
+      tenantId,
+      accountCode
+    },
+    include: [
+      {
+        model: models.SubAccount,
+        as: 'subAccounts',
+        where: { tenantId },
+        required: false
+      }
+    ],
+    order: [[{ model: models.SubAccount, as: 'subAccounts' }, 'subAccountCode', 'ASC']]
+  });
+
+  if (!account) {
+    return { accountCode, name: '', subAccounts: [] };
+  }
+
+  return account.toJSON();
+}
+
 export async function listChartAccounts(tenantId) {
   const accounts = await models.Account.findAll({
     where: { tenantId },

@@ -8,5 +8,13 @@
 </svelte:head>
 
 <div class="page-container container-fluid px-0">
-  <Ledger status={{ user: data.user, fy: data.currentFy }} />
+  <Ledger
+    status={{ user: data.user, fy: data.currentFy }}
+    accounts={data.accounts}
+    account={data.account}
+    remaining={data.remaining}
+    details={data.details}
+    accountCode={data.accountCode}
+    subAccountCode={data.subAccountCode}
+  />
 </div>
