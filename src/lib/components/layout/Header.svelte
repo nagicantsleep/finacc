@@ -1,5 +1,5 @@
 <script>
-  import { onMount } from 'svelte';
+  import { onMount, tick } from 'svelte';
   import axios from 'axios';
   import { formatFiscalHeader, formatFiscalCompact, formatFiscalBadge } from '$lib/utils.js';
   import ProfileModal from '$lib/components/common/profile-modal.svelte';
@@ -16,6 +16,10 @@
   let profileModal;
   let switchingTenant = false;
   let creatingTenant = false;
+  let userMenuOpen = false;
+  let userMenuRoot;
+  let userMenuBtn;
+  let userMenuStyle = '';
 
   $: fyObj = currentFy ? {
     term: currentFy.term,
@@ -32,17 +36,21 @@
     tooltip: `${formatFiscalHeader(fyObj, $languagePair?.primary || 'ja')} / ${formatFiscalHeader(fyObj, $languagePair?.secondary || 'vi')}`
   };
 
-  const toggleSidebar = () => {
-    sidebarCollapsed.update((c) => !c);
+  const openSidebar = () => {
+    sidebarCollapsed.set(false);
   };
 
-  const openProfile = () => profileModal?.show();
+  const openProfile = () => {
+    closeUserMenu();
+    profileModal?.show();
+  };
 
   const onProfileUpdated = (event) => {
     user = { ...user, ...event.detail };
   };
 
   const openTenantCreate = async () => {
+    closeUserMenu();
     if (creatingTenant) return;
     const name = window.prompt($bi('nav_tenant_name_prompt'));
     if (!name?.trim()) return;
@@ -67,6 +75,7 @@
   };
 
   const switchTenantFromApp = async () => {
+    closeUserMenu();
     if (switchingTenant) return;
     switchingTenant = true;
     try {
@@ -81,19 +90,69 @@
       switchingTenant = false;
     }
   };
+
+  async function positionUserMenu() {
+    await tick();
+    if (!userMenuBtn) return;
+    const rect = userMenuBtn.getBoundingClientRect();
+    userMenuStyle = `top:${rect.bottom + 4}px;left:${rect.right}px;transform:translateX(-100%);`;
+  }
+
+  async function toggleUserMenu() {
+    userMenuOpen = !userMenuOpen;
+    if (userMenuOpen) {
+      await positionUserMenu();
+    }
+  }
+
+  function closeUserMenu() {
+    userMenuOpen = false;
+  }
+
+  function handleDocumentClick(event) {
+    if (userMenuOpen && userMenuRoot && !userMenuRoot.contains(event.target)) {
+      closeUserMenu();
+    }
+  }
+
+  function handleDocumentKeydown(event) {
+    if (userMenuOpen && event.key === 'Escape') {
+      closeUserMenu();
+    }
+  }
+
+  onMount(() => {
+    const reposition = () => {
+      if (userMenuOpen) positionUserMenu();
+    };
+
+    document.addEventListener('click', handleDocumentClick);
+    document.addEventListener('keydown', handleDocumentKeydown);
+    window.addEventListener('resize', reposition);
+    window.addEventListener('scroll', reposition, true);
+
+    return () => {
+      document.removeEventListener('click', handleDocumentClick);
+      document.removeEventListener('keydown', handleDocumentKeydown);
+      window.removeEventListener('resize', reposition);
+      window.removeEventListener('scroll', reposition, true);
+    };
+  });
 </script>
 
 <div class="topbar">
   <div class="brand-container {$sidebarCollapsed ? 'collapsed' : ''}">
-    <button
-      type="button"
-      class="btn btn-link text-light pushmenu-btn p-0 me-1"
-      on:click={toggleSidebar}
-      title="Toggle sidebar"
-      aria-label="Toggle sidebar"
-    >
-      <i class="bi bi-list fs-4"></i>
-    </button>
+    {#if $sidebarCollapsed}
+      <button
+        type="button"
+        class="btn btn-link mobile-sidebar-open-btn d-md-none p-0 me-1"
+        on:click={openSidebar}
+        title="Open sidebar"
+        aria-label="Open sidebar"
+      >
+        <i class="bi bi-layout-sidebar-inset" aria-hidden="true"></i>
+      </button>
+    {/if}
     <a href="/workspace" class="brand-link">
       <img src="/logo.png" alt="Logo" class="brand-image" />
       <span class="brand-text">Hieronymus</span>
@@ -136,52 +195,55 @@
         <li class="nav-item me-1 me-md-2">
           <LanguagePairSelector />
         </li>
-        <li class="nav-item dropdown">
-          <a
-            href="#"
-            class="nav-link dropdown-toggle user-menu-toggle text-light p-1 px-md-2"
-            data-bs-toggle="dropdown"
-            id="user_menu"
-            role="button"
-            aria-expanded="false"
+        <li class="nav-item user-menu-root" bind:this={userMenuRoot}>
+          <button
+            type="button"
+            class="nav-link user-menu-toggle text-light p-1 px-md-2 border-0 bg-transparent"
+            bind:this={userMenuBtn}
+            aria-haspopup="menu"
+            aria-expanded={userMenuOpen}
+            on:click|stopPropagation={toggleUserMenu}
           >
             <span class="user-avatar" aria-hidden="true" title={user.name}>
               {(user.name || '?').trim().charAt(0).toUpperCase()}
             </span>
             <span class="d-none d-lg-inline user-menu-name ms-1">{user.name || 'User'}</span>
-          </a>
-          <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="user_menu">
-            <li>
-              <a href="#" class="dropdown-item" on:click|preventDefault={openProfile}>
-                <i class="bi bi-person-circle me-2"></i>
-                <BilingualText key="profile" stacked={false} />
-              </a>
-            </li>
-            <li>
-              <a href="#" class="dropdown-item" on:click|preventDefault={openTenantCreate}>
-                <i class="bi bi-building-add me-2"></i>
-                <BilingualText key="create_tenant" stacked={false} />
-              </a>
-            </li>
-            <li>
-              <a href="#" class="dropdown-item" on:click|preventDefault={switchTenantFromApp}>
-                <i class="bi bi-arrow-left-right me-2"></i>
-                <BilingualText key="nav_tenant_switch" stacked={false} />
-                {#if switchingTenant}
-                  <span class="spinner-border spinner-border-sm ms-2" role="status" aria-hidden="true"></span>
-                {/if}
-              </a>
-            </li>
-            <li><hr class="dropdown-divider" /></li>
-            <li>
-              <form action="/logon?/logout" method="POST" class="d-block m-0 p-0">
-                <button type="submit" class="dropdown-item text-danger">
-                  <i class="bi bi-power me-2"></i>
-                  <BilingualText key="nav_sign_out" stacked={false} />
+            <i class="bi bi-chevron-down ms-1 user-menu-caret" aria-hidden="true"></i>
+          </button>
+          {#if userMenuOpen}
+            <ul class="user-menu-dropdown" style={userMenuStyle} role="menu" aria-labelledby="user_menu">
+              <li role="none">
+                <button type="button" class="dropdown-item" role="menuitem" on:click={openProfile}>
+                  <i class="bi bi-person-circle me-2"></i>
+                  <BilingualText key="profile" />
                 </button>
-              </form>
-            </li>
-          </ul>
+              </li>
+              <li role="none">
+                <button type="button" class="dropdown-item" role="menuitem" on:click={openTenantCreate}>
+                  <i class="bi bi-building-add me-2"></i>
+                  <BilingualText key="create_tenant" />
+                </button>
+              </li>
+              <li role="none">
+                <button type="button" class="dropdown-item" role="menuitem" on:click={switchTenantFromApp}>
+                  <i class="bi bi-arrow-left-right me-2"></i>
+                  <BilingualText key="nav_tenant_switch" />
+                  {#if switchingTenant}
+                    <span class="spinner-border spinner-border-sm ms-2" role="status" aria-hidden="true"></span>
+                  {/if}
+                </button>
+              </li>
+              <li role="separator"><hr class="dropdown-divider" /></li>
+              <li role="none">
+                <form action="/logon?/logout" method="POST" class="d-block m-0 p-0">
+                  <button type="submit" class="dropdown-item text-danger">
+                    <i class="bi bi-power me-2"></i>
+                    <BilingualText key="nav_sign_out" />
+                  </button>
+                </form>
+              </li>
+            </ul>
+          {/if}
         </li>
       </ul>
     </div>
@@ -189,3 +251,10 @@
 </div>
 
 <ProfileModal bind:this={profileModal} {user} on:updated={onProfileUpdated} />
+
+<style>
+  .user-menu-caret {
+    font-size: 0.7rem;
+    opacity: 0.85;
+  }
+</style>
