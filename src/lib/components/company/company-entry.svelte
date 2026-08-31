@@ -1,17 +1,20 @@
 <script>
 import axios from 'axios';
-import {onMount, beforeUpdate, afterUpdate, createEventDispatcher} from 'svelte';
-const dispatch = createEventDispatcher();
-import {currentCompany, getStore} from '$lib/client/current-record.js'
+import {beforeUpdate, createEventDispatcher} from 'svelte';
+import { goto, invalidate } from '$app/navigation';
+import {currentCompany} from '$lib/client/current-record.js'
 
 import CompanyInfo from './company-info.svelte';
 import OkModal from '$lib/components/common/OkModal.svelte';
 import BilingualText from '$lib/components/BilingualText.svelte';
 import { bi } from '$lib/i18n/bilingual.js';
 
+const dispatch = createEventDispatcher();
+
 export let status;
 export let company;
 export  let inline;
+export let companyClasses = [];
 
 let ok = true;
 let errorMessages = [];
@@ -137,14 +140,13 @@ const save = (event) => {
     }
     pr.then((result) => {
       if	( create )	{
-        console.log({result});
-        const id = result.data.id;
-        axios.get(`/api/company/${id}`).then((res) => {
-          company = res.data.company;
-          currentCompany.set(company);
-          window.history.replaceState(
-            status, "", `/company/entry/${id}`);
-        })
+        const id = result.data.id ?? result.data.company?.id;
+        if (id) {
+          currentCompany.set(result.data.company || company);
+          goto(`/company/entry/${id}`);
+        }
+      } else {
+        invalidate('app:company');
       }
     });
   } catch(e) {
@@ -207,8 +209,8 @@ const delete_ = (event) => {
         </div>
         {/if}
         <CompanyInfo
-        	bind:status={status}
-        	bind:company={company}></CompanyInfo>
+        	bind:company={company}
+          companyClasses={companyClasses}></CompanyInfo>
       </div>
       <div class="footer">
         <button type="button" class="btn btn-secondary"

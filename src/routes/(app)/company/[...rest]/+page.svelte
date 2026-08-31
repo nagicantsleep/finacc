@@ -8,7 +8,8 @@
     fy: data.currentFy,
     tenant: data.tenant,
     current: 'company',
-    pathname: '/company'
+    pathname: '/company',
+    state: data.viewState || 'list'
   };
 </script>
 
@@ -17,5 +18,12 @@
 </svelte:head>
 
 <div class="company-page container-fluid px-0">
-  <CompanyView bind:status />
+  <CompanyView
+    bind:status
+    companies={data.companies}
+    companyClasses={data.companyClasses}
+    selectedCompany={data.selectedCompany}
+    viewState={data.viewState}
+    kind={data.kind}
+  />
 </div>

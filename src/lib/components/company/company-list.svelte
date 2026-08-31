@@ -27,14 +27,13 @@
         <td>
           <select class="form-select" id="kind"
             on:input={(event) => {
-              let value = parseInt(event.currentTarget.value);
-              status.params.set('kind', value);
-              const param = buildParam(status, {});
-              link(`${(typeof location !== 'undefined' ? location.pathname : '')}?${param}`);
+              const value = parseInt(event.currentTarget.value, 10);
+              const href = Number.isFinite(value) && value > 0 ? `/company?kind=${value}` : '/company';
+              goto(href, { keepFocus: true, noScroll: true });
             }}
-            value={status.params ? parseInt(status.params.get('kind')) : -1}>
+            value={kind}>
             <option value={-1}><BilingualText key="all" /></option>
-            {#each companyClasses as ent}
+            {#each companyClasses as ent (ent.id)}
             <option value={ent.id}>{ent.name}</option>
             {/each}
           </select>
@@ -45,7 +44,7 @@
         <td></td>
         <td></td>
       </tr>
-      {#each companies as line}
+      {#each companies as line (line.id)}
       <tr class="fontsize-12pt">
         <td>
           <button type="button" class="btn btn-link"
@@ -102,74 +101,26 @@ th {
 </style>
 
 <script>
-import axios from 'axios';
-import {onMount, beforeUpdate, afterUpdate, createEventDispatcher} from 'svelte';
-const dispatch = createEventDispatcher();
-import { buildParam, parseParams } from '$lib/client/params.js';
-import { link } from '$lib/client/router.js';
+import { createEventDispatcher } from 'svelte';
+import { goto } from '$app/navigation';
 
 import BilingualText from '$lib/components/BilingualText.svelte';
 import { bi } from '$lib/i18n/bilingual.js';
-export let status;
-export let companies;
 
-let companyClasses = [];
-let prevParamsString = null;
+const dispatch = createEventDispatcher();
 
-const paramsToString = (params) => {
-  if (!params) return '';
-  const array = [];
-  params.forEach((value, key) => {
-    array.push(`${key}=${value}`);
-  });
-  return array.sort().join('&');
-}
-
-beforeUpdate(() => {
-  const newParamsString = paramsToString(status.params);
-  if (newParamsString !== prevParamsString) {
-    prevParamsString = newParamsString;
-    updateCompanys();
-  }
-});
-
-const updateCompanys = () => {
-  let param = buildParam(status, undefined);
-
-  axios.get(`/api/company?${param}`).then((result) => {
-    companies = result.data.companies;
-  }).catch(err => {
-    console.error('[LIST] axios.get failed:', err);
-    companies = [];
-  });
-};
+export let companies = [];
+export let companyClasses = [];
+export let kind = -1;
 
 const openCompany = (event) => {
-  let	company;
-  if  ( event ) {
-    let id = event.target.dataset.no;
-
-    //console.log('openCompany', id);
-    //console.log('companies', companies);
-
-    for ( let i = 0; i < companies.length; i ++ ) {
-      if ( companies[i].id == id ) {
-        company = companies[i];
-        break;
-      }
-    }
+  let company;
+  if (event) {
+    const id = event.currentTarget.dataset.no;
+    company = companies.find((row) => String(row.id) === String(id));
   } else {
     company = {};
   }
   dispatch('open', company);
-}
-
-onMount(() => {
-  console.log('company-list onMount');
-  prevParamsString = paramsToString(status.params);
-  updateCompanys();
-  axios.get(`/api/company/kinds`).then((result) => {
-    companyClasses = result.data.values;
-  });
-})
+};
 </script>

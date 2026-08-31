@@ -1,33 +1,44 @@
-import { fail, redirect } from '@sveltejs/kit';
+import { error, fail, redirect } from '@sveltejs/kit';
+import { NOT_FOUND_MESSAGE } from '$lib/errors.js';
+import {
+  getCompanyById,
+  listCompanies,
+  listCompanyClasses,
+  parseCompanyView
+} from '$lib/server/accounting/company-list.js';
 import models from '$lib/server/db/index.js';
 
 /** @type {import('./$types').PageServerLoad} */
-export async function load({ locals }) {
+export async function load({ locals, url, params, depends }) {
+  depends('app:company');
   if (!locals.user) throw redirect(303, '/login');
   if (!locals.tenantId) throw redirect(303, '/logon');
 
-  const companies = await models.Company.findAll({
-    where: { tenantId: locals.tenantId },
-    include: [{ model: models.CompanyClass, as: 'companyClass' }],
-    order: [['id', 'ASC']]
-  });
+  const { viewState, entryId, kind } = parseCompanyView(params.rest, url.searchParams);
+  if (!viewState || (viewState === 'entry' && !entryId)) {
+    throw error(404, NOT_FOUND_MESSAGE);
+  }
 
-  const companyClasses = await models.CompanyClass.findAll({
-    where: { tenantId: locals.tenantId },
-    order: [['displayOrder', 'ASC']]
-  });
+  const [companies, companyClasses, selectedCompany] = await Promise.all([
+    viewState === 'list'
+      ? listCompanies(locals.tenantId, { kind })
+      : Promise.resolve([]),
+    listCompanyClasses(locals.tenantId),
+    viewState === 'entry'
+      ? getCompanyById(locals.tenantId, entryId)
+      : Promise.resolve(viewState === 'new' ? {} : null)
+  ]);
+
+  if (viewState === 'entry' && !selectedCompany) {
+    throw error(404, NOT_FOUND_MESSAGE);
+  }
 
   return {
-    companies: companies.map((c) => ({
-      id: c.id,
-      name: c.name,
-      chargeName: c.chargeName || '',
-      className: c.companyClass?.name || '未分類'
-    })),
-    companyClasses: companyClasses.map((cls) => ({
-      id: cls.id,
-      name: cls.name
-    }))
+    companies,
+    companyClasses,
+    selectedCompany,
+    viewState,
+    kind
   };
 }
 

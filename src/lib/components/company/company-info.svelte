@@ -4,7 +4,7 @@
     <label for="name" class="col-2 col-form-label"><BilingualText key="company_class" /></label>
     <div class="col-sm-10">
       <select class="form-control" id="type" bind:value={company.companyClassId}>
-        {#each companyClasses as companyClass }
+        {#each companyClasses as companyClass (companyClass.id)}
         <option value={companyClass.id}>{companyClass.name}</option>
         {/each}
       </select>
@@ -134,22 +134,16 @@
 </style>
 <script>
 import axios from 'axios';
-import {onMount, beforeUpdate, afterUpdate, createEventDispatcher} from 'svelte';
+import {onMount} from 'svelte';
 
 import BilingualText from '$lib/components/BilingualText.svelte';
-export let status;
 export let	company;
-
-let companyClasses = [];
+export let companyClasses = [];
 
 onMount(() => {
-  console.log('company-list onMount');
+  if (companyClasses.length > 0) return;
   axios.get(`/api/company/kinds`).then((result) => {
-    companyClasses = result.data.values;
+    companyClasses = result.data.values || [];
   });
 })
-
-beforeUpdate(() => {
-
-});
 </script>

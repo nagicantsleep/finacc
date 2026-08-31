@@ -1,17 +1,14 @@
 import { json } from '@sveltejs/kit';
+import { listCompanies } from '$lib/server/accounting/company-list.js';
 import models from '$lib/server/db/index.js';
 
-export async function GET({ locals }) {
+export async function GET({ locals, url }) {
   if (!locals.user || !locals.tenantId) {
     return json({ result: 'NG', message: 'Unauthorized' }, { status: 401 });
   }
 
-  const companies = await models.Company.findAll({
-    where: { tenantId: locals.tenantId },
-    include: [{ model: models.CompanyClass, as: 'companyClass' }],
-    order: [['id', 'ASC']]
-  });
-
+  const kind = parseInt(url.searchParams.get('kind') || '-1', 10);
+  const companies = await listCompanies(locals.tenantId, { kind });
   return json({ result: 'OK', companies });
 }
 
