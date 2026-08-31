@@ -9,25 +9,21 @@
           <LanguagePairSelector save={false} tone="card" />
         </div>
         <p class="fs-4 text-center"><BilingualText key="signup_heading" /></p>
-        
-        {#if successMessage}
-          <div class="alert alert-success text-center" role="alert">
-            <i class="bi bi-check-circle me-2"></i>
-            {successMessage}
-          </div>
-        {:else}
-          {#if message}
-            <p class="text-{msg_type} text-center">{message}</p>
-          {/if}
-          
+
+        {#if message}
+          <p class="text-{msg_type} text-center">{message}</p>
+        {/if}
+
+        <form method="POST" on:submit={onSubmit} use:enhance={handleEnhance}>
           <fieldset class="mb-3">
             <legend class="fieldset-legend"><BilingualText key="login_info" inline /> <span class="text-danger">*</span></legend>
-            
+
             <div class="mb-3">
               <label for="user_name"><BilingualText key="username" inline /> <span class="text-danger">*</span></label>
-              <input 
-                type="text" 
+              <input
+                type="text"
                 id="user_name"
+                name="username"
                 bind:value={user_name}
                 class="form-control"
                 class:is-invalid={errors.user_name}
@@ -40,12 +36,13 @@
                 <div class="invalid-feedback">{errors.user_name}</div>
               {/if}
             </div>
-            
+
             <div class="mb-3">
               <label for="password"><BilingualText key="password" inline /> <span class="text-danger">*</span></label>
-              <input 
-                type="password" 
+              <input
+                type="password"
                 id="password"
+                name="password"
                 bind:value={password}
                 class="form-control"
                 class:is-invalid={errors.password}
@@ -58,12 +55,13 @@
                 <div class="invalid-feedback">{errors.password}</div>
               {/if}
             </div>
-            
+
             <div class="mb-3">
               <label for="confirmPassword"><BilingualText key="password_confirm" inline /> <span class="text-danger">*</span></label>
-              <input 
-                type="password" 
+              <input
+                type="password"
                 id="confirmPassword"
+                name="confirmPassword"
                 bind:value={confirmPassword}
                 class="form-control"
                 class:is-invalid={errors.confirmPassword}
@@ -76,15 +74,16 @@
               {/if}
             </div>
           </fieldset>
-          
+
           <fieldset class="mb-3">
             <legend class="fieldset-legend"><BilingualText key="basic_info" inline /> <span class="text-danger">*</span></legend>
-            
+
             <div class="mb-3">
               <label for="legalName"><BilingualText key="member_name" inline /> <span class="text-danger">*</span></label>
-              <input 
-                type="text" 
+              <input
+                type="text"
                 id="legalName"
+                name="legalName"
                 bind:value={legalName}
                 class="form-control"
                 class:is-invalid={errors.legalName}
@@ -96,12 +95,13 @@
                 <div class="invalid-feedback">{errors.legalName}</div>
               {/if}
             </div>
-            
+
             <div class="mb-3">
               <label for="legalRuby"><BilingualText key="full_name_ruby" /></label>
-              <input 
-                type="text" 
+              <input
+                type="text"
                 id="legalRuby"
+                name="legalRuby"
                 bind:value={legalRuby}
                 class="form-control"
                 placeholder={$bi('furigana_placeholder')}
@@ -109,12 +109,13 @@
                 disabled={isSubmitting}
               >
             </div>
-            
+
             <div class="mb-3">
               <label for="email"><BilingualText key="email" inline /> <span class="text-danger">*</span></label>
-              <input 
-                type="email" 
+              <input
+                type="email"
                 id="email"
+                name="email"
                 bind:value={email}
                 class="form-control"
                 class:is-invalid={errors.email}
@@ -126,13 +127,14 @@
                 <div class="invalid-feedback">{errors.email}</div>
               {/if}
             </div>
-            
+
             <div class="row mb-3">
               <div class="col-6">
                 <label for="birthDate"><BilingualText key="birth_date" /></label>
-                <input 
-                  type="date" 
+                <input
+                  type="date"
                   id="birthDate"
+                  name="birthDate"
                   bind:value={birthDate}
                   class="form-control"
                   autocomplete="bday"
@@ -141,8 +143,9 @@
               </div>
               <div class="col-6">
                 <label for="legalSex"><BilingualText key="gender" /></label>
-                <select 
+                <select
                   id="legalSex"
+                  name="legalSex"
                   bind:value={legalSex}
                   class="form-select"
                   autocomplete="sex"
@@ -155,12 +158,13 @@
                 </select>
               </div>
             </div>
-            
+
             <div class="mb-3">
               <label for="telNo"><BilingualText key="tel" /></label>
-              <input 
-                type="tel" 
+              <input
+                type="tel"
                 id="telNo"
+                name="telNo"
                 bind:value={telNo}
                 class="form-control"
                 placeholder="090-1234-5678"
@@ -168,12 +172,13 @@
                 disabled={isSubmitting}
               >
             </div>
-            
+
             <div class="mb-3">
               <label for="zip"><BilingualText key="zip_code" /></label>
-              <input 
-                type="text" 
+              <input
+                type="text"
                 id="zip"
+                name="zip"
                 bind:value={zip}
                 class="form-control"
                 placeholder="123-4567"
@@ -181,12 +186,13 @@
                 disabled={isSubmitting}
               >
             </div>
-            
+
             <div class="mb-3">
               <label for="address1"><BilingualText key="address1" /></label>
-              <input 
-                type="text" 
+              <input
+                type="text"
                 id="address1"
+                name="address1"
                 bind:value={address1}
                 class="form-control"
                 placeholder={$bi('address_placeholder')}
@@ -194,12 +200,13 @@
                 disabled={isSubmitting}
               >
             </div>
-            
+
             <div class="mb-3">
               <label for="address2"><BilingualText key="address2" /></label>
-              <input 
-                type="text" 
+              <input
+                type="text"
                 id="address2"
+                name="address2"
                 bind:value={address2}
                 class="form-control"
                 placeholder={$bi('address2_placeholder')}
@@ -208,96 +215,66 @@
               >
             </div>
           </fieldset>
-          
+
           <div class="row d-flex justify-content-center">
             <div class="col-lg-8 col-12 d-grid">
-              <button 
-                type="submit" 
-                class="btn btn-primary mb-2"
-                on:click={SignUp}
-                disabled={isSubmitting}
-              >
+              <button type="submit" class="btn btn-primary mb-2" disabled={isSubmitting}>
                 {#if isSubmitting}
                   <span class="spinner-border spinner-border-sm me-2"></span>
                 {/if}
                 <BilingualText key="register" />
               </button>
-              <a on:click|preventDefault={change} href="#" class="text-center"><BilingualText key="login_here" /></a>
+              <a href={resolve('/login')} class="text-center"><BilingualText key="login_here" /></a>
             </div>
           </div>
-        {/if}
+        </form>
       </div>
     </div>
   </div>
 </div>
 
 <script>
-import axios from 'axios';
-import {onMount} from 'svelte';
-import {get} from 'svelte/store';
-import { link } from '$lib/client/router.js';
+import { enhance } from '$app/forms';
+import { resolve } from '$app/paths';
+import { get } from 'svelte/store';
 import BilingualText from '$lib/components/BilingualText.svelte';
-import { bi, _b } from '$lib/i18n/bilingual.js';
+import { bi } from '$lib/i18n/bilingual.js';
 import LanguagePairSelector from '../widgets/language-pair-selector.svelte';
 
-// Option text can't host a component; build "primary / secondary" strings reactively.
-$: biFn = $bi;
+export let form = null;
+
 $: selectPleaseText = $bi('select_please');
 $: genderMaleText = $bi('gender_male');
 $: genderFemaleText = $bi('gender_female');
 $: genderOtherText = $bi('gender_other');
 
-// Login credentials
-let user_name = '';
+let user_name = form?.username || '';
 let password = '';
 let confirmPassword = '';
+let legalName = form?.legalName || '';
+let legalRuby = form?.legalRuby || '';
+let email = form?.email || '';
+let birthDate = form?.birthDate || '';
+let legalSex = form?.legalSex || '';
+let telNo = form?.telNo || '';
+let zip = form?.zip || '';
+let address1 = form?.address1 || '';
+let address2 = form?.address2 || '';
 
-// Identity
-let legalName = '';
-let legalRuby = '';
-let email = '';
-
-// Optional
-let birthDate = '';
-let legalSex = '';
-let telNo = '';
-let zip = '';
-let address1 = '';
-let address2 = '';
-
-// UI state
-let message = '';
-let msg_type = '';
-let successMessage = '';
+let message = form?.error || '';
+let msg_type = form?.error ? 'danger' : '';
 let isSubmitting = false;
 let errors = {};
 
-onMount(() => {
-  resetForm();
-});
-
-function resetForm() {
-  user_name = '';
-  password = '';
-  confirmPassword = '';
-  legalName = '';
-  legalRuby = '';
-  email = '';
-  birthDate = '';
-  legalSex = '';
-  telNo = '';
-  zip = '';
-  address1 = '';
-  address2 = '';
-  message = '';
-  successMessage = '';
-  errors = {};
+$: if (form?.error) {
+  message = form.error;
+  msg_type = 'danger';
 }
 
 function validateForm() {
   errors = {};
   let isValid = true;
-  
+
   if (!user_name || user_name.trim().length === 0) {
     errors.user_name = get(bi)('signup_error_username_required');
     isValid = false;
@@ -334,75 +311,30 @@ function validateForm() {
     errors.email = get(bi)('signup_error_email_invalid');
     isValid = false;
   }
-  
+
   return isValid;
 }
 
-const change = () => {
-  link('/login');
-}
-
-const SignUp = async () => {
+const onSubmit = (event) => {
   message = '';
-  successMessage = '';
-  
   if (!validateForm()) {
+    event.preventDefault();
     msg_type = 'danger';
     message = get(bi)('signup_validation_prompt');
-    return;
   }
-  
+};
+
+const handleEnhance = () => {
   isSubmitting = true;
-  
-  try {
-    const payload = {
-      user_name: user_name.trim(),
-      password: password,
-      legalName: legalName.trim(),
-      email: email.trim()
-    };
-    
-    if (legalRuby && legalRuby.trim()) {
-      payload.legalRuby = legalRuby.trim();
-    }
-    if (birthDate) {
-      payload.birthDate = birthDate;
-    }
-    if (legalSex) {
-      payload.legalSex = parseInt(legalSex, 10);
-    }
-    if (telNo && telNo.trim()) {
-      payload.telNo = telNo.trim();
-    }
-    if (zip && zip.trim()) {
-      payload.zip = zip.trim();
-    }
-    if (address1 && address1.trim()) {
-      payload.address1 = address1.trim();
-    }
-    if (address2 && address2.trim()) {
-      payload.address2 = address2.trim();
-    }
-    
-    const response = await axios.post('/api/user/signup', payload);
-    
-    if (response.data.result === 'OK') {
-      successMessage = get(bi)('signup_register_success');
-      setTimeout(() => {
-        link('/login');
-      }, 2000);
-    } else {
-      message = response.data.message || get(bi)('signup_register_fail');
-      msg_type = 'danger';
+  return async ({ result, update }) => {
+    if (result.type === 'failure') {
       isSubmitting = false;
+      message = result.data?.error || get(bi)('login_error_occurred');
+      msg_type = 'danger';
     }
-  } catch (err) {
-    console.error('signup error', err);
-    message = err.response?.data?.message || get(bi)('login_error_occurred');
-    msg_type = 'danger';
-    isSubmitting = false;
-  }
-}
+    await update();
+  };
+};
 </script>
 
 <style>
@@ -410,20 +342,20 @@ const SignUp = async () => {
     width: 100%;
     max-width: 480px;
   }
-  
+
   @media (min-width: 600px) {
     .signup-box {
       width: 480px;
     }
   }
-  
+
   @media (max-width: 599px) {
     .signup-box {
       width: 95%;
       max-width: none;
     }
   }
-  
+
   .fieldset-legend {
     font-size: 0.95rem;
     font-weight: 600;
@@ -432,22 +364,18 @@ const SignUp = async () => {
     padding-bottom: 0.5rem;
     margin-bottom: 1rem;
   }
-  
+
   fieldset {
     border: none;
     padding: 0;
     margin: 0;
   }
-  
+
   .form-text {
     font-size: 0.8rem;
   }
-  
+
   .invalid-feedback {
     display: block;
-  }
-  
-  .alert-success {
-    margin-bottom: 1rem;
   }
 </style>

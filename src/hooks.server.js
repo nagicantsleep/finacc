@@ -141,3 +141,12 @@ export async function handle({ event, resolve }) {
 
   return resolve(event);
 }
+
+/** @type {import('@sveltejs/kit').HandleServerError} */
+export function handleError({ error, event, status, message }) {
+  console.error('[handleError]', status, event.url.pathname, error?.message || error);
+  if (status === 404) {
+    return { message: 'ページが見つかりません。' };
+  }
+  return { message: message || 'エラーが発生しました。' };
+}
