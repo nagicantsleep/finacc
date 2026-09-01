@@ -40,7 +40,7 @@
 
 <div class="mt-4">
   <button type="button" class="btn btn-danger" on:click={remove} disabled={!project.id}><BilingualText key="delete" /></button>
-  <button type="button" class="btn btn-secondary" on:click={() => history.back()}><BilingualText key="back" /></button>
+  <button type="button" class="btn btn-secondary" on:click={back}><BilingualText key="back" /></button>
   <button type="button" class="btn btn-info" on:click={openLabelSettings} disabled={!project.id}><BilingualText key="summary_settings" /></button>
   <button type="button" class="btn btn-info" on:click={openSummary} disabled={!project.id}><BilingualText key="summary_view" /></button>
   <button type="button" class="btn btn-primary" on:click={save}><BilingualText key="save" /></button>
@@ -49,6 +49,7 @@
 <script>
   import axios from 'axios';
   import { createEventDispatcher } from 'svelte';
+  import { goto, invalidate } from '$app/navigation';
   import { link } from '$lib/client/router.js';
   import { currentProject } from '$lib/client/current-record.js';
   import BilingualText from '$lib/components/BilingualText.svelte';
@@ -56,11 +57,13 @@
 
   const dispatch = createEventDispatcher();
 
+  export let status;
   export let project;
 
   const save = async () => {
     try {
       let response;
+      const create = !project.id;
       if (project.id) {
         response = await axios.put(`/api/project/${project.id}`, project);
       } else {
@@ -68,8 +71,12 @@
       }
       project = response.data;
       currentProject.set(project);
-      dispatch('close');
-      history.back();
+      if (create) {
+        goto(`/project/entry/${project.id}`);
+      } else {
+        await invalidate('app:project');
+        dispatch('close');
+      }
     } catch (err) {
       console.error("プロジェクトの保存に失敗しました:", err);
       alert($bi('error_save_project'));
@@ -83,11 +90,15 @@
     try {
       await axios.delete(`/api/project/${project.id}`);
       dispatch('close');
-      history.back(); // 削除後に戻る
     } catch (err) {
       console.error("プロジェクトの削除に失敗しました:", err);
       alert($bi('error_delete_project'));
     }
+  };
+
+  const back = () => {
+    currentProject.set(null);
+    dispatch('close');
   };
 
   const openSummary = () => {

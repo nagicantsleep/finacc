@@ -18,7 +18,7 @@
       </tr>
     </thead>
     <tbody>
-      {#each projects as line}
+      {#each projects as line (line.id)}
       <tr class="fontsize-12pt">
         <td>
           <button type="button" class="btn btn-link"
@@ -68,52 +68,27 @@ th {
 </style>
 
 <script>
-import axios from 'axios';
-import {onMount, beforeUpdate, afterUpdate, createEventDispatcher} from 'svelte';
-const dispatch = createEventDispatcher();
-import { buildParam, parseParams } from '$lib/client/params.js';
+import { createEventDispatcher } from 'svelte';
 import { link } from '$lib/client/router.js';
-
 import BilingualText from '$lib/components/BilingualText.svelte';
-export let status;
-export let projects;
 
-const updateProjects = (_params) => {
-  let param = buildParam(status, _params);
-  axios.get(`/api/projects?${param}`).then((result) => {
-    projects = result.data;
-  });
-  if	( _params )	{
-    window.history.pushState(
-        status, "", `${(typeof location !== 'undefined' ? location.pathname : '')}?${param}`);
-  }
-};
+const dispatch = createEventDispatcher();
+
+export let status;
+export let projects = [];
 
 const openProject = (event) => {
-  let	project;
-  if  ( event ) {
-    let id = event.target.dataset.no;
-    for ( let i = 0; i < projects.length; i ++ ) {
-      if ( projects[i].id == id ) {
-        project = projects[i];
-        break;
-      }
-    }
+  let project;
+  if (event) {
+    const id = event.target.dataset.no;
+    project = projects.find((line) => String(line.id) === String(id));
   } else {
     project = {};
   }
   dispatch('open', project);
-}
+};
 
 const openSummary = (project) => {
   link(`/project/summary/${project.id}`);
-}
-
-onMount(() => {
-  console.log('project-list onMount');
-  status.params = parseParams();
-  updateProjects();
-})
-beforeUpdate(() => {
-});
+};
 </script>

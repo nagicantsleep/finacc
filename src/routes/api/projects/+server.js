@@ -1,15 +1,10 @@
 import { json } from '@sveltejs/kit';
-import models from '$lib/server/db/index.js';
+import { listProjects } from '$lib/server/master/project-api.js';
 
 export async function GET({ locals }) {
   if (!locals.user || !locals.tenantId) {
     return json([], { status: 401 });
   }
 
-  const projects = await models.Project.findAll({
-    where: { tenantId: locals.tenantId },
-    order: [['id', 'ASC']]
-  });
-
-  return json(projects.map((p) => p.toJSON()));
+  return json(await listProjects(locals.tenantId));
 }

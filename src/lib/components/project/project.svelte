@@ -1,107 +1,65 @@
-{#if ( status.state === 'list' )}
-<ProjectList
-	bind:status={status}
-  bind:projects={projects}
-  on:open={openEntry}></ProjectList>
-{:else if ( status.state === 'home')}
-<ProjectHome
-  bind:status={status}
-></ProjectHome>
-{:else if ( status.state === 'labels')}
-<ProjectLabels
-  bind:status={status}
-></ProjectLabels>
-{:else if ( status.state === 'settings')}
-<ProjectLabelSettings
-  bind:status={status}
-></ProjectLabelSettings>
-{:else if ( status.state === 'summary' )}
-<ProjectSummary
-  bind:status={status}
-></ProjectSummary>
-{:else}
-  {#if (status.state === 'entry' && project && project.id) || (status.state === 'new' && project)}
-  <ProjectEntry
-	  bind:status={status}
-	  bind:project={project}
-    on:close={closeEntry}></ProjectEntry>
-  {/if}
+{#if viewState === 'list'}
+  <ProjectList
+    bind:status={status}
+    projects={projects}
+    on:open={openEntry}
+  ></ProjectList>
+{:else if viewState === 'home'}
+  <ProjectHome bind:status={status}></ProjectHome>
+{:else if viewState === 'labels'}
+  {#await import('./project-labels.svelte') then { default: ProjectLabels }}
+    <ProjectLabels bind:status={status}></ProjectLabels>
+  {/await}
+{:else if viewState === 'settings'}
+  {#await import('./project-label-settings.svelte') then { default: ProjectLabelSettings }}
+    <ProjectLabelSettings bind:status={status}></ProjectLabelSettings>
+  {/await}
+{:else if viewState === 'summary'}
+  {#await import('./project-summary.svelte') then { default: ProjectSummary }}
+    <ProjectSummary bind:status={status} initialProjects={projects}></ProjectSummary>
+  {/await}
+{:else if (viewState === 'entry' && project && project.id) || (viewState === 'new' && project)}
+  {#await import('./project-entry.svelte') then { default: ProjectEntry }}
+    <ProjectEntry
+      bind:status={status}
+      bind:project={project}
+      on:close={closeEntry}
+    ></ProjectEntry>
+  {/await}
 {/if}
 
-<style>
-</style>
-
 <script>
-import axios from 'axios';
-import {onMount, beforeUpdate, afterUpdate, createEventDispatcher} from 'svelte';
-import ProjectEntry from './project-entry.svelte';
+import { goto } from '$app/navigation';
 import ProjectList from './project-list.svelte';
-import {currentProject, getStore} from '$lib/client/current-record.js'
 import ProjectHome from './project-home.svelte';
-import ProjectLabels from './project-labels.svelte';
-import ProjectLabelSettings from './project-label-settings.svelte';
-import ProjectSummary from './project-summary.svelte'; // インポートを追加
-import { link, currentPage } from '$lib/client/router.js';
+import { currentProject } from '$lib/client/current-record.js';
+import { link } from '$lib/client/router.js';
 
 export let status;
+export let projects = [];
+export let selectedProject = null;
+export let viewState = 'list';
+export let resourceId = null;
 
-let	project;
-let projects = [];
+let project = selectedProject;
 
-$: checkPage($currentPage);
-
-const checkPage = (page) => {
-  page = page || (typeof location !== 'undefined' ? location.pathname : '');
-  const args = page.split('/');
-  status.state = args[2] || 'list';
-  
-  // summaryの場合は、URLから直接パラメータをstatusに設定
-  if (status.state === 'summary') {
-    status.id = parseInt(args[3], 10);
-    // クエリパラメータはProjectSummaryコンポーネント自身が処理する
-  } else {
-    status.id = args[3];
-  }
-
-  switch  (status.state) {
-  case  'home':
-  case  'labels':
-  case  'settings':
-  case  'summary':
-    break;
-  case  'entry':
-    if (!project || project.id != args[3]) { // projectが空か、違うIDのデータを持っている場合
-      axios.get(`/api/project/${args[3]}`).then((result) => {
-        project = result.data;
-        currentProject.set(project)
-      });
-    }
-    break;
-  case  'new':
-    project = {}; // 常に新しいオブジェクトを作成
-    currentProject.set(project);
-    break;
-  default:
-    break;
-  }
+$: project = selectedProject;
+$: if (status) {
+  status.state = viewState;
+  status.id = resourceId;
 }
 
-const	openEntry = (event)	=> {
-  console.log('open', event.detail);
-  const project_data = event.detail;
-  if ( !project_data || !project_data.id )	{
+const openEntry = (event) => {
+  const projectData = event.detail;
+  if (!projectData || !projectData.id) {
     link('/project/new');
   } else {
-    link(`/project/entry/${project_data.id}`);
+    link(`/project/entry/${projectData.id}`);
   }
 };
 
-const closeEntry = (event) => {
-  link('/project');
-}
-
-onMount(() => {
-  checkPage($currentPage);
-})
-
+const closeEntry = () => {
+  currentProject.set(null);
+  goto('/project');
+};
 </script>

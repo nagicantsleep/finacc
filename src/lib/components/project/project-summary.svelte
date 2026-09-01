@@ -69,8 +69,9 @@
   );
 
   export let status;
+  export let initialProjects = [];
 
-  let projects = [];
+  let projects = initialProjects;
   let terms = []; // term解決のために必要
   let selectedProjectId = null;
   let selectedFrom = null;
@@ -194,10 +195,13 @@
 
   // --- 初期化 ---
   onMount(async () => {
-    await Promise.all([
-      axios.get('/api/projects').then(res => { projects = res.data; }),
-      axios.get('/api/term').then(res => { terms = res.data; })
-    ]);
+    if (projects.length === 0) {
+      const projectsRes = await axios.get('/api/projects');
+      projects = projectsRes.data;
+    }
+    await axios.get('/api/term').then((res) => {
+      terms = res.data;
+    });
 
     const url = new URL(location.href);
     const pathProjectId = parseInt(url.pathname.split('/')[3], 10) || null;
