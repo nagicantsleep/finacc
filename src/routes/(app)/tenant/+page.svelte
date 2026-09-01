@@ -1,6 +1,7 @@
 <script>
   import TenantDashboard from '$lib/components/tenant/tenant.svelte';
   import Toast from '$lib/components/common/Toast.svelte';
+  import { bi } from '$lib/i18n/bilingual.js';
 
   export let data;
 
@@ -12,10 +13,12 @@
     current: 'tenant',
     pathname: '/tenant'
   };
+
+  $: pageTitle = `${$bi('tenant_settings')} :: Hieronymus`;
 </script>
 
 <svelte:head>
-  <title>会社設定 :: Hieronymus</title>
+  <title>{pageTitle}</title>
 </svelte:head>
 
 <div class="tenant-page container-fluid px-0">
