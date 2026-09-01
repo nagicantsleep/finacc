@@ -1,14 +1,14 @@
 <script>
 import TableMaintenance from '$lib/components/TableMaintenance.svelte';
-import BilingualText from '$lib/components/BilingualText.svelte';
 
 export let status;
-
+export let options = {};
 </script>
 
 <TableMaintenance
   title="voucher_class"
   endpoint={'/api/voucher/classes'}
+  initialValues={options.initialValues}
   columns={[
   { type: "id", name: 'id'},
   { type: "order", name: 'displayOrder'},

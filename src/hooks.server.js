@@ -128,7 +128,7 @@ export async function handle({ event, resolve }) {
       if (fyCount === 0) {
         throw redirect(303, '/setup');
       }
-      if (pathname === '/home' || pathname === '/') {
+      if (pathname === '/') {
         throw redirect(303, '/workspace');
       }
     } catch (e) {

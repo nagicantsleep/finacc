@@ -75,25 +75,38 @@
 {/if}
 <script>
 import axios from 'axios';
-import {onMount, beforeUpdate, afterUpdate, createEventDispatcher} from 'svelte';
-const dispatch = createEventDispatcher();
+import {onMount, afterUpdate} from 'svelte';
 import CrossSlipModal from '../cross-slip/cross-slip-modal.svelte';
-// Modal dynamically loaded
 import {setAccounts} from '$lib/client/cross-slip.js';
 
 import BilingualText from '$lib/components/BilingualText.svelte';
 import { bi } from '$lib/i18n/bilingual.js';
 export let status;
 export let toast;
+export let pendingSlips = null;
+export let accounts = null;
 
 let count = 0;
 let slips = [];
 let slip = {
   lines:[]
 };
-let accounts;
 let modalCount = 0;
 let popUp;
+let hydrated = false;
+
+const hydrateSlips = (value) => {
+  if (!value) return;
+  slips = value;
+  count = slips.length;
+  hydrated = true;
+};
+
+const hydrateAccounts = (value) => {
+  if (!value) return;
+  accounts = value;
+  setAccounts(accounts);
+};
 
 const setupAccount = () => {
 	accounts = [];
@@ -103,7 +116,7 @@ const setupAccount = () => {
 	});
 }
 
-const close_ = (event) => {
+const close_ = () => {
 	getSlips();
 }
 
@@ -122,10 +135,16 @@ const getSlips = () => {
 }
 
 onMount(() => {
-  if  ( !accounts ) {
+  if (pendingSlips) {
+    hydrateSlips(pendingSlips);
+  } else {
+    getSlips();
+  }
+  if (accounts) {
+    hydrateAccounts(accounts);
+  } else if (!accounts) {
     setupAccount();
   }
-  getSlips();
 })
 afterUpdate(() => {
   if  (!popUp)  {
