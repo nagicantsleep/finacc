@@ -16,11 +16,6 @@
     pathname: '/workspace'
   };
 
-  onMount(() => {
-    if ($page.params.id) {
-      goto(`/workspace/${$page.params.id}`, { replaceState: true });
-    }
-  });
 </script>
 
 <svelte:head>

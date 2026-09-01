@@ -204,15 +204,16 @@ import BilingualText from '$lib/components/BilingualText.svelte';
 import { languagePair } from '$lib/i18n/bilingual.js';
 
 export let status = { fy: {} };
+export let initialData = null;
 
-let	bank_list = { subAccounts: [] };
+let	bank_list = initialData?.bankList || { subAccounts: [] };
 let slip = {
   year: 0,
   month: 0,
   lines: []
 };
-let	lines = [];
-let	accounts = [];
+let	lines = initialData?.lines || [];
+let	accounts = initialData?.accounts || [];
 let modalCount = 0;
 let popUp = false;
 
@@ -223,10 +224,14 @@ const BANK_ACCOUNTS = [
   [ '1010030',	'bank_fixed_dep' ]
 ];
 
-let accountCode;
-let subAccountCode;
+let accountCode = initialData?.accountCode || BANK_ACCOUNTS[0][0];
+let subAccountCode = initialData?.subAccountCode;
 
-$: checkPage($page.params);
+let isInitialMount = true;
+
+$: if (!isInitialMount) {
+  checkPage($page.params);
+}
 
 const link = (href) => {
   goto(href, { keepFocus: true, noScroll: true });
@@ -255,26 +260,39 @@ const checkPage = (params) => {
 };
 
 onMount(async () => {
-  lines = [];
-  bank_list = { subAccounts: [] };
-  try {
-    let result = await axios.get('/api/accounts');
-    accounts = result.data;
+  if (initialData?.accounts?.length) {
+    accounts = initialData.accounts;
     setAccounts(accounts);
-
-    if (!status?.fy?.startDate) {
+  }
+  if (initialData?.lines?.length) {
+    lines = initialData.lines;
+  }
+  if (initialData?.bankList) {
+    bank_list = initialData.bankList;
+  }
+  if (!accounts.length) {
+    try {
+      let result = await axios.get('/api/accounts');
+      accounts = result.data;
+      setAccounts(accounts);
+    } catch (e) {
+      console.error('bank-ledger init error', e);
+    }
+  }
+  if (!status?.fy?.startDate) {
+    try {
       const termRes = await axios.get('/api/term');
       if (Array.isArray(termRes.data) && termRes.data.length > 0) {
         status.fy = termRes.data[0];
       } else if (termRes.data?.startDate) {
         status.fy = termRes.data;
       }
+    } catch (e) {
+      console.error('term init error', e);
     }
-  } catch (e) {
-    console.error('bank-ledger init error', e);
   }
 
-  checkPage($page.params);
+  isInitialMount = false;
 });
 
 afterUpdate(() => {
