@@ -28,16 +28,41 @@ async function listTaxRules(tenantId) {
   return rows.map((row) => asJson(row));
 }
 
-export async function loadTenantPageData({ tenantId, user }) {
-  const [companyClasses, transactionKinds, voucherClasses, itemClasses, taxRules, company] =
+async function listMemberClasses() {
+  const rows = await models.MemberClass.findAll({
+    order: [
+      ['displayOrder', 'ASC'],
+      ['id', 'ASC']
+    ]
+  });
+  return rows.map((row) => asJson(row));
+}
+
+export async function loadMaintenanceMasterData(tenantId) {
+  const [companyClasses, transactionKinds, voucherClasses, itemClasses, taxRules, memberClasses] =
     await Promise.all([
       listCompanyClasses(tenantId),
       listTransactionKinds(tenantId),
       listVoucherClasses(tenantId),
       listItemClasses(tenantId),
       listTaxRules(tenantId),
-      getCompanyInfo(tenantId)
+      listMemberClasses()
     ]);
+
+  return {
+    companyClasses,
+    transactionKinds,
+    voucherClasses,
+    itemClasses,
+    taxRules,
+    memberClasses
+  };
+}
+
+export async function loadTenantPageData({ tenantId, user }) {
+  const { companyClasses, transactionKinds, voucherClasses, itemClasses, taxRules } =
+    await loadMaintenanceMasterData(tenantId);
+  const company = await getCompanyInfo(tenantId);
 
   let backupDates = [];
   if (user?.administrable) {

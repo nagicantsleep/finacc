@@ -3,9 +3,12 @@ import TableMaintenance from '$lib/components/TableMaintenance.svelte';
 import { bi } from '$lib/i18n/bilingual.js';
 
 export let status;
+export let options = {};
 </script>
+
 <TableMaintenance
   endpoint={'/api/member/classes'}
+  initialValues={options.initialValues}
   columns={[
     { type: "id", name: 'id'},
     { type: "order", name: 'displayOrder'},

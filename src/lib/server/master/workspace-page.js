@@ -4,6 +4,7 @@ import { getWorkspaceTemplates } from '$lib/server/master/menu-api.js';
 import { listNotApproved } from '$lib/server/accounting/crossSlip.js';
 import { listChartAccounts } from '$lib/server/accounting/chart-accounts.js';
 import { listBackupDates } from '$lib/server/admin-backup.js';
+import { loadMaintenanceMasterData } from '$lib/server/master/tenant-page.js';
 
 const Op = models.Sequelize.Op;
 
@@ -136,6 +137,36 @@ export async function loadWorkspaceWidgetBootstrap({ tenantId, user, term, widge
       bootstrap.Backup = { backupDates: await listBackupDates() };
     } catch {
       bootstrap.Backup = { backupDates: [] };
+    }
+  }
+
+  const maintenanceWidgets = [
+    'CompanyKinds',
+    'TransactionKinds',
+    'VoucherClasses',
+    'ItemClasses',
+    'MemberClasses'
+  ];
+  if (maintenanceWidgets.some((name) => names.has(name))) {
+    const maintenance = await loadMaintenanceMasterData(tenantId);
+    const voucherClassSource = maintenance.voucherClasses.map((value) => [value.id, value.name]);
+    if (names.has('CompanyKinds')) {
+      bootstrap.CompanyKinds = { initialValues: maintenance.companyClasses };
+    }
+    if (names.has('TransactionKinds')) {
+      bootstrap.TransactionKinds = {
+        initialValues: maintenance.transactionKinds,
+        voucherClassSource
+      };
+    }
+    if (names.has('VoucherClasses')) {
+      bootstrap.VoucherClasses = { initialValues: maintenance.voucherClasses };
+    }
+    if (names.has('ItemClasses')) {
+      bootstrap.ItemClasses = { initialValues: maintenance.itemClasses };
+    }
+    if (names.has('MemberClasses')) {
+      bootstrap.MemberClasses = { initialValues: maintenance.memberClasses };
     }
   }
 

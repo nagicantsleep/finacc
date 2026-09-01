@@ -16,7 +16,8 @@
 <div class="row">
   <div class="col-7" style="padding:10px;">
     <SelectTerm
-      bind:status={status}>
+      bind:status={status}
+      {fiscalYears}>
     </SelectTerm>
   </div>
   <div class="col-3" style="padding:10px;">
@@ -32,14 +33,16 @@
   <div class="col-7" style="padding:10px;">
     <Approve
       bind:status={status}
-      bind:toast={toast} />
+      bind:toast={toast}
+      {pendingSlips}
+      {accounts} />
   </div>
   {/if}
 </div>
 {#if ( status.user.administrable) }
 <div class="row">
   <div class="col-6" style="padding:10px;">
-    <Backup bind:toast={toast} bind:status={status}/>
+    <Backup bind:toast={toast} bind:status={status} initialBackupDates={backupDates}/>
   </div>
 </div>
 {/if}
@@ -49,6 +52,7 @@
     <TableMaintenance
       title={$bi('company_class')}
       endpoint={'/api/company/kinds'}
+      initialValues={maintenance?.companyClasses}
       bind:minimize={companyMinimize}
       columns={[
   { type: "id", name: 'id'},
@@ -61,6 +65,7 @@
     <TableMaintenance
       title={$bi('transaction_kind')}
       endpoint={'/api/transaction/kinds'}
+      initialValues={maintenance?.transactionKinds}
       bind:minimize={transactionMinimize}
       columns={[
   { type: "id", name: 'id'},
@@ -72,7 +77,7 @@
   },
   { type: "checkbox", name: 'forCustomer', title: $bi('home_col_for_client'), width: "70px"},
   { type: "dropdown", name: 'bookId', title: $bi('home_col_created_voucher'), width: '200px',
-    func: getClasses
+    source: voucherClassSource
   }
 ]}></TableMaintenance>
   </div>
@@ -84,6 +89,7 @@
     <TableMaintenance
       title={$bi('voucher_class')}
       endpoint={'/api/voucher/classes'}
+      initialValues={maintenance?.voucherClasses}
       bind:minimize={voucherMinimize}
       columns={[
   { type: "id", name: 'id'},
@@ -101,6 +107,7 @@
     <TableMaintenance
       title={$bi('item_class')}
       endpoint={'/api/item/classes'}
+      initialValues={maintenance?.itemClasses}
       bind:minimize={itemMinimize}
       columns={[
   { type: "id", name: 'id'},
@@ -118,6 +125,7 @@
     <TableMaintenance
       title={$bi('home_tax_rule')}
       endpoint={'/api/tax-rule'}
+      initialValues={maintenance?.taxRules}
       bind:minimize={taxRuleMinimize}
       columns={[
   { type: "id", name: 'id'},
@@ -158,6 +166,12 @@ export	let	status;
 export  let toast;
 export  let alert;
 export  let alert_level;
+export let initialCompany = null;
+export let fiscalYears = null;
+export let pendingSlips = null;
+export let accounts = null;
+export let backupDates = null;
+export let maintenance = null;
 
 let companyMinimize = true;
 let transactionMinimize = true;
@@ -165,8 +179,9 @@ let voucherMinimize = true;
 let itemMinimize = true;
 let taxRuleMinimize = true;
 let systemSettingsMinimize = true;
-let company;
+let company = initialCompany;
 
+$: voucherClassSource = maintenance?.voucherClassSource || [];
 $: transactionDocSource = [
   [0, $bi('none_opt')],
   [1, $bi('optional')],
@@ -191,17 +206,27 @@ const link = (href) => {
   status.pathname = href;
 }
 
-beforeUpdate(() => {
-  console.log(status);
-  if  (( !status.fy ) ||
-       ( !status.fy.term )) {
+const warnMissingTerm = () => {
+  if (( !status.fy ) || ( !status.fy.term )) {
     alert = get(bi)('sidebar_select_term');
     alert_level = 'danger';
   }
+};
+
+beforeUpdate(() => {
+  warnMissingTerm();
 })
 
 onMount(() => {
-  console.log('home onMount');
+  if (initialCompany !== null) {
+    company = initialCompany;
+    if (!company) {
+      alert = get(bi)('sidebar_no_company');
+      alert_level = 'danger';
+    }
+    warnMissingTerm();
+    return;
+  }
   axios.get('/api/user').then((res) => {
     status.user = res.data.user;
   });
@@ -213,23 +238,8 @@ onMount(() => {
       alert = get(bi)('sidebar_no_company');
       alert_level = 'danger';
     }
-    console.log({company});
-    if  (( !status.fy ) ||
-         ( !status.fy.term )) {
-      alert = get(bi)('sidebar_select_term');
-      alert_level = 'danger';
-    }
+    warnMissingTerm();
   })
 })
 
-const getClasses = async () => {
-  let result = await axios.get('/api/voucher/classes');
-  let source = [];
-  for ( let value of result.data.values )  {
-    source.push([value.id, value.name]);
-  }
-  return  (source);
-}
-
 </script>
-    
