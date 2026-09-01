@@ -46,11 +46,24 @@ export let title = '';
 export let endpoint = '';
 export let columns = [];
 export let minimize;
+export let initialValues = null;
 
 let table = [];
 let kinds = [];
 let spreadsheet;
 let reorder;
+let hydrated = false;
+
+const hydrateTable = (values) => {
+  if (!values) return;
+  kinds = values;
+  table = structuredClone(kinds);
+  hydrated = true;
+};
+
+$: if (initialValues && !hydrated) {
+  hydrateTable(initialValues);
+}
 
 const update = (event) => {
   //console.log(table);
@@ -86,10 +99,15 @@ onMount(() => {
   }
 
   table = [];
-  axios.get(endpoint).then((result) => {
-    kinds = result.data.values;
-    table = structuredClone(kinds);
-  })
+  if (initialValues) {
+    hydrateTable(initialValues);
+  } else {
+    axios.get(endpoint).then((result) => {
+      kinds = result.data.values;
+      table = structuredClone(kinds);
+      hydrated = true;
+    });
+  }
   columnsUpdate();
   eventBus.on('update', async () => {
     //console.log('update');

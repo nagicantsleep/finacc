@@ -7,17 +7,30 @@ import { bi } from '$lib/i18n/bilingual.js';
   export let toast;
   export let title = $bi('system_settings');
   export let minimize = true;
+  export let initialCompany = null;
 
   let company = {};
   let useProjectAccounting = false;
   let showIntercompanyAsSundries = false;
+  let companyHydrated = false;
+
+  const applyCompany = (value) => {
+    if (!value) return;
+    company = value;
+    useProjectAccounting = company.useProjectAccounting || false;
+    showIntercompanyAsSundries = company.showIntercompanyAsSundries || false;
+    companyHydrated = true;
+  };
+
+  $: if (initialCompany && !companyHydrated) {
+    applyCompany(initialCompany);
+  }
 
   onMount(async () => {
+    if (initialCompany) return;
     try {
       const res = await axios.get('/api/company/info');
-      company = res.data.company || {};
-      useProjectAccounting = company.useProjectAccounting || false;
-      showIntercompanyAsSundries = company.showIntercompanyAsSundries || false;
+      applyCompany(res.data.company || {});
     } catch (error) {
       console.error(error);
       toast.show($bi('system_settings'), $bi('system_settings_load_fail'));

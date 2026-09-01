@@ -56,6 +56,7 @@ import OkModal from '$lib/components/common/OkModal.svelte';
 
 import BilingualText from '$lib/components/BilingualText.svelte';
 export let toast;
+export let initialBackupDates = null;
 
 let files;
 let modal;
@@ -168,15 +169,21 @@ const backup = () => {
   })
 }
 
+const mapBackupDates = (dates) => dates.map((m) => new Date(m));
+
+const loadBackupFiles = () => {
+  axios.get('/api/admin/backups').then((result) => {
+    files = mapBackupDates(result.data);
+  });
+};
+
+$: if (initialBackupDates && !files) {
+  files = mapBackupDates(initialBackupDates);
+}
+
 beforeUpdate(()=> {
-  if  ( !files )  {
-    axios.get('/api/admin/backups').then((result) => {
-      files = [];
-      for ( let m of result.data )  {
-        files.push(new Date(m));
-      }
-      files = files;
-    })
+  if  ( !files && !initialBackupDates )  {
+    loadBackupFiles();
   }
 })
 
