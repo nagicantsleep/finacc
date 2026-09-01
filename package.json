@@ -40,6 +40,7 @@
 		"dotenv": "^16.5.0",
 		"exceljs": "^4.2.1",
 		"gridstack": "^11.5.0",
+		"iconv-lite": "^0.7.3",
 		"jspreadsheet-ce": "^5.0.0",
 		"markdown-it": "^14.1.0",
 		"markdown-it-abbr": "^2.0.0",

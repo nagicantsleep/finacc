@@ -44,15 +44,18 @@ export async function PUT({ locals, request }) {
 
   if (body.menus && Array.isArray(body.menus)) {
     for (const m of body.menus) {
-      if (m.id) {
-        const existing = await models.Menu.findOne({ where: { tenantId, id: m.id } });
+      const patch = { ...m };
+      delete patch.tenantId;
+      if (patch.id) {
+        const existing = await models.Menu.findOne({ where: { tenantId, id: patch.id } });
         if (existing) {
-          existing.set(m);
+          delete patch.id;
+          existing.set(patch);
           existing.tenantId = tenantId;
           await existing.save();
         }
       } else {
-        await models.Menu.create({ ...m, tenantId });
+        await models.Menu.create({ ...patch, tenantId, userId: locals.user.id });
       }
     }
 
@@ -72,7 +75,10 @@ export async function PUT({ locals, request }) {
   if (body.id) {
     const existing = await models.Menu.findOne({ where: { tenantId, id: body.id } });
     if (existing) {
-      existing.set(body);
+      const patch = { ...body };
+      delete patch.id;
+      delete patch.tenantId;
+      existing.set(patch);
       existing.tenantId = tenantId;
       await existing.save();
       return json({ menu: existing });

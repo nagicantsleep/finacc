@@ -175,7 +175,10 @@ export async function createVoucher(tenantId, userId, body) {
 
 export async function updateVoucher(tenantId, user, body, id) {
   const voucherId = id || body.id;
-  const prepared = { ...body, updatedBy: user.id };
+  const patch = { ...body };
+  delete patch.id;
+  delete patch.tenantId;
+  const prepared = { ...patch, updatedBy: user.id };
   const check = await prepareVoucherBody(prepared, tenantId);
   if (!check.ok) return check;
   const voucher = await models.Voucher.findOne({ where: { id: voucherId, tenantId } });

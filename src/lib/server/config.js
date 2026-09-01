@@ -3,6 +3,12 @@ dotenv.config();
 
 const nodeEnv = process.env.NODE_ENV || 'development';
 
+if (nodeEnv === 'production') {
+  if (!process.env.EXPRESS || process.env.EXPRESS === 'hieronymus_secret_dev_key') {
+    throw new Error('FATAL: EXPRESS secret environment variable must be set to a secure non-default value in production mode.');
+  }
+}
+
 export const config = {
   env: nodeEnv,
   port: parseInt(process.env.PORT || '3010', 10),

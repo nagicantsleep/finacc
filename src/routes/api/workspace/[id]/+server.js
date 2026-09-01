@@ -27,7 +27,10 @@ export async function PUT({ params, locals, request }) {
     return json({ error: 'Workspace not found' }, { status: 404 });
   }
 
-  menu.set(body);
+  const patch = { ...body };
+  delete patch.id;
+  delete patch.tenantId;
+  menu.set(patch);
   menu.tenantId = locals.tenantId;
   await menu.save();
 
