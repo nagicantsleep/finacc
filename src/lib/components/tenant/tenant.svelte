@@ -6,13 +6,14 @@
 </div>
 <div class="row">
   <div class="col-6" style="padding:10px;">
-    <Backup bind:toast={toast} bind:status={status}/>
+    <Backup bind:toast={toast} initialBackupDates={backupDates} />
   </div>
   <div class="col-6" style="padding:10px;">
     <SystemSettings
       title={$bi('system_settings')}
       bind:minimize={systemSettingsMinimize}
       bind:toast={toast}
+      initialCompany={companyInfo}
     />
   </div>
 </div>
@@ -21,6 +22,7 @@
     <TableMaintenance
       title={$bi('company_class')}
       endpoint={'/api/company/kinds'}
+      initialValues={companyClasses}
       bind:minimize={companyMinimize}
       columns={[
         { type: "id", name: 'id'},
@@ -34,6 +36,7 @@
     <TableMaintenance
       title={$bi('transaction_kind')}
       endpoint={'/api/transaction/kinds'}
+      initialValues={transactionKinds}
       bind:minimize={transactionMinimize}
       columns={[
         { type: "id", name: 'id'},
@@ -45,7 +48,7 @@
         },
         { type: "checkbox", name: 'forCustomer', title: $bi('home_col_for_client'), width: "70px"},
         { type: "dropdown", name: 'bookId', title: $bi('home_col_created_voucher'), width: '200px',
-          func: getClasses
+          source: voucherClassSource
         }
       ]}>
     </TableMaintenance>
@@ -56,6 +59,7 @@
     <TableMaintenance
       title={$bi('voucher_class')}
       endpoint={'/api/voucher/classes'}
+      initialValues={voucherClasses}
       bind:minimize={voucherMinimize}
       columns={[
         { type: "id", name: 'id'},
@@ -72,6 +76,7 @@
     <TableMaintenance
       title={$bi('item_class')}
       endpoint={'/api/item/classes'}
+      initialValues={itemClasses}
       bind:minimize={itemMinimize}
       columns={[
         { type: "id", name: 'id'},
@@ -88,6 +93,7 @@
     <TableMaintenance
       title={$bi('home_tax_rule')}
       endpoint={'/api/tax-rule'}
+      initialValues={taxRules}
       bind:minimize={taxRuleMinimize}
       columns={[
         { type: "id", name: 'id'},
@@ -105,9 +111,6 @@
 </div>
 
 <script>
-import { onMount } from 'svelte';
-import axios from 'axios';
-
 import Backup from '../home/backup.svelte';
 import SystemSettings from '../home/system-settings.svelte';
 import TableMaintenance from '$lib/components/TableMaintenance.svelte';
@@ -116,6 +119,13 @@ import { bi } from '$lib/i18n/bilingual.js';
 
 export let status;
 export let toast;
+export let companyClasses = [];
+export let transactionKinds = [];
+export let voucherClasses = [];
+export let itemClasses = [];
+export let taxRules = [];
+export let companyInfo = {};
+export let backupDates = [];
 
 let companyMinimize = true;
 let transactionMinimize = true;
@@ -140,13 +150,5 @@ $: taxMethodSource = [
   [2, $bi('home_tax_outer')],
   [9, $bi('home_tax_separate')]
 ];
-
-const getClasses = async () => {
-  let result = await axios.get('/api/voucher/classes');
-  let source = [];
-  for ( let value of result.data.values )  {
-    source.push([value.id, value.name]);
-  }
-  return  (source);
-}
+$: voucherClassSource = voucherClasses.map((value) => [value.id, value.name]);
 </script>

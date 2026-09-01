@@ -19,6 +19,16 @@
 </svelte:head>
 
 <div class="tenant-page container-fluid px-0">
-  <TenantDashboard bind:status bind:toast />
+  <TenantDashboard
+    bind:status
+    bind:toast
+    companyClasses={data.companyClasses}
+    transactionKinds={data.transactionKinds}
+    voucherClasses={data.voucherClasses}
+    itemClasses={data.itemClasses}
+    taxRules={data.taxRules}
+    companyInfo={data.company}
+    backupDates={data.backupDates}
+  />
   <Toast bind:toast />
 </div>
