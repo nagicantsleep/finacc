@@ -8,7 +8,9 @@
     fy: data.currentFy,
     tenant: data.tenant,
     current: 'project',
-    pathname: '/project'
+    pathname: '/project',
+    state: data.viewState || 'list',
+    id: data.resourceId
   };
 </script>
 
@@ -17,5 +19,11 @@
 </svelte:head>
 
 <div class="project-page container-fluid px-0">
-  <ProjectView bind:status />
+  <ProjectView
+    bind:status
+    projects={data.projects}
+    selectedProject={data.selectedProject}
+    viewState={data.viewState}
+    resourceId={data.resourceId}
+  />
 </div>
