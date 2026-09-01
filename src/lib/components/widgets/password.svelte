@@ -1,38 +1,32 @@
-<div class="menu">
+<div class="menu menu-form-stacked">
     <div class="body">
         <form>
-            <div class="row mb-2">
-                <label for="inputCurrentPassword" class="col-sm-5 col-form-label">
+            <div class="widget-field mb-3">
+                <label for="inputCurrentPassword" class="form-label">
                     <BilingualText key="current_password" />
                 </label>
-                <div class="col-sm-7">
-                    <input type="text" class="form-control" id="inputCurrentPassword"
-                        bind:value={currentPassword}>
-                </div>
+                <input type="password" class="form-control" id="inputCurrentPassword"
+                    bind:value={currentPassword} autocomplete="current-password">
             </div>
-            <div class="row mb-2">
-                <label for="inputNewPassword" class="col-sm-5 col-form-label">
+            <div class="widget-field mb-3">
+                <label for="inputNewPassword" class="form-label">
                     <BilingualText key="new_password" />
                 </label>
-                <div class="col-sm-7">
-                    <input type="text" class="form-control" id="inputNewPassword"
-                        bind:value={newPassword}>
-                </div>
+                <input type="password" class="form-control" id="inputNewPassword"
+                    bind:value={newPassword} autocomplete="new-password">
             </div>
-            <div class="row mb-0">
-                <label for="inputConfirmPassword" class="col-sm-5 col-form-label">
+            <div class="widget-field mb-2">
+                <label for="inputConfirmPassword" class="form-label">
                     <BilingualText key="confirm_password" />
                 </label>
-                <div class="col-sm-7">
-                    <input type="text" class="form-control" id="inputConfirmPassword"
-                        bind:value={confirmPassword}>
-                </div>
+                <input type="password" class="form-control" id="inputConfirmPassword"
+                    bind:value={confirmPassword} autocomplete="new-password">
             </div>
         </form>
     </div>
     <div class="footer">
         <button class="btn btn-primary" on:click|preventDefault={updatePassword}>
-            <BilingualText key="update" />
+            <BilingualText key="update" stacked={false} />
         </button>
     </div>
 </div>
@@ -47,20 +41,20 @@ let confirmPassword;
 
 export let toast;
 
-const updatePassword = (event) => {
+const updatePassword = () => {
     if  ( newPassword ) {
         if  ( newPassword == confirmPassword )    {
             axios.put('/api/user/password', {
                 currentPassword: currentPassword,
                 newPassword: newPassword
-            }).then((res) => {
+            }).then(() => {
                 const pwUpdated = _b('password_updated_msg');
                 const pwTitle = _b('password_change');
                 toast.show(`${pwTitle.primary} / ${pwTitle.secondary}`, `${pwUpdated.primary} / ${pwUpdated.secondary}`);
                 currentPassword = '';
                 newPassword = '';
                 confirmPassword = '';
-            }).catch ((e) => {
+            }).catch (() => {
                 const pwFailed = _b('password_update_failed_msg');
                 const pwTitle = _b('password_change');
                 toast.show(`${pwTitle.primary} / ${pwTitle.secondary}`, `${pwFailed.primary} / ${pwFailed.secondary}`);

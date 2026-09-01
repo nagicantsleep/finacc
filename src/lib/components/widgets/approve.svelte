@@ -4,21 +4,23 @@
     <div class="row">
     	<ul class="list-group">
         <li class="list-group-item">
-          <BilingualText key="count_label" />: {count}
+          <BilingualText key="count_label" stacked={false} />: {count}
         </li>
       </ul>
     </div>
-	  <div class="row full-height" style="overflow-y: scroll;">
-		  <table class="table table-bordered">
+	  <div class="table-responsive">
+		  <table class="table table-bordered table-sm mb-0">
         <thead class="table-light">
+          <tr>
           <th colspan="2">
-            <BilingualText key="voucher_info" />
+            <BilingualText key="voucher_info" stacked={false} />
           </th>
-          <th style="width: 100px;">
-            <BilingualText key="username" />
+          <th style="min-width: 6rem;">
+            <BilingualText key="username" stacked={false} />
           </th>
-          <th style="width: 100px;"><BilingualText key="updated_by" /></th>
-          <th><BilingualText key="application" /></th>
+          <th style="min-width: 6rem;"><BilingualText key="updated_by" stacked={false} /></th>
+          <th><BilingualText key="application" stacked={false} /></th>
+          </tr>
         </thead>
         <tbody>
           {#each slips as slip}
@@ -50,6 +52,13 @@
     </div>
   </div>
 </div>
+{:else}
+<div class="menu">
+  <div class="widget-empty">
+    <BilingualText key="approve_pending_count" stacked={false} />: 0
+  </div>
+</div>
+{/if}
 {#if popUp}
 {#key modalCount}
 <CrossSlipModal
@@ -61,7 +70,7 @@
 	on:close={close_}></CrossSlipModal>
 {/key}
 {/if}
-{/if}
+
 <style>
 th {
   text-align: center;

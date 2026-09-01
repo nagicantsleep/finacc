@@ -817,9 +817,15 @@ a.link {
   height: 100%;
   box-sizing: border-box;
   border-radius: 5px;
-  overflow-y: hidden !important;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
+}
+
+.widget-content {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
 }
 
 .menu-header {
@@ -853,20 +859,62 @@ a.link {
 .menu .body {
   flex: 1 1 auto;
   overflow-y: auto;
-  overflow-x: hidden;
-  padding: 0 0 20px 0;
+  overflow-x: auto;
+  padding: 0 0 12px 0;
   box-sizing: border-box;
 }
 .menu .body .description,
 .menu .body form {
-  padding: 10px;
+  padding: 10px 12px;
 }
 .menu .body .table {
-  margin-bottom: 25px;
+  margin-bottom: 12px;
   --bs-table-bg: var(--bs-card-bg);
+  font-size: 0.875rem;
+}
+.menu .body .table th {
+  white-space: normal;
+  vertical-align: bottom;
+  line-height: 1.25;
+  padding: 0.45rem 0.35rem;
+  font-size: 0.8rem;
+}
+.menu .body .table td {
+  white-space: normal;
+  vertical-align: middle;
+  line-height: 1.35;
+  padding: 0.45rem 0.35rem;
+}
+.menu .body .table .btn {
+  white-space: normal;
+  font-size: 0.8rem;
+  padding: 0.25rem 0.45rem;
 }
 .menu .body .list-group {
   --bs-list-group-bg: var(--bs-card-bg);
+}
+.menu .body .list-group-item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.5rem;
+  line-height: 1.35;
+  padding: 0.65rem 0.75rem;
+}
+.menu.menu-form-stacked .body {
+  padding: 0.5rem 0.75rem 0.75rem;
+}
+.menu.menu-form-stacked .widget-field .form-label {
+  margin-bottom: 0.25rem;
+  line-height: 1.3;
+}
+.menu.menu-form-stacked .footer {
+  margin: 0 0.75rem 0.75rem;
+}
+.menu .widget-empty {
+  padding: 0.75rem 1rem;
+  color: var(--bs-secondary-color);
+  font-size: 0.9rem;
 }
 .menu .footer {
   height: 40px;

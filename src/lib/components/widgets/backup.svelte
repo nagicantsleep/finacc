@@ -1,39 +1,43 @@
 <div class="menu">
   <div class="header">
     <button class="btn btn-primary" on:click|preventDefault={backup}>
-      <BilingualText key="backup" />
+      <BilingualText key="backup" stacked={false} />
     </button>
   </div>
   <div class="body">
-    <table class="table table-bordered">
-      <thead class="table-light">
-        <th><BilingualText key="retrieved_at" /></th>
-        <th><BilingualText key="process" /></th>
-      </thead>
-      <tbody>
-        {#each files as file, i}
-        <tr>
-          <td style="vertical-align:middle;font-size:12pt;">
-            {fileName(file)}
-          </td>
-          <td style="text-align:center;">
-            {#if (i == 0) }
-            <button class="btn btn-success" on:click|preventDefault={() => restore(i)}>
-              <BilingualText key="restore" />
-            </button>
-            {:else}
-            <button class="btn btn-warning" on:click|preventDefault={() => restore(i)}>
-              <BilingualText key="restore" />
-            </button>
-            {/if}
-            <button class="btn btn-danger" on:click|preventDefault={() => remove(i)}>
-              <BilingualText key="delete" />
-            </button>
-          </td>
-        </tr>
-        {/each}
-      </tbody>
-    </table>
+    <div class="table-responsive">
+      <table class="table table-bordered table-sm mb-0">
+        <thead class="table-light">
+          <tr>
+          <th scope="col"><BilingualText key="retrieved_at" stacked={false} /></th>
+          <th scope="col" style="min-width: 8rem;"><BilingualText key="process" stacked={false} /></th>
+          </tr>
+        </thead>
+        <tbody>
+          {#each files as file, i}
+          <tr>
+            <td style="vertical-align:middle;">
+              {fileName(file)}
+            </td>
+            <td class="text-center">
+              {#if (i == 0) }
+              <button class="btn btn-success btn-sm" on:click|preventDefault={() => restore(i)}>
+                <BilingualText key="restore" stacked={false} />
+              </button>
+              {:else}
+              <button class="btn btn-warning btn-sm" on:click|preventDefault={() => restore(i)}>
+                <BilingualText key="restore" stacked={false} />
+              </button>
+              {/if}
+              <button class="btn btn-danger btn-sm" on:click|preventDefault={() => remove(i)}>
+                <BilingualText key="delete" stacked={false} />
+              </button>
+            </td>
+          </tr>
+          {/each}
+        </tbody>
+      </table>
+    </div>
   </div>
 </div>
 <OkModal
@@ -46,7 +50,6 @@
 <script>
 import axios from 'axios';
 import {onMount, beforeUpdate} from 'svelte';
-import eventBus from '$lib/client/event-bus.js';
 import OkModal from '$lib/components/common/OkModal.svelte';
 import BilingualText from '$lib/components/BilingualText.svelte';
 import { _b } from '$lib/i18n/bilingual.js';
@@ -68,7 +71,6 @@ const fileName = (file) => {
 }
 
 const remove = (i) => {
-  console.log('remove');
   removeFile = files[i];
   const takenOn = _b('taken_on');
   const tStr = `${takenOn.primary} / ${takenOn.secondary}`;
@@ -87,7 +89,6 @@ const remove = (i) => {
   modal.show();
 }
 const restore = (i) => {
-  console.log('restore');
   restoreFile = files[i];
   const takenOn = _b('taken_on');
   const tStr = `${takenOn.primary} / ${takenOn.secondary}`;
@@ -106,9 +107,7 @@ const restore = (i) => {
   modal.show();
 }
 const doRestore = (ev) => {
-  console.log(ev.detail);
   if  ( ev.detail ) {
-    console.log('Yes');
     const restoreStarted = _b('restore_started');
     toast.show(`${restoreStarted.primary} / ${restoreStarted.secondary}`, '');
     axios.post('/api/admin/restore', {
@@ -125,9 +124,7 @@ const doRestore = (ev) => {
   }
 }
 const doRemove = (ev) => {
-  console.log(ev.detail);
   if  ( ev.detail ) {
-    console.log('Yes');
     axios.delete(`/api/admin/backup/${removeFile.toJSON()}`).then(() => {
       const backupDeleted = _b('backup_deleted_msg');
       toast.show(`${backupDeleted.primary} / ${backupDeleted.secondary}`, '')

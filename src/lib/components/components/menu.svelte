@@ -94,13 +94,15 @@
           </div>
         </div>
         {#if !widget?.minimize && widget?._component}
-        <svelte:component class="mt-0"
-          this={widget._component}
-          isEditMode={isEditMode}
-          bind:status={status}
-          bind:toast={toast}
-          bind:options={widget.options}
-        />
+        <div class="widget-content">
+          <svelte:component class="mt-0"
+            this={widget._component}
+            isEditMode={isEditMode}
+            bind:status={status}
+            bind:toast={toast}
+            bind:options={widget.options}
+          />
+        </div>
         {/if}
       </div>
     </div>
@@ -257,8 +259,8 @@ const initializeGrid = async () => {
   tick().then(() => {
     if (!GridStack) return;
     grid = GridStack.init({
-      cellHeight: 10,
-      margin: 5,
+      cellHeight: 12,
+      margin: 8,
       draggable: isEditMode,
       resizable: isEditMode,
       float: true,
