@@ -131,9 +131,9 @@ import {link, currentPage, getStore} from '$lib/client/router.js';
 import BilingualText from '$lib/components/BilingualText.svelte';
 export	let	items;
 export  let status;
+export  let itemClasses = [];
 
 let itemClassId;
-let itemClasses = [];
 let key = '';
 
 const updateItems = (_params) => {
@@ -152,10 +152,14 @@ onMount(() => {
   status.params = parseParams();
   itemClassId = status.params.itemClassId || -1;
   key = status.params.key || '';
-  updateItems();
-  axios.get('/api/item/classes').then((result) => {
-    itemClasses = result.data.values;
-  })
+  if (!items || items.length === 0) {
+    updateItems();
+  }
+  if (!itemClasses || itemClasses.length === 0) {
+    axios.get('/api/item/classes').then((result) => {
+      itemClasses = result.data.values || [];
+    });
+  }
 })
 beforeUpdate(() => {
   //console.log('item-list beforeUpdate');

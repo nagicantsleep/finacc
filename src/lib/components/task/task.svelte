@@ -23,11 +23,12 @@ import {numeric, formatDate} from '$lib/utils.js';
 import { currentPage, link } from '$lib/client/router.js';
 
 export let status;
-export let toast;
+export let toast = null;
+export let initialData = null;
 
 let task;
-let tasks = [];
-let users = [];
+let tasks = initialData?.tasks || [];
+let users = initialData?.users || [];
 
 $: checkPage($currentPage);
 

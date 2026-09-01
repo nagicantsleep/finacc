@@ -15,5 +15,5 @@
 </svelte:head>
 
 <div class="page-container container-fluid px-0">
-  <View bind:status />
+  <View bind:status initialData={data} />
 </div>

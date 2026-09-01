@@ -1,5 +1,6 @@
 import { fail, redirect } from '@sveltejs/kit';
 import models from '$lib/server/db/index.js';
+import { asJson } from '$lib/server/api-guard.js';
 
 /** @type {import('./$types').PageServerLoad} */
 export async function load({ locals }) {
@@ -8,18 +9,30 @@ export async function load({ locals }) {
 
   const items = await models.Item.findAll({
     where: { tenantId: locals.tenantId },
+    include: [
+      { model: models.ItemClass, as: 'itemClass' },
+      { model: models.Document, as: 'document', include: [{ model: models.DocumentFile, as: 'files' }] }
+    ],
     order: [['id', 'ASC']]
   });
 
+  const classes = await models.ItemClass.findAll({
+    where: { tenantId: locals.tenantId },
+    order: [['displayOrder', 'ASC'], ['id', 'ASC']]
+  });
+
+  const users = await models.User.findAll({
+    attributes: ['id', 'name', 'legalName', 'email'],
+    order: [['name', 'ASC']]
+  });
+
   return {
-    items: items.map((i) => ({
-      id: i.id,
-      code: i.localCode || i.id,
-      name: i.name,
-      price: i.standardPrice || 0,
-      unit: i.unit || '',
-      taxClass: i.taxClass
-    }))
+    user: locals.user,
+    tenant: locals.tenant,
+    currentFy: locals.currentFy,
+    items: asJson(items),
+    classes: asJson(classes),
+    users: asJson(users)
   };
 }
 

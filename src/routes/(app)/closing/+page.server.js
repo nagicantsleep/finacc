@@ -1,18 +1,20 @@
 import { redirect } from '@sveltejs/kit';
-import models from '$lib/server/db/index.js';
+import { buildConfirmData } from '$lib/server/accounting/closing-api.js';
+import { asJson } from '$lib/server/api-guard.js';
 
+/** @type {import('./$types').PageServerLoad} */
 export async function load({ locals }) {
   if (!locals.user) throw redirect(303, '/login');
   if (!locals.tenantId) throw redirect(303, '/logon');
 
+  const term = locals.currentFy?.term || 1;
+  const confirmData = await buildConfirmData(locals.tenantId, term);
+
   return {
     user: locals.user,
     tenant: locals.tenant,
-    currentFy: locals.currentFy ? {
-      term: locals.currentFy.term,
-      startDate: locals.currentFy.startDate,
-      endDate: locals.currentFy.endDate,
-      taxIncluded: Boolean(locals.currentFy.taxIncluded)
-    } : { term: 1, startDate: '2026-01-01', endDate: '2026-12-31', taxIncluded: false }
+    currentFy: locals.currentFy,
+    term,
+    confirmData: asJson(confirmData)
   };
 }

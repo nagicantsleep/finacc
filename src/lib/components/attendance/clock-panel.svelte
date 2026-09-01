@@ -6,7 +6,9 @@
 
   const dispatch = createEventDispatcher();
 
-  let todayRecord = null;
+  export let initialData = null;
+
+  let todayRecord = initialData?.todayRecord || null;
   let loading = false;
   let clocking = false;
   let errorMsg = '';
@@ -14,7 +16,9 @@
   let currentTime = new Date().toLocaleTimeString();
 
   onMount(() => {
-    loadToday();
+    if (!todayRecord) {
+      loadToday();
+    }
     const interval = setInterval(() => {
       currentTime = new Date().toLocaleTimeString();
     }, 1000);

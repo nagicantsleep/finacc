@@ -1,5 +1,6 @@
 import { redirect } from '@sveltejs/kit';
 import models from '$lib/server/db/index.js';
+import { asJson } from '$lib/server/api-guard.js';
 
 /** @type {import('./$types').PageServerLoad} */
 export async function load({ locals }) {
@@ -8,20 +9,28 @@ export async function load({ locals }) {
 
   const members = await models.TenantMember.findAll({
     where: { tenantId: locals.tenantId },
-    include: [{ model: models.User, as: 'user' }],
+    include: [{ model: models.User, as: 'user', attributes: ['id', 'name', 'legalName', 'email'] }],
     order: [['createdAt', 'ASC']]
   });
 
+  const memberUserIds = members.map((m) => m.userId).filter(Boolean);
+  const users = await models.User.findAll({
+    where: memberUserIds.length > 0 ? { id: { [models.Sequelize.Op.notIn]: memberUserIds } } : {},
+    attributes: ['id', 'name', 'legalName', 'email'],
+    order: [['name', 'ASC']]
+  });
+
+  const classes = await models.MemberClass.findAll({
+    where: { tenantId: locals.tenantId },
+    order: [['displayOrder', 'ASC'], ['id', 'ASC']]
+  });
+
   return {
-    members: members.map((m) => ({
-      id: m.id,
-      name: m.user?.name || m.tradingName || '未設定',
-      email: m.user?.email || '-',
-      legalName: m.user?.legalName || '-',
-      isOwner: m.isOwner,
-      status: m.status,
-      accounting: m.accounting,
-      approvable: m.approvable
-    }))
+    user: locals.user,
+    tenant: locals.tenant,
+    currentFy: locals.currentFy,
+    members: asJson(members),
+    users: asJson(users),
+    classes: asJson(classes)
   };
 }

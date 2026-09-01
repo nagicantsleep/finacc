@@ -6,12 +6,16 @@
 
   const dispatch = createEventDispatcher();
 
-  let definitions = [];
+  export let initialData = null;
+
+  let definitions = initialData?.definitions || [];
   let loading = false;
   let errorMsg = '';
 
   onMount(() => {
-    loadDefinitions();
+    if (!definitions || definitions.length === 0) {
+      loadDefinitions();
+    }
   });
 
   export async function loadDefinitions() {

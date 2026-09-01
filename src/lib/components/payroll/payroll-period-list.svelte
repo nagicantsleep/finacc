@@ -6,7 +6,9 @@
 
   const dispatch = createEventDispatcher();
 
-  let periods = [];
+  export let initialData = null;
+
+  let periods = initialData?.periods || [];
   let loading = false;
   let errorMsg = '';
 
@@ -15,7 +17,9 @@
   let creating = false;
 
   onMount(() => {
-    loadPeriods();
+    if (!periods || periods.length === 0) {
+      loadPeriods();
+    }
   });
 
   export async function loadPeriods() {

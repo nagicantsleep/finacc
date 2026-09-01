@@ -5,6 +5,9 @@
   import RegistryDesignerModal from './registry-designer-modal.svelte';
   import RegistryEntryModal from './registry-entry-modal.svelte';
 
+  export let initialData = null;
+  export let status = null;
+
   let currentView = 'list'; // 'list' | 'grid'
   let selectedDefinition = null;
 
@@ -48,6 +51,7 @@
   {#if currentView === 'list'}
     <RegistryList
       bind:this={listComponent}
+      initialData={initialData}
       on:selectRegistry={handleSelectRegistry}
       on:editDesigner={handleEditDesigner}
     />

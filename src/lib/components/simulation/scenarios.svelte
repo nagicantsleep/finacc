@@ -180,8 +180,9 @@
 
   export let toast = undefined;
   export let status = undefined;
+  export let initialData = null;
 
-  let scenarios = [];
+  let scenarios = initialData?.scenarios || [];
   let loading = false;
   let error = null;
   let lastFetched = '';

@@ -120,8 +120,9 @@ import {
   );
 
 export let status;
+export let initialData = null;
 
-let accounts;
+let accounts = initialData?.accounts || [];
 let account;
 let details;
 let remaining;
@@ -247,45 +248,52 @@ const checkPage = (page) => {
   }
 }
 
+const initAccounts = (data) => {
+  accounts = data;
+  setAccounts(accounts);
+  for ( let i = 0; i < accounts.length; i ++ ) {
+    let account = accounts[i];
+    switch (parse_account_code.field(account.code)) {
+      case '1':
+      case '2':
+        fields[0].accounts.push(account);
+        break;
+      case '3':
+      case '4':
+        fields[1].accounts.push(account);
+        break;
+      case '5':
+        fields[2].accounts.push(account);
+        break;
+      case '6':
+        fields[3].accounts.push(account);
+        break;
+      case '7':
+        fields[4].accounts.push(account);
+        break;
+      default:
+        fields[5].accounts.push(account);
+        break;
+    }
+  }
+  fields = fields;
+  if (!accountCode) {
+    const defaultAcc = accounts.find((a) => a.code && a.code.startsWith('6')) || accounts[0];
+    if (defaultAcc) {
+      accountCode = defaultAcc.code;
+      changeAccount(true);
+    }
+  }
+};
+
 onMount(() => {
-  console.log('changes onMount');
-  axios.get(`/api/accounts`).then((res) => {
-    accounts = res.data;
-    setAccounts(accounts);
-    for ( let i = 0; i < accounts.length; i ++ ) {
-      let account = accounts[i];
-      switch (parse_account_code.field(account.code)) {
-        case '1':
-        case '2':
-          fields[0].accounts.push(account);
-          break;
-        case '3':
-        case '4':
-          fields[1].accounts.push(account);
-          break;
-        case '5':
-          fields[2].accounts.push(account);
-          break;
-        case '6':
-          fields[3].accounts.push(account);
-          break;
-        case '7':
-          fields[4].accounts.push(account);
-          break;
-        default:
-          fields[5].accounts.push(account);
-          break;
-      }
-    }
-    fields = fields;
-    if (!accountCode) {
-      const defaultAcc = accounts.find((a) => a.code && a.code.startsWith('6')) || accounts[0];
-      if (defaultAcc) {
-        accountCode = defaultAcc.code;
-        changeAccount(true);
-      }
-    }
-  });
+  if (initialData?.accounts && initialData.accounts.length > 0) {
+    initAccounts(initialData.accounts);
+  } else {
+    axios.get(`/api/accounts`).then((res) => {
+      initAccounts(res.data);
+    });
+  }
 
   checkPage();
 

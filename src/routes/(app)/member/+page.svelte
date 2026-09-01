@@ -17,5 +17,5 @@
 </svelte:head>
 
 <div class="member-page container-fluid px-0">
-  <MemberView bind:status />
+  <MemberView bind:status initialData={data} />
 </div>

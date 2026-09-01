@@ -2,6 +2,7 @@
 <ItemList
   bind:items={items}
   bind:status={status}
+  itemClasses={initialData?.classes || []}
   on:open={openEntry}
   ></ItemList>
 {:else if ( status.state === 'home')}
@@ -24,9 +25,10 @@ import {currentItem, getStore} from '$lib/client/current-record.js';
 import { currentPage, link } from '$lib/client/router.js';
 
 export let status;
+export let initialData = null;
 
 let item;
-let items = [];
+let items = initialData?.items || [];
 
 $: checkPage($currentPage);
 

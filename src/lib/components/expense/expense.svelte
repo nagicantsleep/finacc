@@ -6,6 +6,9 @@
   import ExpenseCategoryModal from './expense-category-modal.svelte';
   import BilingualText from '$lib/components/BilingualText.svelte';
 
+  export let initialData = null;
+  export let status = null;
+
   let listComponent;
   let isClaimModalOpen = false;
   let isAdvanceModalOpen = false;
@@ -50,7 +53,7 @@
   </div>
 
   <!-- Claims Table List -->
-  <ExpenseClaimList bind:this={listComponent} />
+  <ExpenseClaimList bind:this={listComponent} initialData={initialData} />
 
   <!-- Modals -->
   <ExpenseClaimModal

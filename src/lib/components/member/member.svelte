@@ -23,11 +23,12 @@ import {currentMember, getStore} from '$lib/client/current-record.js';
 import { currentPage, link } from '$lib/client/router.js';
 
 export let status;
+export let initialData = null;
 
 let member;
-let members = [];
-let users = [];
-let classes = [];
+let members = initialData?.members || [];
+let users = initialData?.users || [];
+let classes = initialData?.classes || [];
 
 $: checkPage($currentPage);
 
@@ -73,20 +74,26 @@ const checkPage = (page) => {
     status.state = 'list';
     member = null;
     const params = new URLSearchParams(page.split('?')[1] || '');
-    axios.get(`/api/member?${params.toString()}`).then(result => {
-      members = result.data.members;
-    });
+    if (!members.length || params.toString()) {
+      axios.get(`/api/member?${params.toString()}`).then(result => {
+        members = result.data.members;
+      });
+    }
     break;
   }
 }
 
 onMount(() => {
-  axios.get('/api/users?nomember=true').then(result => {
-    users = result.data.users;
-  });
-  axios.get('/api/member/classes').then((result) => {
-    classes = result.data.values;
-  });
+  if (!users.length) {
+    axios.get('/api/users?nomember=true').then(result => {
+      users = result.data.users || [];
+    });
+  }
+  if (!classes.length) {
+    axios.get('/api/member/classes').then((result) => {
+      classes = result.data.values || [];
+    });
+  }
   checkPage($currentPage);
 })
 

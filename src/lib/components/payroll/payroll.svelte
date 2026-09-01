@@ -4,6 +4,9 @@
   import SalaryFormulaModal from './salary-formula-modal.svelte';
   import PayslipModal from './payslip-modal.svelte';
 
+  export let initialData = null;
+  export let status = null;
+
   let currentView = 'list'; // 'list' | 'calc'
   let selectedPeriod = null;
 
@@ -34,6 +37,7 @@
   {#if currentView === 'list'}
     <PayrollPeriodList
       bind:this={listComponent}
+      initialData={initialData}
       on:selectPeriod={handleSelectPeriod}
       on:openFormula={() => isFormulaModalOpen = true}
     />

@@ -5,6 +5,9 @@
   import LeaveRequestModal from './leave-request-modal.svelte';
   import BilingualText from '$lib/components/BilingualText.svelte';
 
+  export let initialData = null;
+  export let status = null;
+
   let timesheetComponent;
   let isLeaveModalOpen = false;
 
@@ -33,10 +36,10 @@
   </div>
 
   <!-- Realtime Clock In / Out Visual Card -->
-  <ClockPanel on:updated={handleAttendanceUpdated} />
+  <ClockPanel initialData={initialData} on:updated={handleAttendanceUpdated} />
 
   <!-- Monthly Sheet -->
-  <MonthlyTimesheet bind:this={timesheetComponent} />
+  <MonthlyTimesheet bind:this={timesheetComponent} initialData={initialData} />
 
   <!-- Leave Request Modal -->
   <LeaveRequestModal bind:isOpen={isLeaveModalOpen} on:updated={handleAttendanceUpdated} />

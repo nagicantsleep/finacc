@@ -68,9 +68,10 @@ import { bi } from '$lib/i18n/bilingual.js';
 import { currentPage, link } from '$lib/client/router.js';
 
 export let status;
+export let initialData = null;
 
-let term;
-let data = null;
+let term = initialData?.term;
+let data = initialData?.confirmData || null;
 let loadError = null;
 let submitError = null;
 let plResetAcknowledged = false;
@@ -121,12 +122,17 @@ const runClosing = async () => {
 
 $: if (!term && status?.fy?.term) {
   term = status.fy.term;
-  loadData();
+  if (!data) loadData();
 }
 
 onMount(() => {
-  term = parseTerm(getCurrentPage());
-  loadData();
+  const currentTerm = parseTerm(getCurrentPage());
+  if (currentTerm !== term) {
+    term = currentTerm;
+    loadData();
+  } else if (!data) {
+    loadData();
+  }
 });
 
 function getCurrentPage() {

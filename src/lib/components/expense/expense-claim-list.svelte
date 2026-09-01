@@ -6,7 +6,9 @@
 
   const dispatch = createEventDispatcher();
 
-  let claims = [];
+  export let initialData = null;
+
+  let claims = initialData?.claims || [];
   let loading = false;
   let errorMsg = '';
   let successMsg = '';
@@ -15,7 +17,9 @@
   let creatingVoucherId = null;
 
   onMount(() => {
-    loadClaims();
+    if (!claims || claims.length === 0) {
+      loadClaims();
+    }
   });
 
   export async function loadClaims() {

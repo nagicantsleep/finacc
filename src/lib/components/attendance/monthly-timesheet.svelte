@@ -4,15 +4,19 @@
   import axios from 'axios';
   import BilingualText from '$lib/components/BilingualText.svelte';
 
+  export let initialData = null;
+
   let year = new Date().getFullYear();
   let month = new Date().getMonth() + 1;
-  let records = [];
-  let summary = { workingDays: 0, totalWorkHours: 0, totalOvertimeHours: 0, totalLateMinutes: 0 };
+  let records = initialData?.records || [];
+  let summary = initialData?.summary || { workingDays: 0, totalWorkHours: 0, totalOvertimeHours: 0, totalLateMinutes: 0 };
   let loading = false;
   let errorMsg = '';
 
   onMount(() => {
-    loadMonthly();
+    if (!records || records.length === 0) {
+      loadMonthly();
+    }
   });
 
   export async function loadMonthly() {
