@@ -1,109 +1,94 @@
-{#if ( status.state === 'list' )}
+{#if viewState === 'list'}
   <TransactionList
-  	bind:status={status}
     transactions={transactions}
-    ></TransactionList>
-{:else if ( (status.state === 'entry' || status.state === 'new') && transaction )}
-  <TransactionEntry
-    bind:status={status}
-    bind:toast={toast}
-    bind:transaction={transaction}
-    bind:users={users}>
-  </TransactionEntry>
+    transactionKinds={transactionKinds}
+    filters={filters}
+    on:filter={applyFilters}
+  ></TransactionList>
+{:else if (viewState === 'entry' || viewState === 'new') && transaction}
+  {#await import('./transaction-entry.svelte') then { default: TransactionEntry }}
+    <TransactionEntry
+      bind:status={status}
+      bind:toast={toast}
+      bind:transaction={transaction}
+      users={users}
+      on:close={closeEntry}
+    ></TransactionEntry>
+  {/await}
 {/if}
 <script>
-import axios from 'axios';
-import {onMount, beforeUpdate, afterUpdate, createEventDispatcher} from 'svelte';
-import TransactionEntry from './transaction-entry.svelte';
+import { get } from 'svelte/store';
+import { goto } from '$app/navigation';
 import TransactionList from './transaction-list.svelte';
-import {numeric, formatDate} from '$lib/utils.js';
-import {currentTransaction, currentTask, getStore} from '$lib/client/current-record.js'
-import { currentPage } from '$lib/client/router.js';
-import { parseParams } from '$lib/client/params.js';
+import { currentTransaction, currentTask } from '$lib/client/current-record.js';
+import { link } from '$lib/client/router.js';
 
 export let status;
 export let toast;
+export let transactions = [];
+export let selectedTransaction = null;
+export let transactionKinds = [];
+export let users = [];
+export let viewState = 'list';
+export let filters = {};
 
-let transaction;
-let transactions = [];
-let users = [];
+let transaction = selectedTransaction;
 
-$: checkPage($currentPage);
+$: transaction = mergeTaskIntoNew(selectedTransaction, viewState);
+$: if (status) status.state = viewState;
 
-const checkPage = (page) => {
-  const pathOnly = (page || (typeof location !== 'undefined' ? location.pathname : '')).split('?')[0].split('#')[0];
-  let args = pathOnly.split('/');
-
-  const newStatus = { ...status };
-  newStatus.state = args[2] || 'list';
-
-  if (newStatus.state === 'list') {
-    newStatus.params = parseParams();
-  }
-  status = newStatus;
-
-  switch  (status.state)  {
-  case  'entry':
-    const entryId = args[3];
-    if (!transaction || transaction.id != entryId) {
-      axios.get(`/api/transaction/${entryId}`).then((result) => {
-        console.log('new load', result.data);
-        transaction = result.data.transaction;
-        currentTransaction.set(transaction);
-      });
-    }
-    break;
-	case  'new':
-    if  (!transaction || transaction.id) {
-      transaction = {
-        issueDate: formatDate(new Date()),
-        tax: 0,
-        amount: 0,
-        lines: [{
-          itemId: null,
-          itemName: '',
-          itemSpec: '',
-          unitPrice: 0,
-          itemNumber: 0,
-          unit: '',
-          amount: 0,
-          tax: 0,
-          description: ''
-        }]};
-      let task = getStore(currentTask);
-      if	( task )	{
-        transaction.taskId = task.id;
-				transaction.companyId = task.companyId;
-        transaction.companyName = task.companyName;
-        transaction.chargeName = task.chargeName;
-        transaction.zip = task.zip;
-        transaction.address1 = task.address1;
-        transaction.address2 = task.address2;
-        transaction.subject = task.subject;
-        transaction.lines = [...task.lines];
-        transaction.taxClass = task.taxClass;
-        transaction.tax = task.tax;
-        transaction.amount = task.amount;
-        transaction.handledBy = task.handledBy;
-      }
-      currentTransaction.set(transaction);
-    }
-    console.log({transaction});
-    break;
-  default:
-    break;
-  }
+function mergeTaskIntoNew(base, state) {
+  if (state !== 'new' || !base) return base;
+  const task = get(currentTask);
+  if (!task) return base;
+  return {
+    ...base,
+    taskId: task.id,
+    companyId: task.companyId,
+    companyName: task.companyName,
+    chargeName: task.chargeName,
+    zip: task.zip,
+    address1: task.address1,
+    address2: task.address2,
+    subject: task.subject,
+    lines: task.lines ? [...task.lines] : base.lines,
+    taxClass: task.taxClass,
+    tax: task.tax,
+    amount: task.amount,
+    handledBy: task.handledBy
+  };
 }
 
-onMount(() => {
-  console.log('transaction onMount');
-  axios.get('/api/users/member').then((result) => {
-    users = result.data.users;
-  });
-  checkPage($currentPage);
-})
+const filterQuery = () => {
+  const params = new URLSearchParams();
+  for (const [key, value] of Object.entries(filters || {})) {
+    if (value != null && value !== '' && String(value) !== '-1') {
+      params.set(key, String(value));
+    }
+  }
+  const query = params.toString();
+  return query ? `?${query}` : '';
+};
 
-afterUpdate(() => {
-  //console.log('transactions afterUpdate');
-})
+const closeEntry = () => {
+  currentTransaction.set(null);
+  const task = get(currentTask);
+  if (task?.id) {
+    link(`/task/entry/${task.id}`);
+  } else {
+    goto(`/transaction${filterQuery()}`);
+  }
+};
+
+const applyFilters = (event) => {
+  const patch = event.detail || {};
+  const params = new URLSearchParams();
+  const merged = { ...filters, ...patch };
+  for (const [key, value] of Object.entries(merged)) {
+    if (value == null || value === '' || String(value) === '-1') continue;
+    params.set(key, String(value));
+  }
+  const query = params.toString();
+  goto(query ? `/transaction?${query}` : '/transaction', { keepFocus: true, noScroll: true });
+};
 </script>

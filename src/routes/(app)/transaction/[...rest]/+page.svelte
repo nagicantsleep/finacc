@@ -8,7 +8,8 @@
     fy: data.currentFy,
     tenant: data.tenant,
     current: 'transaction',
-    pathname: '/transaction'
+    pathname: '/transaction',
+    state: data.viewState || 'list'
   };
 </script>
 
@@ -17,5 +18,13 @@
 </svelte:head>
 
 <div class="transaction-page container-fluid px-0">
-  <TransactionView bind:status />
+  <TransactionView
+    bind:status
+    transactions={data.transactions}
+    selectedTransaction={data.selectedTransaction}
+    transactionKinds={data.transactionKinds}
+    users={data.users}
+    viewState={data.viewState}
+    filters={data.filters}
+  />
 </div>
