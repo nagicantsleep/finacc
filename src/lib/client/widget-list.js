@@ -16,8 +16,8 @@ export const componentList = [
   {
     name: 'Approve',
     title: '承認待ち',
-    defaultW: 5,
-    defaultH: 23,
+    defaultW: 12,
+    defaultH: 28,
     authority: (user, options) => {
       return (user?.approvable);
     },
@@ -25,8 +25,8 @@ export const componentList = [
   }, {
     name: 'Backup',
     title: 'バックアップ',
-    defaultW: 4,
-    defaultH: 23,
+    defaultW: 7,
+    defaultH: 36,
     authority: (user, options) => {
       return (user?.administrable);
     },
@@ -34,8 +34,8 @@ export const componentList = [
   }, {
     name: 'FormPrint',
     title: '帳票出力',
-    defaultW: 3,
-    defaultH: 29,
+    defaultW: 4,
+    defaultH: 38,
     authority: (user, options) => {
       return (user?.accounting || user?.fiscal_browsing);
     },
@@ -43,14 +43,14 @@ export const componentList = [
   }, {
     name: 'Password',
     title: 'パスワード変更',
-    defaultW: 4,
-    defaultH: 29,
+    defaultW: 5,
+    defaultH: 36,
     component: Password
   }, {
     name: 'SelectTerm',
     title: '年度選択',
-    defaultW: 6,
-    defaultH: 29,
+    defaultW: 8,
+    defaultH: 42,
     component: SelectTerm
   }, {
     name: 'CompanyKinds',

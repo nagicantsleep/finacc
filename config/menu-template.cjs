@@ -9,8 +9,8 @@ module.exports = [
         "id": "1",
         "x": 0,
         "y": 0,
-        "w": 6,
-        "h": 29,
+        "w": 8,
+        "h": 42,
         "minimize": false,
         "component": "SelectTerm",
         "options": {
@@ -18,47 +18,47 @@ module.exports = [
         }
       }, {
         "id": "2",
-        "x": 6,
+        "x": 8,
         "y": 0,
-        "w": 3,
-        "h": 29,
+        "w": 4,
+        "h": 38,
         "minimize": false,
         "component": "FormPrint",
         "options": {
             "title": "帳票出力"
         }
-      },{
+      }, {
+        "id": "5",
+        "x": 0,
+        "y": 42,
+        "w": 5,
+        "h": 36,
+        "minimize": false,
+        "component": "Password",
+        "options": {
+            "title": "パスワード変更"
+        }
+      }, {
         "id": "3",
-        "x": 9,
-        "y": 0,
-        "w": 3,
-        "h": 29,
+        "x": 5,
+        "y": 42,
+        "w": 7,
+        "h": 36,
         "minimize": false,
         "component": "Backup",
         "options": {
             "title": "バックアップ"
         }
-      },{
+      }, {
         "id": "4",
-        "x": 6,
-        "y": 30,
-        "w": 6,
-        "h": 25,
+        "x": 0,
+        "y": 78,
+        "w": 12,
+        "h": 28,
         "minimize": false,
         "component": "Approve",
         "options": {
             "title": "承認待ち"
-        }
-      },{
-        "id": "5",
-        "x": 0,
-        "y": 30,
-        "w": 4,
-        "h": 25,
-        "minimize": false,
-        "component": "Password",
-        "options": {
-            "title": "パスワード変更"
         }
       }
     ]
