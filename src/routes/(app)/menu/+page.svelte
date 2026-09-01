@@ -15,9 +15,6 @@
     pathname: '/workspace'
   };
 
-  onMount(() => {
-    goto('/workspace', { replaceState: true });
-  });
 </script>
 
 <svelte:head>
