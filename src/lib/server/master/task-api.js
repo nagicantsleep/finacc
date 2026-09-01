@@ -106,7 +106,10 @@ export async function updateTask(tenantId, user, body, id) {
     include: [{ model: models.Document, as: 'document' }]
   });
   if (!task) return { ok: false, status: 404, payload: { code: -1 } };
-  task.set({ ...body, updatedBy: user.id, tenantId });
+  const patch = { ...body };
+  delete patch.id;
+  delete patch.tenantId;
+  task.set({ ...patch, updatedBy: user.id, tenantId });
   await task.save();
   await models.TaskDetail.destroy({ where: { taskId: task.id, tenantId } });
   const lines = [];

@@ -32,8 +32,11 @@ export async function createDocument(tenantId, body) {
 export async function updateDocument(tenantId, id, body) {
   const document = await models.Document.findOne({ where: { id, tenantId } });
   if (!document) return { ok: false, status: 404, payload: { code: -1 } };
-  const patch = { ...body, tenantId };
+  const patch = { ...body };
+  delete patch.id;
+  delete patch.tenantId;
   document.set(patch);
+  document.tenantId = tenantId;
   await document.save();
   return { ok: true, payload: asJson(document) };
 }

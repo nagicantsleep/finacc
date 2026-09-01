@@ -140,7 +140,10 @@ export async function updateTransaction(tenantId, user, body, id) {
   });
   if (!transaction) return { ok: false, status: 404, payload: { code: -1 } };
   let documentId = transaction.documentId;
-  transaction.set({ ...body, updatedBy: user.id, tenantId });
+  const patch = { ...body };
+  delete patch.id;
+  delete patch.tenantId;
+  transaction.set({ ...patch, updatedBy: user.id, tenantId });
   if (transaction.kind?.hasDetails) {
     await models.TransactionDetail.destroy({
       where: { transactionDocumentId: transaction.id, tenantId }

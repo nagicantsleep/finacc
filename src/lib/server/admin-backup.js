@@ -6,10 +6,13 @@ import { promisify } from 'node:util';
 import { Readable } from 'node:stream';
 import { format, parse } from '@formkit/tempo';
 import { json } from '@sveltejs/kit';
-import { sequelize } from '$lib/server/db/index.js';
-import { forbidden, requireTenant } from '$lib/server/api-guard.js';
+import { sequelize } from './db/index.js';
+import { forbidden, requireTenant } from './api-guard.js';
 
 const execFileAsync = promisify(execFile);
+
+export const BACKUP_DISABLED_MESSAGE =
+  'Full database backup operations are restricted to platform administration in multi-tenant environments.';
 
 const RESTORE_DISABLED_MESSAGE =
   'Database-level restore is disabled in multi-tenant environment to prevent data loss across tenants. Please contact system administrator.';
@@ -50,10 +53,16 @@ export function requireAdmin(locals) {
   const denied = requireTenant(locals);
   if (denied) return denied;
   if (!locals.user?.administrable) return forbidden();
+  if (process.env.ALLOW_PLATFORM_BACKUP !== 'true') {
+    return forbidden(BACKUP_DISABLED_MESSAGE);
+  }
   return null;
 }
 
 export async function listBackupDates() {
+  if (process.env.ALLOW_PLATFORM_BACKUP !== 'true') {
+    return [];
+  }
   const dir = backupDir();
   await mkdir(dir, { recursive: true });
   const { database } = pgConfig();

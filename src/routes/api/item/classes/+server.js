@@ -46,7 +46,10 @@ export async function PUT({ request, locals }) {
     });
     if (!item) return json({ result: 'NG', message: 'Not found' }, { status: 404 });
 
-    await item.update(body);
+    const patch = { ...body };
+    delete patch.id;
+    delete patch.tenantId;
+    await item.update(patch);
     return json({ result: 'OK', value: item });
   } catch (e) {
     return json({ result: 'NG', message: e.message }, { status: 400 });
