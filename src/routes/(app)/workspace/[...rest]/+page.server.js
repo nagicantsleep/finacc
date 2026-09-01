@@ -16,6 +16,8 @@ export async function load({ locals, params, depends }) {
   const pageData = await loadWorkspacePageData({
     tenantId: locals.tenantId,
     userId: locals.user.id,
+    user: locals.user,
+    term: locals.term,
     viewState,
     workspaceId
   });

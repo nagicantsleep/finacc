@@ -1,6 +1,9 @@
 import models from '$lib/server/db/index.js';
 import { asJson } from '$lib/server/api-guard.js';
 import { getWorkspaceTemplates } from '$lib/server/master/menu-api.js';
+import { listNotApproved } from '$lib/server/accounting/crossSlip.js';
+import { listChartAccounts } from '$lib/server/accounting/chart-accounts.js';
+import { listBackupDates } from '$lib/server/admin-backup.js';
 
 const Op = models.Sequelize.Op;
 
@@ -82,14 +85,85 @@ export function parseWorkspaceView(rest) {
   return { viewState: 'entry', workspaceId };
 }
 
-export async function loadWorkspacePageData({ tenantId, userId, viewState, workspaceId }) {
+function widgetComponentNames(widgets) {
+  return new Set((widgets || []).map((widget) => widget.component).filter(Boolean));
+}
+
+function applyWidgetBootstrap(workspace, bootstrap) {
+  if (!workspace?.widgets?.length || !bootstrap) return workspace;
+  return {
+    ...workspace,
+    widgets: workspace.widgets.map((widget) => {
+      const data = bootstrap[widget.component];
+      if (!data) return widget;
+      return {
+        ...widget,
+        options: { ...(widget.options || {}), ...data }
+      };
+    })
+  };
+}
+
+async function listFiscalYears(tenantId) {
+  const rows = await models.FiscalYear.findAll({
+    where: { tenantId },
+    order: [['term', 'ASC']]
+  });
+  return rows.map((row) => asJson(row));
+}
+
+export async function loadWorkspaceWidgetBootstrap({ tenantId, user, term, widgets }) {
+  const names = widgetComponentNames(widgets);
+  const bootstrap = {};
+
+  if (names.has('SelectTerm')) {
+    bootstrap.SelectTerm = { fiscalYears: await listFiscalYears(tenantId) };
+  }
+
+  if (names.has('Approve') && user?.approvable) {
+    const [slips, accounts] = await Promise.all([
+      listNotApproved(tenantId, user, term),
+      listChartAccounts(tenantId)
+    ]);
+    bootstrap.Approve = {
+      pendingSlips: slips.map((slip) => asJson(slip)),
+      accounts
+    };
+  }
+
+  if (names.has('Backup') && user?.administrable) {
+    try {
+      bootstrap.Backup = { backupDates: await listBackupDates() };
+    } catch {
+      bootstrap.Backup = { backupDates: [] };
+    }
+  }
+
+  return bootstrap;
+}
+
+export async function loadWorkspacePageData({ tenantId, userId, user, term, viewState, workspaceId }) {
   if (viewState === 'new') {
     return { workspace: { title: 'ホーム', widgets: [] } };
   }
+
+  let workspace;
   if (viewState === 'entry') {
-    const workspace = await getWorkspaceById(tenantId, workspaceId);
-    return { workspace };
+    workspace = await getWorkspaceById(tenantId, workspaceId);
+  } else {
+    workspace = await loadDefaultWorkspace(tenantId, userId);
   }
-  const workspace = await loadDefaultWorkspace(tenantId, userId);
+
+  if (!workspace) {
+    return { workspace: null };
+  }
+
+  const bootstrap = await loadWorkspaceWidgetBootstrap({
+    tenantId,
+    user,
+    term,
+    widgets: workspace.widgets
+  });
+  workspace = applyWidgetBootstrap(workspace, bootstrap);
   return { workspace };
 }
