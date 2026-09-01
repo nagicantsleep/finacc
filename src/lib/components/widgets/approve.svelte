@@ -82,6 +82,7 @@ import BilingualText from '$lib/components/BilingualText.svelte';
 
 export let status = {};
 export let toast;
+export let options = {};
 
 let count = 0;
 let slips = [];
@@ -93,6 +94,20 @@ let modal;
 const newId = uuidv4();
 let modalCount = 0;
 let popUp;
+let hydrated = false;
+
+const hydrateSlips = (value) => {
+  if (!value) return;
+  slips = value;
+  count = slips.length;
+  hydrated = true;
+};
+
+const hydrateAccounts = (value) => {
+  if (!value) return;
+  accounts = value;
+  setAccounts(accounts);
+};
 
 
 const setupAccount = () => {
@@ -122,12 +137,16 @@ const getSlips = () => {
 }
 
 onMount(() => {
-  console.log('approve onMount');
-  if  ( !accounts ) {
+  if (options.pendingSlips) {
+    hydrateSlips(options.pendingSlips);
+  } else {
+    getSlips();
+  }
+  if (options.accounts) {
+    hydrateAccounts(options.accounts);
+  } else if (!accounts) {
     setupAccount();
   }
-  getSlips();
-  console.log('approve onMount end');
 })
 afterUpdate(() => {
   if  (!popUp)  {

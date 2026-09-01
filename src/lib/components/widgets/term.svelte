@@ -77,31 +77,32 @@ import BilingualText from '$lib/components/BilingualText.svelte';
 import { bi } from '$lib/i18n/bilingual.js';
 
 export let status = {};
+export let options = {};
 
 let lines = [];
 
+const mapFiscalYears = (data) =>
+  data.map((line) => ({
+    id: line.id,
+    term: line.term,
+    startDate: new Date(line.startDate),
+    endDate: new Date(line.endDate),
+    taxIncluded: line.taxIncluded
+  }));
+
 const change = (line) => {
-  //console.log('change', line)
-  axios.put(`/api/term/${line.id}`, line).then((result) => {
+  axios.put(`/api/term/${line.id}`, line).then(() => {
     lines = undefined;
-  })
-}
+  });
+};
 
 onMount(() => {
+  if (options.fiscalYears?.length) {
+    lines = mapFiscalYears(options.fiscalYears);
+    return;
+  }
   axios.get('/api/term').then((res) => {
-    let data = res.data;
-    for ( let i = 0; i < data.length; i ++ )    {
-      let line = data[i];
-      lines.push({
-        id: line.id,
-        term: line.term,
-        startDate: new Date(line.startDate),
-        endDate: new Date(line.endDate),
-        taxIncluded: line.taxIncluded
-      });
-    }
-    lines = lines;
-    //console.log(lines);
+    lines = mapFiscalYears(res.data);
   });
 });
 </script>

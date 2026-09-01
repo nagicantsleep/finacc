@@ -53,6 +53,7 @@ import { _b } from '$lib/i18n/bilingual.js';
 
 export let toast;
 export let status;
+export let options = {};
 
 let files = [];
 let modal;
@@ -145,26 +146,26 @@ const backup = () => {
     files = undefined;
   })
 }
+const mapBackupDates = (dates) => dates.map((m) => new Date(m));
+
+const loadBackupFiles = () => {
+  axios.get('/api/admin/backups').then((result) => {
+    files = mapBackupDates(result.data);
+  });
+};
+
 beforeUpdate(()=> {
-  if  ( !files )  {
-    axios.get('/api/admin/backups').then((result) => {
-      files = [];
-      for ( let m of result.data )  {
-        files.push(new Date(m));
-      }
-      files = files;
-    })
+  if  ( !files?.length && !options.backupDates?.length )  {
+    loadBackupFiles();
   }
 })
 
 onMount(()=> {
-  axios.get('/api/admin/backups').then((result) => {
-    console.log('backup', {result});
-    files = [];
-    for ( let m of result.data )  {
-      files.push(new Date(m));
-    }
-  })
+  if (options.backupDates?.length) {
+    files = mapBackupDates(options.backupDates);
+    return;
+  }
+  loadBackupFiles();
 })
 
 </script>
