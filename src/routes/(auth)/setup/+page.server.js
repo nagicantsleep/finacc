@@ -42,7 +42,7 @@ export const actions = {
     const roundingMethod = data.get('roundingMethod')?.toString() || '1';
 
     if (!startDate || !endDate) {
-      return fail(400, { error: '開始日と終了日は必須です。' });
+      return fail(400, { errorKey: 'setup_dates_required' });
     }
 
     try {
@@ -63,11 +63,11 @@ export const actions = {
         });
         throw redirect(303, '/workspace');
       } else {
-        return fail(400, { error: result.message || '初期設定に失敗しました。' });
+        return fail(400, { errorKey: 'setup_failed', error: result.message || undefined });
       }
     } catch (e) {
       if (e?.status === 303) throw e;
-      return fail(400, { error: e.message || '初期設定中にエラーが発生しました。' });
+      return fail(400, { errorKey: 'setup_error_generic', error: e.message || undefined });
     }
   }
 };
