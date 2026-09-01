@@ -44,9 +44,10 @@
 <script>
 import axios from 'axios';
 import WorkspaceGrid from '../components/menu.svelte';
-import { onMount, beforeUpdate, tick } from "svelte";
-import { currentMenu, getStore } from '$lib/client/current-record.js';
-import { numeric, formatDate } from '$lib/utils.js';
+import { onMount, tick } from 'svelte';
+import { get } from 'svelte/store';
+import { goto, invalidate } from '$app/navigation';
+import { currentMenu } from '$lib/client/current-record.js';
 import { eventBus as tableBus } from '$lib/client/table-maintenance.js';
 import menuBus from '$lib/client/event-bus.js';
 import { componentList } from '$lib/client/widget-list.js';
@@ -54,29 +55,30 @@ import BilingualText from '$lib/components/BilingualText.svelte';
 
 export let status;
 export let toast;
+export let initialWorkspace = { title: 'ホーム', widgets: [] };
+export let viewState = 'default';
+export let workspaceId = null;
 
-let workspace = { title: '', widgets: [] };
-let widgets = [];
-let arg2;
+let workspace = initialWorkspace;
+let widgets = initialWorkspace?.widgets || [];
 let reload = 0;
 let isEditMode = false;
+let loadedKey = '';
 
 const startWidgetDrag = (event) => {
-  let name = event.target.dataset.type;
-  event.dataTransfer.setData("application/json", JSON.stringify({
+  const name = event.target.dataset.type;
+  event.dataTransfer.setData('application/json', JSON.stringify({
     component: name
   }));
-  event.dataTransfer.effectAllowed = "copy";
+  event.dataTransfer.effectAllowed = 'copy';
 };
 
-const serializeWorkspace = () => {
-  return ({
-    id: workspace.id,
-    title: workspace.title,
-    displayOrder: workspace.displayOrder,
-    body: JSON.stringify(widgets)
-  });
-};
+const serializeWorkspace = () => ({
+  id: workspace.id,
+  title: workspace.title,
+  displayOrder: workspace.displayOrder,
+  body: JSON.stringify(widgets)
+});
 
 const deserializeWorkspace = (_ws) => {
   if (!_ws) return { title: 'ホーム', widgets: [] };
@@ -89,30 +91,30 @@ const deserializeWorkspace = (_ws) => {
     } else if (Array.isArray(_ws.widgets)) {
       parsedWidgets = _ws.widgets;
     }
-  } catch (e) {
+  } catch {
     parsedWidgets = [];
   }
-  return ({
+  return {
     id: _ws.id,
     title: _ws.title || 'ホーム',
     displayOrder: _ws.displayOrder,
     widgets: parsedWidgets
-  });
+  };
 };
 
-const save = (event) => {
+const save = () => {
   try {
     let pr;
     let create = false;
-    let _ws = serializeWorkspace();
+    const _ws = serializeWorkspace();
     if (_ws.id) {
-      _ws.id = parseInt(_ws.id);
+      _ws.id = parseInt(_ws.id, 10);
       pr = axios.put('/api/workspace', _ws);
     } else {
       create = true;
       pr = axios.post('/api/workspace', _ws);
     }
-    pr.then((result) => {
+    pr.then(async (result) => {
       const item = result.data.workspace || result.data.menu;
       if (item) {
         workspace = deserializeWorkspace(item);
@@ -122,7 +124,9 @@ const save = (event) => {
       tableBus.emit('menuUpdated');
       menuBus.emit('menuUpdated');
       if (create && workspace.id) {
-        window.history.replaceState(status, "", `/workspace/${workspace.id}`);
+        await goto(`/workspace/${workspace.id}`, { replaceState: true, noScroll: true });
+      } else {
+        await invalidate('app:workspace');
       }
     });
   } catch (e) {
@@ -131,77 +135,30 @@ const save = (event) => {
 };
 
 $: {
-  let args = (typeof location !== 'undefined' ? location.pathname : '').split('/');
-  if (args[2] === 'new') {
-    status.state = args[2];
-    tick().then(() => {
-      let value = $currentMenu;
-      currentMenu.set(null);
-      if (value) {
-        workspace = value;
-        widgets = value.widgets || value.menu || [];
-        isEditMode = true;
-        reload += 1;
-      }
-    });
-  } else if (numeric(args[2])) {
-    if (arg2 !== args[2]) {
-      arg2 = args[2];
-      widgets = [];
-      axios.get(`/api/workspace/${args[2]}`).then((result) => {
-        const item = result.data.workspace || result.data.menu;
-        workspace = deserializeWorkspace(item);
-        widgets = workspace.widgets;
-        reload += 1;
-      });
-    }
+  const key = `${viewState}:${workspaceId ?? ''}:${initialWorkspace?.id ?? 'default'}`;
+  if (key !== loadedKey && viewState !== 'new' && initialWorkspace) {
+    loadedKey = key;
+    workspace = initialWorkspace;
+    widgets = initialWorkspace.widgets || [];
+    reload += 1;
   }
 }
 
-beforeUpdate(() => {
-  let args = (typeof location !== 'undefined' ? location.pathname : '').split('/');
-  if (numeric(args[2])) {
-    if (arg2 !== args[2]) {
-      arg2 = args[2];
-      widgets = [];
-      axios.get(`/api/workspace/${args[2]}`).then((result) => {
-        const item = result.data.workspace || result.data.menu;
-        workspace = deserializeWorkspace(item);
-        widgets = workspace.widgets;
-        reload += 1;
-      });
-    }
-  }
-});
+$: if (status) {
+  status.state = viewState === 'new' ? 'new' : viewState === 'entry' ? String(workspaceId ?? '') : '';
+}
 
 onMount(() => {
-  let args = (typeof location !== 'undefined' ? location.pathname : '').split('/');
-  if (!args[2] || args[2] === '') {
-    axios.get('/api/workspace').then(async (result) => {
-      const list = result.data.workspaces || result.data.menus || [];
-      if (list.length > 0) {
-        workspace = deserializeWorkspace(list[0]);
-        widgets = workspace.widgets || [];
-        reload += 1;
-      } else {
-        try {
-          const tResult = await axios.get('/api/workspace/templates');
-          const templates = tResult.data.workspaces || tResult.data.templates || [];
-          const homeTpl = templates.find(t => t.title === 'ホーム') || templates[1] || templates[0];
-          if (homeTpl) {
-            workspace = deserializeWorkspace(homeTpl);
-            widgets = workspace.widgets || [];
-            reload += 1;
-          } else {
-            workspace = { title: 'ホーム', widgets: [] };
-            widgets = [];
-          }
-        } catch (e) {
-          workspace = { title: 'ホーム', widgets: [] };
-          widgets = [];
-        }
-      }
-    });
-  }
+  if (viewState !== 'new') return;
+  tick().then(() => {
+    const value = get(currentMenu);
+    currentMenu.set(null);
+    if (value) {
+      workspace = value;
+      widgets = value.widgets || value.menu || [];
+      isEditMode = true;
+      reload += 1;
+    }
+  });
 });
 </script>

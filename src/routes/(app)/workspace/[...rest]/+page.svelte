@@ -10,7 +10,8 @@
     fy: data.currentFy,
     tenant: data.tenant,
     current: 'workspace',
-    pathname: '/workspace'
+    pathname: '/workspace',
+    state: data.viewState === 'new' ? 'new' : data.viewState === 'entry' ? String(data.workspaceId) : ''
   };
 </script>
 
@@ -19,6 +20,12 @@
 </svelte:head>
 
 <div class="workspace-page container-fluid px-0">
-  <WorkspaceView bind:status bind:toast />
+  <WorkspaceView
+    bind:status
+    bind:toast
+    initialWorkspace={data.workspace}
+    viewState={data.viewState}
+    workspaceId={data.workspaceId}
+  />
   <Toast bind:toast />
 </div>
