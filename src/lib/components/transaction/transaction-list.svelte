@@ -23,15 +23,10 @@
         <tr>
           <td style="padding:5px;">
             <select class="form-select" id="kind"
-              on:input={(event) => {
-                let value = parseInt(event.currentTarget.value);
-                status.params.set('kind', value);
-                const param = buildParam(status, {});
-                link(`${(typeof location !== 'undefined' ? location.pathname : '')}?${param}`);
-              }}
-              value={status.params ? parseInt(status.params.get('kind')) : -1}>
+              on:input={changeKind}
+              value={filters.kind ? parseInt(filters.kind, 10) : -1}>
               <option value={-1}><BilingualText key="all" /></option>
-              {#each transactionKinds as ent}
+              {#each transactionKinds as ent (ent.id)}
               <option value={ent.id}>{ent.label}</option>
               {/each}
             </select>
@@ -53,7 +48,7 @@
           <td style="text-align:right;">
           </td>
         </tr>
-        {#each transactions as line}
+        {#each transactions as line (line.id)}
         <tr>
           <td>
             {line.kindId ? line.kind.label : '_'}
@@ -115,80 +110,32 @@
 </style>
 
 <script>
-import axios from 'axios';
-
+import { createEventDispatcher } from 'svelte';
 import CompanySelect from '$lib/components/CompanySelect.svelte';
-
-import {numeric, formatDate} from '$lib/utils.js';
-import {onMount, beforeUpdate, afterUpdate} from 'svelte';
-import {parseParams, buildParam} from '$lib/client/params.js';
+import { numeric, formatDate } from '$lib/utils.js';
 import { link } from '$lib/client/router.js';
-
 import BilingualText from '$lib/components/BilingualText.svelte';
-export let status;
-export let transactions;
 
-let companyId;
-let upperAmount;
-let lowerAmount;
-let transactionKinds = [];
-let prevParamsString = null;
+const dispatch = createEventDispatcher();
 
-const paramsToString = (params) => {
-  if (!params) return '';
-  const array = [];
-  params.forEach((value, key) => {
-    array.push(`${key}=${value}`);
-  });
-  return array.sort().join('&');
-}
+export let transactions = [];
+export let transactionKinds = [];
+export let filters = {};
 
-const compDate = (date, year, month, day) => {
-  let ymd = date.split('-');
-  return	(	( parseInt(ymd[0]) == year )
-    &&	( parseInt(ymd[1]) == month )
-    &&	( parseInt(ymd[2]) == day ));
-}
+let companyId = filters.company || '';
 
-const updateTransactions = () => {
-  let param = buildParam(status, undefined);
-  console.log('param', param);
-  axios.get(`/api/transaction?${param}`).then((result) => {
-    transactions = result.data.transactions;
-    console.log('transactions', transactions);
+$: companyId = filters.company || '';
+
+const changeKind = (event) => {
+  const value = parseInt(event.currentTarget.value, 10);
+  dispatch('filter', {
+    kind: Number.isFinite(value) && value > 0 ? value : undefined
   });
 };
 
-beforeUpdate(() => {
-  const newParamsString = paramsToString(status.params);
-  if (newParamsString !== prevParamsString) {
-    prevParamsString = newParamsString;
-    updateTransactions();
-  }
-});
-
 const changeCompany = (event) => {
-  let companyId = event.detail;
-  status.params.set('company', companyId);
-  const param = buildParam(status, {});
-  link(`${(typeof location !== 'undefined' ? location.pathname : '')}?${param}`);
-}
-
-const changeAmount = (event) => {
-  if	( event.keyCode == 13 )	{
-    status.params.set('upper', numeric(upperAmount));
-    status.params.set('lower', numeric(lowerAmount));
-    const param = buildParam(status, {});
-    link(`${(typeof location !== 'undefined' ? location.pathname : '')}?${param}`);
-  }
-}
-
-onMount(() => {
-  prevParamsString = paramsToString(status.params);
-  updateTransactions();
-  axios.get(`/api/transaction/kinds`).then((result) => {
-    transactionKinds = result.data.values;
-    console.log({transactionKinds});
+  dispatch('filter', {
+    company: event.detail || undefined
   });
-})
+};
 </script>

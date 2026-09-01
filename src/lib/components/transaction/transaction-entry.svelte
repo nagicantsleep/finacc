@@ -80,17 +80,20 @@
 <script>
 import axios from 'axios';
 import Icon from '@iconify/svelte';
-import {numeric, formatDate} from '$lib/utils.js';
-import {onMount, beforeUpdate, afterUpdate} from 'svelte';
+import {numeric} from '$lib/utils.js';
+import {createEventDispatcher} from 'svelte';
+import { goto, invalidate } from '$app/navigation';
 import TransactionInfo from './transaction-info.svelte';
 import FormError from '$lib/components/common/FormError.svelte';
 import OkModal from '$lib/components/common/OkModal.svelte';
-import {currentTransaction, currentTask, getStore} from '$lib/client/current-record.js';
+import {currentTransaction} from '$lib/client/current-record.js';
 import {bindFile} from '$lib/client/document.js';
 import { link } from '$lib/client/router.js';
 
 import BilingualText from '$lib/components/BilingualText.svelte';
 import { bi } from '$lib/i18n/bilingual.js';
+
+const dispatch = createEventDispatcher();
 export	let	status;
 export let toast;
 export	let transaction;
@@ -196,22 +199,16 @@ const save = () => {
       	create = true;
     	}
     	pr.then((result) => {
-      	console.log('result', result);
       	if  ( !result.data.code ) {
-        	let id = result.data.id;
-          let documentId = result.data.documentId;
-          //console.log({documentId});
+        	const id = result.data.id;
+          const documentId = result.data.documentId;
           bindFile(files, documentId);
-          axios.get(`/api/transaction/${id}`).then((result) => {
-        		console.log('new load', result.data);
-        		transaction = result.data.transaction;
-        		currentTransaction.set(transaction);
-				    if	( create )	{
-        	    link(`/transaction/entry/${transaction.id}`);
-      	    } else {
-              currentTransaction.set(transaction);
-            }
-          });
+          if (create) {
+            currentTransaction.set(transaction);
+            goto(`/transaction/entry/${id}`);
+          } else {
+            invalidate('app:transaction');
+          }
         } else {
           errorMessages.push($bi('error_save_failed'));
           errorMessages = errorMessages;
@@ -229,19 +226,10 @@ const save = () => {
 const	back = (event) => {
   currentTransaction.set(null);
   errorMessages = [];
-  const task = getStore(currentTask);
-  if (task && task.id) {
-    link(`/task/entry/${task.id}`);
-  } else {
-    link('/transaction');
-  }
+  dispatch('close');
 }
 
 const makeVoucher = (event) => {
 
 }
-
-beforeUpdate(() => {
-});
-
 </script>
