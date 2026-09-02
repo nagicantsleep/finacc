@@ -1,23 +1,25 @@
-<table class="table table-bordered table-sm">
-  <thead class="table-light">
-    <tr>
-      <th scope="col" class="text-center"><BilingualText key="month" /></th>
-      {#each header as col}
-        <th scope="col" class="text-center">{col.name}</th>
-      {/each}
-    </tr>
-  </thead>
-  <tbody>
-    {#each body as row}
+<div class="table-responsive">
+  <table class="table table-bordered table-sm">
+    <thead class="table-light">
       <tr>
-        <td>{row.year}/{String(row.month).padStart(2, '0')}</td>
+        <th scope="col" class="text-center"><BilingualText key="month" /></th>
         {#each header as col}
-          <td class="text-end">{(row[col.name] || 0).toLocaleString()}</td>
+          <th scope="col" class="text-center">{col.name}</th>
         {/each}
       </tr>
-    {/each}
-  </tbody>
-</table>
+    </thead>
+    <tbody>
+      {#each body as row}
+        <tr>
+          <td>{row.year}/{String(row.month).padStart(2, '0')}</td>
+          {#each header as col}
+            <td class="text-end">{(row[col.name] || 0).toLocaleString()}</td>
+          {/each}
+        </tr>
+      {/each}
+    </tbody>
+  </table>
+</div>
 
 <script>
   import BilingualText from '$lib/components/BilingualText.svelte';

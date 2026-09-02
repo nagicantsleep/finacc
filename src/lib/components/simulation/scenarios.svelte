@@ -68,45 +68,47 @@
     </div>
   </div>
 
-  <table class="table table-bordered table-sm sim-table mt-2">
-    <thead class="table-light">
-      <tr>
-        <th scope="col">名称 / Tên</th>
-        <th scope="col" class="sim-col-status">状態 / Trạng thái</th>
-        <th scope="col" class="sim-col-num">基準期 / Kỳ gốc</th>
-        <th scope="col">予測期間 / Kỳ mô phỏng</th>
-        <th scope="col" class="sim-col-date">作成日 / Ngày tạo</th>
-      </tr>
-    </thead>
-    <tbody>
-      {#each scenarios as s (s.id)}
-        <tr class="sim-clickable" on:click={() => openDetail(s.id)}>
-          <td>
-            <strong>{s.name}</strong>
-            {#if s.description}<div class="sim-desc">{s.description}</div>{/if}
-          </td>
-          <td class="sim-col-status">
-            <span class="badge sim-badge-{s.status}">{statusLabel(s.status)}</span>
-          </td>
-          <td class="sim-col-num">{s.baseTerm}</td>
-          <td>{fmtDate(s.simPeriodFrom)} → {fmtDate(s.simPeriodTo)}</td>
-          <td class="sim-col-date">{fmtDate(s.createdAt)}</td>
-        </tr>
-      {/each}
-      {#if scenarios.length === 0 && !loading}
+  <div class="table-responsive mt-2">
+    <table class="table table-bordered table-sm sim-table">
+      <thead class="table-light">
         <tr>
-          <td colspan="5" class="text-center text-muted sim-empty">
-            <BilingualText primary="シナリオがありません" secondary="Chưa có kịch bản nào" inline={true} />
-            <div class="mt-2">
-              <button type="button" class="btn btn-sm btn-primary" on:click={openCreate}>
-                <BilingualText primary="最初のシナリオを作成" secondary="Tạo kịch bản đầu tiên" inline={true} />
-              </button>
-            </div>
-          </td>
+          <th scope="col">名称 / Tên</th>
+          <th scope="col" class="sim-col-status">状態 / Trạng thái</th>
+          <th scope="col" class="sim-col-num">基準期 / Kỳ gốc</th>
+          <th scope="col">予測期間 / Kỳ mô phỏng</th>
+          <th scope="col" class="sim-col-date">作成日 / Ngày tạo</th>
         </tr>
-      {/if}
-    </tbody>
-  </table>
+      </thead>
+      <tbody>
+        {#each scenarios as s (s.id)}
+          <tr class="sim-clickable" on:click={() => openDetail(s.id)}>
+            <td>
+              <strong>{s.name}</strong>
+              {#if s.description}<div class="sim-desc">{s.description}</div>{/if}
+            </td>
+            <td class="sim-col-status">
+              <span class="badge sim-badge-{s.status}">{statusLabel(s.status)}</span>
+            </td>
+            <td class="sim-col-num">{s.baseTerm}</td>
+            <td>{fmtDate(s.simPeriodFrom)} → {fmtDate(s.simPeriodTo)}</td>
+            <td class="sim-col-date">{fmtDate(s.createdAt)}</td>
+          </tr>
+        {/each}
+        {#if scenarios.length === 0 && !loading}
+          <tr>
+            <td colspan="5" class="text-center text-muted sim-empty">
+              <BilingualText primary="シナリオがありません" secondary="Chưa có kịch bản nào" inline={true} />
+              <div class="mt-2">
+                <button type="button" class="btn btn-sm btn-primary" on:click={openCreate}>
+                  <BilingualText primary="最初のシナリオを作成" secondary="Tạo kịch bản đầu tiên" inline={true} />
+                </button>
+              </div>
+            </td>
+          </tr>
+        {/if}
+      </tbody>
+    </table>
+  </div>
 </div>
 
 {#if showCreate}

@@ -1,24 +1,24 @@
 <input type="hidden" id="id" bind:value={task.id}>
 <div class="container-fluid">
-  <div class="row mb-3">
-    <label for="issueDate" class="col-1 col-form-label"><BilingualText key="occurrence_date" /></label>
-    <div class="col-2">
+  <div class="row mb-3 g-2">
+    <label for="issueDate" class="col-12 col-md-1 col-form-label"><BilingualText key="occurrence_date" /></label>
+    <div class="col-12 col-md-3">
       <input type="date" class="form-control" id="issueDate"
         bind:value={task.issueDate}>
     </div>
-    <label for="deliveryLimit" class="col-1 col-form-label"><BilingualText key="delivery_limit" /></label>
-    <div class="col-2">
+    <label for="deliveryLimit" class="col-12 col-md-1 col-form-label"><BilingualText key="delivery_limit" /></label>
+    <div class="col-12 col-md-3">
       <input type="date" class="form-control" id="deliveryLimit"
         bind:value={task.deliveryLimit}>
     </div>
-    <label for="endedAt" class="col-1 col-form-label"><BilingualText key="project_end" /></label>
-    <div class="col-2">
+    <label for="endedAt" class="col-12 col-md-1 col-form-label"><BilingualText key="project_end" /></label>
+    <div class="col-12 col-md-3">
       <input type="date" class="form-control" id="endedAt"
         bind:value={task.endedAt}>
     </div>
   </div>
-  <div class="row mb-3">
-    <div class="col-1">
+  <div class="row mb-3 g-2">
+    <div class="col-12 col-md-1">
       <label class="col-form-label"><BilingualText key="counterparty" /></label>
       {#if ( task.companyId && task.id)}
       {#if (companyEditting)}
@@ -36,7 +36,7 @@
       {/if}
       {/if}
     </div>
-    <div class="col-11">
+    <div class="col-12 col-md-11">
       {#if (companyEditting || !task.companyId)}
       <CompanySelect
         on:startregister
@@ -60,15 +60,15 @@
   		{/if}
     </div>
   </div>
-  <div class="row mb-3">
-    <label for="subject" class="col-1 col-form-label"><BilingualText key="task_subject" /></label>
-    <div class="col-7">
+  <div class="row mb-3 g-2">
+    <label for="subject" class="col-12 col-md-1 col-form-label"><BilingualText key="task_subject" /></label>
+    <div class="col-12 col-md-6">
       <input type="text" class="form-control" id="subject"
         bind:value={task.subject} />
     </div>
-    <div class="col-4">
-      <label for="handler" class="col-form-label"><BilingualText key="person_in_charge" /></label>
-      <select id="handler" class="form-control" style="display:inline;margin:0 10px;width:200px;"
+    <div class="col-12 col-md-5 d-flex align-items-center">
+      <label for="handler" class="col-form-label me-2"><BilingualText key="person_in_charge" /></label>
+      <select id="handler" class="form-control flex-grow-1"
         bind:value={task.handledBy}>
         {#each users as user}
         <option value={user.id}>{user.name}</option>
@@ -76,8 +76,8 @@
       </select>
     </div>
   </div>
-  <div class="row mb-3">
-    <div class="col-1">
+  <div class="row mb-3 g-2">
+    <div class="col-12 col-md-1">
       <label class="col-form-label"><BilingualText key="estimate" /></label>
       {#if (task.id)}
       {#if (viewDetail)}
@@ -139,8 +139,8 @@
     </div>
     {/if}
   </div>
-  <div class="row mb-3">
-    <div class="col-1">
+  <div class="row mb-3 g-2">
+    <div class="col-12 col-md-1">
       <label for="description" class="col-form-label"><BilingualText key="remarks" /></label>
       {#if ( documentEditting )}
       <a href="#" on:click|preventDefault={() => {
@@ -171,7 +171,7 @@
       {/if}
       {/if}
   	</div>
-    <div class="col-11">
+    <div class="col-12 col-md-11">
       <Document
         editting={documentEditting}
         noTitle={true}
@@ -179,8 +179,8 @@
         bind:document={task.document}></Document>
     </div>
   </div>
-  <div class="row mb-3">
-    <div class="col-1">
+  <div class="row mb-3 g-2">
+    <div class="col-12 col-md-1">
       <BilingualText key="file" />
       {#if ( viewFiles )}
       <a href="#" on:click|preventDefault={() => {
@@ -196,7 +196,7 @@
       </a>
       {/if}
     </div>
-    <div class="col-11">
+    <div class="col-12 col-md-11">
       {#if ( viewFiles )}
       <DocumentFiles
       	document={task.document}
@@ -204,8 +204,8 @@
       {/if}
     </div>
   </div>
-  <div class="row mb-3">
-    <div class="col-1">
+  <div class="row mb-3 g-2">
+    <div class="col-12 col-md-1">
       <BilingualText key="transaction_label" />
       {#if ( viewTransaction )}
       <a href="#" on:click|preventDefault={() => {
@@ -221,94 +221,63 @@
       </a>
       {/if}
     </div>
-    <div class="col-11">
+    <div class="col-12 col-md-11">
       {#if (viewTransaction && transactions )}
-      <table class="table table-bordered">
-        <thead class="table-light">
-          <tr>
-            <th scope="col" style="width: 100px;"><BilingualText key="kind" /></th>
-            <th scope="col" style="width: 100px;"><BilingualText key="occurrence_date" /><a href=""
-              	on:click|preventDefault={() => {
-                if	( transactionOrder === 'asc' )	{
-									transactionOrder = 'desc';
-                } else {
-                  transactionOrder = 'asc';
-                }
-                transactionParams.set('order', transactionOrder);
-                transactions = null;
-              }}>
-							  {#if ( transactionOrder === 'asc')}
-                ▲
-                {:else}
-                ▼
-                {/if}
-              </a>
-            </th>
-            <th scope="col" style=""><BilingualText key="task_subject" /></th>
-            <th scope="col" style="width: 100px;"><BilingualText key="person_in_charge" /></th>
-            <th scope="col" style="width: 100px;"><BilingualText key="amount" /></th>
-          </tr>
-        </thead>
-				<tbody>
-          {#each transactions as line}
-          <tr>
-            <td>
-              {line.kindId ? line.kind.label : '_'}
-            </td>
-            <td>
-              {formatDate(line.issueDate)}
-            </td>
-            <td>
-              <a href="#" on:click|preventDefault={() => {
-                  openTransaction(line.id)
+      <div class="table-responsive">
+        <table class="table table-bordered">
+          <thead class="table-light">
+            <tr>
+              <th scope="col" style="width: 100px;"><BilingualText key="kind" /></th>
+              <th scope="col" style="width: 100px;"><BilingualText key="occurrence_date" /><a href=""
+                  on:click|preventDefault={() => {
+                  if ( transactionOrder === 'asc' ) {
+                    transactionOrder = 'desc';
+                  } else {
+                    transactionOrder = 'asc';
+                  }
+                  transactionParams.set('order', transactionOrder);
+                  transactions = null;
                 }}>
-                {line.subject ? line.subject : '__'}
-              </a>
-            </td>
-            <td>
-              { line.handleUser ? (line.handleUser.memberships?.[0]?.tradingName || line.handleUser.legalName || ''): '__'}
-            </td>
-            <td class="number">
-              {numeric(line.amount).toLocaleString()}
-            </td>
-          </tr>
-          {/each}
-        </tbody>
-      </table>
-      <!-- div class="row">
-        <div class="col-5">
-        	<button type="button" class="btn btn-info"
-        		on:click={() => {
-              transactionParams.delete('kind');
-              transactionParams.set('voucher','true');
-              transactions = null;
-          	}}><BilingualText key="billing" /></button>
-        	<button type="button" class="btn btn-info"
-	        	on:click={() => {
-              transactionParams.delete('kind');
-              transactionParams.set('voucher', 'false');
-              transactions = null;
-        	  }}><BilingualText key="business_relations" /></button>
-	        <button type="button" class="btn btn-info"
-  	      	on:click={() => {
-              transactionParams.delete('voucher');
-              transactionParams.delete('kind');
-              transactions = null;
-	        	}}><BilingualText key="all" /></button>
-      		<select class="form-select" style="display:inline;width:150px;"
-        		bind:value={kind}
-          	on:change={() => {
-              transactionParams.set('kind', kind);
-              transactions = null;
-          	}}>
-        		<option value={-1}></option>
-        		{#each transactionKinds as ent}
-        		<option value={ent.id}>{ent.label}</option>
-        		{/each}
-      		</select>
-      	</div>
-    	</div -->
-			{/if}
+                  {#if ( transactionOrder === 'asc')}
+                  ▲
+                  {:else}
+                  ▼
+                  {/if}
+                </a>
+              </th>
+              <th scope="col" style=""><BilingualText key="task_subject" /></th>
+              <th scope="col" style="width: 100px;"><BilingualText key="person_in_charge" /></th>
+              <th scope="col" style="width: 100px;"><BilingualText key="amount" /></th>
+            </tr>
+          </thead>
+          <tbody>
+            {#each transactions as line}
+            <tr>
+              <td>
+                {line.kindId ? line.kind.label : '_'}
+              </td>
+              <td>
+                {formatDate(line.issueDate)}
+              </td>
+              <td>
+                <a href="#" on:click|preventDefault={() => {
+                    openTransaction(line.id)
+                  }}>
+                  {line.subject ? line.subject : '__'}
+                </a>
+              </td>
+              <td>
+                { line.handleUser ? (line.handleUser.memberships?.[0]?.tradingName || line.handleUser.legalName || ''): '__'}
+              </td>
+              <td class="number">
+                {numeric(line.amount).toLocaleString()}
+              </td>
+            </tr>
+            {/each}
+          </tbody>
+        </table>
+      </div>
+      {/if}
     </div>
   </div>
 </div>

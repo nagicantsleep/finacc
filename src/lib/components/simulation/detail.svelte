@@ -82,46 +82,48 @@
 
   <div class="sim-tab-body mt-2">
     {#if activeTab === 'entries'}
-      <table class="table table-bordered table-sm sim-entry-table">
-        <thead class="table-light">
-          <tr>
-            <th>日付 / Ngày</th>
-            <th>借方科目 / TK Nợ</th>
-            <th class="sim-num">借方金額 / Số tiền Nợ</th>
-            <th>貸方科目 / TK Có</th>
-            <th class="sim-num">貸方金額 / Số tiền Có</th>
-            <th>摘要 / Diễn giải</th>
-            <th class="sim-actions"></th>
-          </tr>
-        </thead>
-        <tbody>
-          {#each entries as e (e.id)}
+      <div class="table-responsive">
+        <table class="table table-bordered table-sm sim-entry-table">
+          <thead class="table-light">
             <tr>
-              <td>{fmtDate(e.date)}</td>
-              <td>{e.debitAccount}{#if e.debitSubAccount}-{e.debitSubAccount}{/if}</td>
-              <td class="sim-num">{fmtNum(e.debitAmount)}</td>
-              <td>{e.creditAccount}{#if e.creditSubAccount}-{e.creditSubAccount}{/if}</td>
-              <td class="sim-num">{fmtNum(e.creditAmount)}</td>
-              <td>{e.memo || ''}</td>
-              <td class="sim-actions">
-                {#if scenario.status === 'draft' && canEdit}
-                  <button class="btn btn-sm btn-link p-0 me-2" on:click={() => editEntry(e)}>
-                    <i class="bi bi-pencil"></i>
-                  </button>
-                  <button class="btn btn-sm btn-link p-0 text-danger" on:click={() => deleteEntry(e)}>
-                    <i class="bi bi-trash"></i>
-                  </button>
-                {/if}
-              </td>
+              <th>日付 / Ngày</th>
+              <th>借方科目 / TK Nợ</th>
+              <th class="sim-num">借方金額 / Số tiền Nợ</th>
+              <th>貸方科目 / TK Có</th>
+              <th class="sim-num">貸方金額 / Số tiền Có</th>
+              <th>摘要 / Diễn giải</th>
+              <th class="sim-actions"></th>
             </tr>
-          {/each}
-          {#if entries.length === 0}
-            <tr><td colspan="7" class="text-center text-muted py-3">
-              <BilingualText primary="仮想仕訳がありません" secondary="Chưa có bút toán ảo" inline={true} />
-            </td></tr>
-          {/if}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {#each entries as e (e.id)}
+              <tr>
+                <td>{fmtDate(e.date)}</td>
+                <td>{e.debitAccount}{#if e.debitSubAccount}-{e.debitSubAccount}{/if}</td>
+                <td class="sim-num">{fmtNum(e.debitAmount)}</td>
+                <td>{e.creditAccount}{#if e.creditSubAccount}-{e.creditSubAccount}{/if}</td>
+                <td class="sim-num">{fmtNum(e.creditAmount)}</td>
+                <td>{e.memo || ''}</td>
+                <td class="sim-actions">
+                  {#if scenario.status === 'draft' && canEdit}
+                    <button class="btn btn-sm btn-link p-0 me-2" on:click={() => editEntry(e)}>
+                      <i class="bi bi-pencil"></i>
+                    </button>
+                    <button class="btn btn-sm btn-link p-0 text-danger" on:click={() => deleteEntry(e)}>
+                      <i class="bi bi-trash"></i>
+                    </button>
+                  {/if}
+                </td>
+              </tr>
+            {/each}
+            {#if entries.length === 0}
+              <tr><td colspan="7" class="text-center text-muted py-3">
+                <BilingualText primary="仮想仕訳がありません" secondary="Chưa có bút toán ảo" inline={true} />
+              </td></tr>
+            {/if}
+          </tbody>
+        </table>
+      </div>
 
     {:else if activeTab === 'tb'}
       {#if tbLoading}<p class="text-muted">...</p>

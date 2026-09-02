@@ -261,6 +261,12 @@ const initializeGrid = async () => {
     grid = GridStack.init({
       cellHeight: 12,
       margin: 8,
+      minRow: 1,
+      minWidth: 768,
+      columnOpts: {
+        breakpointForWindow: true,
+        breakpoints: [{ w: 768, c: 1 }]
+      },
       draggable: isEditMode,
       resizable: isEditMode,
       float: true,
