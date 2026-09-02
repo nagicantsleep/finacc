@@ -35,14 +35,4 @@ export async function htmlToPdf(fullHTML) {
   }
 }
 
-export const print = async (reportName, props) => {
-  const origin = originFromEnv();
-  const reportPath = `../dist-ssr/${reportName}.js`;
-  const { default: ReportComponent } = await import(reportPath);
-  const { html, head } = ReportComponent.render(props);
-  const realHead = head.replaceAll(/href="\//g, `href="${origin}`);
-  const fullHTML = `<!DOCTYPE html><html><head>${realHead}</head><body>${html}</body></html>`;
-  return htmlToPdf(fullHTML);
-};
-
 export { originFromEnv };

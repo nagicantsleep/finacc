@@ -93,8 +93,8 @@ export async function respondFormPdf(event) {
         });
       }
       return await pdfResponse(`${form}.pdf`, TX_VIEWS[form], props, [
-        'style/paperA4.css',
-        'style/transaction.css'
+        'stylesheets/paperA4.css',
+        'stylesheets/transaction.css'
       ]);
     } catch (e) {
       console.error('respondFormPdf transaction', e);
