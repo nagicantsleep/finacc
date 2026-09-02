@@ -69,7 +69,7 @@ $: if (accounts?.length) setAccounts(accounts);
 const openSlip = (event) => {
   const slipNo = event.detail;
   if (slipNo.no) {
-    axios.get(`/api/cross_slip/${slipNo.year}/${slipNo.month}/${slipNo.no}`).then((result) => {
+    axios.get(`/api/cross-slip/${slipNo.year}/${slipNo.month}/${slipNo.no}`).then((result) => {
       slip = result.data;
       slip.approvedAt = slip.approvedAt ? new Date(slip.approvedAt) : null;
       popUp = true;
