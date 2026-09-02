@@ -1,4 +1,5 @@
 <script>
+  import { bi } from '$lib/i18n/bilingual.js';
   import AccountsView from '$lib/components/accounts/accounts.svelte';
 
   export let data;
@@ -14,7 +15,7 @@
 </script>
 
 <svelte:head>
-  <title>勘定科目設定 :: Hieronymus</title>
+  <title>{$bi('title_accounts')} :: Hieronymus</title>
 </svelte:head>
 
 <div class="accounts-page container-fluid px-0">

@@ -1,4 +1,5 @@
 <script>
+  import { bi } from '$lib/i18n/bilingual.js';
   import View from '$lib/components/forms/general-ledger/general-ledger.svelte';
 
   export let data;
@@ -10,7 +11,7 @@
 </script>
 
 <svelte:head>
-  <title>総勘定元帳帳票 :: Hieronymus</title>
+  <title>{$bi('title_general_ledger_form')} :: Hieronymus</title>
 </svelte:head>
 
 <div class="page-container container-fluid px-0">

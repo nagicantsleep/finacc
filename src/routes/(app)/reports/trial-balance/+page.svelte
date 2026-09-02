@@ -1,4 +1,5 @@
 <script>
+  import { bi } from '$lib/i18n/bilingual.js';
   import TrialBalanceView from '$lib/components/reports/trial-balance.svelte';
 
   export let data;
@@ -13,7 +14,7 @@
 </script>
 
 <svelte:head>
-  <title>残高試算表 v2 :: Hieronymus</title>
+  <title>{$bi('title_trial_balance')} :: Hieronymus</title>
 </svelte:head>
 
 <div class="trial-balance-page container-fluid px-0">

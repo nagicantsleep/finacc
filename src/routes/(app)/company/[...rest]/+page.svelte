@@ -1,4 +1,5 @@
 <script>
+  import { bi } from '$lib/i18n/bilingual.js';
   import CompanyView from '$lib/components/company/company.svelte';
 
   export let data;
@@ -14,7 +15,7 @@
 </script>
 
 <svelte:head>
-  <title>取引先管理 :: Hieronymus</title>
+  <title>{$bi('title_company')} :: Hieronymus</title>
 </svelte:head>
 
 <div class="company-page container-fluid px-0">

@@ -1,4 +1,5 @@
 <script>
+  import { bi } from '$lib/i18n/bilingual.js';
   import TransactionView from '$lib/components/transaction/transaction.svelte';
 
   export let data;
@@ -14,7 +15,7 @@
 </script>
 
 <svelte:head>
-  <title>取引管理 :: Hieronymus</title>
+  <title>{$bi('title_transaction')} :: Hieronymus</title>
 </svelte:head>
 
 <div class="transaction-page container-fluid px-0">

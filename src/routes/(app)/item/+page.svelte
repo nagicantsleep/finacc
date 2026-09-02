@@ -1,4 +1,5 @@
 <script>
+  import { bi } from '$lib/i18n/bilingual.js';
   import ItemView from '$lib/components/item/item.svelte';
 
   export let data;
@@ -13,7 +14,7 @@
 </script>
 
 <svelte:head>
-  <title>品目マスタ :: Hieronymus</title>
+  <title>{$bi('title_item')} :: Hieronymus</title>
 </svelte:head>
 
 <div class="item-page container-fluid px-0">

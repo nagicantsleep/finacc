@@ -1,4 +1,5 @@
 <script>
+  import { bi } from '$lib/i18n/bilingual.js';
   import HomeView from '$lib/components/home/home.svelte';
   import Toast from '$lib/components/common/Toast.svelte';
 
@@ -17,7 +18,7 @@
 </script>
 
 <svelte:head>
-  <title>ホーム :: Hieronymus</title>
+  <title>{$bi('title_home')} :: Hieronymus</title>
 </svelte:head>
 
 <div class="home-page container-fluid px-0">

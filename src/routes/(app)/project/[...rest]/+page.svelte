@@ -1,4 +1,5 @@
 <script>
+  import { bi } from '$lib/i18n/bilingual.js';
   import ProjectView from '$lib/components/project/project.svelte';
 
   export let data;
@@ -15,7 +16,7 @@
 </script>
 
 <svelte:head>
-  <title>プロジェクト会計 :: Hieronymus</title>
+  <title>{$bi('title_project')} :: Hieronymus</title>
 </svelte:head>
 
 <div class="project-page container-fluid px-0">

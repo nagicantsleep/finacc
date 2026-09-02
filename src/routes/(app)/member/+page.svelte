@@ -1,4 +1,5 @@
 <script>
+  import { bi } from '$lib/i18n/bilingual.js';
   import MemberView from '$lib/components/member/member.svelte';
 
   export let data;
@@ -13,7 +14,7 @@
 </script>
 
 <svelte:head>
-  <title>役職員・メンバー :: Hieronymus</title>
+  <title>{$bi('title_member')} :: Hieronymus</title>
 </svelte:head>
 
 <div class="member-page container-fluid px-0">

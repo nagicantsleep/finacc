@@ -1,4 +1,5 @@
 <script>
+  import { bi } from '$lib/i18n/bilingual.js';
   import CrossSlipEditor from '$lib/components/cross-slip/cross-slip.svelte';
   import Toast from '$lib/components/common/Toast.svelte';
 
@@ -18,7 +19,7 @@
 </script>
 
 <svelte:head>
-  <title>振替伝票入力 :: Hieronymus</title>
+  <title>{$bi('title_crossslip')} :: Hieronymus</title>
 </svelte:head>
 
 <div class="crossslip-page container-fluid px-0">

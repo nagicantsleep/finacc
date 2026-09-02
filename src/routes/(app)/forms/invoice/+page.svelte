@@ -1,4 +1,5 @@
 <script>
+  import { bi } from '$lib/i18n/bilingual.js';
   import View from '$lib/components/forms/invoice/invoice.svelte';
 
   export let data;
@@ -33,7 +34,7 @@
 </script>
 
 <svelte:head>
-  <title>請求書 :: Hieronymus</title>
+  <title>{$bi('title_invoice')} :: Hieronymus</title>
 </svelte:head>
 
 <div class="page-container container-fluid px-0">

@@ -1,4 +1,5 @@
 <script>
+  import { bi } from '$lib/i18n/bilingual.js';
   import WorkspaceView from '$lib/components/workspace/workspace.svelte';
   import Toast from '$lib/components/common/Toast.svelte';
 
@@ -16,7 +17,7 @@
 </script>
 
 <svelte:head>
-  <title>ワークスペース :: Hieronymus</title>
+  <title>{$bi('title_workspace')} :: Hieronymus</title>
 </svelte:head>
 
 <div class="workspace-page container-fluid px-0">

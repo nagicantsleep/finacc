@@ -1,4 +1,5 @@
 <script>
+  import { bi } from '$lib/i18n/bilingual.js';
   import View from '$lib/components/closing/closing-confirm.svelte';
 
   export let data;
@@ -11,7 +12,7 @@
 </script>
 
 <svelte:head>
-  <title>決算繰越処理 :: Hieronymus</title>
+  <title>{$bi('title_closing')} :: Hieronymus</title>
 </svelte:head>
 
 <div class="page-container container-fluid px-0">

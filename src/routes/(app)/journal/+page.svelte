@@ -1,4 +1,5 @@
 <script>
+  import { bi } from '$lib/i18n/bilingual.js';
   import JournalView from '$lib/components/journal/journal.svelte';
 
   export let data;
@@ -13,7 +14,7 @@
 </script>
 
 <svelte:head>
-  <title>仕訳日記帳 :: Hieronymus</title>
+  <title>{$bi('title_journal')} :: Hieronymus</title>
 </svelte:head>
 
 <div class="journal-page container-fluid px-0">

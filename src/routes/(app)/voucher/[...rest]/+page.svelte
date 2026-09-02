@@ -1,4 +1,5 @@
 <script>
+  import { bi } from '$lib/i18n/bilingual.js';
   import VoucherView from '$lib/components/voucher/voucher.svelte';
 
   export let data;
@@ -14,7 +15,7 @@
 </script>
 
 <svelte:head>
-  <title>証憑・伝票管理 :: Hieronymus</title>
+  <title>{$bi('title_voucher')} :: Hieronymus</title>
 </svelte:head>
 
 <div class="voucher-page container-fluid px-0">

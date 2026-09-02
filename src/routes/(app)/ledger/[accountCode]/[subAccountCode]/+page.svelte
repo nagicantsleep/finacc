@@ -1,10 +1,11 @@
 <script>
+  import { bi } from '$lib/i18n/bilingual.js';
   import Ledger from '$lib/components/ledger/ledger.svelte';
   export let data;
 </script>
 
 <svelte:head>
-  <title>総勘定元帳 :: Hieronymus</title>
+  <title>{$bi('title_ledger')} :: Hieronymus</title>
 </svelte:head>
 
 <div class="page-container container-fluid px-0">

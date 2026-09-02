@@ -1,4 +1,5 @@
 <script>
+  import { bi } from '$lib/i18n/bilingual.js';
   import View from '$lib/components/forms/explanatory-journal/explanatory-journal.svelte';
 
   export let data;
@@ -9,7 +10,7 @@
 </script>
 
 <svelte:head>
-  <title>仕訳日記帳 :: Hieronymus</title>
+  <title>{$bi('title_explanatory_journal_form')} :: Hieronymus</title>
 </svelte:head>
 
 <div class="page-container container-fluid px-0">
