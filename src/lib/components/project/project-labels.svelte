@@ -364,7 +364,7 @@ import BilingualText from '$lib/components/BilingualText.svelte';
     await fetchLabels();
     try {
       const term = (status && status.fy) ? status.fy.term : 0;
-      const response = await axios.get(`/api/accounts4/${term}`);
+      const response = await axios.get(`/api/accounts/tree/${term}`);
       allAccounts = response.data;
     } catch (err) {
       console.error("全勘定科目の取得に失敗しました:", err);

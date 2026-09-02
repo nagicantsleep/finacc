@@ -360,7 +360,7 @@ const openSlip = (year, month, no) => {
     };
     popUp = true;
   } else {
-    axios.get(`/api/cross_slip/${year}/${month}/${no}`).then((result) => {
+    axios.get(`/api/cross-slip/${year}/${month}/${no}`).then((result) => {
       let data = result.data;
       slip = {
         year: data.year,

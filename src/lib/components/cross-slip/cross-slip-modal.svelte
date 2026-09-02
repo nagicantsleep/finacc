@@ -244,9 +244,9 @@ const save = (event) => {
     try {
       let pr;
       if ( slip.no  ) {
-        pr = axios.put('/api/cross_slip', slip);
+        pr = axios.put('/api/cross-slip', slip);
       } else {
-        pr = axios.post('/api/cross_slip', slip);
+        pr = axios.post('/api/cross-slip', slip);
       }
       pr.then(() => {
         close_();
@@ -268,7 +268,7 @@ const close_ = (event) => {
 const delete_ = (event) => {
   try {
     //console.log('delete');
-    axios.delete('/api/cross_slip', {
+    axios.delete('/api/cross-slip', {
       data: {
         year: slip.year,
         month: slip.month,
@@ -287,7 +287,7 @@ const delete_ = (event) => {
 
 const disapprove = (event) => {
   slip.approvedAt = null;
-  axios.put('/api/cross_slip/approve', {
+  axios.put('/api/cross-slip/approve', {
     year: slip.year,
     month: slip.month,
     no: slip.no,
@@ -299,7 +299,7 @@ const disapprove = (event) => {
 }
 const approve = (event) => {
   slip.approvedAt = new Date();
-  axios.put('/api/cross_slip/approve', {
+  axios.put('/api/cross-slip/approve', {
     year: slip.year,
     month: slip.month,
     no: slip.no,

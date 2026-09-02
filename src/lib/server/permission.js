@@ -51,11 +51,11 @@ const RULES = [
   { match: /^\/voucher(\/\d+)?$/, methods: ['GET', 'POST', 'PUT', 'DELETE'], access: ANY },
 
   // Cross Slips & Details
-  { match: /^\/cross_slip\/approve$/, methods: ['PUT'], access: ['approvable'] },
-  { match: /^\/cross_slip\/\d+\/\d+\/\d+$/, methods: ['GET'], access: ['accounting', 'fiscalBrowsing'] },
-  { match: /^\/cross_slips\/.+$/, methods: ['GET'], access: ANY },
-  { match: /^\/cross_slip$/, methods: ['POST', 'PUT'], access: ANY },
-  { match: /^\/cross_slip$/, methods: ['DELETE'], access: ['approvable'] },
+  { match: /^\/cross[-_]slip\/approve$/, methods: ['PUT'], access: ['approvable'] },
+  { match: /^\/cross[-_]slip\/\d+\/\d+\/\d+$/, methods: ['GET'], access: ['accounting', 'fiscalBrowsing'] },
+  { match: /^\/cross[-_]slips?\/.+$/, methods: ['GET'], access: ANY },
+  { match: /^\/cross[-_]slip$/, methods: ['POST', 'PUT'], access: ANY },
+  { match: /^\/cross[-_]slip$/, methods: ['DELETE'], access: ['approvable'] },
   { match: /^\/cross-slip-detail\/\d+$/, methods: ['GET'], access: ['accounting', 'fiscalBrowsing'] },
   { match: /^\/cross-slip-detail$/, methods: ['PUT'], access: ['accounting'] },
 

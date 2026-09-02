@@ -121,14 +121,14 @@ const close_ = () => {
 }
 
 const openSlip = (year, month, no) => {
-  axios.get(`/api/cross_slip/${year}/${month}/${no}`).then((result) => {
+  axios.get(`/api/cross-slip/${year}/${month}/${no}`).then((result) => {
     slip = result.data;
     popUp = true;
   })
 }
 
 const getSlips = () => {
-  axios.get('/api/cross_slips/not_approved').then((result) => {
+  axios.get('/api/cross-slip/not-approved').then((result) => {
     slips = result.data;
     count = slips.length;
   })

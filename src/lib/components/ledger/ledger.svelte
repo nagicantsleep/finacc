@@ -212,7 +212,7 @@ const openSlip = (event) => {
   modalCount += 1;
   const dataset = event.detail;
   if (dataset?.no) {
-    axios.get(`/api/cross_slip/${dataset.year}/${dataset.month}/${dataset.no}`).then((result) => {
+    axios.get(`/api/cross-slip/${dataset.year}/${dataset.month}/${dataset.no}`).then((result) => {
       const data = result.data;
       slip = {
         year: data.year,
