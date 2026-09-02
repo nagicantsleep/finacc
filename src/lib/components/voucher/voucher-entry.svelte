@@ -1,0 +1,208 @@
+<div class="entry">
+  <div class="page-title d-flex justify-content-between">
+    <h1><BilingualText key="voucher_info" /></h1>
+  </div>
+  <div class="">
+    <div class="content">
+      <div class="body full-height-2">
+        {#if !ok }
+        <div class="border rounded border-danger mb-3 ms-2 me-2 p-3">
+          <h5 class="fs-5 text-danger"><i class="bi bi-exclamation-triangle-fill"></i>&nbsp;<BilingualText key="error" /></h5>
+          <ul>
+            {#each errorMessages as errorMessage}
+              <li class="text-danger">{errorMessage}</li>
+            {/each}
+          </ul>
+        </div>
+        {/if}
+        <VoucherInfo
+          on:startregister={() => { disabled = true} }
+          on:endregister={() => { disabled = false} }
+          bind:status={status}
+          bind:voucher={voucher}
+          bind:files={files}
+          voucherClasses={voucherClasses}></VoucherInfo>
+      </div>
+      <div class="footer">
+        <button type="button" class="btn btn-secondary" disabled={disabled}
+          on:click={close_}
+          ><BilingualText key="back" /></button>
+        {#if ( voucher && voucher.id && voucher.id > 0 )}
+          <button type="button" class="btn btn-danger" disabled={disabled}
+              on:click={delete_}
+                  id="delete-button"><BilingualText key="delete" /></button>
+          <button type="button" class="btn btn-success" disabled={disabled}
+            on:click|preventDefault={() => {
+              console.log('voucher', voucher);
+              if  ( voucher.details[0] )  {
+                dispatch('open', {
+                  year: voucher.details[0].crossSlip.year,
+                  month: voucher.details[0].crossSlip.month,
+                  day: voucher.details[0].crossSlip.day,
+                  no: voucher.details[0].crossSlip.no
+                });
+              } else {
+                let issueDate = new Date(voucher.issueDate);
+                dispatch('open', {
+                  year: issueDate.getFullYear(),
+                  month: issueDate.getMonth()+1,
+                  day: issueDate.getDate()
+                });
+              }
+            }}
+            id="slip-button"><BilingualText key="voucher_slip" /></button>
+        {/if}
+        <button type="button" class="btn btn-primary" disabled={disabled}
+            on:click={save}
+            id="save-button"><BilingualText key="save" /></button>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+/*
+  voucher_fileに関する処理もここに移した方が良いかも知れない。
+*/
+import axios from 'axios';
+import {numeric, formatDate} from '$lib/utils.js';
+import {createEventDispatcher} from 'svelte';
+import { goto, invalidate } from '$app/navigation';
+const dispatch = createEventDispatcher();
+import VoucherInfo from './voucher-info.svelte';
+import {currentVoucher} from '$lib/client/current-record.js'
+import BilingualText from '$lib/components/BilingualText.svelte';
+import { bi } from '$lib/i18n/bilingual.js';
+
+
+export let voucher;
+export let status;
+export let voucherClasses = [];
+
+let	files;
+let ok = true;
+let errorMessages = [];
+let disabled = false;
+
+const create_voucher = async (_voucher) => {
+  let result = await axios.post('/api/voucher', _voucher);
+  console.log(result);
+  return	(result);
+}
+const update_voucher = async (_voucher) => {
+  console.log('save_voucher', _voucher);
+  let result = await axios.put('/api/voucher', _voucher);
+
+  console.log(result);
+  return	(result);
+}
+const delete_voucher = async (voucher) => {
+  console.log('delete_voucher', voucher);
+  let result = await axios.delete('/api/voucher', {
+    data: {
+      id: voucher.id
+    }
+  });
+  console.log(result);
+}
+const bind_file = async(file) => {
+  console.log('bind_file', file.id, file.voucherId);
+  let	result = await axios.put('/api/voucher/bind', {
+    id: file.id,
+    voucherId: file.voucherId
+  });
+  return	(result);
+}
+
+const validateForm = () => {
+  ok = true;
+  errorMessages = [];
+  if ( voucher.companyId === undefined ) {
+    ok = false;
+    errorMessages.push($bi('counterparty_error'));
+  }
+  return ok;
+}
+const save = (event) => {
+  console.log('voucher', voucher);
+  if ( !validateForm() ){
+    return ;
+  }
+  if	( voucher.type )	{
+    voucher.type = parseInt(voucher.type);
+  }
+  if	( voucher.companyId )	{
+    voucher.companyId = parseInt(voucher.companyId);
+  }
+  if	( voucher.amount )	{
+    voucher.amount = numeric(voucher.amount);
+  }
+  if	( voucher.tax )	{
+    voucher.tax = numeric(voucher.tax);
+  }
+  voucher.taxRuleId = parseInt(voucher.taxRuleId);
+  voucher.update = undefined;
+  voucher.files = undefined;
+  console.log('input', voucher);
+  try {
+    let	pr;
+    let create = false;
+    console.log(voucher)
+    if ( voucher.id  ) {
+      voucher.id = parseInt(voucher.id);
+      pr = update_voucher(voucher);
+    } else {
+      pr = create_voucher(voucher);
+      create = true;
+    }
+    pr.then((result) => {
+      voucher = result.data.voucher;
+      if (files) {
+        for (let i = 0; i < files.length; i += 1) {
+          if (!files[i].voucherId) {
+            files[i].voucherId = voucher.id;
+            bind_file(files[i]);
+          }
+        }
+      }
+      if (create) {
+        currentVoucher.set(voucher);
+        goto(`/voucher/entry/${voucher.id}`);
+      } else {
+        invalidate('app:voucher');
+      }
+    });
+  }
+  catch(e) {
+    console.log(e);
+    // can't save
+    //	TODO alert
+  }
+};
+
+
+const clean_popup = () => {
+  files = [];
+  ok = true;
+  errorMessages = [];
+}
+
+const	close_ = (event) => {
+  currentVoucher.set(null);
+  clean_popup();
+  dispatch('close');
+}
+
+const delete_ = (event) => {
+  try {
+    console.log('delete');
+    delete_voucher(voucher).then(() => {
+      close_();
+    });
+  }
+  catch(e) {
+    console.log(e);
+    // can't delete
+    //	TODO alert
+  }
+}
+</script>

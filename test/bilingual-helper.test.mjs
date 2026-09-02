@@ -8,7 +8,7 @@
  */
 
 import { strict as assert } from 'node:assert';
-import bilingualHelper from '../libs/bilingual-helper.js';
+import bilingualHelper from '../src/lib/server/bilingual-helper.js';
 import mockModels from '../models/index.js';
 
 const {

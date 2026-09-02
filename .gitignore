@@ -63,8 +63,10 @@ typings/
 # dotenv environment variables file
 .env
 
-# next.js build output
+# next.js and sveltekit build output
 .next
+.svelte-kit
+/build
 /node_modules
 /dist
 /sessions
@@ -75,6 +77,7 @@ accounts.json
 *.map
 
 # User-added
+tmp/
 @test/
 @testDB/
 @chrome/
@@ -91,3 +94,7 @@ harness.db-wal
 harness.db-shm
 scripts/bin/harness-cli
 scripts/bin/harness-cli.exe
+
+# Git worktrees for local comparison
+worktree-main/
+worktree-*/

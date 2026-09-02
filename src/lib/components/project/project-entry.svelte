@@ -1,0 +1,116 @@
+<div class="page-title">
+  <h1><BilingualText key="project_info" /></h1>
+</div>
+
+<div class="row justify-content-center">
+  <div class="col-md-10">
+    <div class="mb-3 row">
+      <label for="projectName" class="col-sm-2 col-form-label"><BilingualText key="project_name" /></label>
+      <div class="col-sm-10">
+        <input type="text" class="form-control" id="projectName" bind:value={project.name}>
+      </div>
+    </div>
+    <div class="mb-3 row">
+      <label for="projectCode" class="col-sm-2 col-form-label"><BilingualText key="project_code" /></label>
+      <div class="col-sm-10">
+        <input type="text" class="form-control" id="projectCode" bind:value={project.code}>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-6">
+        <div class="mb-3 row">
+          <label for="startDate" class="col-sm-4 col-form-label"><BilingualText key="project_start" /></label>
+          <div class="col-sm-8">
+            <input type="date" class="form-control" id="startDate" bind:value={project.startDate}>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="mb-3 row">
+          <label for="endDate" class="col-sm-4 col-form-label"><BilingualText key="project_end" /></label>
+          <div class="col-sm-8">
+            <input type="date" class="form-control" id="endDate" bind:value={project.endDate}>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div class="mt-4">
+  <button type="button" class="btn btn-danger" on:click={remove} disabled={!project.id}><BilingualText key="delete" /></button>
+  <button type="button" class="btn btn-secondary" on:click={back}><BilingualText key="back" /></button>
+  <button type="button" class="btn btn-info" on:click={openLabelSettings} disabled={!project.id}><BilingualText key="summary_settings" /></button>
+  <button type="button" class="btn btn-info" on:click={openSummary} disabled={!project.id}><BilingualText key="summary_view" /></button>
+  <button type="button" class="btn btn-primary" on:click={save}><BilingualText key="save" /></button>
+</div>
+
+<script>
+  import axios from 'axios';
+  import { createEventDispatcher } from 'svelte';
+  import { goto, invalidate } from '$app/navigation';
+  import { link } from '$lib/client/router.js';
+  import { currentProject } from '$lib/client/current-record.js';
+  import BilingualText from '$lib/components/BilingualText.svelte';
+  import { bi } from '$lib/i18n/bilingual.js';
+
+  const dispatch = createEventDispatcher();
+
+  export let status;
+  export let project;
+
+  const save = async () => {
+    try {
+      let response;
+      const create = !project.id;
+      if (project.id) {
+        response = await axios.put(`/api/project/${project.id}`, project);
+      } else {
+        response = await axios.post('/api/project', project);
+      }
+      project = response.data;
+      currentProject.set(project);
+      if (create) {
+        goto(`/project/entry/${project.id}`);
+      } else {
+        await invalidate('app:project');
+        dispatch('close');
+      }
+    } catch (err) {
+      console.error("プロジェクトの保存に失敗しました:", err);
+      alert($bi('error_save_project'));
+    }
+  };
+
+  const remove = async () => {
+    if (!project.id || !confirm($bi('confirm_delete_project'))) {
+      return;
+    }
+    try {
+      await axios.delete(`/api/project/${project.id}`);
+      dispatch('close');
+    } catch (err) {
+      console.error("プロジェクトの削除に失敗しました:", err);
+      alert($bi('error_delete_project'));
+    }
+  };
+
+  const back = () => {
+    currentProject.set(null);
+    dispatch('close');
+  };
+
+  const openSummary = () => {
+    if (project && project.id) {
+      link(`/project/summary/${project.id}`);
+    }
+  };
+
+  const openLabelSettings = () => {
+    if (project && project.id) {
+      link(`/project/settings/${project.id}`);
+    }
+  };
+
+</script>

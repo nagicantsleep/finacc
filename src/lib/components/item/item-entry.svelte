@@ -1,0 +1,179 @@
+<div class="entry">
+  <div class="page-title d-flex justify-content-between">
+    <h1><BilingualText key="item_info" /></h1>
+  </div> 
+  <div class="full-height fontsize-12pt">
+    <div class="content">
+      <div class="body">
+        <FormError
+        	messages={errorMessages}></FormError>
+        <ItemInfo
+          bind:files={files}
+          bind:item={item}
+          bind:status={status} />
+      </div>
+      <div class="footer">
+        <button type="button" class="btn btn-secondary" disabled={disabled}
+          on:click={back}><BilingualText key="back" /></button>
+        {#if ( item && item.id && item.id > 0 )}
+        <button type="button" class="btn btn-danger" disabled={disabled}
+          on:click={deleteItem}
+          id="delete-button"><BilingualText key="delete" /></button>
+        {/if}
+        <button type="button" class="btn btn-primary" disabled={disabled}
+          on:click={save}
+          id="save-button"><BilingualText key="save" /></button>
+      </div>
+    </div>
+  </div>
+</div>
+<OkModal
+  bind:this={modal}
+  title={title}
+  description={description}
+  on:answer={operation}
+  ></OkModal>
+<script>
+import axios from 'axios';
+import {numeric, formatDate} from '$lib/utils.js';
+import {onMount, beforeUpdate, afterUpdate, createEventDispatcher} from 'svelte';
+const dispatch = createEventDispatcher();
+import ItemInfo from './item-info.svelte';
+import OkModal from '$lib/components/common/OkModal.svelte';
+import {bindFile} from '$lib/client/document.js';
+import {currentItem, getStore} from '$lib/client/current-record.js'
+import eventBus from '$lib/client/event-bus.js';
+import FormError from '$lib/components/common/FormError.svelte';
+import BilingualText from '$lib/components/BilingualText.svelte';
+import { bi } from '$lib/i18n/bilingual.js';
+import { link } from '$lib/client/router.js';
+
+export let status;
+export let item;
+
+let disabled = false;
+let errorMessages = [];
+let ok = true;
+let files;
+
+let modal;
+let title;
+let description;
+let operation = () => {};
+
+const create_item = async (_item) => {
+  let result = await axios.post('/api/item', _item);
+  return	(result);
+}
+const update_item = async (_item) => {
+  let result = await axios.put('/api/item', _item);
+  return	(result);
+}
+
+const deleteItem = (event) => {
+  title = $bi('item_delete_title');
+  description = `
+<table style="font-size:12px;">
+  <tbody>
+    <tr>
+			<td>${$bi('item_class_label')}</td><td>${item.itemClass.name}</td>
+		</tr>
+    <tr>
+			<td>${$bi('general_name')}</td><td>${item.name || ''}</td>
+		</tr>
+    <tr>
+			<td>${$bi('formal_name')}</td><td>${item.normalName || ''}</td>
+		</tr>
+    <tr>
+			<td>${$bi('specification')}</td><td>${item.spec || ''}</td>
+    </tr>
+  </tbody>
+`;
+  operation = doDelete;
+  modal.show();
+}
+
+const doDelete = async (event) => {
+  if	( event.detail )	{
+  	try {
+  		let result = await axios.delete(`/api/item/${item.id}`);
+    	back();
+  	} catch (e) {
+	    console.log(e);
+  	}
+  }
+}
+
+const save = () => {
+  ok = true;
+  errorMessages = [];
+  if	( item.itemClassId )	{
+    item.itemClassId = parseInt(item.itemClassId);
+  } else {
+    ok = false;
+    errorMessages.push($bi('item_class_required'))
+  }
+  if  (( !item.key ) ||
+       ( item.key === ''))  {
+    ok = false;
+    errorMessages.push($bi('item_key_required'));
+  }
+  if  ( !ok )  {
+    errorMessages = errorMessages;
+    return;
+  }
+  if	( item.standardPrice )	{
+    item.standardPrice = numeric(item.standardPrice);
+  }
+  if	( item.costPrice )	{
+    item.costPrice = numeric(item.costPrice);
+  }
+  item.taxClass = parseInt(item.taxClass);
+
+  if ((!item.document || !item.document.description) && (files && files.length > 0)) {
+    if (!item.document) {
+      item.document = {};
+    }
+    item.document.descriptionType = 'file';
+  }
+
+  try {
+    let	it;
+    let create = false;
+    if ( item.id  ) {
+      item.id = parseInt(item.id);
+      it = update_item(item);
+    } else {
+      it = create_item(item);
+      create = true;
+    }
+    it.then(async (result) => {
+      if  ( !result.data.code ) {
+        item = result.data.item;
+        await bindFile(files, item.documentId);
+      }
+      if  ( create )  {
+        // replaceState is better, but link is what we have
+        link(`/item/entry/${item.id}`);
+      }
+    });
+  }
+  catch(e) {
+    console.log(e);
+  }
+};
+
+
+const	back = (event) => {
+  dispatch('close');
+  currentItem.set(null);
+  errorMessages = [];
+}
+
+beforeUpdate(() => {
+});
+
+onMount(() => {
+})
+
+</script>

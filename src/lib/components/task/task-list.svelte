@@ -1,0 +1,131 @@
+<div class="list">
+  <div class="page-title d-flex justify-content-between align-items-center flex-wrap">
+    <h1 class="page-title-bilingual mb-0"><BilingualText key="project_list" inline={true} /></h1>
+    <button type="button" class="btn btn-primary btn-bilingual flex-shrink-0"
+    on:click={() => {
+      link('/task/new');
+    }}
+    id="task-info"><BilingualText key="new_entry" inline={true} /><i class="bi bi-pencil-square"></i></button>
+  </div>
+  <div class="full-height-1 fontsize-12pt table-responsive">
+    <table class="table table-bordered">
+      <thead class="table-light">
+        <tr>
+          <th scope="col" style="width: 300px;"><BilingualText key="counterparty" /></th>
+          <th scope="col"><BilingualText key="task_subject" /></th>
+          <th scope="col" style="width: 100px;"><BilingualText key="occurrence_date" /></th>
+          <th scope="col" style="width: 100px;"><BilingualText key="project_end" /></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="padding:5px;">
+            <CompanySelect
+              register={false}
+              on:input={(event) => {
+                const companyId = parseInt(event.detail);
+                const newParams = new URLSearchParams((typeof location !== 'undefined' ? location.search : ''));
+                if (companyId > 0) {
+                  newParams.set('company', companyId);
+                } else {
+                  newParams.delete('company');
+                }
+                const query = newParams.toString();
+                link(`/task/list${query ? '?' + query : ''}`);
+              }}
+              companyId={status.params ? parseInt(status.params.get('company')) : -1}>
+            </CompanySelect>
+          </td>
+          <td>
+          </td>
+          <td>
+          </td>
+          <td>
+          </td>
+        </tr>
+        {#each tasks as line}
+        <tr>
+          <td>
+            {#if (line.companyId)}
+            <button type="button" class="btn btn-link"
+              on:click={() => {
+                link(`/company/entry/${line.companyId}`)
+              }}>
+              {line.companyName ? line.companyName : line.company.name}
+            </button>
+            {:else}
+            {line.companyName ? line.companyName : '__' }
+            {/if}
+          </td>
+          <td>
+            <button type="button" class="btn btn-link"
+              on:click={() => {
+                link(`/task/entry/${line.id}`)
+              }}>
+              {line.subject ? line.subject : '__'}
+            </button>
+          </td>
+          <td>
+            {formatDate(line.issueDate)}
+          </td>
+          <td>
+            {formatDate(line.endedAt)}
+          </td>
+        </tr>
+        {/each}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<style>
+.page-title-bilingual {
+  display: inline-flex;
+  align-items: center;
+  line-height: 1.3;
+}
+.btn-bilingual {
+  min-height: 56px;
+  line-height: 1.2;
+  white-space: normal;
+  padding: 0.25rem 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.page-title {
+  margin-bottom: 1rem;
+}
+</style>
+
+<script>
+import axios from 'axios';
+import CompanySelect from '$lib/components/CompanySelect.svelte';
+import {numeric, formatDate} from '$lib/utils.js';
+import {onMount, beforeUpdate, afterUpdate } from 'svelte';
+import eventBus from '$lib/client/event-bus.js';
+import {parseParams, buildParam} from '$lib/client/params.js';
+import { link } from '$lib/client/router.js';
+
+import BilingualText from '$lib/components/BilingualText.svelte';
+export let status;
+export let tasks;
+
+const updateTasks = () => {
+  let param = buildParam(status);
+  axios.get(`/api/task?${param}`).then((result) => {
+    tasks = result.data.tasks;
+  });
+};
+
+$: if(status && status.params) {
+  updateTasks();
+}
+
+beforeUpdate(() => {
+});
+
+onMount(() => {
+})
+
+</script>

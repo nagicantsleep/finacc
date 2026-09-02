@@ -1,0 +1,33 @@
+/* Global App CSS for SvelteKit Accounting */
+:root {
+  --bs-font-sans-serif: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans JP", "Hiragino Kaku Gothic ProN", Meiryo, Arial, sans-serif;
+  --bs-primary: #2a9d8f;
+  --bs-primary-rgb: 42, 157, 143;
+}
+
+body {
+  font-family: var(--bs-font-sans-serif);
+  background-color: var(--bs-body-bg, #f4f4f4);
+  color: var(--bs-body-color, #333);
+  margin: 0;
+  padding: 0;
+}
+
+.font-monospace {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+a {
+  color: var(--bs-link-color, #008c8c);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+@media print {
+  .d-print-none {
+    display: none !important;
+  }
+}

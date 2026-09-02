@@ -1,0 +1,193 @@
+<div class="table-responsive">
+<table class="table table-bordered">
+  <thead class="table-light">
+    <tr>
+      <th scope="col" style="width: 120px;"><BilingualText key="major_class" /></th>
+      <th scope="col" style="width: 120px;"><BilingualText key="middle_class" /></th>
+      <th scope="col" style="width: 140px;"><BilingualText key="minor_class" /></th>
+      <th scope="col"><BilingualText key="chart_of_accounts" /></th>
+      <th scope="col" style="width: 80px;"><BilingualText key="account" /><br/><BilingualText key="code" /></th>
+      <th scope="col" style="width: 120px;"><BilingualText key="sub_account" /></th>
+      <th scope="col" style="width: 50px;"><BilingualText key="tax_category" /></th>
+      <th scope="col" style="width: 60px;"><BilingualText key="search_key" /></th>
+      <th scope="col" style="width: 100px;"><BilingualText key="debit_amount" /></th>
+      <th scope="col" style="width: 100px;"><BilingualText key="credit_amount" /></th>
+      <th scope="col" style="width: 100px;"><BilingualText key="balance" /></th>
+    </tr>
+  </thead>
+  <tbody>
+    {#each lines as line}
+    <tr>
+      <td>
+        {#if line.majorName}<span class="bi-pair"><span class="bi-primary">{line.majorName}</span>{#if line.majorNameVi}<span class="bi-sep"> / </span><span class="bi-secondary">{line.majorNameVi}</span>{/if}</span>{/if}
+      </td>
+      <td>
+        {#if line.middleName}<span class="bi-pair"><span class="bi-primary">{line.middleName}</span>{#if line.middleNameVi}<span class="bi-sep"> / </span><span class="bi-secondary">{line.middleNameVi}</span>{/if}</span>{/if}
+      </td>
+      <td>
+        {#if (line.minorName != '')}
+        <span class="bi-pair"><span class="bi-primary">{line.minorName}</span>{#if line.minorNameVi}<span class="bi-sep"> / </span><span class="bi-secondary">{line.minorNameVi}</span>{/if}</span>
+        {/if}
+      </td>
+      <td>
+        {#if line.code}
+        <button type="button" class="btn btn-link"
+          on:click={() => {
+            editAccount(line.code);
+          }}>
+          <span class="bi-pair"><span class="bi-primary">{line.accountName}</span>{#if line.accountNameVi}<span class="bi-sep"> / </span><span class="bi-secondary">{line.accountNameVi}</span>{/if}</span>
+        </button>
+        {:else}
+        <button type="button" class="btn btn-primary btn-sm"
+          on:click={() => {
+            newAccount(line.aclId, line.aclCode);
+          }}>
+          <i class="bi bi-plus"></i>
+        </button>
+        {/if}
+      </td>
+      <td>
+        {#if line.code}
+        {line.code}
+        {/if}
+      </td>
+      <td>
+        {#if ( line.subCode )}
+        {#if (line.subCode >= 0)}
+        <button type="button" class="btn btn-link"
+          on:click={() => {
+            editSubAccount(line.code, line.subCode);
+          }}>
+          <span class="bi-pair"><span class="bi-primary">{line.subAccountName}</span>{#if line.subAccountNameVi}<span class="bi-sep"> / </span><span class="bi-secondary">{line.subAccountNameVi}</span>{/if}</span>
+        </button>
+        {:else}
+        <button type="button" class="btn btn-primary btn-sm"
+          on:click={() => {
+            newSubAccount(line.code);
+          }}>
+          <i class="bi bi-plus"></i>
+        </button>
+        {/if}
+        {/if}
+      </td>
+      <td>
+        {line.taxClass ? taxClass(line.taxClass) : ''}
+      </td>
+      <td>
+        {line.key ? line.key : ''}
+      </td>
+      <td class="number">
+        {line.code ? line.debit.toLocaleString() : ''}
+      </td>
+      <td class="number">
+        {line.code ? line.credit.toLocaleString() : ''}
+      </td>
+      <td class="number">
+        {line.code ? line.remaining.toLocaleString(): ''}
+      </td>
+    </tr>
+    {/each}
+  </tbody>
+</table>
+</div>
+
+<style>
+th {
+	text-align: center;
+}
+.bi-pair {
+	display: inline;
+}
+.bi-primary {
+	font-weight: 600;
+}
+.bi-secondary {
+	font-size: 0.85em;
+}
+.bi-sep {
+	opacity: 0.5;
+}
+</style>
+
+<script>
+import axios from 'axios';
+import {onMount, beforeUpdate, afterUpdate, createEventDispatcher} from 'svelte';
+const dispatch = createEventDispatcher();
+import {taxClass} from '$lib/utils.js';
+
+import BilingualText from '$lib/components/BilingualText.svelte';
+export	let	status;
+export	let	lines;
+export	let	accounts;
+
+const editAccount = (code) => {
+	let account;
+	for ( let i = 0; i < accounts.length ; i ++ ) {
+		account = accounts[i];
+		if ( account.code === code ) break;
+	}
+	dispatch('open',{
+		account: account,
+		subAccount: null,
+		mode: 'edit-account'
+	});
+}
+const	newAccount = (id, code) => {
+	axios.get(`/api/account-class/${id}`).then((result) => {
+	  let acl = result.data;
+	  console.log({acl});
+	  let account = {
+		  code: code + '****',
+		  major_name: acl.major,
+		  middle_name: acl.middle,
+		  minor_name: acl.minor,
+		  klass_id: acl.id,
+		  name: '',
+		  key: '',
+      debit: 0,
+      credit: 0,
+      balance: 0
+	  };
+	  dispatch('open',{
+		  account: account,
+		  subAccount: null,
+		  mode: 'new-account'
+	  });
+  });
+}
+
+const	editSubAccount = (code, sub_code) => {
+	let account;
+	for ( let i = 0; i < accounts.length ; i ++ ) {
+		account = accounts[i];
+		if ( account.code === code ) break;
+	}
+	let subAccount = null;
+	for ( let i = 0; i < account.subAccounts.length ; i ++) {
+		subAccount = account.subAccounts[i];
+		if ( subAccount.code === sub_code ) break;
+	}
+	dispatch('open',{
+		account: account,
+		subAccount: subAccount,
+		mode: "edit-sub-account"
+	});
+}
+const	newSubAccount = async (code) => {
+	let account;
+	for ( let i = 0; i < accounts.length ; i ++ ) {
+		account = accounts[i];
+		if ( account.code == code ) break;
+	}
+	let subAccount  = {
+    debit: 0,
+    credit: 0,
+    balance: 0
+	}
+	dispatch('open',{
+		account: account,
+		subAccount: subAccount,
+		mode: 'new-sub-account'
+	});
+}
+</script>

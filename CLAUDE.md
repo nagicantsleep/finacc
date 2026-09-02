@@ -12,7 +12,7 @@
 - **Structure:** `front/` `views/` `routes/` `models/` `migrations/` `config/` `libs/` `bin/` (server entry `bin/www`) `public/` `batch/` `forms/` `test/` (mocha) `docs/` (harness operating docs) `scripts/` (harness CLI).
 - **Core Flow:** HTTP request → Express route (`routes/`) → Sequelize model (`models/`) → PostgreSQL. Svelte UI is built by Vite and served by Express.
 - **Conventions:** ESM modules; env via `dotenv` (`.env`, never commit); sessions via `connect-pg-simple` / `session-file-store`; path/state per existing modules.
-- **Commands:** install `npm install` | build `npm run build` (vite) | dev `npm run dev` | start `npm start` | test `npm test` (mocha). No `lint` script is configured — do not invoke `npm run lint`.
+- **Commands:** install `pnpm install` | build `pnpm build` (vite) | dev `pnpm run dev` | start `pnpm start` | test `pnpm test` (mocha). No `lint` script is configured — do not invoke `pnpm run lint`.
 
 ---
 
