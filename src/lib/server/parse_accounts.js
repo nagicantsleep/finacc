@@ -1,122 +1,21 @@
-const INPUT_FILE = './accounts.csv'
+import chartAccountsTemplate from './data/chart-accounts-template.js';
 
-import fs from 'fs';
-import iconv from 'iconv-lite';
-
+/**
+ * Returns initial chart of accounts template (classes, accounts, subAccounts)
+ * for a new fiscal term and company class.
+ *
+ * @param {number} term Fiscal year term number (e.g. 1, 2)
+ * @param {number} companyClass 1 for 法人 (Houjin/Corporate), 2 for 個人事業主 (Kojin/Sole Proprietorship)
+ * @returns {{ accountClasses: Array, accounts: Array, subAccounts: Array }}
+ */
 export const exec = (term, companyClass) => {
-  const buf = fs.readFileSync(INPUT_FILE);
-  let file = iconv.decode(buf, 'shift_jis');
-  let lines = file.split("\r\n");		// Excel csv line separator
-
-  // skip title 2lines
-  lines.shift();
-  lines.shift();
-
-  // var names line
-  let names = lines[0].split(",");
-  lines.shift();
-
-  let accountClasses = [];
-  let accounts = [];
-  let subAccounts = [];
-  let ent_1 = {};
-  let class_code;
-  let field;
-  let adding;
-  let seq = 0;
-  let account_code;
-  let sub_account;
-
-  lines.forEach ( (line) => {
-    let ent = {};
-    let vars = line.split(",");
-
-    if ( vars.length > 3 ) {
-      for ( let i = 0; i < names.length; i ++ ) {
-        ent[names[i]] = vars[i];
-      }
-      ent.subject_code_seq = parseInt(ent.subject_code_seq);
-      ent.sub_subject_code = parseInt(ent.sub_subject_code);
-      ent.tax_class = parseInt(ent.tax_class);
-      ent.houjin = parseInt(ent.houjin);
-      ent.kojin = parseInt(ent.kojin);
-      switch  (companyClass)  {
-        case  1:  //  法人
-          if  ( ent.houjin !== 1 )  return;
-          break;
-        case  2:  //  個人事業主
-          if  ( ent.kojin !== 1 ) return;
-          break;
-      }
-
-      if (( ent.subject_code_field != ent_1.subject_code_field ) ||
-        ( ent.subject_code_sum != ent_1.subject_code_sum )) {
-        seq = 0;
-        class_code = `${ent.subject_code_field}${('00'+ent.subject_code_sum).slice(-2)}`
-        field = parseInt(ent.subject_code_field);
-        adding = parseInt(ent.subject_code_sum);
-        accountClasses.push({
-          major: ent.major_class,
-          middle: ent.middle_class,
-          minor: ent.minor_class,
-          field: field,
-          adding: adding
-        });
-      }
-      if ( ent.sub_subject_code === 0 ) {
-        account_code = `${class_code}${('0000'+seq).slice(-4)}`;
-        sub_account = 0;
-        accounts.push({
-          name: ent.account,
-          key: ent.major_key=='' ? null : ent.major_key,
-          field: field,
-          adding: adding,
-          account_code: account_code,
-          sub_account_count: 0,
-          tax_class: ent.tax_class,
-          balance: 0,
-          term: term
-        });
-        seq += 10;
-      } else {
-        sub_account += 1;
-        subAccounts.push({
-          name: ent.sub_account,
-          key: ent.minor_key,
-          account_code: account_code,
-          sub_account_code: sub_account,
-          term: term,
-          tax_class: ent.tax_class,
-          balance: 0
-        });
-      }
-      ent_1 = ent;
-    }
-  });
-
-  accounts.forEach( (account) => {
-    let balance = 0;
-    let count = 0;
-    subAccounts.forEach((sub_account) => {
-      if ( account.account_code == sub_account.account_code ) {
-        count += 1;
-        balance += sub_account.balance;
-      }
-    });
-    if ( count > 0 ) {
-      account.balance = balance;
-      account.sub_account_count = count;
-    }
-  });
-  //console.log(accountClasses);
-  //console.log(accounts);
-  //console.log(subAccounts);
+  const target = companyClass === 2 ? chartAccountsTemplate.kojin : chartAccountsTemplate.houjin;
 
   return {
-    accountClasses: accountClasses,
-    accounts: accounts,
-    subAccounts: subAccounts
+    accountClasses: target.accountClasses.map((c) => ({ ...c })),
+    accounts: target.accounts.map((a) => ({ ...a, term })),
+    subAccounts: target.subAccounts.map((s) => ({ ...s, term }))
   };
-}
+};
 
 export default exec;
